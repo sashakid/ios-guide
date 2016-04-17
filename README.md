@@ -454,16 +454,16 @@ NSLog(@"Object Found: %@ at index: %i", obj, index);
 Для перечисления коллекции, вы должны создать новый перечислитель.
 ```objective-c
 NSMutableDictionary *myMutableDictionary = ... ;
-NSMutableArray *keysToDeleteArray =
-[NSMutableArray arrayWithCapacity:[myMutableDictionary count]];
+NSMutableArray *keysToDeleteArray = [NSMutableArray arrayWithCapacity:[myMutableDictionary count]];
 NSString *aKey;
 NSEnumerator *keyEnumerator = [myMutableDictionary keyEnumerator];
 while (aKey = [keyEnumerator nextObject]) {
-if (/* Проверка критериев для ключа или значения */) {
-[keysToDeleteArray addObject:aKey];
+	if (/* Проверка критериев для ключа или значения */) {
+		[keysToDeleteArray addObject:aKey];
+	}
 }
-}
-[myMutableDictionary removeObjectsForKeys:keysToDeleteArray];```
+[myMutableDictionary removeObjectsForKeys:keysToDeleteArray];
+```
 
 Array
  
