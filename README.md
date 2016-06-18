@@ -228,7 +228,7 @@
 - Множество допустимых значений, который принимает объект в СД
 - Множество операций, которые могут применяться к объекту
 Операции над СД – `CRUD`: `CREATE` `READ` `UPDATE` `DELETE`
-<img src="https://raw.githubusercontent.com/sashakid/ios-guide/master/images/data_structures_crud.png">
+<img src="https://github.com/sashakid/ios-guide/blob/master/Images/data_structures_crud.png">
 СД в ООП реализуется в виде классов, данные хранятся в переменных класса, системе предписаний соответстует набор методов класса.
 
 ПРОСТЫЕ БАЗОВЫЕ (числовые, символьные, логические, перечисление, интервал, указатели)
