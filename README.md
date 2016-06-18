@@ -258,15 +258,14 @@
 ######Метод	
 Действие, которое выполняется над экземпляром класса (простой метод) (-) или самим классом (статический метод) (+). 
 Простые методы имеют доступ к данным объекта (конкретного экземпляра данного класса), статические методы  не имеют доступа к данным объекта и для их использования не нужно создавать экземпляры (данного класса). 
-Метод класса используется для создания новых объектов и называется фабричным методом. Также может использоваться для доступа к глобальным данным.
+Метод класса используется для создания новых объектов и называется фабричным методом. Также может использоваться для доступа к глобальным данным. Примеры методов класса и методов экземпляра `NSString`: 
 ```
-NSString: 
-+ stringWithContentsOfFile:encoding:error:, 
-+ stringWithString:, 
-+ stringWithFormat:, 
-– init, 
-– initWithString:, 
-– lowercaseString.
++ stringWithContentsOfFile:encoding:error:
++ stringWithString:
++ stringWithFormat:
+– init
+– initWithString:
+– lowercaseString
 ```
 ######Глобальная переменная	
 Объявляется в начале программы вне любого метода, значение которой можно использовать из любого места модуля или другого файла.
@@ -288,8 +287,14 @@ NSString:
 ***
 # Структуры данных
 
-### Массив
+<img src="https://github.com/sashakid/ios-guide/blob/master/Images/data_structures_kinds1.png">
+
+<img src="https://github.com/sashakid/ios-guide/blob/master/Images/data_structures_kinds2.png">
+
+## Массив
 Фиксированный набор данных одного типа в виде непрерывного ряда. Простая базовая стати-ческая СД с последовательным распределением элементов в памяти с прямым или произволь-ным доступом (одномерный массив – вектор, двухмерный – матрица).
+
+<img src="https://github.com/sashakid/ios-guide/blob/master/Images/array.png">
 
 Операции
 •	Получить элемент за время log(n)
@@ -300,10 +305,10 @@ NSString:
 Минусы
 •	Статичная, неизменяемая структура
 
-#### Массив в СИ
+### Массив в СИ
 Количество элементов массива определено заранее при объявлении массива. Все элементы упорядочены – каждому присвоен порядковый номер, который называется индексом. Доступ к конкретному элементу массива осуществляется с помощью индекса. В языке C все массивы располагаются в отдельной непрерывной области памяти. Первый элемент массива имеет наименьший адрес, а последний – наибольший. Элементы массива могут быть как простыми переменными, так и составными. Элемент массива может иметь несколько индексов. Количе-ство индексов переменной определяет размерность массива. Размерность массивов в языке C не ограничена, но чаще используются одномерные и двумерные массивы. Начальное значение индекса элемента массива для каждого измерения в C – нуль.
 
-#### Ассоциативный массив
+### Ассоциативный массив
 An associative array, map, symbol table, or dictionary is an abstract data type composed of a collec-tion of   pairs, such that each possible key appears at most once in the collection.
 Operations associated with this data type allow:
 •	the addition of pairs to the collection
@@ -313,18 +318,20 @@ Operations associated with this data type allow:
 Dictionary (Map) еще называют нагруженным множеством (data + info), где data – ключ, а нагрузка – значение ключа.
 Хеш-таблица – ассоциативный массив, хранит пары   в виде связанного списка (open hash, closed address) или массива пар (closed hash, open address). Индекс элемента равен хеш-функции от ключа i = hash(key). Разбиение множества на подмножества происходит с по-мощью хеш функции (пример: телефонная книга).
 
-### Множество
+## Множество
 A set is an abstract data structure that can store certain values, without any particular order, and no repeated values. It is a computer implementation of the mathematical concept of a finite set. Unlike most other collection types, rather than retrieving a specific element from a set, one typically tests a value for membership in a set. Some set data structures are designed for static or frozen sets that do not change after they are constructed. Static sets allow only query operations on their elements — such as checking whether a given value is in the set, or enumerating the values in some arbitrary or-der. Other variants, called dynamic or mutable sets, allow also the insertion and deletion of elements from the set.
-Конечное множество (finit set) — множество, количество элементов которого конечно, то есть, существует неотрицательное целое число k, равное количеству элементов этого множества. В противном случае множество называется бесконечным. Например,
-  – конечное множество из пяти элементов. Число элементов конечного множества это натуральное число и называется мощно-стью множества. Множество всех положительных целых чисел бесконечно:  
 
-### Список
+## Список
 Простейшая динамическая структура, упорядоченное множество с переменным числом эле-ментов.
-Односвязный список
 
-#### Двусвязный список
+### Односвязный список
+<img src="https://github.com/sashakid/ios-guide/blob/master/Images/singly_linked_list.png">
 
-#### Кольцевой список
+### Двусвязный список
+<img src="https://github.com/sashakid/ios-guide/blob/master/Images/doubly_linked_list.png">
+
+### Кольцевой список
+<img src="https://github.com/sashakid/ios-guide/blob/master/Images/circular_linked_list.png">
 
 Плюсы
 •	Движение в обе стороны
@@ -337,7 +344,7 @@ A set is an abstract data structure that can store certain values, without any p
 Массив имеет фиксированное время перехода по индексу, но нуждается в монолитном секторе памяти, обладает нефиксированным временем вставки и удаления.
 Список более требователен к памяти, дольше переход по индексу, но значительно быстрее вставка и удаление за O(1). В Java и в C++ явно различаются List и Array, в ObjC NSMutableArray скорее список, чем массив.
 
-### Стек и фрейм
+## Стек и фрейм
 Стек – очередь LIFO (last-in-first-out) структурированная область памяти, в отличие от кучи. Последовательный список с переменной длинной, включение и исключение только из верши-ны стека. Состоит из последовательности фреймов. После вызова метода из стека выделяется запрошенная область памяти – фрейм, который хранит значения объявленных переменных.
 •	Включение
 •	Исключение
@@ -345,14 +352,16 @@ A set is an abstract data structure that can store certain values, without any p
 •	Очистка
 •	Неразрушающее чтение
 Функция стека – сохранить работу, невыполненную до конца, с возможностью переключения на другую работу.
+<img src="https://github.com/sashakid/ios-guide/blob/master/Images/stack.png">
 
-### Очередь FIFO
+## Очередь FIFO
 Акроним First In, First Out — «первым пришёл — первым ушёл» — способ организации и манипулирования данными относительно времени и приоритетов. Это выражение описывает принцип технической обработки очереди или обслуживания конфликтных требований путём упорядочения процесса по принципу: «первым пришёл — первым обслужен» (ПППО). Тот, кто приходит первым, тот и обслуживается первым, пришедший следующим ждёт, пока обслужи-вание первого не будет закончено, и так далее. В информатике этот термин относится к спосо-бу запоминания данных, обрабатываемых в очереди. Каждый элемент очереди хранится в структуре данных очереди (без исключений). Первые данные, добавленные в очередь, будут первыми из неё удалены, то есть обработка производится последовательно в том же порядке, что и поступление. Это типичное поведение для очереди, хотя и не единственно возможное
 
-### Дек
+## Дек
 Double ended queue – очередь с двумя концами, включение и исключение из любого конца (ле-вого или правого).
+<img src="https://github.com/sashakid/ios-guide/blob/master/Images/dequeue.png">
 
-### Куча
+## Куча
 Куча как СД – дерево, родитель A >= ребенка B => A – корень кучи. Max куча, Min куча.
 •	Найти max или min
 •	Удалить max или min
@@ -361,19 +370,23 @@ Double ended queue – очередь с двумя концами, включе
 •	Слияние
 Куча как область памяти – реализация динамически распределяемой памяти, в которой хра-нятся все объекты. alloc – из кучи выделяется требуемая область памяти.
 
-### Двоичная куча
+## Двоичная куча
 
-### Граф
+## Граф
 Фигура, состоящая из вершин и ребер, соединяющих вершины. Направленный и ненаправлен-ный.
 
-### Дерево
+## Дерево
 Связаный граф без циклов. Выделена одна вершина – корень. Остальные – сыновья. Если нет ребенка – терминальная вершина
+<img src="https://github.com/sashakid/ios-guide/blob/master/Images/tree.png">
 
-### Бинарное дерево поиска
+## Бинарное дерево поиска
 Состоит из узлов (записей) вида data, left, right, где
 key[left[x]] < key[x] <= key[right[x]]
 Ключ данных родительского узла больше левого сына и нестрого меньше правого.
-Красно-черное дерево
+
+## Красно-черное дерево
+<img src="https://github.com/sashakid/ios-guide/blob/master/Images/red_black_tree.png">
+<img src="https://github.com/sashakid/ios-guide/blob/master/Images/red_black_tree_statistics.png">
 
 Одно из самобалансирующихся двоичных деревьев поиска, гарантирующих логарифмический рост высоты дерева от числа узлов и быстро выполняющее основные операции дерева поиска: добавление, удаление и поиск узла. Сбалансированность достигается за счёт введения допол-нительного атрибута узла дерева — «цвета». Этот атрибут может принимать одно из двух возможных значений — «чёрный» или «красный».
 •	Узел либо красный, либо чёрный.
@@ -384,11 +397,13 @@ key[left[x]] < key[x] <= key[right[x]]
 •	Всякий простой путь от данного узла до любого листового узла, являющегося его потомком, содержит одинаковое число черных узлов.
 
 # Коллекции в Objective-C
+<img src="https://github.com/sashakid/ios-guide/blob/master/Images/objc_collections.png">
+
 
 Mutability
 Most collection classes exist in two versions: mutable and immutable (default). What’s the big ad-vantage? Thread safety. Immutable collections are fully thread safe and can be iterated from multiple threads at the same time, without any risk of mutation exceptions. Your API should never expose mutable collections. Of course there’s a cost when going from immutable and mutable and back - the object has to be copied twice, and all objects within will be retained/released. Sometimes it’s more efficient to hold an internal mutable collection and return a copied, immutable object on access. Notably, some of the more modern collection classes like NSHashTable, NSMapTable, and NSPointerArray are mutable by default and don’t have immutable counterparts. They are meant for internal class use, and a use case where you would want those immutable would be quite unusual.
 
-Core Foundation:
+## Core Foundation:
 •	CFMutableDictionary
 The access time for a value in the dictionary is guaranteed to be at worst O(N) for any implemen-tation, current and future, but will often be O(1) (constant time). Insertion or deletion operations will typically be constant time as well, but are O(N*N) in the worst case in some implementations. Access of values through a key is faster than accessing values directly (if there are any such opera-tions). Dictionaries will tend to use significantly more memory than a array with the same number of values.
 •	CFMutableArray
@@ -398,7 +413,7 @@ The access time for a value in the dictionary is guaranteed to be at worst O(N) 
 •	CFMutableTree
 •	CFMutableSet
 
-Foundation:
+## Foundation:
 1.	NSArray (NSMutableArray) – управляет упорядоченной коллекцией элементов, называемой массивом. Вы можете использовать объекты этого класса для создания неизменяемых массивов. Это значит, что все элементы объектов класса NSArray доступны только для чтения. Имеется возможность доступа к элементам массива по индексу. Массивы могут хранить элементы различных типов. Массивы поддерживают сортировку и поиск элементов, а также сравнение самих массивов между собой. Для создания изменяемых массивов следует использовать NSMutableArray.
 
 The most interesting part is that Apple doesn’t guarantee O(1) access time on individual object access - as you can read in the note about Computational Complexity in the CFArray.h CoreFoundation header:
