@@ -419,7 +419,7 @@ The access time for a value in the dictionary is guaranteed to be at worst O(N) 
 * `CFBinaryHeap`
 * `CFMutableBitVector`
 * `CFMutableTree`
-* `CFMutableSet
+* `CFMutableSet`
 
 ## Foundation:
 1. NSArray (NSMutableArray) – управляет упорядоченной коллекцией элементов, называемой массивом. Вы можете использовать объекты этого класса для создания неизменяемых массивов. Это значит, что все элементы объектов класса NSArray доступны только для чтения. Имеется возможность доступа к элементам массива по индексу. Массивы могут хранить элементы различных типов. Массивы поддерживают сортировку и поиск элементов, а также сравнение самих массивов между собой. Для создания изменяемых массивов следует использовать NSMutableArray.
@@ -613,9 +613,9 @@ NSSortDescriptor *firstDescriptor = [[NSSortDescriptor alloc] initWithKey:FIRST 
 NSArray *descriptors = [NSArray arrayWithObjects:lastDescriptor, firstDescriptor, nil]; 
 sortedArray = [array sortedArrayUsingDescriptors:descriptors];
 ```
-```objectivec
 __Сортировка с помощью функции__
 Такой подход значительно менее гибкий.
+```objectivec
 NSInteger lastNameFirstNameSort(id person1, id person2, void *reverse) {
 NSString *name1 = [person1 valueForKey:LAST];
 NSString *name2 = [person2 valueForKey:LAST];
@@ -644,6 +644,7 @@ NSArray *sortedArray = [array sortedArrayUsingComparator: ^(id obj1, id obj2) {
 	}
 	return (NSComparisonResult)NSOrderedSame;
 }];
+```
 __Сортировка с помощью функций и селекторов__
 Следующий листинг иллюстрирует использование методов `sortedArrayUsingSelector:`, `sortedArrayUsingFunction:context:`, и `sortedArrayUsingFunction:context:hint:`. Самым сложным из этих методов является `sortedArrayUsingFunction:context:hint:`. Он наиболее эффективен, когда у вас есть большой массив (N записей), которые вам надо отсортировать раз и затем лишь слег-ка изменить (P добавлений и удалений, где P гораздо меньше, чем N). Вы можете использовать работу, которую вы сделали в оригинальнй сортировке, и сделать своего рода слияние между N "старых" предметов и Р "новых" предметов. Чтобы получить соответствующую подсказку, вы используете sortedArrayHint когда исходный массив был отсортирован, и держите его, пока вам это нужно (если вы хотите, отсортировать массив после того, как он был изменен).
 ```objectivec
@@ -669,8 +670,8 @@ sortedArray = [anArray sortedArrayUsingFunction:alphabeticSort context:&reverseS
 // сортировка с подсказкой
 sortedArray = [anArray sortedArrayUsingFunction:alphabeticSort context:&reverseSort hint:sortedArrayHint];
 ```
-```
 Sorting 1,000,000 elements:
+```
 selector: 4947.90[ms]
 function: 5618.93[ms]
 block: 5082.98[ms]
