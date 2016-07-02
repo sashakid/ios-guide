@@ -263,7 +263,7 @@
 Действие, которое выполняется над экземпляром класса (простой метод) (-) или самим классом (статический метод) (+). 
 Простые методы имеют доступ к данным объекта (конкретного экземпляра данного класса), статические методы  не имеют доступа к данным объекта и для их использования не нужно создавать экземпляры (данного класса). 
 Метод класса используется для создания новых объектов и называется фабричным методом. Также может использоваться для доступа к глобальным данным. Примеры методов класса и методов экземпляра `NSString`: 
-```
+```objectivec
 + stringWithContentsOfFile:encoding:error:
 + stringWithString:
 + stringWithFormat:
@@ -438,15 +438,19 @@ NSSet can only work efficiently if the hashing method used is balanced; if all o
 Usage: Instances where one might use NSMapTable include non-copyable keys and storing weak references to keyed delegates or another kind of weak object.
 10. NSIndexPath – представляет путь к конкретному узлу в виде дерева вложенных массивов коллекций. Этот путь известен как индексный путь. Каждый индекс в индексном пути представляет индекс в массиве дочерних элементов от одного узла в дереве к другому.
 
-* NSArray is the best choice to use for a list of items if you're going to iterate over them in se-quence, or access directly by index. They are also efficient to use as a queue or stack, as adding or removing items from either the beginning or is O(1). Checking to see if an object exists in the array using containsObject: is an O(N) operation, as it may take up to N comparisons to find the match.
-* NSSet is a great choice for checking containsObject: due to efficient hashing algorithms. Add-ing/removing items is always O(1). In addition, you have fast set arithmetic operations.
-* NSDictionary is a great choice if you have a natural key you can use to access objects. This has no inherent order, but if you know the key you can retrieve any object as O(1).
+<img src="https://github.com/sashakid/ios-guide/blob/master/Images/complexity.png">
+
+_NSArray is the best choice to use for a list of items if you're going to iterate over them in se-quence, or access directly by index. They are also efficient to use as a queue or stack, as adding or removing items from either the beginning or is O(1). Checking to see if an object exists in the array using containsObject: is an O(N) operation, as it may take up to N comparisons to find the match._
+_NSSet is a great choice for checking containsObject: due to efficient hashing algorithms. Add-ing/removing items is always O(1). In addition, you have fast set arithmetic operations._
+_NSDictionary is a great choice if you have a natural key you can use to access objects. This has no inherent order, but if you know the key you can retrieve any object as O(1)._
 
 ## Разница между `Set` и `Array`?
 NSSet предназначен для создания несортированных массивов данных (например каких-либо объектов). Существует модифицируемая версия класса NSSet — это NSMutableSet, используя которую можно добавлять и удалять элементы. Стоит обратить внимание, что объект, кото-рый хранится в NSSet, встречается только один раз. Т.е. все элементы NSSet — уникальные.
 Добавить дубликат элемента в NSMutableSet у вас также не получится. Для создания несорти-рованного массива, в котором можно использовать неуникальные элементы, можно использо-вать NSCountedSet. Основным преимуществом NSCountedSet перед использованием классиче-ского массива NSArray является то, что элемент может быть продублирован огромное количе-ство раз и при этом занимать памяти как один элемент. Это объясняется тем, что NSCountedSet хранит в памяти только одну копию элемента и запоминает сколько раз этот элемент встреча-ется. Если для вас не важен порядок элементов внутри массива и вы используете действи-тельно большие объемы информации, то использование NSSet повысит производительность приложения за счет снижения потребляемой памяти. Несмотря на то, что количество элемен-тов хранящихся в памяти будет одинаковым, NSSet не тратит память на то, чтобы помнить в какой последовательности хранятся элементы.
+``òbjectivec
 NSSet *set = [NSSet setWithObjects:@"1", @"2", @"3", @"4", @"5", @"6", @"7", @"8", @"9", @"0", nil];
 NSLog(@"%@", set);
+```
 
 ## Difference between `NSArray` and `CFArray`
 What's the point of them both existing? There are a few reasons.
@@ -471,7 +475,7 @@ Cocoa содержит три основных способа перечисле
 * Вы можете выполнять несколько перечислений одновременно.
 __C Loops (for/while)__
 for and while loops are the "classic" method of iterating over a collection. Anyone who's taken Comput-er Science 101 has written code like this before:
-```
+```objectivec
 for (NSUInteger i = 0; i < [array count]; i++) {
 	id object = array[i];
 	NSLog(@"%@", object);
@@ -480,7 +484,7 @@ for (NSUInteger i = 0; i < [array count]; i++) {
 But as anyone who has used C-style loops knows, this method is prone to off-by-one errors—particularly when used in a non-standard way. Fortunately, Smalltalk significantly improved this state of affairs with an idea called list comprehensions, which are commonly known today as for/in loops.
 __List Comprehension (for/in)__
 By using a higher level of abstraction, declaring the intention of iterating through all elements of a collection, not only are we less prone to error, but there's a lot less to type:
-```
+```objectivec
 for (id object in array) {
     NSLog(@"%@", object);
 }
@@ -494,18 +498,20 @@ for (key in someDictionary) {
 ```
 In Cocoa, comprehensions are available to any class that implements the NSFastEnumeration proto-col, including NSArray, NSSet, and NSDictionary.
 Использование перечислений на основе блоков
-NSArray, NSDictionary и NSSet разрешают перечисление их содержимого с помощью блоков. Для перечисления с блоком, вызовите соответствующий метод и укажите блок для использо-вания.
+`NSArray`, `NSDictionary` и `NSSet` разрешают перечисление их содержимого с помощью блоков. Для перечисления с блоком, вызовите соответствующий метод и укажите блок для использо-вания.
+``òbjectivec
 NSArray *anArray = [NSArray arrayWithObjects:@"A", @"B", @"D", @"M", nil];
 NSString *string = @"c";
 [anArray enumerateObjectsUsingBlock:^(id obj, NSUInteger index, BOOL *stop) {
-if ([obj localizedCaseInsensitiveCompare:string] == NSOrderedSame) {
-NSLog(@"Object Found: %@ at index: %i", obj, index);
-*stop = YES;
-}
+	if ([obj localizedCaseInsensitiveCompare:string] == NSOrderedSame) {
+		NSLog(@"Object Found: %@ at index: %i", obj, index);
+		*stop = YES;
+	}
 }];
-Для перечисления NSArray, параметр index полезен для одновременного перечисления. Без этого параметра, единственный способ получить доступ к индексу был бы использованием метода indexOfObject:, который является неэффективным. stop параметр важен для произво-дительности, так как он позволяет остановить перечисление раньше, на основе некоторого условия, определяемого в пределах блока. Методы перечисления на основе блока в других коллекциях, немного отличаются по названию.
+``
+Для перечисления `NSArray`, параметр `index` полезен для одновременного перечисления. Без этого параметра, единственный способ получить доступ к индексу был бы использованием метода indexOfObject:, который является неэффективным. stop параметр важен для производительности, так как он позволяет остановить перечисление раньше, на основе некоторого условия, определяемого в пределах блока. Методы перечисления на основе блока в других коллекциях, немного отличаются по названию.
 Использование перечислителя NSEnumerator
-Абстрактный класс, экземпляры подклассов которого перечисляют коллекции других объек-тов, таких как массивы и словари. Все методы создания определены в классах коллекций, та-ких как NSArray, NSSet и NSDictionary, которые обеспечивают специальные объекты NSEnume-rator для перечисления их содержимого. Например, класс NSArray имеет два метода, которые возвращают объект NSEnumerator: objectEnumerator и reverseObjectEnumerator. NSDictionary также имеет два метода, которые возвращают объект NSEnumerator: keyEnumerator и objectE-numerator. Эти методы позволяют перечислить содержимое словаря по ключу или по значе-нию, соответственно. Вы отправляете nextObject, чтобы вновь созданный объект NSEnumerator возвращал следующий объект в оригинальной коллекции. Когда коллекция будет исчерпана, то возвращается nil. Вы не можете "сбросить" перечислитель после того, как он исчерпал свои коллекции. Подклассы NSEnumerator, используемые NSArray, NSDictionary и NSSet сохраняют коллекцию во время перечисления. Когда перечисление закончено, временные коллекции освобождаются.
+Абстрактный класс, экземпляры подклассов которого перечисляют коллекции других объек-тов, таких как массивы и словари. Все методы создания определены в классах коллекций, та-ких как NSArray, NSSet и NSDictionary, которые обеспечивают специальные объекты NSEnumerator для перечисления их содержимого. Например, класс NSArray имеет два метода, которые возвращают объект NSEnumerator: objectEnumerator и reverseObjectEnumerator. NSDictionary также имеет два метода, которые возвращают объект NSEnumerator: keyEnumerator и objectE-numerator. Эти методы позволяют перечислить содержимое словаря по ключу или по значе-нию, соответственно. Вы отправляете nextObject, чтобы вновь созданный объект NSEnumerator возвращал следующий объект в оригинальной коллекции. Когда коллекция будет исчерпана, то возвращается nil. Вы не можете "сбросить" перечислитель после того, как он исчерпал свои коллекции. Подклассы NSEnumerator, используемые NSArray, NSDictionary и NSSet сохраняют коллекцию во время перечисления. Когда перечисление закончено, временные коллекции освобождаются.
 Примечание: не безопасно изменение коллекции во время её перечисления. Некоторые кол-лекции в настоящее время поддерживают такие операции, но такое поведение не гарантиро-вано в будущем.
 Для перечисления коллекции, вы должны создать новый перечислитель.
 ```objective-c
@@ -523,118 +529,126 @@ while (aKey = [keyEnumerator nextObject]) {
 
 Array
 
+<img src="https://github.com/sashakid/ios-guide/blob/master/Images/array_performance.png">
+
 Dictionary
+
+<img src="https://github.com/sashakid/ios-guide/blob/master/Images/dictionary_performance.png.png">
 
 Why is NSFastEnumeration so slow here? Iterating the dictionary usually requires both key and ob-ject; fast enumeration can only help for the key, and we have to fetch the object every time ourselves. Using the block-based enumerateKeysAndObjectsUsingBlock: is more efficient since both objects can be more efficiently prefetched.
 Using NSPredicate to Filter Data
 If you look at an arbitrary code base, chances are you’ll sooner or later run into a piece of code similar to this one:
+``òbjectivec
 NSMutableArray *oldSkoolFiltered = [[NSMutableArray alloc] init];
 for (Book *book in bookshelf) {
-if ([book.publisher isEqualToString:@"Apress"]) {
-[oldSkoolFiltered addObject:book];
+	if ([book.publisher isEqualToString:@"Apress"]) {
+		[oldSkoolFiltered addObject:book];
+	}
 }
-}
+
 It’s a straight-forward approach to filtering an array of items (in this case, we’re talking about books) using a rather simple if-statement. Nothing wrong with this, but despite the fact we’re using a fairly simple expression here, the code is rather verbose. We can easily imagine what will happen in case we need to use more complicated selection criteria or a combination of filtering criteria.
-Simple filtering with NSPredicate
-Thanks to Cocoa, we can simplify the code by using NSPredicate. NSPredicate is the object representation of an if-statement, or, more formally, a predicate. Predicates are expressions that evaluate to a truth value, i.e. true or false. We can use them to perform validation and filtering. In Cocoa, we can use NSPredicate to evaluate single objects, filter arrays and perform queries against Core Data data sets. Let’s have a look at how our example looks like when using NSPredicate:
-NSPredicate *predicate = [NSPredicate predicateWithFormat:
-@"publisher == %@", @"Apress" ];
+__Simple filtering with NSPredicate__
+Thanks to Cocoa, we can simplify the code by using NSPredicate. NSPredicate is the object representation of an if-statement, or, more formally, a predicate. Predicates are expressions that evaluate to a truth value, i.e. true or false. We can use them to perform validation and filtering. In Cocoa, we can use NSPredicate to evaluate single objects, filter arrays and perform queries against Core Data data sets. Let’s have a look at how our example looks like when using `NSPredicate`:
+``òbjectivec
+NSPredicate *predicate = [NSPredicate predicateWithFormat:@"publisher == %@", @"Apress"];
 NSArray *filtered  = [bookshelf filteredArrayUsingPredicate:predicate];
-Filtering with Regular Expressions
+```
+__Filtering with Regular Expressions__
 Regular Expressions can be used to solve almost any problem ;-) so it’s good to know you can use them in NSPredicates as well. To use regular expressions in your NSPredicate, you need to use the MATCHES operator. Let’s filter all books that are about iPad or iPhone programming:
+``òbjectivec
 predicate = [NSPredicate predicateWithFormat:@"title MATCHES '.*(iPhone|iPad).*'"];
 filtered = [bookshelf filteredArrayUsingPredicate:predicate];
 dumpBookshelf(@"Books that contain 'iPad' or 'iPhone' in their title", filtered);
+``
 You need to obey some rules when using regular expressions in NSPredicate: most importantly, you cannot use regular expression metacharacters inside a pattern set.
-Filtering using set operations
+__Filtering using set operations__
 Let’s for a moment assume you want to filter all books that have been published by your favorite publishers. Using the IN operator, this is rather simple: first, we need to set up a set containing the publishers we’re interested in. Then, we can create the predicate and finally perform the filtering operation:
+``òbjectivec
 NSArray *favoritePublishers = [NSArray arrayWithObjects:@"Apress", @"O'Reilly", nil];
 predicate = [NSPredicate predicateWithFormat:@"publisher IN %@", favoritePublishers];
 filtered  = [bookshelf filteredArrayUsingPredicate:predicate];
 dumpBookshelf(@"Books published by my favorite publishers", filtered);
-Advanced filtering thanks to KVC goodness
+```
+__Advanced filtering thanks to KVC goodness__
 NSPredicate relies on key-value coding to achieve its magic. On one hand this means your classes need to be KVC compliant in order to be queried using NSPredicate (at least the attributes you want to query). On the other hand, this allows us to perform some very interesting things with very little lines of code. Let’s for example retrieve a list of books written by authors with the name “Mark”:
-predicate = [NSPredicate predicateWithFormat:
-@"authors.lastName CONTAINS %@", @"Mark" ];
+```òbjectivec
+predicate = [NSPredicate predicateWithFormat:@"authors.lastName CONTAINS %@", @"Mark" ];
 filtered  = [bookshelf filteredArrayUsingPredicate:predicate];
+```
 In case we’d want to return the value of one of the aggregate functions, we don’t need to use NSPredicate itself, but instead use KVC directly. Let’s retrieve the average price of all books on our shelf:
-NSNumber *average = [bookshelf valueForKeyPath:@"@avg.price"];
-Сортировка массивов
+```NSNumber *average = [bookshelf valueForKeyPath:@"@avg.price"];```
+__Сортировка массивов__
 Вам может потребоваться разместить несколько созданных пользователем строк в алфавит-ном порядке, либо вам потребуется разместить номера в убыванию или по возрастанию – ис-пользуйте дескрипторы блоков и селекторов. Дескрипторы сортировки (экземпляры NSSortDescriptor) обеспечивают удобный и абстрактный способ описания порядка сортировки.
 Простая сортировка по алфавиту:
 NSArray *myArray = @[@"v", @"a", @"c", @"b", @"z"];
-NSLog(@"%@",
-[myArray sortedArrayUsingSelector:@selector(caseInsensitiveCompare:)]);
-sortedArrayUsingDescriptors: или sortUsingDescriptors:
+NSLog(@"%@", [myArray sortedArrayUsingSelector:@selector(caseInsensitiveCompare:)]); 
+`sortedArrayUsingDescriptors`: или `sortUsingDescriptors`:
+```òbjectivec
 //Сначала создадим массив из словарей
 NSString *LAST = @"lastName";
 NSString *FIRST = @"firstName";
 NSMutableArray *array = [NSMutableArray array];
 NSArray *sortedArray;
 NSDictionary *dict;
-dict = [NSDictionary dictionaryWithObjectsAndKeys:
-@"Jo", FIRST, @"Smith", LAST, nil];
+dict = [NSDictionary dictionaryWithObjectsAndKeys:@"Jo", FIRST, @"Smith", LAST, nil];
 [array addObject:dict];
-dict = [NSDictionary dictionaryWithObjectsAndKeys:
-@"Joe", FIRST, @"Smith", LAST, nil];
+dict = [NSDictionary dictionaryWithObjectsAndKeys:@"Joe", FIRST, @"Smith", LAST, nil];
 [array addObject:dict];
-dict = [NSDictionary dictionaryWithObjectsAndKeys:
-@"Joe", FIRST, @"Smythe", LAST, nil];
+dict = [NSDictionary dictionaryWithObjectsAndKeys:@"Joe", FIRST, @"Smythe", LAST, nil];
 [array addObject:dict];
-dict = [NSDictionary dictionaryWithObjectsAndKeys:
-@"Joanne", FIRST, @"Smith", LAST, nil];
+dict = [NSDictionary dictionaryWithObjectsAndKeys:@"Joanne", FIRST, @"Smith", LAST, nil];
 [array addObject:dict];
-dict = [NSDictionary dictionaryWithObjectsAndKeys:
-@"Robert", FIRST, @"Jones", LAST, nil];
+dict = [NSDictionary dictionaryWithObjectsAndKeys:@"Robert", FIRST, @"Jones", LAST, nil];
 [array addObject:dict];
 //Далее сортируем содержимое массива по last name затем first name
 //Результаты могут быть показаны пользователю
-//Обратите внимание на использование localizedCaseInsensitiveCompare: selector
-NSSortDescriptor *lastDescriptor = [[NSSortDescriptor alloc] initWithKey:LAST
-ascending:YES
-selector:@selector(localizedCaseInsensitiveCompare:)];
-NSSortDescriptor *firstDescriptor = [[NSSortDescriptor alloc] initWithKey:FIRST
-ascending:YES
-selector:@selector(localizedCaseInsensitiveCompare:)];
-NSArray *descriptors = [NSArray arrayWithObjects:lastDescriptor, firstDescriptor, nil];
+//Обратите внимание на использование localizedCaseInsensitiveCompare:selector
+NSSortDescriptor *lastDescriptor = [[NSSortDescriptor alloc] initWithKey:LAST ascending:YES selector:@selector(localizedCaseInsensitiveCompare:)];
+NSSortDescriptor *firstDescriptor = [[NSSortDescriptor alloc] initWithKey:FIRST ascending:YES selector:@selector(localizedCaseInsensitiveCompare:)];
+NSArray *descriptors = [NSArray arrayWithObjects:lastDescriptor, firstDescriptor, nil]; 
 sortedArray = [array sortedArrayUsingDescriptors:descriptors];
-Сортировка с помощью функции. Такой подход значительно менее гибкий.
+```
+``òbjectivec
+__Сортировка с помощью функции__
+Такой подход значительно менее гибкий.
 NSInteger lastNameFirstNameSort(id person1, id person2, void *reverse) {
 NSString *name1 = [person1 valueForKey:LAST];
 NSString *name2 = [person2 valueForKey:LAST];
 NSComparisonResult comparison = [name1 localizedCaseInsensitiveCompare:name2];
-    	if (comparison == NSOrderedSame) {
-        	name1 = [person1 valueForKey:FIRST];
-        	name2 = [person2 valueForKey:FIRST];
-        	comparison = [name1 localizedCaseInsensitiveCompare:name2];
-    	}
-if (*(BOOL *)reverse == YES) {
-        	return 0 - comparison;
-    	}
-    	return comparison;
+    if (comparison == NSOrderedSame) {
+        name1 = [person1 valueForKey:FIRST];
+        name2 = [person2 valueForKey:FIRST];
+        comparison = [name1 localizedCaseInsensitiveCompare:name2];
+    }
+	if (*(BOOL *)reverse == YES) {
+        return 0 - comparison;
+    }
+    return comparison;
 }
 BOOL reverseSort = YES;
 sortedArray = [array sortedArrayUsingFunction:lastNameFirstNameSort context:&reverseSort];
-Сортировка с блоками
+```
+__Сортировка с блоками__
+``òbjectivec
 NSArray *sortedArray = [array sortedArrayUsingComparator: ^(id obj1, id obj2) {
-     	if ([obj1 integerValue] > [obj2 integerValue]) {
-          	return (NSComparisonResult)NSOrderedDescending;
-     	}
-if ([obj1 integerValue] < [obj2 integerValue]) {
-       	   return (NSComparisonResult)NSOrderedAscending;
-     	}
-    	return (NSComparisonResult)NSOrderedSame;
+	if ([obj1 integerValue] > [obj2 integerValue]) {
+		return (NSComparisonResult)NSOrderedDescending;
+	}
+	if ([obj1 integerValue] < [obj2 integerValue]) {
+		return (NSComparisonResult)NSOrderedAscending;
+	}
+	return (NSComparisonResult)NSOrderedSame;
 }];
-Сортировка с помощью функций и селекторов
-Следующий листинг иллюстрирует использование методов sortedArrayUsingSelector:, sortedArrayUsingFunction:context:, и sortedArrayUsingFunction:context:hint:. Самым сложным из этих методов является sortedArrayUsingFunction:context:hint:. Он наиболее эффективен, когда у вас есть большой массив (N записей), которые вам надо отсортировать раз и затем лишь слег-ка изменить (P добавлений и удалений, где P гораздо меньше, чем N). Вы можете использовать работу, которую вы сделали в оригинальнй сортировке, и сделать своего рода слияние между N "старых" предметов и Р "новых" предметов. Чтобы получить соответствующую подсказку, вы используете sortedArrayHint когда исходный массив был отсортирован, и держите его, пока вам это нужно (если вы хотите, отсортировать массив после того, как он был изменен).
+__Сортировка с помощью функций и селекторов__
+Следующий листинг иллюстрирует использование методов `sortedArrayUsingSelector:`, `sortedArrayUsingFunction:context:`, и `sortedArrayUsingFunction:context:hint:`. Самым сложным из этих методов является `sortedArrayUsingFunction:context:hint:`. Он наиболее эффективен, когда у вас есть большой массив (N записей), которые вам надо отсортировать раз и затем лишь слег-ка изменить (P добавлений и удалений, где P гораздо меньше, чем N). Вы можете использовать работу, которую вы сделали в оригинальнй сортировке, и сделать своего рода слияние между N "старых" предметов и Р "новых" предметов. Чтобы получить соответствующую подсказку, вы используете sortedArrayHint когда исходный массив был отсортирован, и держите его, пока вам это нужно (если вы хотите, отсортировать массив после того, как он был изменен).
+``òbjectivec
 NSInteger alphabeticSort(id string1, id string2, void *reverse) {
-if (*(BOOL *)reverse == YES) {
-return [string2 localizedCaseInsensitiveCompare:string1];
+	if (*(BOOL *)reverse == YES) {
+		return [string2 localizedCaseInsensitiveCompare:string1];
+	}
+	return [string1 localizedCaseInsensitiveCompare:string2];
 }
-return [string1 localizedCaseInsensitiveCompare:string2];
-}
-NSMutableArray *anArray =
-[NSMutableArray arrayWithObjects:
+NSMutableArray *anArray = [NSMutableArray arrayWithObjects:
 @"aa", @"ab", @"ac", @"ad", @"ae", @"af", @"ag", @"ah", @"ai", @"aj", @"ak", @"al", @"am", @"an", @"ao", @"ap", @"aq", @"ar", @"as", @"at", @"au", @"av", @"aw", @"ax", @"ay", @"az", @"ba", @"bb", @"bc", @"bd", @"bf", @"bg", @"bh", @"bi", @"bj", @"bk", @"bl", @"bm", @"bn", @"bo", @"bp", @"bq", @"br", @"bs", @"bt", @"bu", @"bv", @"bw", @"bx", @"by", @"bz", @"ca", @"cb", @"cc", @"cd", @"ce", @"cf", @"cg", @"ch", @"ci", @"cj", @"ck", @"cl", @"cm", @"cn", @"co", @"cp", @"cq", @"cr", @"cs", @"ct", @"cu",
 @"cv", @"cw", @"cx", @"cy", @"cz",
 nil];
@@ -643,21 +657,21 @@ NSData *sortedArrayHint = [anArray sortedArrayHint];
 [anArray insertObject:@"be" atIndex:5];
 NSArray *sortedArray;
 // сортировка используя селектор
-sortedArray =
-[anArray sortedArrayUsingSelector:@selector(localizedCaseInsensitiveCompare:)];
+sortedArray = [anArray sortedArrayUsingSelector:@selector(localizedCaseInsensitiveCompare:)];
 // сортировка используя функцию
 BOOL reverseSort = NO;
 sortedArray = [anArray sortedArrayUsingFunction:alphabeticSort context:&reverseSort];
 // сортировка с подсказкой
 sortedArray = [anArray sortedArrayUsingFunction:alphabeticSort context:&reverseSort hint:sortedArrayHint];
-
+```
+```
 Sorting 1,000,000 elements:
 selector: 4947.90[ms]
 function: 5618.93[ms]
 block: 5082.98[ms]
-
-Алгоритмы
-Нотация «большое О»
+```
+# Алгоритмы
+## Нотация «большое О»
 Performance is usually described with the Big O Notation. It defines the limiting behavior of a function and is often used to characterize algorithms on their performance. O defines the upper bound of the growth rate of the function. To see just how big the difference is, see commonly used O notations and the number of operations needed.
 
 For example, if you sort an array with 50 elements, and your sorting algorithm has a complexity of O(n^2), there will be 2,500 operations necessary to complete the task. Furthermore, there’s also overhead in internal management and calling that method - so it’s 2,500 operations times constant. O(1) is the ideal complexity, meaning constant time. Good sorting algorithms usually need O(n log n) time.
