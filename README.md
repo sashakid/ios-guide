@@ -451,7 +451,7 @@ _NSDictionary is a great choice if you have a natural key you can use to access 
 ## Разница между `Set` и `Array`?
 NSSet предназначен для создания несортированных массивов данных (например каких-либо объектов). Существует модифицируемая версия класса NSSet — это NSMutableSet, используя которую можно добавлять и удалять элементы. Стоит обратить внимание, что объект, кото-рый хранится в NSSet, встречается только один раз. Т.е. все элементы NSSet — уникальные.
 Добавить дубликат элемента в NSMutableSet у вас также не получится. Для создания несорти-рованного массива, в котором можно использовать неуникальные элементы, можно использо-вать NSCountedSet. Основным преимуществом NSCountedSet перед использованием классиче-ского массива NSArray является то, что элемент может быть продублирован огромное количе-ство раз и при этом занимать памяти как один элемент. Это объясняется тем, что NSCountedSet хранит в памяти только одну копию элемента и запоминает сколько раз этот элемент встреча-ется. Если для вас не важен порядок элементов внутри массива и вы используете действи-тельно большие объемы информации, то использование NSSet повысит производительность приложения за счет снижения потребляемой памяти. Несмотря на то, что количество элемен-тов хранящихся в памяти будет одинаковым, NSSet не тратит память на то, чтобы помнить в какой последовательности хранятся элементы.
-```objectivec
+``objectivec
 NSSet *set = [NSSet setWithObjects:@"1", @"2", @"3", @"4", @"5", @"6", @"7", @"8", @"9", @"0", nil];
 NSLog(@"%@", set);
 ```
@@ -531,13 +531,13 @@ while (aKey = [keyEnumerator nextObject]) {
 [myMutableDictionary removeObjectsForKeys:keysToDeleteArray];
 ```
 
-Array
+__Array__
 
 <img src="https://github.com/sashakid/ios-guide/blob/master/Images/array_performance.png">
 
-Dictionary
+__Dictionary__
 
-<img src="https://github.com/sashakid/ios-guide/blob/master/Images/dictionary_performance.png.png">
+<img src="https://github.com/sashakid/ios-guide/blob/master/Images/dictionary_performance.png">
 
 Why is NSFastEnumeration so slow here? Iterating the dictionary usually requires both key and ob-ject; fast enumeration can only help for the key, and we have to fetch the object every time ourselves. Using the block-based enumerateKeysAndObjectsUsingBlock: is more efficient since both objects can be more efficiently prefetched.
 Using NSPredicate to Filter Data
@@ -549,7 +549,7 @@ for (Book *book in bookshelf) {
 		[oldSkoolFiltered addObject:book];
 	}
 }
-
+```
 It’s a straight-forward approach to filtering an array of items (in this case, we’re talking about books) using a rather simple if-statement. Nothing wrong with this, but despite the fact we’re using a fairly simple expression here, the code is rather verbose. We can easily imagine what will happen in case we need to use more complicated selection criteria or a combination of filtering criteria.
 __Simple filtering with NSPredicate__
 Thanks to Cocoa, we can simplify the code by using NSPredicate. NSPredicate is the object representation of an if-statement, or, more formally, a predicate. Predicates are expressions that evaluate to a truth value, i.e. true or false. We can use them to perform validation and filtering. In Cocoa, we can use NSPredicate to evaluate single objects, filter arrays and perform queries against Core Data data sets. Let’s have a look at how our example looks like when using `NSPredicate`:
