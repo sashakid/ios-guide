@@ -341,6 +341,7 @@ A set is an abstract data structure that can store certain values, without any p
 *	Движение в обе стороны
 *	Добавление элемента за O(1) время
 *	Удаление за O(1) время
+
 Минусы
 *	На указатели тратится дополнительная память
 *	Поиск только последовательный путем перебора за O(n)
@@ -355,7 +356,9 @@ A set is an abstract data structure that can store certain values, without any p
 *	Определение размера
 *	Очистка
 *	Неразрушающее чтение
+
 Функция стека – сохранить работу, невыполненную до конца, с возможностью переключения на другую работу.
+
 <img src="https://github.com/sashakid/ios-guide/blob/master/Images/stack.png">
 
 ## Очередь FIFO
@@ -363,6 +366,7 @@ A set is an abstract data structure that can store certain values, without any p
 
 ## Дек
 Double ended queue – очередь с двумя концами, включение и исключение из любого конца (ле-вого или правого).
+
 <img src="https://github.com/sashakid/ios-guide/blob/master/Images/dequeue.png">
 
 ## Куча
@@ -499,7 +503,7 @@ for (key in someDictionary) {
 In Cocoa, comprehensions are available to any class that implements the NSFastEnumeration proto-col, including NSArray, NSSet, and NSDictionary.
 Использование перечислений на основе блоков
 `NSArray`, `NSDictionary` и `NSSet` разрешают перечисление их содержимого с помощью блоков. Для перечисления с блоком, вызовите соответствующий метод и укажите блок для использо-вания.
-``òbjectivec
+```objectivec
 NSArray *anArray = [NSArray arrayWithObjects:@"A", @"B", @"D", @"M", nil];
 NSString *string = @"c";
 [anArray enumerateObjectsUsingBlock:^(id obj, NSUInteger index, BOOL *stop) {
@@ -538,7 +542,7 @@ Dictionary
 Why is NSFastEnumeration so slow here? Iterating the dictionary usually requires both key and ob-ject; fast enumeration can only help for the key, and we have to fetch the object every time ourselves. Using the block-based enumerateKeysAndObjectsUsingBlock: is more efficient since both objects can be more efficiently prefetched.
 Using NSPredicate to Filter Data
 If you look at an arbitrary code base, chances are you’ll sooner or later run into a piece of code similar to this one:
-``òbjectivec
+```objectivec
 NSMutableArray *oldSkoolFiltered = [[NSMutableArray alloc] init];
 for (Book *book in bookshelf) {
 	if ([book.publisher isEqualToString:@"Apress"]) {
@@ -549,13 +553,13 @@ for (Book *book in bookshelf) {
 It’s a straight-forward approach to filtering an array of items (in this case, we’re talking about books) using a rather simple if-statement. Nothing wrong with this, but despite the fact we’re using a fairly simple expression here, the code is rather verbose. We can easily imagine what will happen in case we need to use more complicated selection criteria or a combination of filtering criteria.
 __Simple filtering with NSPredicate__
 Thanks to Cocoa, we can simplify the code by using NSPredicate. NSPredicate is the object representation of an if-statement, or, more formally, a predicate. Predicates are expressions that evaluate to a truth value, i.e. true or false. We can use them to perform validation and filtering. In Cocoa, we can use NSPredicate to evaluate single objects, filter arrays and perform queries against Core Data data sets. Let’s have a look at how our example looks like when using `NSPredicate`:
-``òbjectivec
+```objectivec
 NSPredicate *predicate = [NSPredicate predicateWithFormat:@"publisher == %@", @"Apress"];
 NSArray *filtered  = [bookshelf filteredArrayUsingPredicate:predicate];
 ```
 __Filtering with Regular Expressions__
 Regular Expressions can be used to solve almost any problem ;-) so it’s good to know you can use them in NSPredicates as well. To use regular expressions in your NSPredicate, you need to use the MATCHES operator. Let’s filter all books that are about iPad or iPhone programming:
-``òbjectivec
+```objectivec
 predicate = [NSPredicate predicateWithFormat:@"title MATCHES '.*(iPhone|iPad).*'"];
 filtered = [bookshelf filteredArrayUsingPredicate:predicate];
 dumpBookshelf(@"Books that contain 'iPad' or 'iPhone' in their title", filtered);
@@ -563,7 +567,7 @@ dumpBookshelf(@"Books that contain 'iPad' or 'iPhone' in their title", filtered)
 You need to obey some rules when using regular expressions in NSPredicate: most importantly, you cannot use regular expression metacharacters inside a pattern set.
 __Filtering using set operations__
 Let’s for a moment assume you want to filter all books that have been published by your favorite publishers. Using the IN operator, this is rather simple: first, we need to set up a set containing the publishers we’re interested in. Then, we can create the predicate and finally perform the filtering operation:
-``òbjectivec
+```objectivec
 NSArray *favoritePublishers = [NSArray arrayWithObjects:@"Apress", @"O'Reilly", nil];
 predicate = [NSPredicate predicateWithFormat:@"publisher IN %@", favoritePublishers];
 filtered  = [bookshelf filteredArrayUsingPredicate:predicate];
@@ -571,7 +575,7 @@ dumpBookshelf(@"Books published by my favorite publishers", filtered);
 ```
 __Advanced filtering thanks to KVC goodness__
 NSPredicate relies on key-value coding to achieve its magic. On one hand this means your classes need to be KVC compliant in order to be queried using NSPredicate (at least the attributes you want to query). On the other hand, this allows us to perform some very interesting things with very little lines of code. Let’s for example retrieve a list of books written by authors with the name “Mark”:
-```òbjectivec
+```objectivec
 predicate = [NSPredicate predicateWithFormat:@"authors.lastName CONTAINS %@", @"Mark" ];
 filtered  = [bookshelf filteredArrayUsingPredicate:predicate];
 ```
@@ -583,7 +587,7 @@ __Сортировка массивов__
 NSArray *myArray = @[@"v", @"a", @"c", @"b", @"z"];
 NSLog(@"%@", [myArray sortedArrayUsingSelector:@selector(caseInsensitiveCompare:)]); 
 `sortedArrayUsingDescriptors`: или `sortUsingDescriptors`:
-```òbjectivec
+```objectivec
 //Сначала создадим массив из словарей
 NSString *LAST = @"lastName";
 NSString *FIRST = @"firstName";
@@ -608,7 +612,7 @@ NSSortDescriptor *firstDescriptor = [[NSSortDescriptor alloc] initWithKey:FIRST 
 NSArray *descriptors = [NSArray arrayWithObjects:lastDescriptor, firstDescriptor, nil]; 
 sortedArray = [array sortedArrayUsingDescriptors:descriptors];
 ```
-``òbjectivec
+```objectivec
 __Сортировка с помощью функции__
 Такой подход значительно менее гибкий.
 NSInteger lastNameFirstNameSort(id person1, id person2, void *reverse) {
@@ -629,7 +633,7 @@ BOOL reverseSort = YES;
 sortedArray = [array sortedArrayUsingFunction:lastNameFirstNameSort context:&reverseSort];
 ```
 __Сортировка с блоками__
-``òbjectivec
+```objectivec
 NSArray *sortedArray = [array sortedArrayUsingComparator: ^(id obj1, id obj2) {
 	if ([obj1 integerValue] > [obj2 integerValue]) {
 		return (NSComparisonResult)NSOrderedDescending;
@@ -641,7 +645,7 @@ NSArray *sortedArray = [array sortedArrayUsingComparator: ^(id obj1, id obj2) {
 }];
 __Сортировка с помощью функций и селекторов__
 Следующий листинг иллюстрирует использование методов `sortedArrayUsingSelector:`, `sortedArrayUsingFunction:context:`, и `sortedArrayUsingFunction:context:hint:`. Самым сложным из этих методов является `sortedArrayUsingFunction:context:hint:`. Он наиболее эффективен, когда у вас есть большой массив (N записей), которые вам надо отсортировать раз и затем лишь слег-ка изменить (P добавлений и удалений, где P гораздо меньше, чем N). Вы можете использовать работу, которую вы сделали в оригинальнй сортировке, и сделать своего рода слияние между N "старых" предметов и Р "новых" предметов. Чтобы получить соответствующую подсказку, вы используете sortedArrayHint когда исходный массив был отсортирован, и держите его, пока вам это нужно (если вы хотите, отсортировать массив после того, как он был изменен).
-``òbjectivec
+```objectivec
 NSInteger alphabeticSort(id string1, id string2, void *reverse) {
 	if (*(BOOL *)reverse == YES) {
 		return [string2 localizedCaseInsensitiveCompare:string1];
@@ -670,6 +674,9 @@ selector: 4947.90[ms]
 function: 5618.93[ms]
 block: 5082.98[ms]
 ```
+
+***
+
 # Алгоритмы
 ## Нотация «большое О»
 Performance is usually described with the Big O Notation. It defines the limiting behavior of a function and is often used to characterize algorithms on their performance. O defines the upper bound of the growth rate of the function. To see just how big the difference is, see commonly used O notations and the number of operations needed.
