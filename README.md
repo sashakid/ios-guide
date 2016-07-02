@@ -212,7 +212,7 @@
 
 ######Бит и байт
 Информация –– мера разрешения неопределенности.
-Бит (`Binary digIT`, `bit` – кусочек) выбран как мера неопределенности с двумя возможными состояниями: истина | ложь, да | нет, 1 | 0. Любые данные в компьютере представлены в виде последовательности битов. Цифровая И. хранится благодаря различию между разными величинами какой-либо физической характеристики (ток, напряжение) => чем больше велечин, которые нужно различать, тем меньше различий между смежными величинами => тем менее надежна память. В двоичной системе следует различать всего два состояния => это самый надеждный метод кодирования И. 8 бит памяти позволяет хранить `2^8 = 256` комбинаций нулей и единиц.
+Бит (`Binary digIT`, `bit` – кусочек) выбран как мера неопределенности с двумя возможными состояниями: `истина | ложь`, `да | нет`, `1 | 0. Любые данные в компьютере представлены в виде последовательности битов. Цифровая И. хранится благодаря различию между разными величинами какой-либо физической характеристики (ток, напряжение) => чем больше велечин, которые нужно различать, тем меньше различий между смежными величинами => тем менее надежна память. В двоичной системе следует различать всего два состояния => это самый надеждный метод кодирования И. 8 бит памяти позволяет хранить `2^8 = 256` комбинаций нулей и единиц.
 ######Память
 Сверхоперативная, оперативная и внешняя. Некоторые регистры сверхоперативной П. (в которые могут помещаться аргументы арифметических операций) находятся в ЦП. Также они используются для хранения текущих или следующих команд. Оперативная П. – для запо-минания более постоянной И. Каждая ячейка ОП имеет свой идентификатор (адрес) в массиве ячеек П. Самая маленькая ячейка имеет размер 8 бит (байт). Внешняя П. служит для долговременного хранения И., используется для хранения самих программ.
 ######Тип данных, абстрактный тип данных
@@ -242,9 +242,13 @@
 ДИНАМИЧЕСКИЕ (связный список, граф, дерево)
 ######Алгоритмы
 «Рецепт расчета» – метод, разработанный для решения задачи, при-годный для реализации в компьютерной программе. Сам алгоритм яв-ляется абстракцией, но его представление – конкретно и может меняться в зависимости от архитектуры компьютера, ЯП и т. д. Представление алгоритма конструируется из блоков – примитивов. Набор примитивов и правил, как комбинировать эти примитивы для воплощения более сложных идей организуют ЯП. Примитив состоит из син-таксической и семантической части. Описание алгоритма на низком уровне – неудобно, поэтому используются абстракции для примитивов более высокого уровня, которые состоят из примитивов низкого. Итерационная структура – выполнение набора инструкций в циклическом режиме. Рекурсивная – каждая стадия повторения цикла реализуется как подзадача предыдущей стадии. Чтобы оценить производитель-ность нужно подсчитать кол-во операций. Различают временную сложность и пространственную (используемая память).
+
 `О` – (сложность в наихудшем случае), асимптотическая верхняя оценка кол-ва операций => времени работы (худший вариант). При оценке берется кол-во операций, возрастающих быстрее всего.
+
 `Ω` – сложность в лучшем случае
+
 `Θ` – сложность в среднем, когда оценка `Ω = О`
+
 Наилучшая оценка алгоритма – `О(1)`, константная, когда алгоритм без циклов и рекурсии.
 ЯП служит для точного описания АТД и алгоритмов. Компилятор транслирует текст программы на ЯП в машинный код, связывая каждый идентификатор (имя) с адресом памяти.
 ######Программа
@@ -404,14 +408,14 @@ Mutability
 Most collection classes exist in two versions: mutable and immutable (default). What’s the big ad-vantage? Thread safety. Immutable collections are fully thread safe and can be iterated from multiple threads at the same time, without any risk of mutation exceptions. Your API should never expose mutable collections. Of course there’s a cost when going from immutable and mutable and back - the object has to be copied twice, and all objects within will be retained/released. Sometimes it’s more efficient to hold an internal mutable collection and return a copied, immutable object on access. Notably, some of the more modern collection classes like NSHashTable, NSMapTable, and NSPointerArray are mutable by default and don’t have immutable counterparts. They are meant for internal class use, and a use case where you would want those immutable would be quite unusual.
 
 ## Core Foundation:
-•	CFMutableDictionary
+* `CFMutableDictionary` 
 The access time for a value in the dictionary is guaranteed to be at worst O(N) for any implemen-tation, current and future, but will often be O(1) (constant time). Insertion or deletion operations will typically be constant time as well, but are O(N*N) in the worst case in some implementations. Access of values through a key is faster than accessing values directly (if there are any such opera-tions). Dictionaries will tend to use significantly more memory than a array with the same number of values.
-•	CFMutableArray
-•	CFMutableBag
-•	CFBinaryHeap
-•	CFMutableBitVector
-•	CFMutableTree
-•	CFMutableSet
+* `CFMutableArray`
+* `CFMutableBag`
+* `CFBinaryHeap`
+* `CFMutableBitVector`
+* `CFMutableTree`
+* `CFMutableSet
 
 ## Foundation:
 1.	NSArray (NSMutableArray) – управляет упорядоченной коллекцией элементов, называемой массивом. Вы можете использовать объекты этого класса для создания неизменяемых массивов. Это значит, что все элементы объектов класса NSArray доступны только для чтения. Имеется возможность доступа к элементам массива по индексу. Массивы могут хранить элементы различных типов. Массивы поддерживают сортировку и поиск элементов, а также сравнение самих массивов между собой. Для создания изменяемых массивов следует использовать NSMutableArray.
@@ -2845,10 +2849,56 @@ Also, in agile software development, user acceptance testing involves creating t
 Блоки
 http://rypress.com/tutorials/objective-c/blocks
 
+Blocks are Objective-C objects. When you write a block in code, that is an expression of object type, much like the @"..." constant string syntax gives you an expression of object type. You can then use this object like you would any other Objective-C object, by sending it messages that it responds to, putting it into containers, passing it as a parameter, returning it, etc.
+
+There is a major difference from the constant string syntax. Unlike constant strings, blocks are not exactly the same each time through a piece of code. This is because blocks capture their enclosing scope, and that scope is different every time they're called. In short, each time code execution hits a ^{...} construct, a new object is created.
+
+Allocating a new object every time would be kind of slow, so blocks take an unusual approach: the object you get from a ^{...} construct is a stack object. This means that it has the same lifetime as local variables, and will be destroyed automatically upon leaving the current scope. Weird, huh?
+
+It's frequently useful for a block to outlive the scope where it was created. For example, you may want to return a block, or save it for later. For this to work, you must copy the block. You can do this like any other Objective-C object by sending it the -copy message. And like any other Objective-C object, if you aren't running under Garbage Collection then you own the resulting object and must eventually dispose of it using -release or -autorelease.
+
+Any reference to self is a reference to a local object variable, causing self to be retained. Any reference to an instance variable is an implicit reference to self and causes the same thing. 
+
+Objective-C blocks are objects which contain an embedded function pointer. A block call translates to a call to that function pointer, passing the block as an implicit parameter:
+
+    block();
+    // equivalent to:
+    block->impl(block);
+The cost of calling a block is therefore about the same as the cost of calling a C function. It's slightly higher due to the need to look up the implementation pointer first, but just slightly.
+
 Замыкание (англ. closure) в программировании — функция, в теле которой присутствуют ссылки на переменные, объявленные вне тела этой функции и не в качестве её параметров (а в окружающем коде). Говоря другим языком, замыкание — функция, которая ссылается на свобод-ные переменные в своём контексте. Замыкание, так же как и экземпляр объекта, есть способ представления функциональности и данных, связанных и упакованных вместе.
 Лямбда-выражение (в программировании) — это специальный синтаксис для объявления анонимных функторов по месту их использования. Используя лямбда-выражения, можно объявлять функции в любом месте кода. Обычно лямбда-выражение допускает замыкание на лексиче-ский контекст, в котором это выражение использовано. Лямбда-выражения поддерживаются во многих языках программирования (C, Com-mon Lisp, Python, PHP, C#, F#, Visual Basic .NET, C++, Java и других).
 Нестандартное расширение синтаксиса языков программирования C/C++/Objective-C, позво-ляющее инкапсулировать код и данные в один объект. Блоковые объекты это C-уровневые синтаксические функции. Они похожи на стандартные функции C, но в дополнение к исполня-емому коду они также могут содержать переменные привязанные к автоматической (стеку) или управляемой (куче) памяти. Поэтому блок может поддерживать набор состояний (дан-ные), которые он может использовать, чтобы повлиять на поведение при выполнении. Блоки особенно полезны в качестве обратного вызова, потому что блок несет как код, который будет выполняться на обратном вызове, так и данные, необходимые во время этого выполнения.
 
+#import "NSArray+Map.h"
+
+@implementation NSArray (Map)
+
+- (NSArray *)map:(id (^)(id))block {
+	// takes an id, returns an id
+	NSMutableArray *ret = [NSMutableArray array];
+	for(id obj in self)
+		[ret addObject:block(obj)];
+	return ret;
+}
+
+- (NSArray *)select:(BOOL (^)(id obj))block {
+	NSMutableArray *new = [NSMutableArray array];
+	for(id obj in self)
+		if(block(obj))
+			[new addObject: obj];
+	return new;
+}
+
+@end
+
+NSArray *array = @[@1, @2, @3, @4, @5];
+NSArray *mappedArray = [array map:^id(id element) {
+	NSNumber *current = (NSNumber *)element;
+	return [NSNumber numberWithInt:[current intValue] * [current intValue]];
+}];
+
+NSArray *longStrings = [strings select: ^BOOL (id obj) { return [obj length] > 5; }];
 
 As a local variable:
 returnType (^blockName)(parameterTypes) = ^returnType(parameters) {...};
