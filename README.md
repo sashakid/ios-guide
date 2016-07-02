@@ -253,16 +253,16 @@
 ЯП служит для точного описания АТД и алгоритмов. Компилятор транслирует текст программы на ЯП в машинный код, связывая каждый идентификатор (имя) с адресом памяти.
 ######Программа
 СД и алгоритмы – это материалы, из которых строятся программы и сам компьютер. В основе работы компьютера – умение работать с двоичными данными, битами, под командами ЦП в виде специальных инструкций – алгоритмов. Задачи редко выражаются в виде битов: они выражаются в виде чисел, символов, строк и более сложных структур – последовательностей, списков, деревьев и т. д. Задача, которую решает программа – преобразование входных данных в выходные.
-######Объект	
+######Объект
 Сущность в  виртуальном пространстве, которой можно посылать сообщения и которая может на них реагировать, используя свои данные, появляющаяся при создании экземпляра класса или копирования прототипа, обладающая определённым состоянием и поведением, имеющая заданные значения свойств (атрибутов) и операций над ними (методов). Как правило, при рассмотрении объектов выделяется то, что объекты принадлежат одному или нескольким классам, которые определяют поведение или роль (являются моделями) объекта. Термины «экземпляр класса» и «объект» взаимозаменяемы. Объект, наряду с понятием класс, является важным понятием объектно-ориентированного подхода. Объекты обладают свойствами наследования, инкапсуляции и полиморфизма.
-######Прототип	
+######Прототип
 Объект-образец, по образу и подобию которого создаются другие объекты. Объекты-копии могут сохранять связь с родительским объектом, автоматически наследуя изменения в прототипе.
-######Класс	
+######Класс
 Модель еще не существующей сущности (объекта). Описывает устройство объекта, является как бы чертежом объекта.
-######Метод	
-Действие, которое выполняется над экземпляром класса (простой метод) (-) или самим классом (статический метод) (+). 
-Простые методы имеют доступ к данным объекта (конкретного экземпляра данного класса), статические методы  не имеют доступа к данным объекта и для их использования не нужно создавать экземпляры (данного класса). 
-Метод класса используется для создания новых объектов и называется фабричным методом. Также может использоваться для доступа к глобальным данным. Примеры методов класса и методов экземпляра `NSString`: 
+######Метод
+Действие, которое выполняется над экземпляром класса (простой метод) (-) или самим классом (статический метод) (+).
+Простые методы имеют доступ к данным объекта (конкретного экземпляра данного класса), статические методы  не имеют доступа к данным объекта и для их использования не нужно создавать экземпляры (данного класса).
+Метод класса используется для создания новых объектов и называется фабричным методом. Также может использоваться для доступа к глобальным данным. Примеры методов класса и методов экземпляра `NSString`:
 ```objectivec
 + stringWithContentsOfFile:encoding:error:
 + stringWithString:
@@ -271,21 +271,21 @@
 – initWithString:
 – lowercaseString
 ```
-######Глобальная переменная	
+######Глобальная переменная
 Объявляется в начале программы вне любого метода, значение которой можно использовать из любого места модуля или другого файла.
 ######Локальная переменная 	
 Существует только во время выполнения метода и доступ к ним может выполняться только внутри метода, в котором она определена.
-######Статическая переменная	
+######Статическая переменная
 Сохраняет свое значение при нескольких вызовах метода, в отличие от локальной переменной. Инициализируется только один раз в начале выполнения программы.
-######Переменная экземпляра, instance var-iable, ivar	
-Данные, которые может содержать объект класса. Каждый раз создавая новый объект, создается и новый, причем уникальный, набор переменных экземпляра объекта. Поэтому, если у вас имеется два экземпляра объекта класса Fraction, к примеру, fracA и fracB, то каждый из них будет иметь свой собственный набор переменных. То есть, fracA и fracB будут иметь свои собственные numerator и denominator.
-######Абстракция	
+######Переменная экземпляра, instance variable, ivar
+Данные, которые может содержать объект класса. Каждый раз создавая новый объект, создается и новый, причем уникальный, набор переменных экземпляра объекта. Поэтому, если у вас имеется два экземпляра `объекта` класса `Fraction`, к примеру, `fracA` и `fracB`, то каждый из них будет иметь свой собственный набор переменных. То есть, `fracA` и `fracB` будут иметь свои собственные numerator и denominator.
+######Абстракция
 Смысловая конструкция, кратко описывающая СД и операции над ни-ми для упрощения понимания. Отделение объекта от его реализации (данные обрабатываются функцией высокого уровня с помощью функции низкого уровня). Существует из-за неудобства описания опе-раций на низком уровне.
-######Инкапсуляция	
+######Инкапсуляция
 Сокрытие методов и переменных от других объектов и частей про-граммы.
-######Наследование	
+######Наследование
 Процесс при котором один объект приобретает свойства и методы другого объекта.
-######Полиморфизм	
+######Полиморфизм
 Возможность объектов с одинаковой спецификацией иметь различную реализацию (например, объект UIViewController может быть и контроллером в MVC, и делегатом и источником данных для UITableView, если поддерживает соответствующие протоколы).
 
 ***
@@ -301,7 +301,7 @@
 <img src="https://github.com/sashakid/ios-guide/blob/master/Images/array.png">
 
 Операции
-* Получить элемент за время `log(n)
+* Получить элемент за время `log(n)`
 * Записать элемент
 Плюсы
 * Доступ за постоянное время
@@ -313,7 +313,7 @@
 Количество элементов массива определено заранее при объявлении массива. Все элементы упорядочены – каждому присвоен порядковый номер, который называется индексом. Доступ к конкретному элементу массива осуществляется с помощью индекса. В языке C все массивы располагаются в отдельной непрерывной области памяти. Первый элемент массива имеет наименьший адрес, а последний – наибольший. Элементы массива могут быть как простыми переменными, так и составными. Элемент массива может иметь несколько индексов. Количе-ство индексов переменной определяет размерность массива. Размерность массивов в языке C не ограничена, но чаще используются одномерные и двумерные массивы. Начальное значение индекса элемента массива для каждого измерения в C – нуль.
 
 ### Ассоциативный массив
-An associative array, map, symbol table, or dictionary is an abstract data type composed of a collec-tion of pairs, such that each possible key appears at most once in the collection.
+An associative array, map, symbol table, or dictionary is an abstract data type composed of a collection of pairs, such that each possible key appears at most once in the collection.
 Operations associated with this data type allow:
 * the addition of pairs to the collection
 * the removal of pairs from the collection
@@ -412,7 +412,7 @@ Mutability
 Most collection classes exist in two versions: mutable and immutable (default). What’s the big ad-vantage? Thread safety. Immutable collections are fully thread safe and can be iterated from multiple threads at the same time, without any risk of mutation exceptions. Your API should never expose mutable collections. Of course there’s a cost when going from immutable and mutable and back - the object has to be copied twice, and all objects within will be retained/released. Sometimes it’s more efficient to hold an internal mutable collection and return a copied, immutable object on access. Notably, some of the more modern collection classes like NSHashTable, NSMapTable, and NSPointerArray are mutable by default and don’t have immutable counterparts. They are meant for internal class use, and a use case where you would want those immutable would be quite unusual.
 
 ## Core Foundation:
-* `CFMutableDictionary` 
+* `CFMutableDictionary`
 The access time for a value in the dictionary is guaranteed to be at worst O(N) for any implemen-tation, current and future, but will often be O(1) (constant time). Insertion or deletion operations will typically be constant time as well, but are O(N*N) in the worst case in some implementations. Access of values through a key is faster than accessing values directly (if there are any such opera-tions). Dictionaries will tend to use significantly more memory than a array with the same number of values.
 * `CFMutableArray`
 * `CFMutableBag`
@@ -429,8 +429,8 @@ The access time for a value in the array is guaranteed to be at worst O(lg N) fo
 3. NSDictionary (NSMutableDictionary) – следует использовать когда требуется удобный и эффективный способ хранения данных, ассоциированных с ключом. Объекты класса NSDictionary позволяют хранить неизменяемые пары объектов “ключ/значение” различных типов. Ключи в словаре NSDictionary не могут дублироваться, повторение значений допускается. Типы ключей и значений могут, но не обязаны совпадать. Особенно эффективными по скорости будут операции поиска по ключу, так как словарь специально оптимизирован для них. Если для решения задачи требуется изменение словаря объектов, следует использвать класс NSMutableDictionary.
 4. NSSet (NSMutableSet) – объекты представляют неупорядоченные множества различных объектов. Объект NSSet при создании заполняется множеством объектов, которое не может быть изменено до конца своего существования. Если требуется использовать изменяемые множества, следует воспользоваться классом NSMutableSet. Вы можете использовать множества в качестве альтернативы массивам, когда порядок элементов не важен, но требуется быстрое определение O(1) принадлежности объекта множеству. Операция определения принадлежности выполняется значительно быстрее в сравнении с массивами
 NSSet can only work efficiently if the hashing method used is balanced; if all objects are in the same hash bucket, then NSSet is not much faster in object-existence checking than NSArray. Variants of NSSet are also NSCountedSet, and the non-toll-free counter-variant CFBag/CFMutableBag.
-5. NSOrderedSet (NSMutableOrderedSet) – объявляет программный интерфейс для упорядоченного множества объектов. Класс NSOrderedSet объявляет программный интерфейс для неизменяемых множеств различных объектов. Вы задаёте записи неизменяемого множества на этапе его создания, после этого записи не могут быть изменены.С другой стороны, класс NSMutableOrderedSet, объявляет программный интерфейс для динамически изменяемых множеств различных объектов. Динамического или изменяемые множества позволяет добавлять и удалять записи в любое время, автоматически выделяя память по мере необходимости. Вы можете использовать упорядоченные множества как альтернативу массивам, когда порядок элементов является важным и требуется высокая скорость поиска элементов в коллекции. Класс NSMutableOrderedSet объявляет программный интерфейс к изменяемому упорядоченному множеству различных объектов. Объекты класса NSMut-ableOrderedSet объекты не похожи на массивы языка С. Во время создания такого множества вы можете указать размер, но реальный размер всё равно будет равен 0.
-6. NSCountedSet – объявляет программный интерфейс к изменяемой, неупорядоченной коллекции нечетких объектов. Счётное множество также известно как bag. Каждый отдельный объект, вставленный в NSCountedSet, имеет счётчик, связанный с ним. Объект NSCountedSet отслеживает количество раз, когда объекты были вставлены, и требует, чтобы объекты были удалены такое же количество раз. В то же время, внутри объекта NSSet существует только один экземпляр вставляемого объекта, даже если этот объект был добавлен в множество несколько раз. 
+5. NSOrderedSet (NSMutableOrderedSet) – объявляет программный интерфейс для упорядоченного множества объектов. Класс NSOrderedSet объявляет программный интерфейс для неизменяемых множеств различных объектов. Вы задаёте записи неизменяемого множества на этапе его создания, после этого записи не могут быть изменены.С другой стороны, класс NSMutableOrderedSet, объявляет программный интерфейс для динамически изменяемых множеств различных объектов. Динамического или изменяемые множества позволяет добавлять и удалять записи в любое время, автоматически выделяя память по мере необходимости. Вы можете использовать упорядоченные множества как альтернативу массивам, когда порядок элементов является важным и требуется высокая скорость поиска элементов в коллекции. Класс NSMutableOrderedSet объявляет программный интерфейс к изменяемому упорядоченному множеству различных объектов. Объекты класса NSMutableOrderedSet объекты не похожи на массивы языка С. Во время создания такого множества вы можете указать размер, но реальный размер всё равно будет равен 0.
+6. NSCountedSet – объявляет программный интерфейс к изменяемой, неупорядоченной коллекции нечетких объектов. Счётное множество также известно как bag. Каждый отдельный объект, вставленный в NSCountedSet, имеет счётчик, связанный с ним. Объект NSCountedSet отслеживает количество раз, когда объекты были вставлены, и требует, чтобы объекты были удалены такое же количество раз. В то же время, внутри объекта NSSet существует только один экземпляр вставляемого объекта, даже если этот объект был добавлен в множество несколько раз.
 7. NSIndexSet (NSMutableIndexSet) – represents an immutable collection of unique unsigned integers, known as indexes because of the way they are used. This collection is referred to as an index set. You use index sets in your code to store indexes into some other data structure. For example, given an NSArray object, you could use an index set to identify a subset of objects in that array. You should not use index sets to store an arbitrary collection of integer values because index sets store indexes as sorted ranges. This makes them more efficient than storing a collection of individual integers. It also means that each index value can only appear once in the index set. The designated initializers of the NSIndexSet class are: init, initWithIndexesInRange:, and initWithIndexSet:. You must not subclass the NSIndexSet class. The mutable subclass of NSIndexSet is NSMutableIndexSet.
 8. NSHashTable – в отличие от NSSet, поддерживает слабые ссылки. Он может содержать слабые ссылки на объекты. Объекты класса NSHashTable могут содержать произвольные указатели, хранимые объекты не ограничиваются объектами классов. Можно настроить экземпляр NSHashTable для работы с произвольными указателями, а не только с объектами классов. Благодаря своим свойствам, класс NSHashTable это не множество, потому что он может вести себя по-другому.
 9. NSMapTable – is a general-purpose analogue of NSDictionary. Contrasted with the behavior of NSDictionary / NSMutableDictionary, NSMapTable has the following characteristics:
@@ -451,7 +451,7 @@ _NSDictionary is a great choice if you have a natural key you can use to access 
 ## Разница между `Set` и `Array`?
 NSSet предназначен для создания несортированных массивов данных (например каких-либо объектов). Существует модифицируемая версия класса NSSet — это NSMutableSet, используя которую можно добавлять и удалять элементы. Стоит обратить внимание, что объект, кото-рый хранится в NSSet, встречается только один раз. Т.е. все элементы NSSet — уникальные.
 Добавить дубликат элемента в NSMutableSet у вас также не получится. Для создания несорти-рованного массива, в котором можно использовать неуникальные элементы, можно использо-вать NSCountedSet. Основным преимуществом NSCountedSet перед использованием классиче-ского массива NSArray является то, что элемент может быть продублирован огромное количе-ство раз и при этом занимать памяти как один элемент. Это объясняется тем, что NSCountedSet хранит в памяти только одну копию элемента и запоминает сколько раз этот элемент встреча-ется. Если для вас не важен порядок элементов внутри массива и вы используете действи-тельно большие объемы информации, то использование NSSet повысит производительность приложения за счет снижения потребляемой памяти. Несмотря на то, что количество элемен-тов хранящихся в памяти будет одинаковым, NSSet не тратит память на то, чтобы помнить в какой последовательности хранятся элементы.
-``objectivec
+```objectivec
 NSSet *set = [NSSet setWithObjects:@"1", @"2", @"3", @"4", @"5", @"6", @"7", @"8", @"9", @"0", nil];
 NSLog(@"%@", set);
 ```
@@ -477,6 +477,7 @@ Cocoa содержит три основных способа перечисле
 * Синтаксис краток
 * Перечислитель вызывает исключение, если вы измените коллекции при перечислении.
 * Вы можете выполнять несколько перечислений одновременно.
+
 __C Loops (for/while)__
 for and while loops are the "classic" method of iterating over a collection. Anyone who's taken Comput-er Science 101 has written code like this before:
 ```objectivec
@@ -486,6 +487,7 @@ for (NSUInteger i = 0; i < [array count]; i++) {
 }
 ```
 But as anyone who has used C-style loops knows, this method is prone to off-by-one errors—particularly when used in a non-standard way. Fortunately, Smalltalk significantly improved this state of affairs with an idea called list comprehensions, which are commonly known today as for/in loops.
+
 __List Comprehension (for/in)__
 By using a higher level of abstraction, declaring the intention of iterating through all elements of a collection, not only are we less prone to error, but there's a lot less to type:
 ```objectivec
@@ -500,9 +502,8 @@ for (key in someDictionary) {
    	NSLog(@"Key: %@, Value %@", key, [someDictionary objectForKey: key]);
 }
 ```
-In Cocoa, comprehensions are available to any class that implements the NSFastEnumeration proto-col, including NSArray, NSSet, and NSDictionary.
-Использование перечислений на основе блоков
-`NSArray`, `NSDictionary` и `NSSet` разрешают перечисление их содержимого с помощью блоков. Для перечисления с блоком, вызовите соответствующий метод и укажите блок для использо-вания.
+In Cocoa, comprehensions are available to any class that implements the NSFastEnumeration protocol, including NSArray, NSSet, and NSDictionary.
+Использование перечислений на основе блоков `NSArray`, `NSDictionary` и `NSSet` разрешают перечисление их содержимого с помощью блоков. Для перечисления с блоком, вызовите соответствующий метод и укажите блок для использования.
 ```objectivec
 NSArray *anArray = [NSArray arrayWithObjects:@"A", @"B", @"D", @"M", nil];
 NSString *string = @"c";
@@ -514,8 +515,9 @@ NSString *string = @"c";
 }];
 ```
 Для перечисления `NSArray`, параметр `index` полезен для одновременного перечисления. Без этого параметра, единственный способ получить доступ к индексу был бы использованием метода indexOfObject:, который является неэффективным. stop параметр важен для производительности, так как он позволяет остановить перечисление раньше, на основе некоторого условия, определяемого в пределах блока. Методы перечисления на основе блока в других коллекциях, немного отличаются по названию.
-Использование перечислителя NSEnumerator
-Абстрактный класс, экземпляры подклассов которого перечисляют коллекции других объек-тов, таких как массивы и словари. Все методы создания определены в классах коллекций, та-ких как NSArray, NSSet и NSDictionary, которые обеспечивают специальные объекты NSEnumerator для перечисления их содержимого. Например, класс NSArray имеет два метода, которые возвращают объект NSEnumerator: objectEnumerator и reverseObjectEnumerator. NSDictionary также имеет два метода, которые возвращают объект NSEnumerator: keyEnumerator и objectE-numerator. Эти методы позволяют перечислить содержимое словаря по ключу или по значе-нию, соответственно. Вы отправляете nextObject, чтобы вновь созданный объект NSEnumerator возвращал следующий объект в оригинальной коллекции. Когда коллекция будет исчерпана, то возвращается nil. Вы не можете "сбросить" перечислитель после того, как он исчерпал свои коллекции. Подклассы NSEnumerator, используемые NSArray, NSDictionary и NSSet сохраняют коллекцию во время перечисления. Когда перечисление закончено, временные коллекции освобождаются.
+
+__Использование перечислителя NSEnumerator__
+Абстрактный класс, экземпляры подклассов которого перечисляют коллекции других объек-тов, таких как массивы и словари. Все методы создания определены в классах коллекций, та-ких как NSArray, NSSet и NSDictionary, которые обеспечивают специальные объекты NSEnumerator для перечисления их содержимого. Например, класс NSArray имеет два метода, которые возвращают объект NSEnumerator: objectEnumerator и reverseObjectEnumerator. NSDictionary также имеет два метода, которые возвращают объект NSEnumerator: keyEnumerator и objectE-numerator. Эти методы позволяют перечислить содержимое словаря по ключу или по значению, соответственно. Вы отправляете nextObject, чтобы вновь созданный объект NSEnumerator возвращал следующий объект в оригинальной коллекции. Когда коллекция будет исчерпана, то возвращается nil. Вы не можете "сбросить" перечислитель после того, как он исчерпал свои коллекции. Подклассы NSEnumerator, используемые NSArray, NSDictionary и NSSet сохраняют коллекцию во время перечисления. Когда перечисление закончено, временные коллекции освобождаются.
 Примечание: не безопасно изменение коллекции во время её перечисления. Некоторые кол-лекции в настоящее время поддерживают такие операции, но такое поведение не гарантиро-вано в будущем.
 Для перечисления коллекции, вы должны создать новый перечислитель.
 ```objective-c
@@ -586,7 +588,7 @@ __Сортировка массивов__
 Вам может потребоваться разместить несколько созданных пользователем строк в алфавит-ном порядке, либо вам потребуется разместить номера в убыванию или по возрастанию – ис-пользуйте дескрипторы блоков и селекторов. Дескрипторы сортировки (экземпляры NSSortDescriptor) обеспечивают удобный и абстрактный способ описания порядка сортировки.
 Простая сортировка по алфавиту:
 NSArray *myArray = @[@"v", @"a", @"c", @"b", @"z"];
-NSLog(@"%@", [myArray sortedArrayUsingSelector:@selector(caseInsensitiveCompare:)]); 
+NSLog(@"%@", [myArray sortedArrayUsingSelector:@selector(caseInsensitiveCompare:)]);
 `sortedArrayUsingDescriptors`: или `sortUsingDescriptors`:
 ```objectivec
 //Сначала создадим массив из словарей
@@ -610,7 +612,7 @@ dict = [NSDictionary dictionaryWithObjectsAndKeys:@"Robert", FIRST, @"Jones", LA
 //Обратите внимание на использование localizedCaseInsensitiveCompare:selector
 NSSortDescriptor *lastDescriptor = [[NSSortDescriptor alloc] initWithKey:LAST ascending:YES selector:@selector(localizedCaseInsensitiveCompare:)];
 NSSortDescriptor *firstDescriptor = [[NSSortDescriptor alloc] initWithKey:FIRST ascending:YES selector:@selector(localizedCaseInsensitiveCompare:)];
-NSArray *descriptors = [NSArray arrayWithObjects:lastDescriptor, firstDescriptor, nil]; 
+NSArray *descriptors = [NSArray arrayWithObjects:lastDescriptor, firstDescriptor, nil];
 sortedArray = [array sortedArrayUsingDescriptors:descriptors];
 ```
 __Сортировка с помощью функции__
@@ -645,6 +647,7 @@ NSArray *sortedArray = [array sortedArrayUsingComparator: ^(id obj1, id obj2) {
 	return (NSComparisonResult)NSOrderedSame;
 }];
 ```
+
 __Сортировка с помощью функций и селекторов__
 Следующий листинг иллюстрирует использование методов `sortedArrayUsingSelector:`, `sortedArrayUsingFunction:context:`, и `sortedArrayUsingFunction:context:hint:`. Самым сложным из этих методов является `sortedArrayUsingFunction:context:hint:`. Он наиболее эффективен, когда у вас есть большой массив (N записей), которые вам надо отсортировать раз и затем лишь слег-ка изменить (P добавлений и удалений, где P гораздо меньше, чем N). Вы можете использовать работу, которую вы сделали в оригинальнй сортировке, и сделать своего рода слияние между N "старых" предметов и Р "новых" предметов. Чтобы получить соответствующую подсказку, вы используете sortedArrayHint когда исходный массив был отсортирован, и держите его, пока вам это нужно (если вы хотите, отсортировать массив после того, как он был изменен).
 ```objectivec
@@ -2883,7 +2886,7 @@ Allocating a new object every time would be kind of slow, so blocks take an unus
 
 It's frequently useful for a block to outlive the scope where it was created. For example, you may want to return a block, or save it for later. For this to work, you must copy the block. You can do this like any other Objective-C object by sending it the -copy message. And like any other Objective-C object, if you aren't running under Garbage Collection then you own the resulting object and must eventually dispose of it using -release or -autorelease.
 
-Any reference to self is a reference to a local object variable, causing self to be retained. Any reference to an instance variable is an implicit reference to self and causes the same thing. 
+Any reference to self is a reference to a local object variable, causing self to be retained. Any reference to an instance variable is an implicit reference to self and causes the same thing.
 
 Objective-C blocks are objects which contain an embedded function pointer. A block call translates to a call to that function pointer, passing the block as an implicit parameter:
 
