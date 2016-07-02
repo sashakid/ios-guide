@@ -419,7 +419,7 @@ The access time for a value in the dictionary is guaranteed to be at worst O(N) 
 * `CFBinaryHeap`
 * `CFMutableBitVector`
 * `CFMutableTree`
-* `CFMutableSet`
+* `CFMutableSet
 
 ## Foundation:
 1. NSArray (NSMutableArray) – управляет упорядоченной коллекцией элементов, называемой массивом. Вы можете использовать объекты этого класса для создания неизменяемых массивов. Это значит, что все элементы объектов класса NSArray доступны только для чтения. Имеется возможность доступа к элементам массива по индексу. Массивы могут хранить элементы различных типов. Массивы поддерживают сортировку и поиск элементов, а также сравнение самих массивов между собой. Для создания изменяемых массивов следует использовать NSMutableArray.
@@ -512,7 +512,7 @@ NSString *string = @"c";
 		*stop = YES;
 	}
 }];
-``
+```
 Для перечисления `NSArray`, параметр `index` полезен для одновременного перечисления. Без этого параметра, единственный способ получить доступ к индексу был бы использованием метода indexOfObject:, который является неэффективным. stop параметр важен для производительности, так как он позволяет остановить перечисление раньше, на основе некоторого условия, определяемого в пределах блока. Методы перечисления на основе блока в других коллекциях, немного отличаются по названию.
 Использование перечислителя NSEnumerator
 Абстрактный класс, экземпляры подклассов которого перечисляют коллекции других объек-тов, таких как массивы и словари. Все методы создания определены в классах коллекций, та-ких как NSArray, NSSet и NSDictionary, которые обеспечивают специальные объекты NSEnumerator для перечисления их содержимого. Например, класс NSArray имеет два метода, которые возвращают объект NSEnumerator: objectEnumerator и reverseObjectEnumerator. NSDictionary также имеет два метода, которые возвращают объект NSEnumerator: keyEnumerator и objectE-numerator. Эти методы позволяют перечислить содержимое словаря по ключу или по значе-нию, соответственно. Вы отправляете nextObject, чтобы вновь созданный объект NSEnumerator возвращал следующий объект в оригинальной коллекции. Когда коллекция будет исчерпана, то возвращается nil. Вы не можете "сбросить" перечислитель после того, как он исчерпал свои коллекции. Подклассы NSEnumerator, используемые NSArray, NSDictionary и NSSet сохраняют коллекцию во время перечисления. Когда перечисление закончено, временные коллекции освобождаются.
@@ -535,6 +535,7 @@ __Array__
 
 <img src="https://github.com/sashakid/ios-guide/blob/master/Images/array_performance.png">
 
+
 __Dictionary__
 
 <img src="https://github.com/sashakid/ios-guide/blob/master/Images/dictionary_performance.png">
@@ -549,7 +550,7 @@ for (Book *book in bookshelf) {
 		[oldSkoolFiltered addObject:book];
 	}
 }
-``
+```
 It’s a straight-forward approach to filtering an array of items (in this case, we’re talking about books) using a rather simple if-statement. Nothing wrong with this, but despite the fact we’re using a fairly simple expression here, the code is rather verbose. We can easily imagine what will happen in case we need to use more complicated selection criteria or a combination of filtering criteria.
 __Simple filtering with NSPredicate__
 Thanks to Cocoa, we can simplify the code by using NSPredicate. NSPredicate is the object representation of an if-statement, or, more formally, a predicate. Predicates are expressions that evaluate to a truth value, i.e. true or false. We can use them to perform validation and filtering. In Cocoa, we can use NSPredicate to evaluate single objects, filter arrays and perform queries against Core Data data sets. Let’s have a look at how our example looks like when using `NSPredicate`:
@@ -563,7 +564,7 @@ Regular Expressions can be used to solve almost any problem ;-) so it’s good t
 predicate = [NSPredicate predicateWithFormat:@"title MATCHES '.*(iPhone|iPad).*'"];
 filtered = [bookshelf filteredArrayUsingPredicate:predicate];
 dumpBookshelf(@"Books that contain 'iPad' or 'iPhone' in their title", filtered);
-``
+```
 You need to obey some rules when using regular expressions in NSPredicate: most importantly, you cannot use regular expression metacharacters inside a pattern set.
 __Filtering using set operations__
 Let’s for a moment assume you want to filter all books that have been published by your favorite publishers. Using the IN operator, this is rather simple: first, we need to set up a set containing the publishers we’re interested in. Then, we can create the predicate and finally perform the filtering operation:
