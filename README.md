@@ -46,7 +46,7 @@
 	- [Почему (NSError **) использует указатель на указатель](#Почему-nserror-использует-указатель-на-указатель)
 	- [How to return 2+ values from a function](#How-to-return-2+-values-from-a-function)
 	- [What is the difference between char * const and const char *](#What-is-the-difference-between-char-const-and-const-char)
-	- [Что значит n & (n – 1)](#Что-значит-n-n–1))
+	- [Что значит n & (n – 1)](#Что-значит-n-n–1)
 - [ООП](#ооп)
 	- [История ООП](#История-ооп)
 	- [Основные понятия ООП: абстракция, инкапсуляция, наследование, полиморфизм](#Основные-понятия-ооп)
@@ -296,7 +296,7 @@
 <img src="https://github.com/sashakid/ios-guide/blob/master/Images/data_structures_kinds2.png">
 
 ## Массив
-Фиксированный набор данных одного типа в виде непрерывного ряда. Простая базовая стати-ческая СД с последовательным распределением элементов в памяти с прямым или произволь-ным доступом (одномерный массив – вектор, двухмерный – матрица).
+Фиксированный набор данных одного типа в виде непрерывного ряда. Простая базовая статическая СД с последовательным распределением элементов в памяти с прямым или произвольным доступом (одномерный массив – вектор, двухмерный – матрица).
 
 <img src="https://github.com/sashakid/ios-guide/blob/master/Images/array.png">
 
@@ -385,6 +385,7 @@ Double ended queue – очередь с двумя концами, включе
 
 ## Дерево
 Связаный граф без циклов. Выделена одна вершина – корень. Остальные – сыновья. Если нет ребенка – терминальная вершина
+
 <img src="https://github.com/sashakid/ios-guide/blob/master/Images/tree.png">
 
 ## Бинарное дерево поиска
@@ -394,6 +395,7 @@ key[left[x]] < key[x] <= key[right[x]]
 
 ## Красно-черное дерево
 <img src="https://github.com/sashakid/ios-guide/blob/master/Images/red_black_tree.png">
+
 <img src="https://github.com/sashakid/ios-guide/blob/master/Images/red_black_tree_statistics.png">
 
 Одно из самобалансирующихся двоичных деревьев поиска, гарантирующих логарифмический рост высоты дерева от числа узлов и быстро выполняющее основные операции дерева поиска: добавление, удаление и поиск узла. Сбалансированность достигается за счёт введения допол-нительного атрибута узла дерева — «цвета». Этот атрибут может принимать одно из двух возможных значений — «чёрный» или «красный».
@@ -479,6 +481,7 @@ Cocoa содержит три основных способа перечисле
 * Вы можете выполнять несколько перечислений одновременно.
 
 __C Loops (for/while)__
+
 for and while loops are the "classic" method of iterating over a collection. Anyone who's taken Comput-er Science 101 has written code like this before:
 ```objectivec
 for (NSUInteger i = 0; i < [array count]; i++) {
@@ -489,6 +492,7 @@ for (NSUInteger i = 0; i < [array count]; i++) {
 But as anyone who has used C-style loops knows, this method is prone to off-by-one errors—particularly when used in a non-standard way. Fortunately, Smalltalk significantly improved this state of affairs with an idea called list comprehensions, which are commonly known today as for/in loops.
 
 __List Comprehension (for/in)__
+
 By using a higher level of abstraction, declaring the intention of iterating through all elements of a collection, not only are we less prone to error, but there's a lot less to type:
 ```objectivec
 for (id object in array) {
@@ -517,6 +521,7 @@ NSString *string = @"c";
 Для перечисления `NSArray`, параметр `index` полезен для одновременного перечисления. Без этого параметра, единственный способ получить доступ к индексу был бы использованием метода indexOfObject:, который является неэффективным. stop параметр важен для производительности, так как он позволяет остановить перечисление раньше, на основе некоторого условия, определяемого в пределах блока. Методы перечисления на основе блока в других коллекциях, немного отличаются по названию.
 
 __Использование перечислителя NSEnumerator__
+
 Абстрактный класс, экземпляры подклассов которого перечисляют коллекции других объек-тов, таких как массивы и словари. Все методы создания определены в классах коллекций, та-ких как NSArray, NSSet и NSDictionary, которые обеспечивают специальные объекты NSEnumerator для перечисления их содержимого. Например, класс NSArray имеет два метода, которые возвращают объект NSEnumerator: objectEnumerator и reverseObjectEnumerator. NSDictionary также имеет два метода, которые возвращают объект NSEnumerator: keyEnumerator и objectE-numerator. Эти методы позволяют перечислить содержимое словаря по ключу или по значению, соответственно. Вы отправляете nextObject, чтобы вновь созданный объект NSEnumerator возвращал следующий объект в оригинальной коллекции. Когда коллекция будет исчерпана, то возвращается nil. Вы не можете "сбросить" перечислитель после того, как он исчерпал свои коллекции. Подклассы NSEnumerator, используемые NSArray, NSDictionary и NSSet сохраняют коллекцию во время перечисления. Когда перечисление закончено, временные коллекции освобождаются.
 Примечание: не безопасно изменение коллекции во время её перечисления. Некоторые кол-лекции в настоящее время поддерживают такие операции, но такое поведение не гарантиро-вано в будущем.
 Для перечисления коллекции, вы должны создать новый перечислитель.
@@ -542,7 +547,7 @@ __Dictionary__
 
 <img src="https://github.com/sashakid/ios-guide/blob/master/Images/dictionary_performance.png">
 
-Why is NSFastEnumeration so slow here? Iterating the dictionary usually requires both key and ob-ject; fast enumeration can only help for the key, and we have to fetch the object every time ourselves. Using the block-based enumerateKeysAndObjectsUsingBlock: is more efficient since both objects can be more efficiently prefetched.
+Why is NSFastEnumeration so slow here? Iterating the dictionary usually requires both key and object; fast enumeration can only help for the key, and we have to fetch the object every time ourselves. Using the block-based enumerateKeysAndObjectsUsingBlock: is more efficient since both objects can be more efficiently prefetched.
 Using NSPredicate to Filter Data
 If you look at an arbitrary code base, chances are you’ll sooner or later run into a piece of code similar to this one:
 ```objectivec
@@ -554,13 +559,17 @@ for (Book *book in bookshelf) {
 }
 ```
 It’s a straight-forward approach to filtering an array of items (in this case, we’re talking about books) using a rather simple if-statement. Nothing wrong with this, but despite the fact we’re using a fairly simple expression here, the code is rather verbose. We can easily imagine what will happen in case we need to use more complicated selection criteria or a combination of filtering criteria.
+
 __Simple filtering with NSPredicate__
+
 Thanks to Cocoa, we can simplify the code by using NSPredicate. NSPredicate is the object representation of an if-statement, or, more formally, a predicate. Predicates are expressions that evaluate to a truth value, i.e. true or false. We can use them to perform validation and filtering. In Cocoa, we can use NSPredicate to evaluate single objects, filter arrays and perform queries against Core Data data sets. Let’s have a look at how our example looks like when using `NSPredicate`:
 ```objectivec
 NSPredicate *predicate = [NSPredicate predicateWithFormat:@"publisher == %@", @"Apress"];
 NSArray *filtered  = [bookshelf filteredArrayUsingPredicate:predicate];
 ```
+
 __Filtering with Regular Expressions__
+
 Regular Expressions can be used to solve almost any problem ;-) so it’s good to know you can use them in NSPredicates as well. To use regular expressions in your NSPredicate, you need to use the MATCHES operator. Let’s filter all books that are about iPad or iPhone programming:
 ```objectivec
 predicate = [NSPredicate predicateWithFormat:@"title MATCHES '.*(iPhone|iPad).*'"];
@@ -568,7 +577,9 @@ filtered = [bookshelf filteredArrayUsingPredicate:predicate];
 dumpBookshelf(@"Books that contain 'iPad' or 'iPhone' in their title", filtered);
 ```
 You need to obey some rules when using regular expressions in NSPredicate: most importantly, you cannot use regular expression metacharacters inside a pattern set.
+
 __Filtering using set operations__
+
 Let’s for a moment assume you want to filter all books that have been published by your favorite publishers. Using the IN operator, this is rather simple: first, we need to set up a set containing the publishers we’re interested in. Then, we can create the predicate and finally perform the filtering operation:
 ```objectivec
 NSArray *favoritePublishers = [NSArray arrayWithObjects:@"Apress", @"O'Reilly", nil];
@@ -576,15 +587,18 @@ predicate = [NSPredicate predicateWithFormat:@"publisher IN %@", favoritePublish
 filtered  = [bookshelf filteredArrayUsingPredicate:predicate];
 dumpBookshelf(@"Books published by my favorite publishers", filtered);
 ```
+
 __Advanced filtering thanks to KVC goodness__
+
 NSPredicate relies on key-value coding to achieve its magic. On one hand this means your classes need to be KVC compliant in order to be queried using NSPredicate (at least the attributes you want to query). On the other hand, this allows us to perform some very interesting things with very little lines of code. Let’s for example retrieve a list of books written by authors with the name “Mark”:
 ```objectivec
 predicate = [NSPredicate predicateWithFormat:@"authors.lastName CONTAINS %@", @"Mark" ];
 filtered  = [bookshelf filteredArrayUsingPredicate:predicate];
 ```
-In case we’d want to return the value of one of the aggregate functions, we don’t need to use NSPredicate itself, but instead use KVC directly. Let’s retrieve the average price of all books on our shelf:
-```NSNumber *average = [bookshelf valueForKeyPath:@"@avg.price"];```
+In case we’d want to return the value of one of the aggregate functions, we don’t need to use NSPredicate itself, but instead use KVC directly. Let’s retrieve the average price of all books on our shelf: ```NSNumber *average = [bookshelf valueForKeyPath:@"@avg.price"];```
+
 __Сортировка массивов__
+
 Вам может потребоваться разместить несколько созданных пользователем строк в алфавит-ном порядке, либо вам потребуется разместить номера в убыванию или по возрастанию – ис-пользуйте дескрипторы блоков и селекторов. Дескрипторы сортировки (экземпляры NSSortDescriptor) обеспечивают удобный и абстрактный способ описания порядка сортировки.
 Простая сортировка по алфавиту:
 NSArray *myArray = @[@"v", @"a", @"c", @"b", @"z"];
@@ -615,7 +629,9 @@ NSSortDescriptor *firstDescriptor = [[NSSortDescriptor alloc] initWithKey:FIRST 
 NSArray *descriptors = [NSArray arrayWithObjects:lastDescriptor, firstDescriptor, nil];
 sortedArray = [array sortedArrayUsingDescriptors:descriptors];
 ```
+
 __Сортировка с помощью функции__
+
 Такой подход значительно менее гибкий.
 ```objectivec
 NSInteger lastNameFirstNameSort(id person1, id person2, void *reverse) {
@@ -635,7 +651,9 @@ NSComparisonResult comparison = [name1 localizedCaseInsensitiveCompare:name2];
 BOOL reverseSort = YES;
 sortedArray = [array sortedArrayUsingFunction:lastNameFirstNameSort context:&reverseSort];
 ```
+
 __Сортировка с блоками__
+
 ```objectivec
 NSArray *sortedArray = [array sortedArrayUsingComparator: ^(id obj1, id obj2) {
 	if ([obj1 integerValue] > [obj2 integerValue]) {
@@ -649,6 +667,7 @@ NSArray *sortedArray = [array sortedArrayUsingComparator: ^(id obj1, id obj2) {
 ```
 
 __Сортировка с помощью функций и селекторов__
+
 Следующий листинг иллюстрирует использование методов `sortedArrayUsingSelector:`, `sortedArrayUsingFunction:context:`, и `sortedArrayUsingFunction:context:hint:`. Самым сложным из этих методов является `sortedArrayUsingFunction:context:hint:`. Он наиболее эффективен, когда у вас есть большой массив (N записей), которые вам надо отсортировать раз и затем лишь слег-ка изменить (P добавлений и удалений, где P гораздо меньше, чем N). Вы можете использовать работу, которую вы сделали в оригинальнй сортировке, и сделать своего рода слияние между N "старых" предметов и Р "новых" предметов. Чтобы получить соответствующую подсказку, вы используете sortedArrayHint когда исходный массив был отсортирован, и держите его, пока вам это нужно (если вы хотите, отсортировать массив после того, как он был изменен).
 ```objectivec
 NSInteger alphabeticSort(id string1, id string2, void *reverse) {
