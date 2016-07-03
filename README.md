@@ -413,6 +413,7 @@ key[left[x]] < key[x] <= key[right[x]]
 <img src="https://github.com/sashakid/ios-guide/blob/master/Images/objc_collections.png">
 
 __Mutability__
+
 Most collection classes exist in two versions: mutable and immutable (default). What’s the big ad-vantage? Thread safety. Immutable collections are fully thread safe and can be iterated from multiple threads at the same time, without any risk of mutation exceptions. Your API should never expose mutable collections. Of course there’s a cost when going from immutable and mutable and back - the object has to be copied twice, and all objects within will be retained/released. Sometimes it’s more efficient to hold an internal mutable collection and return a copied, immutable object on access. Notably, some of the more modern collection classes like `NSHashTable`, `NSMapTable`, and `NSPointerArray` are mutable by default and don’t have immutable counterparts. They are meant for internal class use, and a use case where you would want those immutable would be quite unusual.
 
 ## Core Foundation:
@@ -438,7 +439,6 @@ NSSet can only work efficiently if the hashing method used is balanced; if all o
 7. `NSIndexSet` (`NSMutableIndexSet`) – represents an immutable collection of unique unsigned integers, known as indexes because of the way they are used. This collection is referred to as an index set. You use index sets in your code to store indexes into some other data structure. For example, given an `NSArray` object, you could use an index set to identify a subset of objects in that array. You should not use index sets to store an arbitrary collection of integer values because index sets store indexes as sorted ranges. This makes them more efficient than storing a collection of individual integers. It also means that each index value can only appear once in the index set. The designated initializers of the `NSIndexSet` class are: `init`, `initWithIndexesInRange:`, and `initWithIndexSet:`. You must not subclass the `NSIndexSet` class. The mutable subclass of `NSIndexSet` is `NSMutableIndexSet`.
 8. `NSHashTable` – в отличие от NSSet, поддерживает слабые ссылки. Он может содержать слабые ссылки на объекты. Объекты класса NSHashTable могут содержать произвольные указатели, хранимые объекты не ограничиваются объектами классов. Можно настроить экземпляр `NSHashTable` для работы с произвольными указателями, а не только с объектами классов. Благодаря своим свойствам, класс `NSHashTable` это не множество, потому что он может вести себя по-другому.
 9. `NSMapTable` – is a general-purpose analogue of `NSDictionary`. Contrasted with the behavior of `NSDictionary` / `NSMutableDictionary`, `NSMapTable` has the following characteristics:
-
 * `NSDictionary` / `NSMutableDictionary` copies keys, and holds strong references to values.
 * `NSMapTable` is mutable, without an immutable counterpart.
 * `NSMapTable` can hold keys and values with weak references, in such a way that entries are removed when either the key or value is deallocated.
