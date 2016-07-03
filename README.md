@@ -1426,6 +1426,95 @@ When you pass a variable to a function, you are passing a copy of its value to t
 An in-out parameter takes "the variable itself", instead of a copy. and as such you can modify it.
 
 In out parameters are akin to references in C++.
+
+ Function parameters are always passed by value. Pass-by-reference is simulated in C by explicitly passing pointer values. C program source text is free-format, using the semicolon as a statement terminator and curly braces for grouping blocks of statements.
+
+ Objective-C only support passing parameters by value. The problem here has probably been fixed already (Since this question is more than a year old) but I need to clarify some things regarding arguments and Objective-C.
+
+Objective-C is a strict superset of C which means that everything C does, Obj-C does it too.
+
+By having a quick look at Wikipedia, you can see that Function parameters are always passed by value
+
+Objective-C is no different. What's happening here is that whenever we are passing an object to a function (In this case a UILabel *), we pass the value contained at the pointer's address.
+
+Whatever you do, it will always be the value of what you are passing. If you want to pass the value of the reference you would have to pass it a **object (Like often seen when passing NSError).
+
+This is the same thing with scalars, they are passed by value, hence you can modify the value of the variable you received in your method and that won't change the value of the original variable that you passed to the function.
+
+Here's an example to ease the understanding:
+
+- (void)parentFunction {
+    int i = 0;
+    [self modifyValueOfPassedArgument:i];
+    //i == 0 still!
+}
+
+- (void)modifyValueOfPassedArgument:(NSInteger)j {
+    //j == 0! but j is a copied variable. It is _NOT_ i
+    j = 23;
+    //j now == 23, but this hasn't changed the value of i.
+}
+If you wanted to be able to modify i, you would have to pass the value of the reference by doing the following:
+
+- (void)parentFunction {
+    int i = 0; //Stack allocated. Kept it that way for sake of simplicity
+    [self modifyValueOfPassedReference:&i];
+    //i == 23!
+}
+
+- (void)modifyValueOfPassedReference:(NSInteger *)j {
+    //j == 0, and this points to i! We can modify i from here.
+    *j = 23;
+    //j now == 23, and i also == 23!
+}
+
+Say I want to share a web page with you.
+
+If I tell you the URL, I'm passing by reference. You can use that URL to see the same web page I can see. If that page is changed, we both see the changes. If you delete the URL, all you're doing is destroying your reference to that page - you're not deleting the actual page itself.
+
+If I print out the page and give you the printout, I'm passing by value. Your page is a disconnected copy of the original. You won't see any subsequent changes, and any changes that you make (e.g. scribbling on your printout) will not show up on the original page. If you destroy the printout, you have actually destroyed your copy of the object - but the original web page remains intact.
+```c++
+// passes a pointer (called reference in java) to an integer
+void call_by_value(int *p) { // :1
+    p = NULL;
+}
+
+// passes an integer
+void call_by_value(int p) { // :2
+    p = 42;
+}
+
+// passes an integer by reference
+void call_by_reference(int & p) { // :3
+    p = 42;
+}
+
+// this is the java style of passing references. NULL is called "null" there.
+void call_by_value_special(int *p) { // :4
+    *p = 10; // changes what p points to ("what p references" in java)
+    // only changes the value of the parameter, but *not* of
+    // the argument passed by the caller. thus it's pass-by-value:
+    p = NULL;
+}
+
+int main() {
+    int value = 10;
+    int * pointer = &value;
+
+    call_by_value(pointer); // :1
+    assert(pointer == &value); // pointer was copied
+
+    call_by_value(value); // :2
+    assert(value == 10); // value was copied
+
+    call_by_reference(value); // :3
+    assert(value == 42); // value was passed by reference
+
+    call_by_value_special(pointer); // :4
+    // pointer was copied but what pointer references was changed.
+    assert(value == 10 && pointer == &value);
+}
+```
 Вопросы
 Xcode, фреймворки
 Cocoa (в пер. с англ. - какао) — родная объектно-ориентированная среда разработки приложе-ний для операционной системы Mac OS X производства компании Apple. Это один из пяти ос-новных API, доступных в Mac OS X, — Cocoa, Carbon, Toolbox (для работы старых приложений Mac OS 9), POSIX и Java. Такие языки, как Perl, Python и Ruby не считаются основными, так как на них пока что пишется не так много серьёзных приложений для Mac OS X.
@@ -2907,12 +2996,106 @@ It's frequently useful for a block to outlive the scope where it was created. Fo
 
 Any reference to self is a reference to a local object variable, causing self to be retained. Any reference to an instance variable is an implicit reference to self and causes the same thing.
 
+<img src="https://github.com/sashakid/ios-guide/blob/master/Images/block_capturing.png">
+
+<img src="https://github.com/sashakid/ios-guide/blob/master/Images/blocks_structure.png">
+
+
 Objective-C blocks are objects which contain an embedded function pointer. A block call translates to a call to that function pointer, passing the block as an implicit parameter:
 
     block();
     // equivalent to:
     block->impl(block);
 The cost of calling a block is therefore about the same as the cost of calling a C function. It's slightly higher due to the need to look up the implementation pointer first, but just slightly.
+
+It's actually fairly straightforward and described in Clang's Block Implementation Spec, in the "Imported Variables" section.
+
+When the compiler encounters a Block like:
+
+^{ if( numBalloons > numClowns) abort(); }
+it creates a literal structure that includes -- among other things -- two elements that are important here. There's a function pointer to the executable code in the Block, and a const field for each variable that's referred to inside the Block. Something like this:
+
+struct __block_literal_1 {
+    /* other fields */
+    void (*invoke)(struct __block_literal_1 *);
+    /* ... */
+    const int numBalloons;
+    const int numClowns;
+};
+Notice that the invoke function will take a pointer to a struct of the kind that's being defined right here; that is, the Block passes itself in when executing its code. Thus, the code gets access to the members of the structure.
+
+Right after the declaration, the compiler creates a definition of the Block, which simply uses the referenced variables to initialize the correct fields in the struct:
+
+struct __block_literal_1 __block_literal_1 = {
+    /* Other fields */
+    __block_invoke_2,  /* This function was also created by the compiler. */
+    /* ... */
+    numBalloons,  /* These two are the exact same variables as */
+    numClowns     /* those referred to in the Block literal that you wrote. *
+ };
+Then, inside the invoke function, references to the captured variables are made like any other member of a struct, the_block->numBalloons.
+
+http://clang.llvm.org/docs/Block-ABI-Apple.html#imported-variables
+
+I think the issue is that the networkService may keep a strong reference to the block. And the view controller may have a strong reference to the networkService. So the possible cycle of VC->NetworkService->block->VC could exist. However, in this case, it's usually safe to assume that the block will be released after it has run, in which case the cycle is broken. So, in this case, it isn't necessary.
+
+Where it is necessary is if the block is not released. Say, instead of having a block that runs once after a network call, you have a block that is used as a callback. i.e. the networkService object maintains a strong reference to the block and uses it for all callbacks. In this case, the block will have a strong reference to the VC, and this will create a strong cycle, so a weak reference is preferred.
+
+Case 1: using the keyword self inside a block:
+
+If the block is retained by a property, a retain cycle is created between self and the block and both objects can’t be destroyed anymore. If the block is passed around and copied by others, self is retained for each copy.
+
+The situation for object-type variables is a little more complicated, but the same principle applies.
+
+Case 2: declaring a `__weak` reference to self outside the block and use it inside the block:
+
+There is no retain cycle and no matter if the block is retained or not by a property. If the block is passed around and copied by others, when executed, weakSelf can have been turned nil. The execution of the block can be preempted and different subsequent evaluations of the weakSelf pointer can lead to different values (i.e. weakSelf can become nil at a certain evaluation).
+```objectivec
+__weak typeof(self) weakSelf = self;
+dispatch_block_t block =  ^{
+    [weakSelf doSomething]; // weakSelf != nil
+    // preemption, weakSelf turned nil
+    [weakSelf doSomethingElse]; // weakSelf == nil
+};
+```
+
+Case 3: declaring a __weak reference to self outside the block and use a __strong reference inside the block:
+
+There is no retain cycle and, again, no matter if the block is retained or not by a property. If the block is passed around and copied by others, when executed, weakSelf can have been turned nil. When the strong reference is assigned and it is not nil, we are sure that the object is retained for the entire execution of the block if preemption occurs and therefore subsequent evaluations of strongSelf will be consistent and will lead to the same value since the object is now retained. If strongSelf evaluates to nil usually the execution is returned since the block cannot execute properly.
+
+__weak typeof(self) weakSelf = self;
+myObj.myBlock =  ^{
+    __strong typeof(self) strongSelf = weakSelf;
+    if (strongSelf) {
+      [strongSelf doSomething]; // strongSelf != nil
+      // preemption occurs, strongSelf still not nil
+      [strongSelf doSomethingElse]; // strongSelf != nil
+    }
+    else {
+        // Probably nothing...
+        return;
+    }
+};
+
+Dereferencing a __weak pointer is not allowed due to possible null value caused by race condition, assign it to a strong variable first.
+It can be shown with the following code:
+
+__weak typeof(self) weakSelf = self;
+myObj.myBlock =  ^{
+    id localVal = weakSelf->someIVar;
+};
+
+Case 1 should be used only when the block is not assigned to a property, otherwise it will lead to a retain cycle.
+
+Case 2 should be used when the block is assigned to a property and self is referenced only once and the block has a single statement.
+
+Case 3 should be used when the block is assigned to a property and self is referenced more the once and the block has more than a statement.
+
+http://albertodebortoli.com/blog/2013/04/21/objective-c-blocks-under-the-hood/
+
+http://albertodebortoli.com/blog/2013/08/03/objective-c-blocks-caveat/
+
+https://www.mikeash.com/pyblog/friday-qa-2009-08-14-practical-blocks.html
 
 Замыкание (англ. closure) в программировании — функция, в теле которой присутствуют ссылки на переменные, объявленные вне тела этой функции и не в качестве её параметров (а в окружающем коде). Говоря другим языком, замыкание — функция, которая ссылается на свобод-ные переменные в своём контексте. Замыкание, так же как и экземпляр объекта, есть способ представления функциональности и данных, связанных и упакованных вместе.
 Лямбда-выражение (в программировании) — это специальный синтаксис для объявления анонимных функторов по месту их использования. Используя лямбда-выражения, можно объявлять функции в любом месте кода. Обычно лямбда-выражение допускает замыкание на лексиче-ский контекст, в котором это выражение использовано. Лямбда-выражения поддерживаются во многих языках программирования (C, Com-mon Lisp, Python, PHP, C#, F#, Visual Basic .NET, C++, Java и других).
