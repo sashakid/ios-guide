@@ -24,9 +24,9 @@
 	- [Граф](#Граф)
 - [Коллекции в Objective-C](#Коллекции-в-objective-c)
 	- [Разница между set и array](#Разница-между-set-и-array)
-	- [Difference between NSArray and CFArray](#Difference-between-nsarray-and-cfarray)
+	- [Difference between `NSArray` and `CFArray`](#Difference-between-nsarray-and-cfarray)
 	- [Enumeration](#Enumeration)
-	- [How to use NSPredicate to filter data](#How-to-use-nspredicate-to-filter-data)
+	- [How to use `NSPredicate` to filter data](#How-to-use-nspredicate-to-filter-data)
 	- [Сортировка массивов](# Cортировка массивов)
 - [Алгоритмы](#Алгоритмы)
 	- [Нотация «большое О»](#Нотация-большое-о)
@@ -43,10 +43,10 @@
 	- [Битовые операции](#Битовые-операции)
 	- [Примеры битовых операций](#Примеры-битовых-операций)
 	- [Что такое указатель и ссылка и в чем разница](#Что-такое-указатель-и-ссылка-и-в-чем-разница)
-	- [Почему (NSError **) использует указатель на указатель](#Почему-nserror-использует-указатель-на-указатель)
+	- [Почему `(NSError **)` использует указатель на указатель](#Почему-nserror-использует-указатель-на-указатель)
 	- [How to return 2+ values from a function](#How-to-return-2+-values-from-a-function)
-	- [What is the difference between char * const and const char *](#What-is-the-difference-between-char-const-and-const-char)
-	- [Что значит n & (n – 1)](#Что-значит-n-n–1)
+	- [What is the difference between `char* const` and `const char*`](#What-is-the-difference-between-char-const-and-const-char)
+	- [Что значит `n&(n – 1)`](#Что-значит-n-n–1)
 - [ООП](#ооп)
 	- [История ООП](#История-ооп)
 	- [Основные понятия ООП: абстракция, инкапсуляция, наследование, полиморфизм](#Основные-понятия-ооп)
@@ -56,18 +56,18 @@
 - [Swift](#swift)
 - [iOS](#iOS)
 	- [Xcode, фреймворки](#Xcode-фреймворки)
-	    - [Core Foundation](#Core-Foundation)
-	    - [UIKit](#UIKit)
-	    - [AddressBook](#AddressBook)
-	    - [CFNetwork](#CFNetwork)
-	    - [QuartzCore](#QuartzCore)
+	    - [`Core Foundation`](#Core-Foundation)
+	    - [`UIKit`](#UIKit)
+	    - [`AddressBook`](#AddressBook)
+	    - [`CFNetwork`](#CFNetwork)
+	    - [`QuartzCore`](#QuartzCore)
 	- [Templates в Xcode, структура проекта, код](#Templates в Xcode, структура проекта, код)
 	- [iOS](#iOS)
 	- [IPhone, resolution, pixels vs points](#IPhone, resolution, pixels vs points)
 	- [Файловая система iOS](#Файловая система iOS)
 	- [App lifecycle](#App lifecycle)
 	- [Возможные состояния программы](#Возможные состояния программы)
-	- [Жизненный цикл UIViewController](#Жизненный цикл UIViewController)
+	- [Жизненный цикл `UIViewController`](#Жизненный цикл UIViewController)
 	- [Представления](#Представления)
 - [MEMORY MANAGEMENT](#MEMORY MANAGEMENT)
 	- [Память в стеке и в куче](#Память в стеке и в куче)
@@ -78,17 +78,17 @@
 	    - [Для переменных](#Для переменных)
 	- [Что такое property](#Что такое property)
 	- [Написать сеттер и геттер для свойства, с ARC и без](#Написать сеттер и геттер для свойства, с ARC и без)
-	- [В каких случаях лучше использовать strong, а в каких copy для NSString? Почему?](#В каких случаях лучше использовать strong, а в каких copy для NSString? Почему?)
-	- [autorelease vs release](#autorelease vs release)
+	- [В каких случаях лучше использовать `strong`, а в каких `copy` для `NSString`? Почему?](#В каких случаях лучше использовать strong, а в каких copy для NSString? Почему?)
+	- [`autorelease` vs `release`](#autorelease vs release)
 	- [Что делать, если проект написан с использованием ARC, а нужно использовать классы сторонней библиотеки написанной без ARC](#Что делать, если проект написан с использованием ARC, а нужно использовать классы сторонней библиотеки написанной без ARC)
-	- [Основные темы управления памятью, такие как владение retain/release/autorelease](#Основные темы управления памятью, такие как владение retain/release/autorelease)
-	- [Вопрос о циклах в графах владения, и почему свойства delegate (предоставляющие доступ к делегату) обычно задаются как assign?](#Вопрос о циклах в графах владения, и почему свойства delegate (предоставляющие доступ к делегату) обычно задаются как assign?)
+	- [Основные темы управления памятью, такие как владение `retain/release/autorelease`](#Основные темы управления памятью, такие как владение retain/release/autorelease)
+	- [Вопрос о циклах в графах владения, и почему свойства `delegate` обычно задаются как `assign`?](#Вопрос о циклах в графах владения, и почему свойства delegate (предоставляющие доступ к делегату) обычно задаются как assign?)
 	- [Что произойдет если сначала нажать на кнопку 1 а потом на кнопку 2?](#Что произойдет если сначала нажать на кнопку 1 а потом на кнопку 2?)
-	- [Нужно ли ретейнить (посылать сообщение retain) делегат для `CAAnimation`?](#Нужно ли ретейнить (посылать сообщение retain) делегат для CAAnimation?)
+	- [Нужно ли ретейнить делегат для `CAAnimation`?](#Нужно ли ретейнить (посылать сообщение retain) делегат для CAAnimation?)
 	- [Что произойдет при исполнении следующего кода?](#Что произойдет при исполнении следующего кода?)
 	- [Реализуйте следующие методы: `retain`, `release`, `autorelease`](#Реализуйте следующие методы: retain, release, autorelease)
-	- [Если я вызову performSelector:withObject:afterDelay: – объекту пошлется сообщение retain?](#Если я вызову performSelector:withObject:afterDelay: – объекту пошлется сообщение retain?)
-	- [Вы можете объяснить, что происходит когда вы посылаете объекту сообщение autorelease?](#Вы можете объяснить, что происходит когда вы посылаете объекту сообщение autorelease?)
+	- [Если я вызову `performSelector:withObject:afterDelay:` – объекту пошлется сообщение `retain`?](#Если я вызову performSelector:withObject:afterDelay: – объекту пошлется сообщение retain?)
+	- [Что происходит когда вы посылаете объекту сообщение `autorelease`?](#Что происходит когда вы посылаете объекту сообщение autorelease?)
 	- [Объясните что такое подсчет ссылок (retain count)?](#Объясните что такое подсчет ссылок (retain count)?)
 - [Паттерны проектирования](#Паттерны проектирования)
 	    - [Communication Patterns](#Communication Patterns)
@@ -111,18 +111,18 @@
 	    - [Proxy](#Proxy)
 	    - [KVC](#KVC)
 	    - [KVO](#KVO)
-	    - [Цепочка ответственности](#Цепочка ответственности)ё
+	    - [Цепочка ответственности](#Цепочка ответственности)
 	- [Анти-паттерны в объектно-ориентированном программировании](#Анти-паттерны в объектно-ориентированном программировании)
 	- [Какая разница между использованием делагатов и нотификейшенов?](#Какая разница между использованием делагатов и нотификейшенов?)
 - [Runtime](#Runtime)
-	- [Что такое указатель isa? Для чего он нужен?](#Что такое указатель isa? Для чего он нужен?)
+	- [Что такое указатель `isa`? Для чего он нужен?](#Что такое указатель isa? Для чего он нужен?)
 	- [Что происходит с методом после того, как он не нашелся в объекте класса, которому его вызвали?](#Что происходит с методом после того, как он не нашелся в объекте класса, которому его вызвали?)
-	- [Как в C можно описать вызов метода [someObject someMethod:someArgument]?](#Как в C можно описать вызов метода [someObject someMethod:someArgument]?)
+	- [Как в C можно описать вызов метода `[someObject someMethod:someArgument]`?](#Как в C можно описать вызов метода [someObject someMethod:someArgument]?)
 	- [Что такое Run Loop?](#Что такое Run Loop?)
 	- [Что такое классы в Objective-C (структура классов)?](#Что такое классы в Objective-C (структура классов)?)
 	- [Чем объект Objective-c отличается от структуры С, что такое структура в C?](#Чем объект Objective-c отличается от структуры С, что такое структура в C?)
-	- [Вопрос о методах isKindOfClass, isMemberOfClass](#Вопрос о методах isKindOfClass, isMemberOfClass)
-	- [Тип id](#Тип id)
+	- [Вопрос о методах `isKindOfClass`, `isMemberOfClass`](#Вопрос о методах isKindOfClass, isMemberOfClass)
+	- [Тип `id`](#Тип id)
 	- [Директивы компилятора](#Директивы компилятора)
 - [Concurrency](#Concurrency)
 	- [POSIX Threads](#POSIX Threads)
@@ -135,7 +135,7 @@
 	    - [Что такое deadlock?](#Что такое deadlock?)
 	    - [Что такое livelock?](#Что такое livelock?)
 	    - [Что такое семафор?](#Что такое семафор?)
-	    - [Чем отличается dispatch_async от dispatch_sync?](#Чем отличается dispatch_async от dispatch_sync?)
+	    - [Чем отличается `dispatch_async` от `dispatch_sync`?](#Чем отличается dispatch_async от dispatch_sync?)
 	    - [Для чего при разработке под iOS использовать POSIX-потоки?](#Для чего при разработке под iOS использовать POSIX-потоки?)
 	    - [Как многопоточность работает с UIKit?](#Как многопоточность работает с UIKit?)
 	    - [Выведется ли в дебагер «Hello world»? Почему?](#Выведется ли в дебагер «Hello world»? Почему?)
@@ -143,8 +143,8 @@
     	- [Atomic vs nonatomic. Чем отличаются? Как вручную переопределить atomic/nonatomic сеттер в не ARC коде?](#Atomic vs nonatomic. Чем отличаются? Как вручную переопределить atomic/nonatomic сеттер в не ARC коде?)
 - [Network](#Concurrency)
 	- [Преимущества и недостатки синхронного и асинхронного соединения?](#Преимущества и недостатки синхронного и асинхронного соединения?)
-	- [Что означает http, tcp?](#Что означает http, tcp?)
-	- [Какие различия между HEAD, GET, POST, PUT?](#Какие различия между HEAD, GET, POST, PUT? )
+	- [Что означает `http`, `tcp`?](#Что означает http, tcp?)
+	- [Какие различия между `HEAD`, `GET`, `POST`, `PUT`?](#Какие различия между HEAD, GET, POST, PUT? )
 	- [Что такое REST архитектура?](#Что такое REST архитектура?)
 	- [Как загрузить что-то из интернета? (NSURL, NSURLSession, NSURLConnection, NSURLRequest)](#Как загрузить что-то из интернета? (NSURL, NSURLSession, NSURLConnection, NSURLRequest))
 	- [Парсинг (JSON, HTML, XML)](#Парсинг (JSON, HTML, XML))
@@ -184,19 +184,19 @@
 	- [Что выведется в консоль? Почему?](#Что выведется в консоль? Почему?)
 	- [Как работают push нотификации?](#Как работают push нотификации?)
 	- [Memory warning](#Memory warning)
-	- [Как лучше всего загрузить UIImage c диска (с кеша)?](#Как лучше всего загрузить UIImage c диска (с кеша)?)
+	- [Как лучше всего загрузить `UIImage` c диска (с кеша)?](#Как лучше всего загрузить UIImage c диска (с кеша)?)
 	- [Какой контент лучше хранить в Documents, а какой в Cache?](#Какой контент лучше хранить в Documents, а какой в Cache?)
 	- [Как из строки вытащить подстроку?](#Как из строки вытащить подстроку?)
-	- [NSCoding, archiving?](#NSCoding, archiving?)
-	- [Как работает UITableView?](#Как работает UITableView?)
-	- [Константы, typedef, enum, #define](#Константы, typedef, enum, #define)
+	- [`NSCoding`, archiving?](#NSCoding, archiving?)
+	- [Как работает `UITableView`?](#Как работает UITableView?)
+	- [Константы, `typedef`, `enum`, `#define`](#Константы, typedef, enum, #define)
 	- [Что такое awakeFromNib?](#Что такое awakeFromNib?)
-	- [Что происходит когода мы пытаемся вызвать метод у nil указателя? Разница между nil и Nil.](#Что происходит когода мы пытаемся вызвать метод у nil указателя? Разница между nil и Nil.)
+	- [Что происходит когода мы пытаемся вызвать метод у `nil` указателя? Разница между `nil` и `Nil`.](#Что происходит когода мы пытаемся вызвать метод у nil указателя? Разница между nil и Nil.)
 	- [Что такое неформальный протокол?](#Что такое неформальный протокол?)
-	- [В чем разница между NSString и char? (Что значит приставка NS в общем?)](#В чем разница между NSString и char? (Что значит приставка NS в общем?))
-	- [Опишите иерархию классов от UIButton до NSObject.](#Опишите иерархию классов от UIButton до NSObject.)
+	- [В чем разница между `NSString` и `char`? (Что значит приставка `NS` в общем?)](#В чем разница между NSString и char? (Что значит приставка NS в общем?))
+	- [Опишите иерархию классов от `UIButton` до `NSObject`.](#Опишите иерархию классов от UIButton до NSObject.)
 	- [Что такое контекст (context)?](#Что такое контекст (context)?)
-	- [[NSArray arrayWithObjects: a, b, c, nil]; зачем nil вконце?](#[NSArray arrayWithObjects: a, b, c, nil]; зачем nil вконце?)
+	- [`[NSArray arrayWithObjects: a, b, c, nil];` зачем `nil` вконце?](#[NSArray arrayWithObjects: a, b, c, nil]; зачем nil вконце?)
 	- [Сработает ли таймер? Что нужно чтобы сработал?](#Сработает ли таймер? Что нужно чтобы сработал?)
 	- [Что такое xib и storyboard, в чем отличие, что лучше использовать?](#Что такое xib и storyboard, в чем отличие, что лучше использовать?)
 	- [Задача про банерокрутилку](#Задача про банерокрутилку)
@@ -224,7 +224,7 @@
 
 ######Структура данных
 Пространственное понятие: схема организации И. в компьютере. Множество элементов данных и множество связей между ними. От выбора СД зависит производительность программы. Тип СД определяет:
-- Как хранятся данные в структуре (выделение памяти, представ-ление данных)
+- Как хранятся данные в структуре (выделение памяти, представление данных)
 - Множество допустимых значений, который принимает объект в СД
 - Множество операций, которые могут применяться к объекту
 Операции над СД – `CRUD`: `CREATE` `READ` `UPDATE` `DELETE`
@@ -241,7 +241,7 @@
 
 ДИНАМИЧЕСКИЕ (связный список, граф, дерево)
 ######Алгоритмы
-«Рецепт расчета» – метод, разработанный для решения задачи, при-годный для реализации в компьютерной программе. Сам алгоритм яв-ляется абстракцией, но его представление – конкретно и может меняться в зависимости от архитектуры компьютера, ЯП и т. д. Представление алгоритма конструируется из блоков – примитивов. Набор примитивов и правил, как комбинировать эти примитивы для воплощения более сложных идей организуют ЯП. Примитив состоит из син-таксической и семантической части. Описание алгоритма на низком уровне – неудобно, поэтому используются абстракции для примитивов более высокого уровня, которые состоят из примитивов низкого. Итерационная структура – выполнение набора инструкций в циклическом режиме. Рекурсивная – каждая стадия повторения цикла реализуется как подзадача предыдущей стадии. Чтобы оценить производитель-ность нужно подсчитать кол-во операций. Различают временную сложность и пространственную (используемая память).
+«Рецепт расчета» – метод, разработанный для решения задачи, пригодный для реализации в компьютерной программе. Сам алгоритм является абстракцией, но его представление – конкретно и может меняться в зависимости от архитектуры компьютера, ЯП и т. д. Представление алгоритма конструируется из блоков – примитивов. Набор примитивов и правил, как комбинировать эти примитивы для воплощения более сложных идей организуют ЯП. Примитив состоит из синтаксической и семантической части. Описание алгоритма на низком уровне – неудобно, поэтому используются абстракции для примитивов более высокого уровня, которые состоят из примитивов низкого. Итерационная структура – выполнение набора инструкций в циклическом режиме. Рекурсивная – каждая стадия повторения цикла реализуется как подзадача предыдущей стадии. Чтобы оценить производительность нужно подсчитать кол-во операций. Различают временную сложность и пространственную (используемая память).
 
 `О` – (сложность в наихудшем случае), асимптотическая верхняя оценка кол-ва операций => времени работы (худший вариант). При оценке берется кол-во операций, возрастающих быстрее всего.
 
@@ -260,7 +260,7 @@
 ######Класс
 Модель еще не существующей сущности (объекта). Описывает устройство объекта, является как бы чертежом объекта.
 ######Метод
-Действие, которое выполняется над экземпляром класса (простой метод) (-) или самим классом (статический метод) (+).
+Действие, которое выполняется над экземпляром класса (простой метод) `-` или самим классом (статический метод) `+`.
 Простые методы имеют доступ к данным объекта (конкретного экземпляра данного класса), статические методы  не имеют доступа к данным объекта и для их использования не нужно создавать экземпляры (данного класса).
 Метод класса используется для создания новых объектов и называется фабричным методом. Также может использоваться для доступа к глобальным данным. Примеры методов класса и методов экземпляра `NSString`:
 ```objectivec
@@ -278,15 +278,15 @@
 ######Статическая переменная
 Сохраняет свое значение при нескольких вызовах метода, в отличие от локальной переменной. Инициализируется только один раз в начале выполнения программы.
 ######Переменная экземпляра, instance variable, ivar
-Данные, которые может содержать объект класса. Каждый раз создавая новый объект, создается и новый, причем уникальный, набор переменных экземпляра объекта. Поэтому, если у вас имеется два экземпляра `объекта` класса `Fraction`, к примеру, `fracA` и `fracB`, то каждый из них будет иметь свой собственный набор переменных. То есть, `fracA` и `fracB` будут иметь свои собственные numerator и denominator.
+Данные, которые может содержать объект класса. Каждый раз создавая новый объект, создается и новый, причем уникальный, набор переменных экземпляра объекта. Поэтому, если у вас имеется два экземпляра `объекта` класса `Fraction`, к примеру, `fracA` и `fracB`, то каждый из них будет иметь свой собственный набор переменных. То есть, `fracA` и `fracB` будут иметь свои собственные `numerator` и `denominator`.
 ######Абстракция
-Смысловая конструкция, кратко описывающая СД и операции над ни-ми для упрощения понимания. Отделение объекта от его реализации (данные обрабатываются функцией высокого уровня с помощью функции низкого уровня). Существует из-за неудобства описания опе-раций на низком уровне.
+Смысловая конструкция, кратко описывающая СД и операции над ними для упрощения понимания. Отделение объекта от его реализации (данные обрабатываются функцией высокого уровня с помощью функции низкого уровня). Существует из-за неудобства описания операций на низком уровне.
 ######Инкапсуляция
-Сокрытие методов и переменных от других объектов и частей про-граммы.
+Сокрытие методов и переменных от других объектов и частей программы.
 ######Наследование
 Процесс при котором один объект приобретает свойства и методы другого объекта.
 ######Полиморфизм
-Возможность объектов с одинаковой спецификацией иметь различную реализацию (например, объект UIViewController может быть и контроллером в MVC, и делегатом и источником данных для UITableView, если поддерживает соответствующие протоколы).
+Возможность объектов с одинаковой спецификацией иметь различную реализацию (например, объект `UIViewController` может быть и контроллером в MVC, и делегатом и источником данных для `UITableView`, если поддерживает соответствующие протоколы).
 
 ***
 # Структуры данных
@@ -323,7 +323,7 @@ Dictionary (Map) еще называют нагруженным множеств
 Хеш-таблица – ассоциативный массив, хранит пары   в виде связанного списка (open hash, closed address) или массива пар (closed hash, open address). Индекс элемента равен хеш-функции от ключа i = hash(key). Разбиение множества на подмножества происходит с по-мощью хеш функции (пример: телефонная книга).
 
 ## Множество
-A set is an abstract data structure that can store certain values, without any particular order, and no repeated values. It is a computer implementation of the mathematical concept of a finite set. Unlike most other collection types, rather than retrieving a specific element from a set, one typically tests a value for membership in a set. Some set data structures are designed for static or frozen sets that do not change after they are constructed. Static sets allow only query operations on their elements — such as checking whether a given value is in the set, or enumerating the values in some arbitrary or-der. Other variants, called dynamic or mutable sets, allow also the insertion and deletion of elements from the set.
+A set is an abstract data structure that can store certain values, without any particular order, and no repeated values. It is a computer implementation of the mathematical concept of a finite set. Unlike most other collection types, rather than retrieving a specific element from a set, one typically tests a value for membership in a set. Some set data structures are designed for static or frozen sets that do not change after they are constructed. Static sets allow only query operations on their elements — such as checking whether a given value is in the set, or enumerating the values in some arbitrary order. Other variants, called dynamic or mutable sets, allow also the insertion and deletion of elements from the set.
 
 ## Список
 Простейшая динамическая структура, упорядоченное множество с переменным числом эле-ментов.
@@ -339,15 +339,15 @@ A set is an abstract data structure that can store certain values, without any p
 
 Плюсы
 *	Движение в обе стороны
-*	Добавление элемента за O(1) время
-*	Удаление за O(1) время
+*	Добавление элемента за `O(1)` время
+*	Удаление за `O(1)` время
 
 Минусы
 *	На указатели тратится дополнительная память
-*	Поиск только последовательный путем перебора за O(n)
+*	Поиск только последовательный путем перебора за `O(n)`
 Отличие списка от массива:
 Массив имеет фиксированное время перехода по индексу, но нуждается в монолитном секторе памяти, обладает нефиксированным временем вставки и удаления.
-Список более требователен к памяти, дольше переход по индексу, но значительно быстрее вставка и удаление за O(1). В Java и в C++ явно различаются List и Array, в ObjC NSMutableArray скорее список, чем массив.
+Список более требователен к памяти, дольше переход по индексу, но значительно быстрее вставка и удаление за `O(1)`. В Java и в C++ явно различаются `List` и `Array`, в ObjC `NSMutableArray` скорее список, чем массив.
 
 ## Стек и фрейм
 Стек – очередь LIFO (last-in-first-out) структурированная область памяти, в отличие от кучи. Последовательный список с переменной длинной, включение и исключение только из верши-ны стека. Состоит из последовательности фреймов. После вызова метода из стека выделяется запрошенная область памяти – фрейм, который хранит значения объявленных переменных.
@@ -365,7 +365,7 @@ A set is an abstract data structure that can store certain values, without any p
 Акроним First In, First Out — «первым пришёл — первым ушёл» — способ организации и манипулирования данными относительно времени и приоритетов. Это выражение описывает принцип технической обработки очереди или обслуживания конфликтных требований путём упорядочения процесса по принципу: «первым пришёл — первым обслужен» (ПППО). Тот, кто приходит первым, тот и обслуживается первым, пришедший следующим ждёт, пока обслужи-вание первого не будет закончено, и так далее. В информатике этот термин относится к спосо-бу запоминания данных, обрабатываемых в очереди. Каждый элемент очереди хранится в структуре данных очереди (без исключений). Первые данные, добавленные в очередь, будут первыми из неё удалены, то есть обработка производится последовательно в том же порядке, что и поступление. Это типичное поведение для очереди, хотя и не единственно возможное
 
 ## Дек
-Double ended queue – очередь с двумя концами, включение и исключение из любого конца (ле-вого или правого).
+Double ended queue – очередь с двумя концами, включение и исключение из любого конца (левого или правого).
 
 <img src="https://github.com/sashakid/ios-guide/blob/master/Images/dequeue.png">
 
@@ -376,12 +376,12 @@ Double ended queue – очередь с двумя концами, включе
 * Увеличить ключи или уменьшить
 * Добавить
 * Слияние
-Куча как область памяти – реализация динамически распределяемой памяти, в которой хра-нятся все объекты. alloc – из кучи выделяется требуемая область памяти.
+Куча как область памяти – реализация динамически распределяемой памяти, в которой хранятся все объекты. alloc – из кучи выделяется требуемая область памяти.
 
 ## Двоичная куча
 
 ## Граф
-Фигура, состоящая из вершин и ребер, соединяющих вершины. Направленный и ненаправлен-ный.
+Фигура, состоящая из вершин и ребер, соединяющих вершины. Направленный и ненаправленный.
 
 ## Дерево
 Связаный граф без циклов. Выделена одна вершина – корень. Остальные – сыновья. Если нет ребенка – терминальная вершина
@@ -389,8 +389,10 @@ Double ended queue – очередь с двумя концами, включе
 <img src="https://github.com/sashakid/ios-guide/blob/master/Images/tree.png">
 
 ## Бинарное дерево поиска
-Состоит из узлов (записей) вида data, left, right, где
+Состоит из узлов (записей) вида `data`, `left`, `right`, где
+```
 key[left[x]] < key[x] <= key[right[x]]
+```
 Ключ данных родительского узла больше левого сына и нестрого меньше правого.
 
 ## Красно-черное дерево
@@ -409,9 +411,8 @@ key[left[x]] < key[x] <= key[right[x]]
 # Коллекции в Objective-C
 <img src="https://github.com/sashakid/ios-guide/blob/master/Images/objc_collections.png">
 
-
-Mutability
-Most collection classes exist in two versions: mutable and immutable (default). What’s the big ad-vantage? Thread safety. Immutable collections are fully thread safe and can be iterated from multiple threads at the same time, without any risk of mutation exceptions. Your API should never expose mutable collections. Of course there’s a cost when going from immutable and mutable and back - the object has to be copied twice, and all objects within will be retained/released. Sometimes it’s more efficient to hold an internal mutable collection and return a copied, immutable object on access. Notably, some of the more modern collection classes like NSHashTable, NSMapTable, and NSPointerArray are mutable by default and don’t have immutable counterparts. They are meant for internal class use, and a use case where you would want those immutable would be quite unusual.
+__Mutability__
+Most collection classes exist in two versions: mutable and immutable (default). What’s the big ad-vantage? Thread safety. Immutable collections are fully thread safe and can be iterated from multiple threads at the same time, without any risk of mutation exceptions. Your API should never expose mutable collections. Of course there’s a cost when going from immutable and mutable and back - the object has to be copied twice, and all objects within will be retained/released. Sometimes it’s more efficient to hold an internal mutable collection and return a copied, immutable object on access. Notably, some of the more modern collection classes like `NSHashTable`, `NSMapTable`, and `NSPointerArray` are mutable by default and don’t have immutable counterparts. They are meant for internal class use, and a use case where you would want those immutable would be quite unusual.
 
 ## Core Foundation:
 * `CFMutableDictionary`
@@ -424,25 +425,25 @@ The access time for a value in the dictionary is guaranteed to be at worst O(N) 
 * `CFMutableSet`
 
 ## Foundation:
-1. NSArray (NSMutableArray) – управляет упорядоченной коллекцией элементов, называемой массивом. Вы можете использовать объекты этого класса для создания неизменяемых массивов. Это значит, что все элементы объектов класса NSArray доступны только для чтения. Имеется возможность доступа к элементам массива по индексу. Массивы могут хранить элементы различных типов. Массивы поддерживают сортировку и поиск элементов, а также сравнение самих массивов между собой. Для создания изменяемых массивов следует использовать NSMutableArray.
-The most interesting part is that Apple doesn’t guarantee O(1) access time on individual object access - as you can read in the note about Computational Complexity in the CFArray.h CoreFoundation header:
-The access time for a value in the array is guaranteed to be at worst O(lg N) for any implementa-tion, current and future, but will often be O(1) (constant time). Linear search operations similarly have a worst case complexity of O(Nlg N), though typically the bounds will be tighter, and so on. Insertion or deletion operations will typically be linear in the number of values in the array, but may be O(Nlg N) clearly in the worst case in some implementations. There are no favored positions within the array for performance; that is, it is not necessarily faster to access values with low indices, or to insert or delete values with high indices, or whatever.
-2. NSPointerArray – mutable collection modeled after NSArray but it can also hold NULL values, which can be inserted or extracted (and which contribute to the object’s count). Moreover, unlike traditional arrays, you can set the count of the array directly. In a garbage collected environment, if you specify a zeroing weak memory configuration, if an element is collected it is replaced by a NULL value.
-3. NSDictionary (NSMutableDictionary) – следует использовать когда требуется удобный и эффективный способ хранения данных, ассоциированных с ключом. Объекты класса NSDictionary позволяют хранить неизменяемые пары объектов “ключ/значение” различных типов. Ключи в словаре NSDictionary не могут дублироваться, повторение значений допускается. Типы ключей и значений могут, но не обязаны совпадать. Особенно эффективными по скорости будут операции поиска по ключу, так как словарь специально оптимизирован для них. Если для решения задачи требуется изменение словаря объектов, следует использвать класс NSMutableDictionary.
-4. NSSet (NSMutableSet) – объекты представляют неупорядоченные множества различных объектов. Объект NSSet при создании заполняется множеством объектов, которое не может быть изменено до конца своего существования. Если требуется использовать изменяемые множества, следует воспользоваться классом NSMutableSet. Вы можете использовать множества в качестве альтернативы массивам, когда порядок элементов не важен, но требуется быстрое определение O(1) принадлежности объекта множеству. Операция определения принадлежности выполняется значительно быстрее в сравнении с массивами
-NSSet can only work efficiently if the hashing method used is balanced; if all objects are in the same hash bucket, then NSSet is not much faster in object-existence checking than NSArray. Variants of NSSet are also NSCountedSet, and the non-toll-free counter-variant CFBag/CFMutableBag.
-5. NSOrderedSet (NSMutableOrderedSet) – объявляет программный интерфейс для упорядоченного множества объектов. Класс NSOrderedSet объявляет программный интерфейс для неизменяемых множеств различных объектов. Вы задаёте записи неизменяемого множества на этапе его создания, после этого записи не могут быть изменены.С другой стороны, класс NSMutableOrderedSet, объявляет программный интерфейс для динамически изменяемых множеств различных объектов. Динамического или изменяемые множества позволяет добавлять и удалять записи в любое время, автоматически выделяя память по мере необходимости. Вы можете использовать упорядоченные множества как альтернативу массивам, когда порядок элементов является важным и требуется высокая скорость поиска элементов в коллекции. Класс NSMutableOrderedSet объявляет программный интерфейс к изменяемому упорядоченному множеству различных объектов. Объекты класса NSMutableOrderedSet объекты не похожи на массивы языка С. Во время создания такого множества вы можете указать размер, но реальный размер всё равно будет равен 0.
-6. NSCountedSet – объявляет программный интерфейс к изменяемой, неупорядоченной коллекции нечетких объектов. Счётное множество также известно как bag. Каждый отдельный объект, вставленный в NSCountedSet, имеет счётчик, связанный с ним. Объект NSCountedSet отслеживает количество раз, когда объекты были вставлены, и требует, чтобы объекты были удалены такое же количество раз. В то же время, внутри объекта NSSet существует только один экземпляр вставляемого объекта, даже если этот объект был добавлен в множество несколько раз.
-7. NSIndexSet (NSMutableIndexSet) – represents an immutable collection of unique unsigned integers, known as indexes because of the way they are used. This collection is referred to as an index set. You use index sets in your code to store indexes into some other data structure. For example, given an NSArray object, you could use an index set to identify a subset of objects in that array. You should not use index sets to store an arbitrary collection of integer values because index sets store indexes as sorted ranges. This makes them more efficient than storing a collection of individual integers. It also means that each index value can only appear once in the index set. The designated initializers of the NSIndexSet class are: init, initWithIndexesInRange:, and initWithIndexSet:. You must not subclass the NSIndexSet class. The mutable subclass of NSIndexSet is NSMutableIndexSet.
-8. NSHashTable – в отличие от NSSet, поддерживает слабые ссылки. Он может содержать слабые ссылки на объекты. Объекты класса NSHashTable могут содержать произвольные указатели, хранимые объекты не ограничиваются объектами классов. Можно настроить экземпляр NSHashTable для работы с произвольными указателями, а не только с объектами классов. Благодаря своим свойствам, класс NSHashTable это не множество, потому что он может вести себя по-другому.
-9. NSMapTable – is a general-purpose analogue of NSDictionary. Contrasted with the behavior of NSDictionary / NSMutableDictionary, NSMapTable has the following characteristics:
-* NSDictionary / NSMutableDictionary copies keys, and holds strong references to values.
-* NSMapTable is mutable, without an immutable counterpart.
-* NSMapTable can hold keys and values with weak references, in such a way that entries are removed when either the key or value is deallocated.
-* NSMapTable can copy its values on input.
-* NSMapTable can contain arbitrary pointers, and use pointer identity for equality and hashing checks.
+1. `NSArray` (`NSMutableArray`) – управляет упорядоченной коллекцией элементов, называемой массивом. Вы можете использовать объекты этого класса для создания неизменяемых массивов. Это значит, что все элементы объектов класса NSArray доступны только для чтения. Имеется возможность доступа к элементам массива по индексу. Массивы могут хранить элементы различных типов. Массивы поддерживают сортировку и поиск элементов, а также сравнение самих массивов между собой. Для создания изменяемых массивов следует использовать `NSMutableArray`.
+The most interesting part is that Apple doesn’t guarantee `O(1)` access time on individual object access - as you can read in the note about Computational Complexity in the `CFArray.h` `CoreFoundation` header:
+The access time for a value in the array is guaranteed to be at worst `O(lg N)` for any implementation, current and future, but will often be `O(1)` (constant time). Linear search operations similarly have a worst case complexity of `O(Nlg N)`, though typically the bounds will be tighter, and so on. Insertion or deletion operations will typically be linear in the number of values in the array, but may be `O(Nlg N)` clearly in the worst case in some implementations. There are no favored positions within the array for performance; that is, it is not necessarily faster to access values with low indices, or to insert or delete values with high indices, or whatever.
+2. `NSPointerArray` – mutable collection modeled after NSArray but it can also hold `NULL` values, which can be inserted or extracted (and which contribute to the object’s count). Moreover, unlike traditional arrays, you can set the count of the array directly. In a garbage collected environment, if you specify a zeroing weak memory configuration, if an element is collected it is replaced by a `NULL` value.
+3. `NSDictionary` (`NSMutableDictionary`) – следует использовать когда требуется удобный и эффективный способ хранения данных, ассоциированных с ключом. Объекты класса `NSDictionary` позволяют хранить неизменяемые пары объектов “ключ/значение” различных типов. Ключи в словаре `NSDictionary` не могут дублироваться, повторение значений допускается. Типы ключей и значений могут, но не обязаны совпадать. Особенно эффективными по скорости будут операции поиска по ключу, так как словарь специально оптимизирован для них. Если для решения задачи требуется изменение словаря объектов, следует использвать класс `NSMutableDictionary`.
+4. `NSSet` (`NSMutableSet`) – объекты представляют неупорядоченные множества различных объектов. Объект NSSet при создании заполняется множеством объектов, которое не может быть изменено до конца своего существования. Если требуется использовать изменяемые множества, следует воспользоваться классом NSMutableSet. Вы можете использовать множества в качестве альтернативы массивам, когда порядок элементов не важен, но требуется быстрое определение `O(1)` принадлежности объекта множеству. Операция определения принадлежности выполняется значительно быстрее в сравнении с массивами
+NSSet can only work efficiently if the hashing method used is balanced; if all objects are in the same hash bucket, then NSSet is not much faster in object-existence checking than NSArray. Variants of `NSSet` are also `NSCountedSet`, and the non-toll-free counter-variant `CFBag` / `CFMutableBag`.
+5. `NSOrderedSet` (`NSMutableOrderedSet`) – объявляет программный интерфейс для упорядоченного множества объектов. Класс NSOrderedSet объявляет программный интерфейс для неизменяемых множеств различных объектов. Вы задаёте записи неизменяемого множества на этапе его создания, после этого записи не могут быть изменены. С другой стороны, класс `NSMutableOrderedSet`, объявляет программный интерфейс для динамически изменяемых множеств различных объектов. Динамического или изменяемые множества позволяет добавлять и удалять записи в любое время, автоматически выделяя память по мере необходимости. Вы можете использовать упорядоченные множества как альтернативу массивам, когда порядок элементов является важным и требуется высокая скорость поиска элементов в коллекции. Класс `NSMutableOrderedSet` объявляет программный интерфейс к изменяемому упорядоченному множеству различных объектов. Объекты класса NSMutableOrderedSet объекты не похожи на массивы языка `С`. Во время создания такого множества вы можете указать размер, но реальный размер всё равно будет равен `0`.
+6. `NSCountedSet` – объявляет программный интерфейс к изменяемой, неупорядоченной коллекции нечетких объектов. Счётное множество также известно как bag. Каждый отдельный объект, вставленный в NSCountedSet, имеет счётчик, связанный с ним. Объект `NSCountedSet` отслеживает количество раз, когда объекты были вставлены, и требует, чтобы объекты были удалены такое же количество раз. В то же время, внутри объекта `NSSet` существует только один экземпляр вставляемого объекта, даже если этот объект был добавлен в множество несколько раз.
+7. `NSIndexSet` (`NSMutableIndexSet`) – represents an immutable collection of unique unsigned integers, known as indexes because of the way they are used. This collection is referred to as an index set. You use index sets in your code to store indexes into some other data structure. For example, given an `NSArray` object, you could use an index set to identify a subset of objects in that array. You should not use index sets to store an arbitrary collection of integer values because index sets store indexes as sorted ranges. This makes them more efficient than storing a collection of individual integers. It also means that each index value can only appear once in the index set. The designated initializers of the `NSIndexSet` class are: `init`, `initWithIndexesInRange:`, and `initWithIndexSet:`. You must not subclass the `NSIndexSet` class. The mutable subclass of `NSIndexSet` is `NSMutableIndexSet`.
+8. `NSHashTable` – в отличие от NSSet, поддерживает слабые ссылки. Он может содержать слабые ссылки на объекты. Объекты класса NSHashTable могут содержать произвольные указатели, хранимые объекты не ограничиваются объектами классов. Можно настроить экземпляр `NSHashTable` для работы с произвольными указателями, а не только с объектами классов. Благодаря своим свойствам, класс `NSHashTable` это не множество, потому что он может вести себя по-другому.
+9. `NSMapTable` – is a general-purpose analogue of `NSDictionary`. Contrasted with the behavior of `NSDictionary` / `NSMutableDictionary`, `NSMapTable` has the following characteristics:
+* `NSDictionary` / `NSMutableDictionary` copies keys, and holds strong references to values.
+* `NSMapTable` is mutable, without an immutable counterpart.
+* `NSMapTable` can hold keys and values with weak references, in such a way that entries are removed when either the key or value is deallocated.
+* `NSMapTable` can copy its values on input.
+* `NSMapTable` can contain arbitrary pointers, and use pointer identity for equality and hashing checks.
 Usage: Instances where one might use NSMapTable include non-copyable keys and storing weak references to keyed delegates or another kind of weak object.
-10. NSIndexPath – представляет путь к конкретному узлу в виде дерева вложенных массивов коллекций. Этот путь известен как индексный путь. Каждый индекс в индексном пути представляет индекс в массиве дочерних элементов от одного узла в дереве к другому.
+10. `NSIndexPath` – представляет путь к конкретному узлу в виде дерева вложенных массивов коллекций. Этот путь известен как индексный путь. Каждый индекс в индексном пути представляет индекс в массиве дочерних элементов от одного узла в дереве к другому.
 
 <img src="https://github.com/sashakid/ios-guide/blob/master/Images/complexity.png">
 
@@ -451,8 +452,8 @@ _NSSet is a great choice for checking containsObject: due to efficient hashing a
 _NSDictionary is a great choice if you have a natural key you can use to access objects. This has no inherent order, but if you know the key you can retrieve any object as O(1)._
 
 ## Разница между `Set` и `Array`?
-NSSet предназначен для создания несортированных массивов данных (например каких-либо объектов). Существует модифицируемая версия класса NSSet — это NSMutableSet, используя которую можно добавлять и удалять элементы. Стоит обратить внимание, что объект, кото-рый хранится в NSSet, встречается только один раз. Т.е. все элементы NSSet — уникальные.
-Добавить дубликат элемента в NSMutableSet у вас также не получится. Для создания несорти-рованного массива, в котором можно использовать неуникальные элементы, можно использо-вать NSCountedSet. Основным преимуществом NSCountedSet перед использованием классиче-ского массива NSArray является то, что элемент может быть продублирован огромное количе-ство раз и при этом занимать памяти как один элемент. Это объясняется тем, что NSCountedSet хранит в памяти только одну копию элемента и запоминает сколько раз этот элемент встреча-ется. Если для вас не важен порядок элементов внутри массива и вы используете действи-тельно большие объемы информации, то использование NSSet повысит производительность приложения за счет снижения потребляемой памяти. Несмотря на то, что количество элемен-тов хранящихся в памяти будет одинаковым, NSSet не тратит память на то, чтобы помнить в какой последовательности хранятся элементы.
+`NSSet` предназначен для создания несортированных массивов данных (например каких-либо объектов). Существует модифицируемая версия класса `NSSet` — это `NSMutableSet`, используя которую можно добавлять и удалять элементы. Стоит обратить внимание, что объект, кото-рый хранится в `NSSet`, встречается только один раз. Т.е. все элементы `NSSet` — уникальные.
+Добавить дубликат элемента в `NSMutableSet` у вас также не получится. Для создания несортированного массива, в котором можно использовать неуникальные элементы, можно использо-вать `NSCountedSet`. Основным преимуществом NSCountedSet перед использованием классического массива `NSArray` является то, что элемент может быть продублирован огромное количество раз и при этом занимать памяти как один элемент. Это объясняется тем, что `NSCountedSet` хранит в памяти только одну копию элемента и запоминает сколько раз этот элемент встречается. Если для вас не важен порядок элементов внутри массива и вы используете действительно большие объемы информации, то использование `NSSet` повысит производительность приложения за счет снижения потребляемой памяти. Несмотря на то, что количество элемен-тов хранящихся в памяти будет одинаковым, `NSSet` не тратит память на то, чтобы помнить в какой последовательности хранятся элементы.
 ```objectivec
 NSSet *set = [NSSet setWithObjects:@"1", @"2", @"3", @"4", @"5", @"6", @"7", @"8", @"9", @"0", nil];
 NSLog(@"%@", set);
@@ -547,7 +548,7 @@ __Dictionary__
 
 <img src="https://github.com/sashakid/ios-guide/blob/master/Images/dictionary_performance.png">
 
-Why is NSFastEnumeration so slow here? Iterating the dictionary usually requires both key and object; fast enumeration can only help for the key, and we have to fetch the object every time ourselves. Using the block-based enumerateKeysAndObjectsUsingBlock: is more efficient since both objects can be more efficiently prefetched.
+Why is `NSFastEnumeration` so slow here? Iterating the dictionary usually requires both key and object; fast enumeration can only help for the key, and we have to fetch the object every time ourselves. Using the block-based enumerateKeysAndObjectsUsingBlock: is more efficient since both objects can be more efficiently prefetched.
 Using NSPredicate to Filter Data
 If you look at an arbitrary code base, chances are you’ll sooner or later run into a piece of code similar to this one:
 ```objectivec
@@ -705,7 +706,9 @@ block: 5082.98[ms]
 ## Нотация «большое О»
 Performance is usually described with the Big O Notation. It defines the limiting behavior of a function and is often used to characterize algorithms on their performance. O defines the upper bound of the growth rate of the function. To see just how big the difference is, see commonly used O notations and the number of operations needed.
 
-For example, if you sort an array with 50 elements, and your sorting algorithm has a complexity of O(n^2), there will be 2,500 operations necessary to complete the task. Furthermore, there’s also overhead in internal management and calling that method - so it’s 2,500 operations times constant. O(1) is the ideal complexity, meaning constant time. Good sorting algorithms usually need O(n log n) time.
+<img src="https://github.com/sashakid/ios-guide/blob/master/Images/big_o_complexity.png">
+
+For example, if you sort an array with 50 elements, and your sorting algorithm has a complexity of `O(n^2)`, there will be 2,500 operations necessary to complete the task. Furthermore, there’s also overhead in internal management and calling that method - so it’s 2,500 operations times constant. `O(1)` is the ideal complexity, meaning constant time. Good sorting algorithms usually need `O(n log n)` time.
 
 
 
