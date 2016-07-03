@@ -3292,6 +3292,65 @@ TypeName blockName = ^returnType(parameters) {...};
 *	Вспомогательные объекты: перед началом ожидания вы говорите: «Здесь имеется вспомо-гательный объект, поддерживающий твой протокол. Когда что-нибудь произойдет, от-правляй ему сообщения. Вспомогательные объекты часто называются делегатами или ис-точниками данных.
 *	Оповещения: имеется объект, называемый центром оповещений. Перед началом ожидания вы говорите ему: «Этот объект ожидает таких-то оповещений. При поступлении одного из них отправь объекту это сообщение». Когда происходит Х, объект отправляет оповещение центру оповещений, а последний пересылает его вашему объекту.
 
+There is no "callback" in C - not more than any other generic programming concept.
+
+They're implemented using function pointers. Here's an example:
+
+void populate_array(int *array, size_t arraySize, int (*getNextValue)(void))
+{
+    for (size_t i=0; i<arraySize; i++)
+        array[i] = getNextValue();
+}
+
+int getNextRandomValue(void)
+{
+    return rand();
+}
+
+int main(void)
+{
+    int myarray[10];
+    populate_array(myarray, 10, getNextRandomValue);
+    ...
+}
+Here, the populate_array function takes a function pointer as its third parameter, and calls it to get the values to populate the array with. We've written the callback getNextRandomValue, which returns a random-ish value, and passed a pointer to it to populate_array. populate_array will call our callback function 10 times and assign the returned values to the elements in the given array.
+
+Here is an example of callbacks in C.
+
+Let's say you want to write some code that allows registering callbacks to be called when some event occurs.
+
+First define the type of function used for the callback:
+
+typedef void (*event_cb_t)(const struct event *evt, void *userdata);
+Now, define a function that is used to register a callback:
+
+int event_cb_register(event_cb_t cb, void *userdata);
+This is what code would look like that registers a callback:
+
+static void my_event_cb(const struct event *evt, void *data)
+{
+    /* do stuff and things with the event */
+}
+
+...
+   event_cb_register(my_event_cb, &my_custom_data);
+...
+In the internals of the event dispatcher, the callback may be stored in a struct that looks something like this:
+
+struct event_cb {
+    event_cb_t cb;
+    void *data;
+};
+This is what the code looks like that executes a callback.
+
+struct event_cb *callback;
+
+...
+
+/* Get the event_cb that you want to execute */
+
+callback->cb(event, callback->data);
+
 Когда использовать блоки, делегаты, KVO и уведомления?
 Block
 *	1–3 callbacks
