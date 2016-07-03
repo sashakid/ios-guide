@@ -86,7 +86,7 @@
 	- [Что произойдет если сначала нажать на кнопку 1 а потом на кнопку 2?](#Что произойдет если сначала нажать на кнопку 1 а потом на кнопку 2?)
 	- [Нужно ли ретейнить (посылать сообщение retain) делегат для CAAnimation?](#Нужно ли ретейнить (посылать сообщение retain) делегат для CAAnimation?)
 	- [Что произойдет при исполнении следующего кода?](#Что произойдет при исполнении следующего кода?)
-	- [Реализуйте следующие методы: retain, release, autorelease](#Реализуйте следующие методы: retain, release, autorelease)
+	- [Реализуйте следующие методы: `retain`, `release`, `autorelease`](#Реализуйте следующие методы: retain, release, autorelease)
 	- [Если я вызову performSelector:withObject:afterDelay: – объекту пошлется сообщение retain?](#Если я вызову performSelector:withObject:afterDelay: – объекту пошлется сообщение retain?)
 	- [Вы можете объяснить, что происходит когда вы посылаете объекту сообщение autorelease?](#Вы можете объяснить, что происходит когда вы посылаете объекту сообщение autorelease?)
 	- [Объясните что такое подсчет ссылок (retain count)?](#Объясните что такое подсчет ссылок (retain count)?)
@@ -1514,6 +1514,37 @@ int main() {
     // pointer was copied but what pointer references was changed.
     assert(value == 10 && pointer == &value);
 }
+
+- (void)test
+{
+     NSString *stringVar = @"UPPER CASE STRING";
+     [self changeString:stringVar];
+     NSLog(@"value after changed : %@", stringVar);
+}
+
+- (void)changeString:(NSString*)string
+{
+     string = [string lowercaseString];
+}
+
+I thought the output should be upper case string. But it comes out to be UPPER CASE STRING.
+
+The [string lowercaseString] call creates a new NSString object that you assign to the local variable string. This does not change the value of stringVar outside the changeString function. The pointer itself is passed by value.
+
+One way to do what you want, is to pass a pointer to a pointer:
+
+-(void) test
+{
+     NSString *stringVar = @"UPPER CASE STRING";
+     [self changeString:&stringVar];
+     NSLog(@"value after changed : %@", stringVar);
+}
+
+-(void) changeString:(NSString**)string
+{
+     *string = [*string lowercaseString];
+}
+
 ```
 Вопросы
 Xcode, фреймворки
@@ -1975,6 +2006,40 @@ __unsafe_unretained
 __autoreleasing
 используется для обозначения аргументов, которые передаются по ссылке (id *) и autoreleased по возвращении. not to be confused with calling autorelease on an object before returning it from a method, this is used for passing objects by reference, for example when passing NSError objects by reference such as
 [myObject performOperationWithError:&tmp];
+
+Absolutely not. The key difference in the two definitions that you've pointed out is the "as long as someone else". It's the "someone else" that is important.
+
+Consider the following:
+
+__strong id strongObject = <some_object>;
+__weak id weakObject = strongObject;
+Now we've got a two pointers to <some_object>, one strong and one weak. If we set strongObject to nil like so:
+
+strongObject = nil;
+Then if you go through the rules you outlined then you'll ask yourself these questions:
+
+Strong: "keep this in the heap until I don't point to it anymore"
+
+strongObject doesn't point to <some_object> any more. So we don't need to keep it.
+Weak: "keep this as long as someone else points to it strongly"
+
+weakObject still points to <some_object>. But since nobody else points to it, this rule also means that we don't need to keep it.
+The result is that <some_object> is deallocated and if your runtime supports it (Lion and iOS 5 upwards) then weakObject will automatically be set to nil.
+
+Now consider what happens if we set weakObject to nil like so:
+
+weakObject = nil;
+Then if you go through the rules you outlined then you'll ask yourself these questions:
+
+Strong: "keep this in the heap until I don't point to it anymore"
+
+strongObject does point to <some_object>. So we do need to keep it.
+Weak: "keep this as long as someone else points to it strongly"
+
+weakObject doesn't point to <some_object>.
+The result is that <some_object> is not deallocated, but weakObject will be the nil pointer.
+
+[Note that all that is assuming <some_object> is not pointed to by another strong reference somewhere else / some other means of being "held"]
 
 Что такое property?
 Упрощенный способ для определения и создания методов доступа, обращающихся к суще-ствующим переменным экземплярам. Классы, которые подставляют переменные экземпляра, могут использовать обозначение свойства вместо того, чтобы использовать синтаксис getter и setter.
@@ -3100,6 +3165,31 @@ https://www.mikeash.com/pyblog/friday-qa-2009-08-14-practical-blocks.html
 Замыкание (англ. closure) в программировании — функция, в теле которой присутствуют ссылки на переменные, объявленные вне тела этой функции и не в качестве её параметров (а в окружающем коде). Говоря другим языком, замыкание — функция, которая ссылается на свобод-ные переменные в своём контексте. Замыкание, так же как и экземпляр объекта, есть способ представления функциональности и данных, связанных и упакованных вместе.
 Лямбда-выражение (в программировании) — это специальный синтаксис для объявления анонимных функторов по месту их использования. Используя лямбда-выражения, можно объявлять функции в любом месте кода. Обычно лямбда-выражение допускает замыкание на лексиче-ский контекст, в котором это выражение использовано. Лямбда-выражения поддерживаются во многих языках программирования (C, Com-mon Lisp, Python, PHP, C#, F#, Visual Basic .NET, C++, Java и других).
 Нестандартное расширение синтаксиса языков программирования C/C++/Objective-C, позво-ляющее инкапсулировать код и данные в один объект. Блоковые объекты это C-уровневые синтаксические функции. Они похожи на стандартные функции C, но в дополнение к исполня-емому коду они также могут содержать переменные привязанные к автоматической (стеку) или управляемой (куче) памяти. Поэтому блок может поддерживать набор состояний (дан-ные), которые он может использовать, чтобы повлиять на поведение при выполнении. Блоки особенно полезны в качестве обратного вызова, потому что блок несет как код, который будет выполняться на обратном вызове, так и данные, необходимые во время этого выполнения.
+
+A lambda is just an anonymous function - a function defined with no name. In some languages, such as Scheme, they are equivalent to named functions. In fact, function definition is re-written as binding a lambda to a variable internally. In other languages, like Python, there are some (rather needless) distinctions between them, but they behave the same way otherwise.
+
+A closure is any function which closes over the environment in which it was defined. This means that it can access variables not in its parameter list. Examples:
+
+def func(): return h
+def anotherfunc(h):
+   return func()
+This will cause an error, because func does not close over the environment in anotherfunc - h is undefined. func only closes over the global environment. This will work:
+
+def anotherfunc(h):
+    def func(): return h
+    return func()
+Because here, func is defined in anotherfunc, and in python 2.3 and greater (or some number like this) when they almost got closures correct (mutation still doesn't work), this means that it closes over anotherfunc's environment and can access variables inside of it. In Python 3.1+, mutation works too when using the nonlocal keyword.
+
+Another important point - func will continue to close over anotherfunc's environment even when it's no longer being evaluated in anotherfunc. This code will also work:
+
+def anotherfunc(h):
+    def func(): return h
+    return func
+
+print anotherfunc(10)()
+This will print 10.
+
+This, as you notice, has nothing to do with lambda's - they are two different (although related) concepts.
 
 #import "NSArray+Map.h"
 
