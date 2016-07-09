@@ -319,6 +319,7 @@ Operations associated with this data type allow:
 * the removal of pairs from the collection
 * the modification of the values of existing pairs
 * the lookup of the value associated with a particular key
+
 Dictionary (Map) еще называют нагруженным множеством (data + info), где data – ключ, а нагрузка – значение ключа.
 Хеш-таблица – ассоциативный массив, хранит пары   в виде связанного списка (open hash, closed address) или массива пар (closed hash, open address). Индекс элемента равен хеш-функции от ключа i = hash(key). Разбиение множества на подмножества происходит с по-мощью хеш функции (пример: телефонная книга).
 
@@ -1225,7 +1226,7 @@ In the case of NSError, the function might want to create a new NSError object a
 _Explanation 2:_
 A pointer to a pointer is a form of multiple indirection, or a chain of pointers. Normally, a pointer con-tains the address of a variable. When we define a pointer to a pointer, the first pointer contains the address of the second pointer, which points to the location that contains the actual value as shown below.
 
-<img src="https://github.com/sashakid/ios-guide/blob/master/Images/const_pointer.png">
+<img src="https://github.com/sashakid/ios-guide/blob/master/Images/pointers.png">
 
 A variable that is a pointer to a pointer must be declared as such. This is done by placing an additional asterisk in front of its name. For example, the following declaration declares a pointer to a pointer of type `int`: `int **var;`
 When a target value is indirectly pointed to by a pointer to a pointer, accessing that value requires that the asterisk operator be applied twice, as is shown below in the example:
@@ -1368,6 +1369,8 @@ You can return two values with help of block:
 2. Неконстнатный указатель на константные данные
 3. Константный указатель на неконстантные данные
 4. Константный указатель на константные данные
+
+<img src="https://github.com/sashakid/ios-guide/blob/master/Images/const_pointer.png">
 
 ## Что значит `n&(n – 1)`?
 It's figuring out if `n` is either `0` or an exact power of two.
