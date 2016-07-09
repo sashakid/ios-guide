@@ -1243,7 +1243,7 @@ with a double pointer parameter, say `int**` you can modify the pointer itself, 
 
 __In C:__
 
-1. Returning the address of the first element of a local array has undefined behavior (at least dereferencing it later is). You may use output parameters, that is, pass two pointers, and set the values inside:
+* Returning the address of the first element of a local array has undefined behavior (at least dereferencing it later is). You may use output parameters, that is, pass two pointers, and set the values inside:
 ```c
 void Calculate(int x, int y, int* prod, int* quot) {
     *prod = x*y;
@@ -1255,7 +1255,8 @@ Usage:
 int x = 10, y = 2, prod, quot;
 Calculate(x, y, &prod, &quot)
 ```
-2. Another thing you could do is pack your data into a struct
+* Another thing you could do is pack your data into a struct
+
 ```c
 typedef struct {
     int prod;
@@ -1269,7 +1270,8 @@ product_and_quot Calculate(int x, int y) {
 ```
 __in Objective-C:__
 
-1. Pointers
+* Pointers
+
 ```objectivec
 - (void)convertA:(float)a B:(float)b C:(float) intoX:(float *)xOut Y:(float *)yOut Z:(float)zOut {
     *xOut = 3*a + b;
@@ -1282,7 +1284,8 @@ and call it like this:
 float x, y, z;
 [self convertA:a B:b C:c intoX:&x Y:&y Z:&z];
 ```
-2. Another way is to create a struct and return it:
+* Another way is to create a struct and return it:
+
 ```objectivec
 struct XYZ {
     float x, y, z;
@@ -1300,7 +1303,8 @@ Call it like this:
 ```objectivec
 struct XYZ output = [self xyzWithA:a B:b C:c];
 ```
-3. Double pointers with objects
+* Double pointers with objects
+
 If you want to return more than one new object, your function should take pointers to the object pointer, thus:
 ```objectivec
 - (void)mungeFirst:(NSString **)stringOne andSecond:(NSString **)stringTwo {
@@ -1308,7 +1312,8 @@ If you want to return more than one new object, your function should take pointe
     *stringTwo = [NSString stringWithString:@"baz"];
 }
 ```
-4. Blocks
+* Blocks
+
 You can return two values with help of block:
 ```objectivec
 - (void)getUIControlles:(void (^)(UITextField *objTextFiled, UIView *objView))completionBlock {
@@ -1333,7 +1338,7 @@ You can return two values with help of block:
     }];
 }
 ```
-## What is the difference between `char * const` and `const char *``?
+## What is the difference between `char * const` and `const char *`?
 
 Существует четыре способа передачи в функцию указателя
 
@@ -1343,7 +1348,7 @@ You can return two values with help of block:
 4. Константный указатель на константные данные
 
 ## Что значит `n&(n – 1)`?
-It's figuring out if n is either `0` or an exact power of two.
+It's figuring out if `n` is either `0` or an exact power of two.
 It works because a binary power of two is of the form `1000...000` and subtracting one will give you `111...111`. Then, when you `AND` those together, you get zero, such as with:
 ```
    1000 0000 0000 0000
@@ -1366,7 +1371,7 @@ For example, let's try all the 3-bit combinations:
  6    110   101     100
  7    111   110     110
 ```
-You can see that only `0` and the powers of two (`1`, `2` and `4`) result in a `000/false` bit pattern, all others are non-zero or `true`.
+You can see that only `0` and the powers of two (`1`, `2` and `4`) result in a `000-false` bit pattern, all others are non-zero or `true`.
 See the full Bit Twiddling Hacks document for all sorts of other wonderful (or dastardly, depending on your viewpoint) hackery.
 
 # ООП
