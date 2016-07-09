@@ -1187,9 +1187,11 @@ yPtr = &y;
 Операция `*` – операция косвенной адресации или операция разыменования.
 
 Аргументы можно передавать в функцию тремя способами:
+
 1. Вызов по значению
 2. Вызов по ссылке с аргументами ссылками
 3. Вызов по ссылке с аргументами указателями
+
 Указатели как и ссылки тоже можно использовать для модификации оного или более значений переменных в вызывающем операторе, или передавать указатели на большие объекты данных, чтобы избежать расходов, сопутствующих передаче объектов по значению.
 
 `const` с указателем значит, что значение переменной не изменяется.
@@ -1239,46 +1241,49 @@ with a double pointer parameter, say `int**` you can modify the pointer itself, 
 
 ## How to return 2+ values from a function?
 
-In C:
-1. Returning the address of the first element of a local array has undefined behavior(at least dereferencing it later is). You may use output parameters, that is, pass two pointers, and set the values inside:
-void Calculate(int x, int y, int* prod, int* quot)
-{
+__In C:__
+
+1. Returning the address of the first element of a local array has undefined behavior (at least dereferencing it later is). You may use output parameters, that is, pass two pointers, and set the values inside:
+```c
+void Calculate(int x, int y, int* prod, int* quot) {
     *prod = x*y;
     *quot = x/y;
 }
-
-usage:
-
-int x = 10,y = 2, prod, quot;
+```
+Usage:
+```c
+int x = 10, y = 2, prod, quot;
 Calculate(x, y, &prod, &quot)
-
+```
 2. Another thing you could do is pack your data into a struct
-typedef struct
-{
+```c
+typedef struct {
     int prod;
     int quot;
 } product_and_quot;
 
-product_and_quot Calculate(int x, int y)
-{
+product_and_quot Calculate(int x, int y) {
     product_and_quot p = {x*y, x/y};
     return p;
 }
+```
+__in Objective-C:__
 
-in Objective-C:
 1. Pointers
+```objectivec
 - (void)convertA:(float)a B:(float)b C:(float) intoX:(float *)xOut Y:(float *)yOut Z:(float)zOut {
     *xOut = 3*a + b;
     *yOut = 2*b;
     *zOut = a*b + 4*c;
 }
-
+```
 and call it like this:
-
+```objectivec
 float x, y, z;
 [self convertA:a B:b C:c intoX:&x Y:&y Z:&z];
-
+```
 2. Another way is to create a struct and return it:
+```objectivec
 struct XYZ {
     float x, y, z;
 };
@@ -1290,22 +1295,23 @@ struct XYZ {
     xyz.z = a*b + 4*c;
     return xyz;
 }
-
+```
 Call it like this:
-
+```objectivec
 struct XYZ output = [self xyzWithA:a B:b C:c];
-
+```
 3. Double pointers with objects
 If you want to return more than one new object, your function should take pointers to the object pointer, thus:
--(void)mungeFirst:(NSString**)stringOne andSecond:(NSString**)stringTwo
-{
+```objectivec
+- (void)mungeFirst:(NSString **)stringOne andSecond:(NSString **)stringTwo {
     *stringOne = [NSString stringWithString:@"foo"];
     *stringTwo = [NSString stringWithString:@"baz"];
 }
-
+```
 4. Blocks
 You can return two values with help of block:
-- (void)getUIControlles:(void (^)(UITextField * objTextFiled, UIView * objView))completionBlock {
+```objectivec
+- (void)getUIControlles:(void (^)(UITextField *objTextFiled, UIView *objView))completionBlock {
     UITextField * textFiled = nil;
     /*
      do code here for textfiled
@@ -1319,37 +1325,35 @@ You can return two values with help of block:
     completionBlock (textFiled, viewDemo);
 }
 
-- (void) testMethod {
-
+- (void)testMethod {
     // Call function with following way.
-
     [self getUIControlles:^(UITextField *objTextFiled, UIView *objView) {
-
-// objTextFiled = This is your textfiled object
-// objView = This is your view object
-
+		// objTextFiled = This is your textfiled object
+		// objView = This is your view object
     }];
 }
-
-What is the difference between char * const and const char *?
+```
+## What is the difference between `char * const` and `const char *``?
 
 Существует четыре способа передачи в функцию указателя
-1.	Неконстантный указатель на неконстантные данные
-2.	Неконстнатный указатель на константные данные
-3.	Константный указатель на неконстантные данные
-4.	Константный указатель на константные данные
 
+1. Неконстантный указатель на неконстантные данные
+2. Неконстнатный указатель на константные данные
+3. Константный указатель на неконстантные данные
+4. Константный указатель на константные данные
 
-
-Что значит n & (n – 1)?
-It's figuring out if n is either 0 or an exact power of two.
-It works because a binary power of two is of the form 1000...000 and subtracting one will give you 111...111. Then, when you AND those together, you get zero, such as with:
+## Что значит `n&(n – 1)`?
+It's figuring out if n is either `0` or an exact power of two.
+It works because a binary power of two is of the form `1000...000` and subtracting one will give you `111...111`. Then, when you `AND` those together, you get zero, such as with:
+```
    1000 0000 0000 0000
 &&  111 1111 1111 1111
    ==== ==== ==== ====
  = 0000 0000 0000 0000
+ ```
 Any non-power-of-two input value will not give you zero when you perform that operation.
 For example, let's try all the 3-bit combinations:
+```
       <----- binary ---->
  n     n    n-1   n&(n-1)
 ---   ---   ---   -------
@@ -1361,10 +1365,11 @@ For example, let's try all the 3-bit combinations:
  5    101   100     100
  6    110   101     100
  7    111   110     110
-You can see that only 0 and the powers of two (1, 2 and 4) result in a 000/false bit pattern, all others are non-zero or true.
+```
+You can see that only `0` and the powers of two (`1`, `2` and `4`) result in a `000/false` bit pattern, all others are non-zero or `true`.
 See the full Bit Twiddling Hacks document for all sorts of other wonderful (or dastardly, depending on your viewpoint) hackery.
 
-ООП
+# ООП
 История ООП
 ООП – парадигма программирования, в которой основными концепциями являются понятия объектов и классов. В центре ООП находится понятие объекта. Объект — это сущность, которой можно посылать сообщения, и которая может на них реагировать, используя свои данные. Объект — это экземпляр класса. Данные объекта скрыты от остальной программы. Сокрытие данных называется инкапсуляцией. Наличие инкапсуляции достаточно для объектности языка программирования, но ещё не означает его объектной ориентированности — для этого требуется наличие наследования. Но даже наличие инкапсуляции и наследования не делает язык программирования в полной мере объектным с точки зрения ООП. Основные преимуще-ства ООП проявляются только в том случае, когда в языке программирования реализован по-лиморфизм; то есть возможность объектов с одинаковой спецификацией иметь различную ре-ализацию. Первым языком программирования, в котором были предложены принципы объ-ектной ориентированности, была Симула. В момент своего появления (в 1967 году), этот язык программирования предложил поистине революционные идеи: объекты, классы, виртуальные методы и др., однако это всё не было воспринято современниками как нечто грандиозное. Тем не менее, большинство концепций были развиты Аланом Кэйем и Дэном Ингаллсом в языке Smalltalk. Именно он стал первым широко распространённым объектно-ориентированным языком программирования. (C#, C++, Java, Ruby, PHP, Perl, Python). ООП дает возможность со-здавать расширяемые системы (extensible systems). Это одно из самых значительных досто-инств ООП и именно оно отличает данный подход от традиционных методов программирова-ния. Расширяемость (extensibility) означает, что существующую систему можно заставить ра-ботать с новыми компонентами, причем без внесения в нее каких-либо изменений. Компонен-ты могут быть добавлены на этапе выполнения. Smalltalk — объектно-ориентированный язык программирования с динамической типизацией, разработанный в Xerox PARC Аланом Кэйем, Дэном Ингаллсом, Тедом Кэглером, Адель Голдберг, и другими в 1970-х годах. Язык был представлен как Smalltalk-80. Smalltalk оказал большое влияние на развитие многих дру-гих языков, таких как: Objective-C, Actor, Java, Groovy и Ruby. Многие идеи 1980-х и 1990-х по написанию программ появились в сообществе Smalltalk. К ним можно отнести рефакторинг, шаблоны проектирования (применительно к ПО), карты «класс — обязанности — взаимодей-ствие» и экстремальное программирование в целом. Си (англ. C) — язык программирования, разработанный в 1969—1973 годах сотрудниками Bell Labs Кеном Томпсоном и Деннисом Ритчи как развитие языка Би. Благодаря близости по скорости выполнения программ, напи-санных на Си, к языку ассемблера, этот язык получил широкое применение при создании си-стемного программного обеспечения и прикладное программное обеспечение для решения широко круга задач. Язык программирования Си оказал существенное влияние на развитие индустрии программного обеспечения, а его синтаксис стал основой для таких языков про-граммирования как C++, C# и Java.
 
