@@ -1554,7 +1554,7 @@ _Недостатки_
 * iOS, OS X, watchOS, tvOS, Linux later in 2015
 * License Proprietary, transitioning to open source in 2015
 * Filename exten-sions `.swift`
-* Website	[developer.apple.com/swift/] (developer.apple.com/swift/)
+* Website	[http://developer.apple.com/swift/] (http://developer.apple.com/swift/)
 * Influenced by Objective-C, Rust, Haskell, Ruby, Python, C#, CLU, D
 * Influenced Rust
 
@@ -1633,6 +1633,10 @@ __Core Data__
 Core Data обеспечивает объектно-ориентированное решение для управления данными, кото-рое легко в использовании и понимании, построено для обработки модели данных необходи-мых любому приложению, как большому так и маленькому.
 
 __Core Text__ is an advanced, low-level technology for laying out text and handling fonts.
+Core Text is for apps that need a low-level text-handling technology correlating with the Core Graphics framework (Quartz). If you work directly with Quartz and you need to draw some text, use Core Text. If, for example, you have your own page layout engine—you have some text and you know where it needs to go in your view—you can use Core Text to generate the glyphs and position them relative to each other with all the features of fine typesetting, such as kerning, ligatures, line-breaking, hyphenation, and justification.
+Core Text Lays Out Text. Core Text generates glyphs (from character codes and font data) and positions them relative to each other in glyph runs. It breaks glyph runs into lines, and it assembles lines into multiline frames (such as paragraphs). Core Text also provides glyph- and layout-related data, such as glyph locations and measurement of lines and frames. It handles character attributes and paragraph styles, including various types of tab styles and positioning.
+You Can Manage Fonts With Core Text
+The Core Text font API provides fonts, font collections, font descriptors, and easy access to font data. It also provides support for multiple master fonts, font variations, font cascading, and font linking. Core Text provides an alternative to Quartz for loading your own fonts into the current process, that is, font activation.
 
 <img src="https://github.com/sashakid/ios-guide/blob/master/Images/core_text.png">
 
@@ -1728,13 +1732,6 @@ Quartz.framework OS X only
 * Quartz Composer: display Quartz Composer compositions.
 * QuickLookUI: preview media elements.
 All three frameworks use OpenGL underneath because all drawing in iOS or OS X goes through OpenGL at some point. OpenGL (Open Graphics Library — открытая графическая библиотека, гра-фический API) — спецификация, определяющая независимый от языка программирования платформонезависимый программный интерфейс для написания приложений, использующих двумерную и трёхмерную компьютерную графику. Включает более 250 функций для рисова-ния сложных трёхмерных сцен из простых примитивов. Используется при создании компью-терных игр, САПР, виртуальной реальности, визуализации в научных исследованиях. На плат-форме Windows конкурирует с DirectX.
-
-__CoreText__
-Core Text is for apps that need a low-level text-handling technology correlating with the Core Graphics framework (Quartz). If you work directly with Quartz and you need to draw some text, use Core Text. If, for example, you have your own page layout engine—you have some text and you know where it needs to go in your view—you can use Core Text to generate the glyphs and position them relative to each other with all the features of fine typesetting, such as kerning, ligatures, line-breaking, hyphenation, and justification.
-Core Text Lays Out Text
-Core Text generates glyphs (from character codes and font data) and positions them relative to each other in glyph runs. It breaks glyph runs into lines, and it assembles lines into multiline frames (such as paragraphs). Core Text also provides glyph- and layout-related data, such as glyph locations and measurement of lines and frames. It handles character attributes and paragraph styles, including various types of tab styles and positioning.
-You Can Manage Fonts With Core Text
-The Core Text font API provides fonts, font collections, font descriptors, and easy access to font data. It also provides support for multiple master fonts, font variations, font cascading, and font linking. Core Text provides an alternative to Quartz for loading your own fonts into the current process, that is, font activation.
 
 # iOS
 
