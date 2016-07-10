@@ -118,19 +118,19 @@
 	- [Что такое указатель `isa`? Для чего он нужен?](#Что такое указатель isa? Для чего он нужен?)
 	- [Что происходит с методом после того, как он не нашелся в объекте класса, которому его вызвали?](#Что происходит с методом после того, как он не нашелся в объекте класса, которому его вызвали?)
 	- [Как в C можно описать вызов метода `[someObject someMethod:someArgument]`?](#Как в C можно описать вызов метода [someObject someMethod:someArgument]?)
-	- [Что такое Run Loop?](#Что такое Run Loop?)
 	- [Что такое классы в Objective-C (структура классов)?](#Что такое классы в Objective-C (структура классов)?)
 	- [Чем объект Objective-c отличается от структуры С, что такое структура в C?](#Чем объект Objective-c отличается от структуры С, что такое структура в C?)
 	- [Вопрос о методах `isKindOfClass`, `isMemberOfClass`](#Вопрос о методах isKindOfClass, isMemberOfClass)
 	- [Тип `id`](#Тип id)
 	- [Директивы компилятора](#Директивы компилятора)
-- [Concurrency](#Concurrency)
+- [Multithreading](#Multithreading)
 	- [POSIX Threads](#POSIX Threads)
 	- [NSThread](#NSThread)
+	- [Run Loops](#Run Loops)
+- [Concurrency](#Concurrency)
 	- [GCD (Grand Central Dispatch)](#GCD (Grand Central Dispatch))
 	- [NSOperationQueue](#NSOperationQueue)
 	- [NSObject instance methods](#NSObject instance methods)
-	- [Run Loops](#Run Loops)
 	    - [Что такое мьютекс?](#Что такое мьютекс?)
 	    - [Что такое deadlock?](#Что такое deadlock?)
 	    - [Что такое livelock?](#Что такое livelock?)
@@ -141,7 +141,7 @@
 	    - [Выведется ли в дебагер «Hello world»? Почему?](#Выведется ли в дебагер «Hello world»? Почему?)
 	    - [Что выведется в консоль?](#Что выведется в консоль?)
     	- [Atomic vs nonatomic. Чем отличаются? Как вручную переопределить atomic/nonatomic сеттер в не ARC коде?](#Atomic vs nonatomic. Чем отличаются? Как вручную переопределить atomic/nonatomic сеттер в не ARC коде?)
-- [Network](#Concurrency)
+- [Networking](#Networking)
 	- [Преимущества и недостатки синхронного и асинхронного соединения?](#Преимущества и недостатки синхронного и асинхронного соединения?)
 	- [Что означает `http`, `tcp`?](#Что означает http, tcp?)
 	- [Какие различия между `HEAD`, `GET`, `POST`, `PUT`?](#Какие различия между HEAD, GET, POST, PUT? )
@@ -1478,13 +1478,18 @@ __Виртуальный метод__
 Для каждого класса, имеющего хотя бы один виртуальный метод, создаётся таблица виртуальных методов. Каждый объект хранит указатель на таблицу своего класса. Для вызова виртуального метода используется такой механизм: из объекта берётся указатель на соответствующую таблицу виртуальных методов, а из неё, по фиксированному смещению, — указатель на реализацию метода, используемого для данного класса. При использовании множественного наследования ситуация несколько усложняется за счёт того, что таблица виртуальных методов становится нелинейной.
 __Принцип единственной обязанности__ (Single responsibility principle) обозначает, что каждый объект должен иметь одну обязанность и эта обязанность должна быть полностью инкапсулирована в класс. Все его сервисы должны быть направлены исключительно на обеспечение этой обязанности.
 
-В чем плюсы и минусы ООП?
+## В чем плюсы и минусы ООП?
 Общие положения
-			Преимущества		          			Недостатки                                                     
-Классы позволяют проводить конструирование из полезных компонент, обладающих простыми инструментами, что дает возможность абстрагироваться от деталей реализации.	ООП порождает огромные иерархии клас-сов, что приводит к тому, что функцио-нальность расползается или, как говорят, размывается по базовым и производным членам класса, и отследить логику работы того или иного метода становится сложно.
+---------------
+Преимущества | Недостатки                                                     
+Классы позволяют проводить конструирование из полезных компонент, обладающих простыми инструментами, что дает возможность абстрагироваться от деталей реализации. | ООП порождает огромные иерархии классов, что приводит к тому, что функциональность расползается или, как говорят, размывается по базовым и производным членам класса, и отследить логику работы того или иного метода становится сложно.
+---------------------------------
 Полиморфизм
-Можно создавать новые классы с помощью протокола, «ведущие себя» аналогично род-ственным, что, в свою очередь, позволяет достигнуть расширяемости и модифициру-емости, что помогает снижать сложность программ, разрешая использование того же интерфейса для задания единого класса действий. "Один интерфейс, множество ме-тодов"	На скорости выполнения программ может неблагоприятно сказаться реализация по-лиморфизма, которая основана на меха-низмах позднего связывания вызова мето-да с конкретной его реализацией в одном из производных классов.
-Возможность создавать переменные и ме-тоды с одинаковым именем, но ведущие се-бя по-разному в зависимости от контекста (локальные переменные и перекрытие методов)	Многоразовое использование требует от программиста познакомиться с большими библиотеками классов. А это может ока-заться сложнее, чем даже изучение нового языка программирования. Библиотека классов фактически представляет собой виртуальный язык, который может вклю-чать в себя сотни типов и тысячи опера-ций.
+---------------------------------
+Можно создавать новые классы с помощью протокола, «ведущие себя» аналогично родственным, что, в свою очередь, позволяет достигнуть расширяемости и модифицируемости, что помогает снижать сложность программ, разрешая использование того же интерфейса для задания единого класса действий. "Один интерфейс, множество ме-тодов" | На скорости выполнения программ может неблагоприятно сказаться реализация полиморфизма, которая основана на механизмах позднего связывания вызова мето-да с конкретной его реализацией в одном из производных классов.
+
+Возможность создавать переменные и методы с одинаковым именем, но ведущие себя по-разному в зависимости от контекста (локальные переменные и перекрытие методов) | Многоразовое использование требует от программиста познакомиться с большими библиотеками классов. А это может оказаться сложнее, чем даже изучение нового языка программирования. Библиотека классов фактически представляет собой виртуальный язык, который может включать в себя сотни типов и тысячи операций.
+
 Обработка разнородных структур данных. Программы могут работать, не утруждая себя изучением вида объектов. Новые виды могут быть добавлены в любой момент.
 for (id object in array) {
     NSLog(@"%@", object);
@@ -2693,10 +2698,7 @@ If you send a message to an object that does not handle that message, before ann
 
 Как в C можно описать вызов метода [someObject someMethod:someArgument]?
 objc_msgSend(someObject, @selector(someMethod:), someArgument);
-Что такое Run Loop?
-Циклы выполнения – часть инфраструктуры, используемой для управления событиями при-бывающими асинхронно в потоке. Ждет данные от одного или нескольких источников, чтобы запустить код на исполнение. Циклы выполнения работают по мониторингу одного или не-скольких источников событий для потока. Как только события прибыли, система пробуждает поток и отправляет события на цикл выполнения, который затем передает их указанным об-работчикам. Если нет событий готовых быть обработанными, цикл выполнения ставит поток в режим сна.
-Одна из опасностей потокового программирования, это конфликты ресурсов между несколь-кими потоками. Если несколько потоков пытаются использовать или модифицировать один и тот же ресурс в одно и то же время, то могут возникнуть проблемы. Один из способов решить проблему заключается в устранении общего ресурса в целом и убедиться, что каждый поток имеет свой собственный набор ресурсов, на котором он работает. Поддержание совершенно разных ресурсов, это не вариант, и придется, для синхронизации доступа к ресурсу прибегать к помощи замков, условий, атомарных операций, и других методов.
-Замки обеспечивают грубую форму силы для защиты кода, который может быть выполнен только одним потоком одновременно. Наиболее распространенный тип блокировки взаимного исключения блокировки, также известный как мьютекс. Кроме замков, система обеспечивает поддержку для условий, которые обеспечивают надлежащую последовательность задач в рамках вашего приложения. Условие действует как привратник, блокируя определенный по-ток до приведения определенного состояния в значение истина. Когда это произойдет, поток освобождается и продолжает выполняться. И POSIX и Foundation framework оба оказывают прямую поддержку условий.
+
 Что такое классы в Objective-C (структура классов)?
 #import <objc/objc.h>
 /*
@@ -2857,29 +2859,37 @@ Earlier, we mentioned that you can throw exceptions from objects other than NSEx
 Модуль прекомпилированных заголовков, позволяющий экономить время по сравнению с компиляцией заголовков при #import. Не надо линковать фреймворк.
 #import <Cocoa/Cocoa.h> = @import Cocoa
 
-Concurrency
-Threads are subunits of processes, which can be scheduled independently by the operating system scheduler. Virtually all concurrency APIs are built on top of threads under the hood – that’s true for both Grand Central Dispatch and operation queues. You can either use the POSIX thread API, or the Objective-C wrapper around this API, NSThread, to create your own threads.
-
-
-
-POSIX Threads
+# Multithreading
+Although operation queues and dispatch queues are the preferred way to perform tasks concurrently, they are not a panacea. Depending on your application, there may still be times when you need to create custom threads. If you do create custom threads, you should strive to create as few threads as possible yourself and you should use those threads only for specific tasks that cannot be implemented any other way.
+Threads are still a good way to implement code that must run in real time. Dispatch queues make every attempt to run their tasks as fast as possible but they do not address real time constraints. If you need more predictable behavior from code running in the background, threads may still offer a better alternative.
+## POSIX Threads
 usually referred to as Pthreads, is a POSIX standard for threads defines an API for creating and ma-nipulating threads. Pthreads defines a set of C programming language types, functions and constants. It is implemented with a pthread.h header and a thread library. There are around 100 Pthreads procedures, all prefixed "pthread_" and they can be categorized into four groups:
-*	Thread management - creating, joining threads etc.
-*	Mutexes
-*	Condition variables
-*	Synchronization between threads using read/write locks and barriers
+* Thread management - creating, joining threads etc.
+* Mutexes
+* Condition variables
+* Synchronization between threads using read/write locks and barriers
 Implementations of the API are available on many Unix-like POSIX-conformant operating systems such as FreeBSD, NetBSD, OpenBSD, GNU/Linux, Mac OS X and Solaris. DR-DOS and Microsoft Win-dows implementations also exist.
-NSThread
+## NSThread
 is a simple Objective-C wrapper around pthreads. This makes the code look more familiar in a Cocoa environment. For example, you can define a thread as a subclass of NSThread, which encapsulates the code you want to run in the background.
-GCD (Grand Central Dispatch)
+## Run Loops
+Циклы выполнения – часть инфраструктуры, используемой для управления событиями при-бывающими асинхронно в потоке. Ждет данные от одного или нескольких источников, чтобы запустить код на исполнение. Циклы выполнения работают по мониторингу одного или не-скольких источников событий для потока. Как только события прибыли, система пробуждает поток и отправляет события на цикл выполнения, который затем передает их указанным об-работчикам. Если нет событий готовых быть обработанными, цикл выполнения ставит поток в режим сна.
+Одна из опасностей потокового программирования, это конфликты ресурсов между несколь-кими потоками. Если несколько потоков пытаются использовать или модифицировать один и тот же ресурс в одно и то же время, то могут возникнуть проблемы. Один из способов решить проблему заключается в устранении общего ресурса в целом и убедиться, что каждый поток имеет свой собственный набор ресурсов, на котором он работает. Поддержание совершенно разных ресурсов, это не вариант, и придется, для синхронизации доступа к ресурсу прибегать к помощи замков, условий, атомарных операций, и других методов.
+Замки обеспечивают грубую форму силы для защиты кода, который может быть выполнен только одним потоком одновременно. Наиболее распространенный тип блокировки взаимного исключения блокировки, также известный как мьютекс. Кроме замков, система обеспечивает поддержку для условий, которые обеспечивают надлежащую последовательность задач в рамках вашего приложения. Условие действует как привратник, блокируя определенный по-ток до приведения определенного состояния в значение истина. Когда это произойдет, поток освобождается и продолжает выполняться. И POSIX и Foundation framework оба оказывают прямую поддержку условий.
+Run loops are not technically a concurrency mechanism like GCD or operation queues, because they don’t enable the parallel execution of tasks. However, run loops tie in directly with the execution of tasks on the main dispatch/operation queue and they provide a mechanism to execute code asynchronously. Run loops can be a lot easier to use than operation queues or GCD, because you don’t have to deal with the complexity of concurrency and still get to do things asynchronously.
+A run loop is always bound to one particular thread. The main run loop associated with the main thread has a central role in each Cocoa and CocoaTouch application, because it handles UI events, timers, and other kernel events. Whenever you schedule a timer, use a NSURLConnection or call per-formSelector:withObject:afterDelay:, the run loop is used behind the scenes in order to perform these asyn-chronous tasks. Whenever you use a method which relies on the run loop, it is important to remember that run loops can be run in different modes. Each mode defines a set of events the run loop is going to react to. This is a clever way to temporarily prioritize certain tasks over others in the main run loop. A typical example of this is scrolling on iOS. While you’re scrolling, the run loop is not running in its default mode, and therefore, it’s not going to react to, for example, a timer you have scheduled before. Once scrolling stops, the run loop returns to the default mode and the events which have been queued up are executed. If you want a timer to fire during scrolling, you need to add it to the run loop in the NSRunLoopCommonModes mode. The main thread always has the main run loop set up and running. Other threads though don’t have a run loop configured by default. You can set up a run loop for other threads too, but you will rarely need to do this. Most of the time it is much easier to use the main run loop. If you need to do heavier work that you don’t want to execute on the main thread, you can still dispatch it onto another queue after your code is called from the main run loop.
+You can think of a Run Loop to be an event processing for-loop associated to a thread. This is provided by the system for every thread, but it's only run automatically for the main thread. Note that running run loops and executing a thread are two distinct concepts. You can execute a thread without running a run loop, when you're just performing long calculations and you don't have to respond to various events. If you want to respond to various events from a secondary thread, you retrieve the run loop associated to the thread by [NSRunLoop currentRunLoop]; and run it. The events run loops can handle is called input sources. You can add input sources to a run-loop.
+
+# Concurrency
+Concurrency is the notion of multiple things happening at the same time. Threads are subunits of processes, which can be scheduled independently by the operating system scheduler. Virtually all concurrency APIs are built on top of threads under the hood – that’s true for both Grand Central Dispatch and operation queues. You can either use the POSIX thread API, or the Objective-C wrapper around this API, NSThread, to create your own threads.
+
+## GCD (Grand Central Dispatch)
 With GCD you don’t interact with threads directly anymore. Instead you add blocks of code to queues, and GCD manages a thread pool behind the scenes. GCD decides on which particular thread your code blocks are going to be executed on, and it manages these threads according to the available system resources. This alleviates the problem of too many threads being created, because the threads are now centrally managed and abstracted away from application developers. The other important change with GCD is that you as a developer think about work items in a queue rather than threads. This new mental model of concurrency is easier to work with. GCD exposes five different queues: the main queue running on the main thread, three background queues with different priorities, and one background queue with an even lower priority, which is I/O throttled. Furthermore, you can create custom queues, which can either be serial or concurrent queues. While custom queues are a powerful abstraction, all blocks you schedule on them will ultimately trickle down to one of the system’s global queues and its thread pool(s).
-
-
+Dispatch queues are a C-based mechanism for executing custom tasks. A dispatch queue executes tasks either serially or concurrently but always in a first-in, first-out order. (In other words, a dispatch queue always dequeues and starts tasks in the same order in which they were added to the queue.) A serial dispatch queue runs only one task at a time, waiting until that task is complete before dequeuing and starting a new one. By contrast, a concurrent dispatch queue starts as many tasks as it can without waiting for already started tasks to finish.
 
 Плюсы
 *	Визуально — он самый короткий и простой в реализации. Он возоможен с использова-нием блоков. Этот подход тоже очень гибкий (хотя отменять блок поставленный в оче-редь нельзя стандартными способами). В GCD можно настраивать приоритеты, блоки захватывают переменные из окружения блока.
-NSOperationQueue
-Operation queues are a Cocoa abstraction of the queue model exposed by GCD. While GCD offers more low-level control, operation queues implement several convenient features on top of it, which often makes it the best and safest choice for application developers. The NSOperationQueue class has two different types of queues: the main queue and custom queues. The main queue runs on the main thread, and custom queues are processed in the background. In any case, the tasks which are processed by these queues are represented as subclasses of NSOperation.
+## NSOperationQueue
+Operation queues are a Cocoa abstraction of the queue model exposed by GCD. While GCD offers more low-level control, operation queues implement several convenient features on top of it, which often makes it the best and safest choice for application developers. The NSOperationQueue class has two different types of queues: the main queue and custom queues. The main queue runs on the main thread, and custom queues are processed in the background. In any case, the tasks which are processed by these queues are represented as subclasses of NSOperation. Whereas dispatch queues always execute tasks in first-in, first-out order, operation queues take other factors into account when determining the execution order of tasks. Because the NSOperation class is essentially an abstract base class, you typically define custom subclasses to perform your tasks. However, the Foundation framework does include some concrete subclasses that you can create and use as is to perform tasks.
 Плюсы
 *	Можно для каждой очереди настраивать приоритет и количество одновременно выпол-няющихся операций. NSOperationQueue самостоятельно создает и поддерживает пул по-токов, в которых исполняются NSOperation. Так же NSOperation предоставляет возмож-ность отменять операции, приостанавливать всю очередь, запускать ее снова и много чего прочего.
 NSObject instance methods
@@ -2899,10 +2909,6 @@ NSObject instance methods
 *	Он подходит для простых задач
 Минусы
 *	Нужно упаковывать все параметры для передачи, и бедные возможности по управле-нию очередностью, количеством одновременных задач, их приоритетом. На каждый вы-зов performSelectorInBackground будет создаваться отдельный поток. При быстром скролли-ровании большой таблицы можно довести число потоков до очень большой величины.
-Run Loops
-Run loops are not technically a concurrency mechanism like GCD or operation queues, because they don’t enable the parallel execution of tasks. However, run loops tie in directly with the execution of tasks on the main dispatch/operation queue and they provide a mechanism to execute code asyn-chronously. Run loops can be a lot easier to use than operation queues or GCD, because you don’t have to deal with the complexity of concurrency and still get to do things asynchronously.
-A run loop is always bound to one particular thread. The main run loop associated with the main thread has a central role in each Cocoa and CocoaTouch application, because it handles UI events, timers, and other kernel events. Whenever you schedule a timer, use a NSURLConnection or call per-formSelector:withObject:afterDelay:, the run loop is used behind the scenes in order to perform these asyn-chronous tasks. Whenever you use a method which relies on the run loop, it is important to remember that run loops can be run in different modes. Each mode defines a set of events the run loop is going to react to. This is a clever way to temporarily prioritize certain tasks over others in the main run loop. A typical example of this is scrolling on iOS. While you’re scrolling, the run loop is not running in its default mode, and therefore, it’s not going to react to, for example, a timer you have scheduled before. Once scrolling stops, the run loop returns to the default mode and the events which have been queued up are executed. If you want a timer to fire during scrolling, you need to add it to the run loop in the NSRunLoopCommonModes mode. The main thread always has the main run loop set up and running. Other threads though don’t have a run loop configured by default. You can set up a run loop for other threads too, but you will rarely need to do this. Most of the time it is much easier to use the main run loop. If you need to do heavier work that you don’t want to execute on the main thread, you can still dispatch it onto another queue after your code is called from the main run loop.
-You can think of a Run Loop to be an event processing for-loop associated to a thread. This is provided by the system for every thread, but it's only run automatically for the main thread. Note that running run loops and executing a thread are two distinct concepts. You can execute a thread without running a run loop, when you're just performing long calculations and you don't have to respond to various events. If you want to respond to various events from a secondary thread, you retrieve the run loop associated to the thread by [NSRunLoop currentRunLoop]; and run it. The events run loops can handle is called input sources. You can add input sources to a run-loop.
 
 In general, you should use the highest level of abstraction that suits your needs. This means that you should usually use NSOperationQueue instead of GCD, unless you need to do something that NSOperationQueue doesn't support.
 
