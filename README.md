@@ -1809,15 +1809,20 @@ UIView *view = [[UIView alloc]initWithFrame: appFrame];
 
 # MEMORY MANAGEMENT
 Memory management – процесс выделения памяти под объекты, и освобождение ее после использования.
-* "manual retain-release" (ручное сохранение-освобождение) или MRR – вы явно управляете памятью, отслеживая объекты, которые у вас есть. Это реализуется с помощью модели, известной как подсчет ссылок, что Foundation класса NSObject обеспечивает совместно со средой выполнения.
-* В Automatic Reference Counting (автоматическом подсчете ссылок), или ARC, система использует тот же подсчет ссылок, что и система MRR, но он вставляет соответствующий вызов метода управления памятью за вас во время компиляции.
-* В garbage collection (сборе мусора), система автоматически отслеживает, какие объекты владеют другими объектами. Затем она автоматически освобождает (или собирает мусор) объекты, на которые больше не ссылаются. Метод использует другой механизм, нежели, чем у используемых в MRR и ARC, и поддерживается только в среде выполнения на Mac OS X, а не IOS.
+* __Manual Retain-Release__ (ручное сохранение-освобождение) или MRR – вы явно управляете памятью, отслеживая объекты, которые у вас есть. Это реализуется с помощью модели, известной как подсчет ссылок, что Foundation класса NSObject обеспечивает совместно со средой выполнения.
+* В __Automatic Reference Counting__ (автоматическом подсчете ссылок), или ARC, система использует тот же подсчет ссылок, что и система MRR, но он вставляет соответствующий вызов метода управления памятью за вас во время компиляции.
+* В __Garbage Collection__ (сборе мусора), система автоматически отслеживает, какие объекты владеют другими объектами. Затем она автоматически освобождает (или собирает мусор) объекты, на которые больше не ссылаются. Метод использует другой механизм, нежели, чем у используемых в MRR и ARC, и поддерживается только в среде выполнения на Mac OS X, а не IOS.
 
 _Отличие ARC от GC:_
 
 GC работает во время выполнения программы с помощью кода, который переодически запускается и проверяет объекты. ARC работает во время компиляции и вставляет retain и release автоматически в код.
 
+<img src="https://github.com/sashakid/ios-guide/blob/master/Images/memory_management.png">
+
 ## Память в стеке и в куче
+
+<img src="https://github.com/sashakid/ios-guide/blob/master/Images/stack_explanataion_1.png">
+<img src="https://github.com/sashakid/ios-guide/blob/master/Images/stack_explanataion_2.png">
 
 __Stack__
 
@@ -1864,7 +1869,7 @@ Stack objects have two compelling advantages:
 
 __Disadvantages of Stack Objects__
 
-The strictly defined lifetime of a stack object is a disadvantage as well, and a major one. In Objective-C (and C++, and many other languages), it is impos-sible to move an object after it's created. The reason for this is because there may be many pointers to that object, and those pointers are not tracked. They would all need to be updated to track the move, but there's no way to accomplish this.
+The strictly defined lifetime of a stack object is a disadvantage as well, and a major one. In Objective-C (and C++, and many other languages), it is impossible to move an object after it's created. The reason for this is because there may be many pointers to that object, and those pointers are not tracked. They would all need to be updated to track the move, but there's no way to accomplish this.
 (Note: it's not an impossibility in general, and many languages move objects around as a matter of course, often as part of garbage collection schemes. However, this requires more runtime smarts and a stricter type system than you get in Objective-C.)
 As used in Cocoa, Objective-C uses a reference counting system for memory management. The advantage of this system is that any single object can have multiple "owners", and the system won't allow the object to be destroyed until all owners have relinquished ownership.
 Stack allocated objects inherently have a single owner, the function which created them. If Objective-C had stack objects, what would happen if you passed it to some other code which then tried to keep it around by retaining it? There's no way to prevent the object from being destroyed when the function which created it returns, so the retain can't work. The code which tries to keep the object around will fail, end up with a dangling reference, and will crash.
@@ -1873,7 +1878,7 @@ Another problem is that stack objects are not very flexible. It's not uncommon i
 __Actual Stack Objects in Objective-C__
 
 It turns out that Objective-C does have stack objects, truly and officially, as of 10.6!
-Don't get too excited, though. It's only supported for a single kind of object: blocks. When you write a block inside a function using the ^{} syntax, the result of that expression is a stack object!
+Don't get too excited, though. It's only supported for a single kind of object: blocks. When you write a block inside a function using the `^{}` syntax, the result of that expression is a stack object!
 
 ## Manual retain-release
 Используйте методы доступа, чтобы сделать управление памятью проще. Рассмотрим счетчик объекта, количество которого вы хотите установить.
@@ -1978,8 +1983,8 @@ for (i = 0; i < 10; i++) {
 
 * Вы можете создать объект, используя метод, имя которого начинается с `alloc`, `new`, `copy`, или `mutableCopy`.
 * Вы можете стать владельцем объекта, используя `retain`: Полученный объект, как правило, гарантированно остается в силе в течение выполнения метода, в котором он был получен, и этот метод также может безопасно вернуть объект к вызвовшему его методу. Вы используете `retain` в двух случаях:
-(1) В реализации метода доступа или инициализации метода, чтобы стать владельцем объекта, который нужно сохранить как значение свойства
-(2) Для предотвращения освобождения объекта как побочного эффекта от некоторых других операций
+1. В реализации метода доступа или инициализации метода, чтобы стать владельцем объекта, который нужно сохранить как значение свойства
+2. Для предотвращения освобождения объекта как побочного эффекта от некоторых других операций
 
 _Если объект вам больше не нужен, вы должны отказаться от права собственности на него:_
 Вы отказываетесь от права собственности на объект, послав ему сообщение `release` или `autorelease` сообщение. В Cocoa терминологии, из отказа от права владения объектом, как правило следует, "освобождение" объекта.
@@ -2017,6 +2022,8 @@ All other pointer types, such as `char *` and CF objects such as `CFStringRef`, 
 
 ## Модификаторы
 __Для свойств__
+
+<img src="https://github.com/sashakid/ios-guide/blob/master/Images/property_modifiers.png">
 
 `readwrite` (по-умолчанию) и `readonly`
 * генерируются одновременно сеттеры и геттеры (setters/getters) или только геттеры
@@ -2073,6 +2080,8 @@ __Для переменных__
 
 Generally speaking, these extra qualifiers don’t need to be used very often. You might first encounter these qualifiers and others when using the migration tool. For new projects however, you generally you won’t need them and will mostly use strong/weak with your declared properties.
 
+<img src="https://github.com/sashakid/ios-guide/blob/master/Images/variable_modifiers.png">
+
 `__strong`
 по умолчанию. Объект остается "живым", если на него есть сильный указатель. This means any object created using alloc/init is retained for the lifetime of its current scope. The “current scope” usually means the braces in which the variable is declared (i.e. a method, for loop, if block, etc…)
 
@@ -2101,9 +2110,11 @@ strongObject = nil;
 _Then if you go through the rules you outlined then you'll ask yourself these questions:_
 
 __Strong: "keep this in the heap until I don't point to it anymore"__
-_`strongObject` doesn't point to `<some_object>` any more. So we don't need to keep it.
+
+_`strongObject` doesn't point to `<some_object>` any more. So we don't need to keep it._
 
 __Weak: "keep this as long as someone else points to it strongly"__
+
 _`weakObject` still points to `<some_object>`. But since nobody else points to it, this rule also means that we don't need to keep it.
 The result is that `<some_object>` is deallocated and if your runtime supports it (Lion and iOS 5 upwards) then weakObject will automatically be set to nil._
 
@@ -2112,119 +2123,148 @@ _Now consider what happens if we set `weakObject` to `nil` like so:_
 weakObject = nil;
 ```
 _Then if you go through the rules you outlined then you'll ask yourself these questions:_
+
 __Strong: "keep this in the heap until I don't point to it anymore"__
+
 _strongObject does point to <some_object>. So we do need to keep it._
 
 __Weak: "keep this as long as someone else points to it strongly"__
+
 _`weakObject` doesn't point to `<some_object>`.
 The result is that `<some_object>` is not deallocated, but `weakObject` will be the `nil` pointer._
 
 _[Note that all that is assuming `<some_object>` is not pointed to by another strong reference somewhere else / some other means of being "held"]_
 
 ## Что такое property?
-Упрощенный способ для определения и создания методов доступа, обращающихся к суще-ствующим переменным экземплярам. Классы, которые подставляют переменные экземпляра, могут использовать обозначение свойства вместо того, чтобы использовать синтаксис getter и setter.
+Упрощенный способ для определения и создания методов доступа, обращающихся к существующим переменным экземплярам. Классы, которые подставляют переменные экземпляра, могут использовать обозначение свойства вместо того, чтобы использовать синтаксис getter и setter.
 
-Написать сеттер и геттер для свойства, с ARC и без.
-ARC
+## Написать сеттер и геттер для свойства, с ARC и без.
+__ARC__
+```objectivec
 - (void)setNumerator:(int)n {
-numerator = n;
+	numerator = n;
 }
 
 - (int)numerator {
-return numerator;
+	return numerator;
 }
-MRR
+```
+__MRR__
+```objectivec
 - (NSArray *)sushiTypes {
-    		return _sushiTypes;
-}
-- (void)setSushiTypes:(NSArray *)sushiTypes {
-   		[sushiTypes retain];
-    		[_sushiTypes release];
-    		_sushiTypes = sushiTypes;
-}
-- (void)dealloc {
-    		[super dealloc];
-    		[sushiTypes release];
+    return _sushiTypes;
 }
 
-В каких случаях лучше использовать strong, а в каких copy для NSString? Почему?
+- (void)setSushiTypes:(NSArray *)sushiTypes {
+   	[sushiTypes retain];
+    [_sushiTypes release];
+    _sushiTypes = sushiTypes;
+}
+
+- (void)dealloc {
+    [super dealloc];
+    [sushiTypes release];
+}
+```
+## В каких случаях лучше использовать strong, а в каких copy для NSString? Почему?
+```objectivec
 @property (nonatomic, strong) NSString *someString;
 @property (nonatomic, copy) NSString *anotherString;
-сopy используется только для объектов, реализующих протокол <NSCopying>. Обычно его ис-пользуют с mutable объектами или со свойствами, представляющими какое-то значение (value).
+```
+`сopy` используется только для объектов, реализующих протокол `<NSCopying>`. Обычно его используют с mutable объектами или со свойствами, представляющими какое-то значение (value).
 
-autorelease vs release?
-Autorelease pool это — механизм отложеного отказа от ответсвенности. Это означет что вы больше не хотите владеть объектом и он вам в общем-то не нужен, но не хотите чтобы он уда-лился прямо сейчас. Зачастую вам не нужно создавать свой пул, просто используется NSAutoreleasePool и то даже не напрямую. Чтобы поместить объект в autorelease pool нужно отправить ему сообщение autorelease (один объект может быть добавлен в пул несколько раз) и на следующем цикле сообщений autorelease pool отправит всем этим объектам сообщение release, так как сам получит dealloc после чего будет создан новый autorelease pool. Таким об-разом Cocoa ожидает, что как минимум один autorelease pool будет всегда, и автоматически со-здает его в main.
-Autorelease pool добавляются по принципу стека, самый последний добавленый пул будет в самом верху стека авторелиз пулов в текущем потоке. Создание пула осуществляется стан-дартным alloc и init, удаление drain. Если послать сообщение drain не самому верхнему пулу, то все пулы над ним тоже получат это сообщение и соответсвенно удалят все из себя. Оффици-альная документация показывает нам вот такой пример использования своего пула:
+## `autorelease` vs `release`?
+Autorelease pool это — механизм отложеного отказа от ответсвенности. Это означет что вы больше не хотите владеть объектом и он вам в общем-то не нужен, но не хотите чтобы он удалился прямо сейчас. Зачастую вам не нужно создавать свой пул, просто используется NSAutoreleasePool и то даже не напрямую. Чтобы поместить объект в autorelease pool нужно отправить ему сообщение autorelease (один объект может быть добавлен в пул несколько раз) и на следующем цикле сообщений autorelease pool отправит всем этим объектам сообщение release, так как сам получит dealloc после чего будет создан новый autorelease pool. Таким образом Cocoa ожидает, что как минимум один autorelease pool будет всегда, и автоматически создает его в main.
+Autorelease pool добавляются по принципу стека, самый последний добавленый пул будет в самом верху стека авторелиз пулов в текущем потоке. Создание пула осуществляется стандартным alloc и init, удаление drain. Если послать сообщение drain не самому верхнему пулу, то все пулы над ним тоже получат это сообщение и соответсвенно удалят все из себя. Оффициальная документация показывает нам вот такой пример использования своего пула:
+```objectivec
 NSArray *urls = <# An array of file URLs #>;
 for (NSURL *url in urls) {
-NSAutoreleasePool *loopPool = [[NSAutoreleasePool alloc] init];
+	NSAutoreleasePool *loopPool = [[NSAutoreleasePool alloc] init];
    	NSError *error = nil;
-    	NSString *fileContents = [[[NSString alloc] initWithContentsOfURL:url
-      encoding:NSUTF8StringEncoding
-error:&error] autorelease];
-    	/* Process the string, creating and autoreleasing more objects. */
-    	[loopPool drain];
+    NSString *fileContents = [[[NSString alloc] initWithContentsOfURL:url encoding:NSUTF8StringEncoding error:&error] autorelease];
+    /* Process the string, creating and autoreleasing more objects. */
+    [loopPool drain];
 }
-Мы тут видим, что был создан свой пул (он разместился вверху стека пулов и будет освобож-ден первым), в него добавляются NSString *fileContents и потом пул освобождается (а так как он самый верхний — освобождается только он).
+```
+Мы тут видим, что был создан свой пул (он разместился вверху стека пулов и будет освобож-ден первым), в него добавляются `NSString *fileContents` и потом пул освобождается (а так как он самый верхний — освобождается только он).
 
-Что делать, если проект написан с использованием ARC, а нужно использовать классы сторонней библиотеки написанной без ARC?
+## Что делать, если проект написан с использованием ARC, а нужно использовать классы сторонней библиотеки написанной без ARC?
 1 способ: Edit – Refactor – Convert to ObjC ARC
-2 способ: App – Targets – Build Phases – Compile Sources – поставить флаг -fno-objc-arc
 
-Основные темы управления памятью, такие как владение retain/release/autorelease
-*	Что случится если вы добавите только что созданный объект в Mutable Array, и пошлете ему сообщение release? //объект останется в массиве
-*	Что случится если послать сообщение release массиву? //массив удалится
-*	Что случится если вы удалите объект из массива и попытаетесь его использовать? // объект удалится из массива, использовать объект дальше можно
+2 способ: App – Targets – Build Phases – Compile Sources – поставить флаг `-fno-objc-arc`
 
-Вопрос о циклах в графах владения, и почему свойства delegate (предоставляющие до-ступ к делегату) обычно задаются как assign?
+## Основные темы управления памятью, такие как владение `retain` / `release` / `autorelease`
+* Что случится если вы добавите только что созданный объект в Mutable Array, и пошлете ему сообщение release?
+
+//объект останется в массиве
+
+* Что случится если послать сообщение release массиву?
+
+//массив удалится
+
+* Что случится если вы удалите объект из массива и попытаетесь его использовать?
+
+//объект удалится из массива, использовать объект дальше можно
+
+## Вопрос о циклах в графах владения, и почему свойства `delegate` (предоставляющие доступ к делегату) обычно задаются как assign?
+```
 A creates B;
 A sets itself as B’s delegate;
 [A release];
 if B retained A => leak;
+```
 
+<img src="https://github.com/sashakid/ios-guide/blob/master/Images/retain_cycle.png">
 
-Что произойдет если сначала нажать на кнопку 1 а потом на кнопку 2?
+## Что произойдет если сначала нажать на кнопку 1 а потом на кнопку 2?
+```objectivec
 - (IBAction)btn1DidTouch:(id)sender {
-_string = [[[NSString alloc] initWithFormat:@"v=%i", rand()] autorelease];
+	_string = [[[NSString alloc] initWithFormat:@"v=%i", rand()] autorelease];
 }
 - (IBAction)btn2DidTouch:(id)sender {
-NSLog(@"_string is equal to ‘%@’", _string);
+	NSLog(@"_string is equal to ‘%@’", _string);
 }
-Крэш, т.к utoreleasepool создается в начале обработки события и уничтожается в конце. т.е. нажали на первую кнопку — началась обработка события, нажали на вторую — кнопку — за-кончилась обработка первого события, очистлся autoreleasepool а вместе с ним и объект уда-лился, а ссылка осталась. Затем началась обработка второго события и мы обращаемся к заде-алоченному объекту, результат — крэш.
+```
+Крэш, т.к utoreleasepool создается в начале обработки события и уничтожается в конце. т.е. нажали на первую кнопку — началась обработка события, нажали на вторую — кнопку — закончилась обработка первого события, очистлся autoreleasepool а вместе с ним и объект удалился, а ссылка осталась. Затем началась обработка второго события и мы обращаемся к задеалоченному объекту, результат — крэш.
 
-Нужно ли ретейнить (посылать сообщение retain) делегат для CAAnimation?
-Да. Это одно из редких исключений в политике управления памятью. Specific task that has some sort of “finished” state. Также нужно ритейнить NSURLConnection.
+## Нужно ли ретейнить делегат для `CAAnimation`?
+Да. Это одно из редких исключений в политике управления памятью. Specific task that has some sort of “finished” state. Также нужно ритейнить `NSURLConnection`.
 
-Что произойдет при исполнении следующего кода?
+## Что произойдет при исполнении следующего кода?
+```objectivec
 Ball *ball = [[[[Ball alloc] init] autorelease] autorelease];
-Впоследствии это вызовет крэш. Потому что объект дважды добавляется в пул автоосвобож-дения, и release вызовется дважды.
+```
+Впоследствии это вызовет крэш. Потому что объект дважды добавляется в пул автоосвобождения, и `release` вызовется дважды.
 
-Реализуйте следующие методы: retain, release, autorelease
--(id)retain {
-   		NSIncrementExtraRefCount(self);
-    		return self;
+## Реализуйте следующие методы: retain, release, autorelease
+```objectivec
+- (id)retain {
+   	NSIncrementExtraRefCount(self);
+    return self;
 }
--(void)release {
-    		if(NSDecrementExtraRefCountWasZero(self)) {
-         		NSDeallocateObject(self);
-    		}
+
+- (void)release {
+    if (NSDecrementExtraRefCountWasZero(self)) {
+         NSDeallocateObject(self);
+    }
 }
--(id)autorelease {  
+
+- (id)autorelease {  
 // Add the object to the autorelease pool
-    		[NSAutoreleasePool addObject:self];
-    		return self;
+    [NSAutoreleasePool addObject:self];
+    return self;
 }
-
-Если я вызову performSelector:withObject:afterDelay: – объекту пошлется сообщение re-tain?
+```
+## Если я вызову `performSelector:withObject:afterDelay:` – объекту пошлется сообщение `retain`?
 Да. Это создает таймер который вызывает селектор в RunLoop'е текущего потока (thread).
 
-Вы можете объяснить, что происходит когда вы посылаете объекту сообщение autore-lease?
-Когда вы посылаете объекту сообщение autorelease, его счетчик ссылок уменьшится на 1 в определенный момент в будущем. Объект будет добавлен в autorelease pool (пул автоосвобождения) в текущем потоке (thread). Цикл главного потока (main thread loop "NSRunLoop") создает autorelease pool в начале функции и освобождает его в конце. Это устанавливает pool на время выполнения задачи. Это также означает что авторелизные (объекты помещенные в пул) объекты созданные в течение выполнеения задачи не будут уничтожены пока задача не завершится. Это может привести к излишнему потреблению памяти для задачи (объекты будут уже не нужны но освободятся только в конце задачи). Вы также можете попробовать создать вложенный пул и освободить его раньше, или использовать NSOperationQueue с его собственным пулом.
+## Вы можете объяснить, что происходит когда вы посылаете объекту сообщение `autorelease`?
+Когда вы посылаете объекту сообщение `autorelease`, его счетчик ссылок уменьшится на 1 в определенный момент в будущем. Объект будет добавлен в autorelease pool (пул автоосвобождения) в текущем потоке (thread). Цикл главного потока (main thread loop "NSRunLoop") создает autorelease pool в начале функции и освобождает его в конце. Это устанавливает pool на время выполнения задачи. Это также означает что авторелизные (объекты помещенные в пул) объекты созданные в течение выполнеения задачи не будут уничтожены пока задача не завершится. Это может привести к излишнему потреблению памяти для задачи (объекты будут уже не нужны но освободятся только в конце задачи). Вы также можете попробовать создать вложенный пул и освободить его раньше, или использовать NSOperationQueue с его собственным пулом.
 
-Объясните что такое подсчет ссылок (retain count)?
-Подсчет ссылок (retain count) — это механизм с помощью которого в obj-c реализовано управ-ление памятью. Когда вы создаете объект, его счетчик ссылок (retain count) установлен на 1. Когда вы посылаете объекту сообщение retain , его счетчик ссылок увеличивается на 1. Когда вы посылаете объекту сообщение release , его счетчик ссылок уменьшается на 1. Когда вы по-сылаете объекту сообщение autorelease , его счетчик ссылок уменьшится на 1 в определенный момент в будующем. Когда счетчик ссылок объекта становится равным 0 то объект уничтожа-ется (dealloc).
+## Объясните что такое подсчет ссылок (retain count)?
+Подсчет ссылок (retain count) — это механизм с помощью которого в obj-c реализовано управ-ление памятью. Когда вы создаете объект, его счетчик ссылок (retain count) установлен на `1`. Когда вы посылаете объекту сообщение `retain` , его счетчик ссылок увеличивается на `1`. Когда вы посылаете объекту сообщение `release` , его счетчик ссылок уменьшается на `1`. Когда вы посылаете объекту сообщение autorelease , его счетчик ссылок уменьшится на `1` в определенный момент в будующем. Когда счетчик ссылок объекта становится равным `0` то объект уничтожается (`dealloc`).
 
-Паттерны проектирования
+# Паттерны проектирования
 Повторимая архитектурная конструкция, представляющая собой решение проблемы проекти-рования в рамках некоторого часто возникающего контекста. Популярные: MVC, делегат, син-глтон, наблюдатель. Редкие паттерны: строитель, мост, фасад.
 Порождающий шаблон – абстрагирует процесс инстанцирования (создания экземпляра клас-са). Шаблон, порождающий класс – наследуется. Шаблон, порождающий объект – делегирует. Позволяет сделать систему независимой от способа создания, композиции и представления объектов.
 Примеры: абстрактная фабрика, строитель, ленивая загрузка, singleton.
