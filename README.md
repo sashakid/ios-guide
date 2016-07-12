@@ -2270,7 +2270,9 @@ Ball *ball = [[[[Ball alloc] init] autorelease] autorelease];
 Повторимая архитектурная конструкция, представляющая собой решение проблемы проекти-рования в рамках некоторого часто возникающего контекста.
 Порождающий шаблон – абстрагирует процесс инстанцирования (создания экземпляра класса). Шаблон, порождающий класс – наследуется. Шаблон, порождающий объект – делегирует. Позволяет сделать систему независимой от способа создания, композиции и представления объектов.
 Примеры: абстрактная фабрика, строитель, ленивая загрузка, singleton.
+
 __How Cocoa Adapts Design Patterns__
+
 You can find adaptations of design patterns throughout Cocoa, in both its OS X and iOS versions. Mechanisms and architectures based on patterns are common in Cocoa frameworks and in the Objective-C runtime and language. Cocoa often puts its own distinctive spin on a pattern because its designs are influenced by factors such as language capabilities or existing architectures.
 This section contains summaries of most of the design patterns cataloged in Design Patterns: Elements of Reusable Object-Oriented Software. Each section not only summarizes the pattern but dis-cusses the Cocoa implementations of it. Only patterns that Cocoa implements are listed, and each description of a pattern in the following sections pertains to a particular Cocoa context.
 Implementations of design patterns in Cocoa come in various forms. Some of the designs described in the following sections—such as protocols and categories—are features of the Objective-C language. In other cases, the “instance of a pattern” is implemented in one class or a group of related classes (for example, class clusters and singleton classes). And in other cases the pattern adaptation is a major framework architecture, such as the responder chain. Some of the pattern-based mechanisms you get almost “for free” while others require some work on your part. And even if Cocoa does not implement a pattern, you are encouraged to do so yourself when the situation warrants it; for example, object composition (Decorator pattern) is often a better technique than subclassing for extending class behavior.
@@ -2720,7 +2722,9 @@ _Минусы_
 * Many lines of code required to define:
 
 (1) the protocol definition
+
 (2) the delegate property in the controller
+
 (3) the implementation of the delegate method definitions within the delegate itself.
 
 * Need to be careful to correctly set delegates to nil on object deallocation, failure to do so can cause memory crashes by calling methods on deallocated objects.
