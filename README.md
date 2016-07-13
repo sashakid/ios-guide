@@ -2980,6 +2980,24 @@ Dispatch queues are a C-based mechanism for executing custom tasks. A dispatch q
 
 Плюсы
 *	Визуально — он самый короткий и простой в реализации. Он возоможен с использова-нием блоков. Этот подход тоже очень гибкий (хотя отменять блок поставленный в оче-редь нельзя стандартными способами). В GCD можно настраивать приоритеты, блоки захватывают переменные из окружения блока.
+
+Types of dispatch queues
+
+__Serial__
+
+Serial queues (also known as private dispatch queues) execute one task at a time in the order in which they are added to the queue. The currently executing task runs on a distinct thread (which can vary from task to task) that is managed by the dispatch queue. Serial queues are often used to synchronize access to a specific resource.
+You can create as many serial queues as you need, and each queue operates concurrently with respect to all other queues. In other words, if you create four serial queues, each queue executes only one task at a time but up to four tasks could still execute concurrently, one from each queue. For information on how to create serial queues, see Creating Serial Dispatch Queues.
+
+__Concurrent__
+
+Concurrent queues (also known as a type of global dispatch queue) execute one or more tasks concurrently, but tasks are still started in the order in which they were added to the queue. The currently executing tasks run on distinct threads that are managed by the dispatch queue. The exact number of tasks executing at any given point is variable and depends on system conditions.
+In iOS 5 and later, you can create concurrent dispatch queues yourself by specifying DISPATCH_QUEUE_CONCURRENT as the queue type. In addition, there are four predefined global concurrent queues for your application to use.
+
+__Main dispatch queue__
+
+The main dispatch queue is a globally available serial queue that executes tasks on the application’s main thread. This queue works with the application’s run loop (if one is present) to interleave the execution of queued tasks with the execution of other event sources attached to the run loop. Because it runs on your application’s main thread, the main queue is often used as a key synchronization point for an application.
+Although you do not need to create the main dispatch queue, you do need to make sure your application drains it appropriately.
+
 ## NSOperationQueue
 Operation queues are a Cocoa abstraction of the queue model exposed by GCD. While GCD offers more low-level control, operation queues implement several convenient features on top of it, which often makes it the best and safest choice for application developers. The NSOperationQueue class has two different types of queues: the main queue and custom queues. The main queue runs on the main thread, and custom queues are processed in the background. In any case, the tasks which are processed by these queues are represented as subclasses of NSOperation. Whereas dispatch queues always execute tasks in first-in, first-out order, operation queues take other factors into account when determining the execution order of tasks. Because the NSOperation class is essentially an abstract base class, you typically define custom subclasses to perform your tasks. However, the Foundation framework does include some concrete subclasses that you can create and use as is to perform tasks.
 Плюсы
