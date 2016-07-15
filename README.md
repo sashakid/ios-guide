@@ -3040,7 +3040,7 @@ __Плюсы__
 
 * Можно для каждой очереди настраивать приоритет и количество одновременно выпол-няющихся операций. `NSOperationQueue` самостоятельно создает и поддерживает пул потоков, в которых исполняются `NSOperation`. Так же `NSOperation` предоставляет возможность отменять операции, приостанавливать всю очередь, запускать ее снова и много чего прочего.
 
-## `_NSObject` instance methods
+## `NSObject` instance methods
 ```objectivec
 - (void)performSelector:(SEL)aSelector onThread:(NSThread *)thread withObject:(id)arg waitUntilDone:(BOOL)wait;
 - (void)performSelector:(SEL)aSelector onThread:(NSThread *)thread withObject:(id)arg waitUntilDone:(BOOL)wait mo-des:(NSArray *)array;
