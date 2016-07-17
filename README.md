@@ -154,15 +154,17 @@
 	- [Что такое ленивая загрузка (lazy loading)? Что ее связывает с CoreData? Опишите ситуация когда она может быть полезной?](#Что такое ленивая загрузка (lazy loading)? Что ее связывает с CoreData? Опишите ситуация когда она может быть полезной?)
 	- [Что такое fetch result controller?](#Что такое fetch result controller?)
 - [Тестирование](#Тестирование)
-	- [Общие вопросы](#Общие вопросы)
 - [Блоки](#Блоки)
+	- [When and why block captures `self` and when they don't?](#When and why block captures `self` and when they don't?)
+	- [Примеры объявления и использования блоков](#Примеры объявления и использования блоков)
+	- [В чем отличие блока от лямбды и замыкания](#В чем отличие блока от лямбды и замыкания)
 	- [Обратный вызов](#Обратный вызов)
 	- [Когда использовать блоки, делегаты, KVO и уведомления?](#Когда использовать блоки, делегаты, KVO и уведомления?)
 	- [Swift closures and functions](#Swift closures and functions)
 	- [Closures](#Closures)
 	- [How Do I Declare a Closure in Swift?](#How Do I Declare a Closure in Swift?)
 	- [Чем отличаются лямбда, замыкание и блок?](#Чем отличаются лямбда, замыкание и блок?) 🖊
-- [Вопросы и задачи](#Вопросы и задачи)
+- [Общие вопросы и задачи](#Общие вопросы и задачи)
 	- [Inout parameters, pass by value, pass by reference](#Inout parameters, pass by value, pass by reference)
 	- [Заполнить строку буквами А, чтобы не делать миллионы итераций](#Заполнить строку буквами А, чтобы не делать миллионы итераций)
 	- [Написать процедуру, инвертирующую массив символов (первый элемент должен стать последним, второй пердпоследним и т.д.)](#Написать процедуру, инвертирующую массив символов (первый элемент должен стать последним, второй пердпоследним и т.д.))
@@ -3308,9 +3310,10 @@ _ORM_ – Object-relational mapping, объектно-реляционное о�
 
 _SQL_ – Структурированный язык запросов (Structed Query Language) – является информационно-логическим языком, предназначенным для описания, изменения и извлечения данных, хранимых в реляционных базах данных (relation, отношение).
 
-Пример SQL:
+__Пример SQL:__
 
-create a table to store information about weather observation stations:
+Create a table to store information about weather observation stations:
+
 -- No duplicate ID fields allowed
 ```sql
 CREATE TABLE STATION
@@ -3337,75 +3340,134 @@ ID | CITY | STATE | LAT_N | LONG_W
 66 | Caribou | ME | 47 | 68
 
 query to select Northern stations (Northern latitude > 39.7):
--- selecting only certain rows is called a "restriction".
 
+-- selecting only certain rows is called a "restriction".
+```sql
 SELECT * FROM STATION
 WHERE LAT_N > 39.7;
-ID	CITY	STATE	LAT_N	LONG_W
-44	Denver 	CO	40	105
-66	Caribou	ME	47	68
+```
+ID | CITY | STATE | LAT_N | LONG_W
+---|------|-------|-------|-------
+44 | Denver | CO | 40 | 105
+66 | Caribou | ME | 47 | 68
+
 query to select only ID, CITY, and STATE columns:
+
 -- selecting only certain columns is called a "projection".
-
+```sql
 SELECT ID, CITY, STATE FROM STATION;
-ID	CITY	STATE
-13	Phoenix	AZ
-44	Denver 	CO
-66	Caribou	ME
-query to both "restrict" and "project":
+```
+ID | CITY | STATE
+---|------|------
+13 | Phoenix | AZ
+44 | Denver | CO
+66 | Caribou | ME
 
+query to both "restrict" and "project":
+```sql
 SELECT ID, CITY, STATE FROM STATION
 WHERE LAT_N > 39.7;
-ID	CITY	STATE
-44	Denver 	CO
-66	Caribou	ME
+```
+ID | CITY | STATE
+---|------|------
+44 | Denver | CO
+66 | Caribou | ME
 
+## Целесообразность использования Core Data.
+Core Data уменьшает количество кода, написанного для поддержки модели слоя приложения, как правило, на 50% - 70%, измеряемое в строках кода. Core Data имеет зрелый код, качество которого обеспечивается путем юнит-тестов, и используется ежедневно миллионами клиентов в широком спектре приложений. Структура была оптимизирована в течение нескольких версий. Она использует информацию, содержащуюся в модели и выполненяет функции, как правило, не работающие на уровне приложений в коде. Кроме того, в дополнение к отличной безопасности и обработке ошибок, она предлагает лучшую масштабируемость при работе с памятью, относительно любого конкурирующего решения. Другими словами: вы могли бы потратить долгое время тщательно обрабатывая Ваши собственные решения оптимизации для конкретной предметной области, вместо того, чтобы получить преимущество в производительности, которую Core Data предоставляет бесплатно для любого приложения.
 
-Целесообразность использования Core Data.
-Core Data уменьшает количество кода, написанного для поддержки модели слоя приложения, как правило, на 50% - 70%, измеряемое в строках кода. Core Data имеет зрелый код, качество которого обеспечивается путем юнит-тестов, и используется ежедневно миллионами клиентов в широком спектре приложений. Структура была оптимизирована в течение нескольких версий. Она использует информацию, содержащуюся в модели и выполненяет функции, как правило, не работающие на уровне приложений в коде. Кроме того, в дополнение к отличной безопасности и обработке ошибок, она предлагает лучшую масштабируемость при работе с памятью, относительно любого конкурирующего решения. Другими словами: вы могли бы по-тратить долгое время тщательно обрабатывая Ваши собственные решения оптимизации для конкретной предметной области, вместо того, чтобы получить преимущество в производи-тельности, которую Core Data предоставляет бесплатно для любого приложения.
+__Когда нецелесообразно использовать Core Data:__
+* если планируется использовать очень небольшой объем данных. В этом случае проще воспользоваться для хранения Ваших данных объектами коллекций - массивами или словарями и сохранять их в .plist файлы.
+* если используется кросс-платформерная архитектура или требуется доступ к строго определенному формату файла с данными (хранилищу), например SQLite.
+* использование баз данных клиент-сервер, например MySQL или PostgreSQL.
 
-Когда нецелесообразно использовать Core Data
-*	если планируется использовать очень небольшой объем данных. В этом случае проще воспользоваться для хранения Ваших данных объектами коллекций - массивами или словарями и сохранять их в .plist файлы.
-*	если используется кросс-платформерная архитектура или требуется доступ к строго определенному формату файла с данными (хранилищу), например SQLite.
-*	использование баз данных клиент-сервер, например MySQL или PostgreSQL.
+__SQLite__
+* Максимальный объем хранимых данных базы SQLite составляет 2 терабайта.
+* Чтение из базы данных может производиться одним и более потоками, например несколько процессов могут одновременно выполнять `SELECT`. Однако запись в базу данных может осуществляться, только, если база в данный момент не занята другим процессом.
+* SQLite не накладывает ограничения на типы данных. Любые данные могут быть занесе-ны в любой столбец. Ограничения по типам данных действуют только на `INTEGER PRIMARY KEY`, который может содержать только 64-битное знаковое целое.
 
-SQL
-*	Максимальный объем хранимых данных базы SQLite составляет 2 терабайта.
-*	Чтение из базы данных может производиться одним и более потоками, например не-сколько процессов могут одновременно выполнять SELECT. Однако запись в базу дан-ных может осуществляться, только, если база в данный момент не занята другим про-цессом.
-*	SQLite не накладывает ограничения на типы данных. Любые данные могут быть занесе-ны в любой столбец. Ограничения по типам данных действуют только на INTEGER PRIMARY KEY, который может содержать только 64-битное знаковое целое.
 SQLite версии 3.0 и выше позволяет хранить BLOB данные в любом поле, даже если оно объявлено как поле другого типа.
 Обращение к SQLite базе из двух потоков одновременно неизбежно вызовет краш. Выхода два:
-1.	Синхронизируйте обращения при помощи директивы @synchronized. Это если поздно менять архитектуру, как было у меня;
-2.	Если задача закладывается на этапе проектирования, завести менеджер запросов на ос-нове NSOperationQueue. Он страхует от ошибок автоматически, а то, что делается авто-матически, часто делается без ошибок.
+1. Синхронизируйте обращения при помощи директивы `@synchronized`. Это если поздно менять архитектуру, как было у меня;
+2. Если задача закладывается на этапе проектирования, завести менеджер запросов на основе `NSOperationQueue`. Он страхует от ошибок автоматически, а то, что делается автоматически, часто делается без ошибок.
 
-Что такое Managed object context?
+__Пример SQLite__
+
+```objectivec
+- (int)createTable:(NSString *)filePath {
+    sqlite3 *db = NULL;
+    int rc = 0;
+
+    rc = sqlite3_open_v2([filePath cStringUsingEncoding:NSUTF8StringEncoding], &db, SQLITE_OPEN_READWRITE | SQLITE_OPEN_CREATE, NULL);
+    if (SQLITE_OK != rc) {
+        sqlite3_close(db);
+        NSLog(@"Failed to open db connection");
+    } else {
+        char *query ="CREATE TABLE IF NOT EXISTS students (id INTEGER PRIMARY KEY AUTOINCREMENT, name  TEXT, age INTEGER, marks INTEGER)";
+        char *errMsg;
+        rc = sqlite3_exec(db, query, NULL, NULL, &errMsg);
+        if (SQLITE_OK != rc) {
+            NSLog(@"Failed to create table rc:%d, msg=%s",rc,errMsg);
+        }
+        sqlite3_close(db);
+    }
+    return rc;
+}
+
+- (int)insert:(NSString *)filePath withName:(NSString *)name age:(NSInteger)age marks:(NSInteger)marks {
+    sqlite3 *db = NULL;
+    int rc = 0;
+    rc = sqlite3_open_v2([filePath cStringUsingEncoding:NSUTF8StringEncoding], &db, SQLITE_OPEN_READWRITE, NULL);
+    if (SQLITE_OK != rc) {
+        sqlite3_close(db);
+        NSLog(@"Failed to open db connection");
+    } else {
+        NSString *query  = [NSString stringWithFormat:@"INSERT INTO students (name, age, marks) VALUES (\"%@\", %ld, %ld)", name, (long)age, (long)marks];
+        char *errMsg;
+        rc = sqlite3_exec(db, [query UTF8String], NULL, NULL, &errMsg);
+        if (SQLITE_OK != rc) {
+            NSLog(@"Failed to insert record  rc:%d, msg=%s",rc,errMsg);
+        }
+        sqlite3_close(db);
+    }
+    return rc;
+}
+```
+## Что такое Managed object context?
 Управляемый объект контекста служит в качестве шлюза для основной коллекции объектов, известных под общим названием сохранение стека, некиим посредником между объектами приложения и внешним хранилищем данных. В нижней части стека постоянное хранилище объекта.
 
-Если вы хотите сохранить сделанные вами изменения, контекст гарантирует, что ваши объек-ты находятся в допустимом состоянии. Если это так, то изменения будут записаны в постоян-ное хранилище (или хранилища), добавит новые записи для объектов, созданных и удалит записи для объектов, которые удалены.
+Если вы хотите сохранить сделанные вами изменения, контекст гарантирует, что ваши объекты находятся в допустимом состоянии. Если это так, то изменения будут записаны в постоянное хранилище (или хранилища), добавит новые записи для объектов, созданных и удалит записи для объектов, которые удалены.
 
-Что такое Persistent store coordinator?
-В верхней части стека управляемый объект контекста, в нижней части стека постоянное хра-нилище объекта. Между управляемым объектом контекста и постоянным хранилищем объек-та есть постоянный координатор хранилища. По сути, постоянный координатор хранилища определяет стек. Координатор предназначен для представления фасада для управляемого контекстом объекта, так что группа постоянных хранилищ выглядит как единое совокупное хранилище. Управляемый объект контекста может создать граф объектов на основе объеди-нения всех хранилищ данных координатора. Координатор может быть связан только с одной управляемой объектной моделью. Если Вы хотите положить различные субъекты в различные хранилища, вы должны разделить вашу модель, определяя конфигурацию в управляемой модели объекта.
+## Что такое Persistent store coordinator?
+В верхней части стека управляемый объект контекста, в нижней части стека постоянное хранилище объекта. Между управляемым объектом контекста и постоянным хранилищем объекта есть постоянный координатор хранилища. По сути, постоянный координатор хранилища определяет стек. Координатор предназначен для представления фасада для управляемого контекстом объекта, так что группа постоянных хранилищ выглядит как единое совокупное хранилище. Управляемый объект контекста может создать граф объектов на основе объеди-нения всех хранилищ данных координатора. Координатор может быть связан только с одной управляемой объектной моделью. Если Вы хотите положить различные субъекты в различные хранилища, вы должны разделить вашу модель, определяя конфигурацию в управляемой модели объекта.
 
-Какие есть нюансы при использовании Core Data в разных потоках? Как синхронизиро-вать данные между потоками?
-1.	Create a separate managed object context for each thread and share a single persistent store coordinator. This is the typically-recommended approach.
-2.	Create a separate managed object context and persistent store coordinator for each thread. This approach provides for greater concurrency at the expense of greater complexity (particularly if you need to communicate changes between different contexts) and increased memory usage.
+Какие есть нюансы при использовании Core Data в разных потоках? Как синхронизировать данные между потоками?
+1. Create a separate managed object context for each thread and share a single persistent store coordinator. This is the typically-recommended approach.
+2. Create a separate managed object context and persistent store coordinator for each thread. This approach provides for greater concurrency at the expense of greater complexity (particularly if you need to communicate changes between different contexts) and increased memory usage.
 
-Какие типы хранилищ поддерживает CoreData?
+# Какие типы хранилищ поддерживает CoreData?
 Persistent Store
-*	SQLite
-*	Binary
-*	XML
-Atomic Store (custom type)
 
-Что такое ленивая загрузка (lazy loading)? Что ее связывает с CoreData? Опишите ситуа-ция когда она может быть полезной?
-Для загрузки данных из БД в память приложения удобно пользоваться загрузкой не только данных об объекте, но и о сопряжённых с ним объектах. Это делает загрузку данных проще для разработчика: он просто использует объект, который, тем не менее вынужден загружать все данные в явном виде. Но это ведёт к случаям, когда будет загружаться огромное количе-ство сопряжённых объектов, что плохо скажется на производительности в случаях, когда эти данные реально не нужны. Паттерн Lazy Loading (Ленивая Загрузка) подразумевает отказ от загрузки дополнительных данных, когда в этом нет необходимости. Вместо этого ставится маркер о том, что данные не загружены и их надо загрузить в случае, если они понадобятся. Как известно, если Вы ленивы, то вы выигрываете в том случае, если дело, которое вы не де-лали на самом деле и не надо было делать.
+* SQLite
+* Binary
+* XML
 
-Что такое fetch result controller?
-Данные сами по себе может быть и представляют какую-либо ценность, но, обычно их нужно использовать. Одним из элементов представления данных в iOS служат таблицы (объекты класса UITableView), которые через объект класса NSFetchedResultsController можно привязать к CoreData. После этого при изменении данных в CoreData будет актуализироваться информа-ция в таблице. Так же, с помощью таблицы можно управлять данными в хранилище.
-NSFetchedResultsController — контроллер результатов выборки. Создается, обычно один эк-земпляр на ViewController, но вполне может работать и без оного, внутрь которого помещается исключительно для того, что бы было проще привязать данные к виду.
+Atomic Store
 
-Тестирование
-Unit Tests
+* custom type
+
+## Что такое ленивая загрузка (lazy loading)? Что ее связывает с CoreData? Опишите ситуация когда она может быть полезной? Что такое faulting?
+Для загрузки данных из БД в память приложения удобно пользоваться загрузкой не только данных об объекте, но и о сопряжённых с ним объектах. Это делает загрузку данных проще для разработчика: он просто использует объект, который, тем не менее вынужден загружать все данные в явном виде. Но это ведёт к случаям, когда будет загружаться огромное количество сопряжённых объектов, что плохо скажется на производительности в случаях, когда эти данные реально не нужны. Паттерн Lazy Loading (Ленивая Загрузка) подразумевает отказ от загрузки дополнительных данных, когда в этом нет необходимости. Вместо этого ставится маркер о том, что данные не загружены и их надо загрузить в случае, если они понадобятся. Как известно, если Вы ленивы, то вы выигрываете в том случае, если дело, которое вы не делали на самом деле и не надо было делать.
+Faulting isn't unique to Core Data. A similar technique is used in many other frameworks, such as Ember and Ruby on Rails. Faulting is a mechanism Core Data employs to reduce your application’s memory usage, only load data when it's needed. A fault is a placeholder object that represents a managed object that has not yet been fully realized, or a collection object that represents a relationship. To make faulting work, Core Data does a bit of magic under the hood by creating custom subclasses at compile time that represent the faults.
+
+<img src="https://github.com/sashakid/ios-guide/blob/master/Images/core_data_faulting.png">
+
+## Что такое fetch result controller?
+Данные сами по себе может быть и представляют какую-либо ценность, но, обычно их нужно использовать. Одним из элементов представления данных в iOS служат таблицы (объекты класса `UITableView`), которые через объект класса `NSFetchedResultsController` можно привязать к CoreData. После этого при изменении данных в CoreData будет актуализироваться информация в таблице. Так же, с помощью таблицы можно управлять данными в хранилище.
+`NSFetchedResultsController` — контроллер результатов выборки. Создается, обычно один экземпляр на `ViewController`, но вполне может работать и без оного, внутрь которого помещается исключительно для того, что бы было проще привязать данные к виду.
+
+# Тестирование
+## Unit Tests
 Tests the smallest unit of functionality, typically a method/function (e.g. given a class with a particular state, calling x method on the class should cause y to happen). Unit tests should be focussed on one particular feature (e.g., calling the pop method when the stack is empty should throw an InvalidOperationException). Everything it touches should be done in memory; this means that the test code and the code under test shouldn't:
 1.	Call out into (non-trivial) collaborators
 2.	Access the network
@@ -3415,29 +3477,45 @@ Tests the smallest unit of functionality, typically a method/function (e.g. give
 etc.
 Any kind of dependency that is slow / hard to understand / initialise / manipulate should be stubbed/mocked/whatevered using the appropriate techniques so you can focus on what the unit of code is doing, not what its dependencies do.
 In short, unit tests are as simple as possible, easy to debug, reliable (due to reduced external factors), fast to execute and help to prove that the smallest building blocks of your program function as intended before they're put together. The caveat is that, although you can prove they work perfectly in isolation, the units of code may blow up when combined which brings us to ...
-Integration Tests
+## Integration Tests
 Integration tests build on unit tests by combining the units of code and testing that the resulting combination functions correctly. This can be either the innards of one system, or combining multiple systems together to do something useful. Also, another thing that differentiates integration tests from unit tests is the environment. Integration tests can and will use threads, access the database or do whatever is required to ensure that all of the code and the different environment changes will work correctly.
 If you've built some serialization code and unit tested its innards without touching the disk, how do you know that it'll work when you are loading and saving to disk? Maybe you forgot to flush and dis-pose filestreams. Maybe your file permissions are incorrect and you've tested the innards using in memory streams. The only way to find out for sure is to test it 'for real' using an environment that is closest to production.
 The main advantage is that they will find bugs that unit tests can't such as wiring bugs (e.g. an in-stance of class A unexpectedly receives a null instance of B) and environment bugs (it runs fine on my single-CPU machine, but my colleague's 4 core machine can't pass the tests). The main disadvantage is that integration tests touch more code, are less reliable, failures are harder to diagnose and the tests are harder to maintain.
 Also, integration tests don't necessarily prove that a complete feature works. The user may not care about the internal details of my programs, but I do!
-Functional Tests
+## Functional Tests
 Functional tests check a particular feature for correctness by comparing the results for a given input against the specification. Functional tests don't concern themselves with intermediate results or side-effects, just the result (they don't care that after doing x, object y has state z). They are written to test part of the specification such as, "calling function Square(x) with the argument of 2 returns 4".
-Acceptance Tests
+## Acceptance Tests
 Acceptance testing seems to be split into two types:
 Standard acceptance testing involves performing tests on the full system (e.g. using your web page via a web browser) to see whether the application's functionality satisfies the specification. E.g. "clicking a zoom icon should enlarge the document view by 25%." There is no real continuum of results, just a pass or fail outcome.
 The advantage is that the tests are described in plain English and ensures the software, as a whole, is feature complete. The disadvantage is that you've moved another level up the testing pyramid. Ac-ceptance tests touch mountains of code, so tracking down a failure can be tricky.
 Also, in agile software development, user acceptance testing involves creating tests to mirror the user stories created by/for the software's customer during development. If the tests pass, it means the software should meet the customer's requirements and the stories can be considered complete. An acceptance test suite is basically an executable specification written in a domain specific language that describes the tests in the language used by the users of the system.
-Общие вопросы
-Блоки
-http://rypress.com/tutorials/objective-c/blocks
 
-Blocks are Objective-C objects. When you write a block in code, that is an expression of object type, much like the @"..." constant string syntax gives you an expression of object type. You can then use this object like you would any other Objective-C object, by sending it messages that it responds to, putting it into containers, passing it as a parameter, returning it, etc.
+# Блоки
 
-There is a major difference from the constant string syntax. Unlike constant strings, blocks are not exactly the same each time through a piece of code. This is because blocks capture their enclosing scope, and that scope is different every time they're called. In short, each time code execution hits a ^{...} construct, a new object is created.
+Objective-C blocks introduce a new class of language-level types to represent block types. They match the standard (but tricky) syntax for C function pointer types, but with a `^` in place of the `*`:
+```c
+void (*)(int) // function pointer taking int and returning void
+void (^)(int) // block taking int and returning void
+```
+As with function and method definitions, the braces indicate the start and end of the block. In this example, the block doesn’t return any value, and doesn’t take any arguments. In the same way that you can use a function pointer to refer to a C function, you can declare a variable to keep track of a block, like this:
+```objectivec
+void (^simpleBlock)(void);
 
-Allocating a new object every time would be kind of slow, so blocks take an unusual approach: the object you get from a ^{...} construct is a stack object. This means that it has the same lifetime as local variables, and will be destroyed automatically upon leaving the current scope. Weird, huh?
+simpleBlock = ^{
+    NSLog(@"This is a block");
+};
+```
+Once you’ve declared and assigned a block variable, you can use it to invoke the block:
+```objectivec
+simpleBlock();
+```
+Blocks are Objective-C objects. When you write a block in code, that is an expression of object type, much like the `@"..."` constant string syntax gives you an expression of object type. You can then use this object like you would any other Objective-C object, by sending it messages that it responds to, putting it into containers, passing it as a parameter, returning it, etc.
 
-It's frequently useful for a block to outlive the scope where it was created. For example, you may want to return a block, or save it for later. For this to work, you must copy the block. You can do this like any other Objective-C object by sending it the -copy message. And like any other Objective-C object, if you aren't running under Garbage Collection then you own the resulting object and must eventually dispose of it using -release or -autorelease.
+There is a major difference from the constant string syntax. Unlike constant strings, blocks are not exactly the same each time through a piece of code. This is because blocks capture their enclosing scope, and that scope is different every time they're called. In short, each time code execution hits a `^{...}` construct, a new object is created.
+
+Allocating a new object every time would be kind of slow, so blocks take an unusual approach: the object you get from a `^{...}` construct is a stack object. The cost of calling a block is therefore about the same as the cost of calling a C function. This means that it has the same lifetime as local variables, and will be destroyed automatically upon leaving the current scope. Weird, huh?
+
+It's frequently useful for a block to outlive the scope where it was created. For example, you may want to return a block, or save it for later. For this to work, you must copy the block. You can do this like any other Objective-C object by sending it the `copy` message. And like any other Objective-C object, if you aren't running under Garbage Collection then you own the resulting object and must eventually dispose of it using `release` or `autorelease`.
 
 Any reference to self is a reference to a local object variable, causing self to be retained. Any reference to an instance variable is an implicit reference to self and causes the same thing.
 
@@ -3445,21 +3523,22 @@ Any reference to self is a reference to a local object variable, causing self to
 
 <img src="https://github.com/sashakid/ios-guide/blob/master/Images/blocks_structure.png">
 
-
 Objective-C blocks are objects which contain an embedded function pointer. A block call translates to a call to that function pointer, passing the block as an implicit parameter:
-
-    block();
-    // equivalent to:
-    block->impl(block);
-The cost of calling a block is therefore about the same as the cost of calling a C function. It's slightly higher due to the need to look up the implementation pointer first, but just slightly.
+```objectivec
+block();
+// equivalent to:
+block->impl(block);
+```
+It's slightly higher due to the need to look up the implementation pointer first, but just slightly.
 
 It's actually fairly straightforward and described in Clang's Block Implementation Spec, in the "Imported Variables" section.
 
 When the compiler encounters a Block like:
-
+```objectivec
 ^{ if( numBalloons > numClowns) abort(); }
+```
 it creates a literal structure that includes -- among other things -- two elements that are important here. There's a function pointer to the executable code in the Block, and a const field for each variable that's referred to inside the Block. Something like this:
-
+```c
 struct __block_literal_1 {
     /* other fields */
     void (*invoke)(struct __block_literal_1 *);
@@ -3467,110 +3546,83 @@ struct __block_literal_1 {
     const int numBalloons;
     const int numClowns;
 };
+```
 Notice that the invoke function will take a pointer to a struct of the kind that's being defined right here; that is, the Block passes itself in when executing its code. Thus, the code gets access to the members of the structure.
 
 Right after the declaration, the compiler creates a definition of the Block, which simply uses the referenced variables to initialize the correct fields in the struct:
-
+```c
 struct __block_literal_1 __block_literal_1 = {
     /* Other fields */
-    __block_invoke_2,  /* This function was also created by the compiler. */
+    __block_invoke_2, /* This function was also created by the compiler. */
     /* ... */
-    numBalloons,  /* These two are the exact same variables as */
-    numClowns     /* those referred to in the Block literal that you wrote. *
- };
-Then, inside the invoke function, references to the captured variables are made like any other member of a struct, the_block->numBalloons.
+    numBalloons, /* These two are the exact same variables as */
+    numClowns /* those referred to in the Block literal that you wrote. */
+};
+```
+Then, inside the invoke function, references to the captured variables are made like any other member of a struct, `the_block->numBalloons`.
 
-http://clang.llvm.org/docs/Block-ABI-Apple.html#imported-variables
+## When and why block captures `self` and when they don't?
 
-I think the issue is that the networkService may keep a strong reference to the block. And the view controller may have a strong reference to the networkService. So the possible cycle of VC->NetworkService->block->VC could exist. However, in this case, it's usually safe to assume that the block will be released after it has run, in which case the cycle is broken. So, in this case, it isn't necessary.
+I think the issue is that the networkService may keep a strong reference to the block. And the view controller may have a strong reference to the networkService. So the possible cycle of `VC->NetworkService->block->VC` could exist. However, in this case, it's usually safe to assume that the block will be released after it has run, in which case the cycle is broken. So, in this case, it isn't necessary.
 
 Where it is necessary is if the block is not released. Say, instead of having a block that runs once after a network call, you have a block that is used as a callback. i.e. the networkService object maintains a strong reference to the block and uses it for all callbacks. In this case, the block will have a strong reference to the VC, and this will create a strong cycle, so a weak reference is preferred.
 
-Case 1: using the keyword self inside a block:
+__Case 1: using the keyword self inside a block:__
 
 If the block is retained by a property, a retain cycle is created between self and the block and both objects can’t be destroyed anymore. If the block is passed around and copied by others, self is retained for each copy.
 
 The situation for object-type variables is a little more complicated, but the same principle applies.
 
-Case 2: declaring a `__weak` reference to self outside the block and use it inside the block:
+__Case 2: declaring a `__weak` reference to self outside the block and use it inside the block:__
 
-There is no retain cycle and no matter if the block is retained or not by a property. If the block is passed around and copied by others, when executed, weakSelf can have been turned nil. The execution of the block can be preempted and different subsequent evaluations of the weakSelf pointer can lead to different values (i.e. weakSelf can become nil at a certain evaluation).
+There is no retain cycle and no matter if the block is retained or not by a property. If the block is passed around and copied by others, when executed, `weakSelf` can have been turned `nil`. The execution of the block can be preempted and different subsequent evaluations of the weakSelf pointer can lead to different values (i.e. `weakSelf` can become `nil` at a certain evaluation).
 ```objectivec
 __weak typeof(self) weakSelf = self;
 dispatch_block_t block =  ^{
-    [weakSelf doSomething]; // weakSelf != nil
-    // preemption, weakSelf turned nil
-    [weakSelf doSomethingElse]; // weakSelf == nil
+	[weakSelf doSomething]; // weakSelf != nil
+	// preemption, weakSelf turned nil
+	[weakSelf doSomethingElse]; // weakSelf == nil
 };
 ```
 
-Case 3: declaring a __weak reference to self outside the block and use a __strong reference inside the block:
+__Case 3: declaring a `__weak` reference to self outside the block and use a `__strong` reference inside the block:__
 
-There is no retain cycle and, again, no matter if the block is retained or not by a property. If the block is passed around and copied by others, when executed, weakSelf can have been turned nil. When the strong reference is assigned and it is not nil, we are sure that the object is retained for the entire execution of the block if preemption occurs and therefore subsequent evaluations of strongSelf will be consistent and will lead to the same value since the object is now retained. If strongSelf evaluates to nil usually the execution is returned since the block cannot execute properly.
-
+There is no retain cycle and, again, no matter if the block is retained or not by a property. If the block is passed around and copied by others, when executed, `weakSelf` can have been turned `nil`. When the strong reference is assigned and it is not `nil`, we are sure that the object is retained for the entire execution of the block if preemption occurs and therefore subsequent evaluations of `strongSelf` will be consistent and will lead to the same value since the object is now retained. If `strongSelf` evaluates to `nil` usually the execution is returned since the block cannot execute properly.
+```objectivec
 __weak typeof(self) weakSelf = self;
 myObj.myBlock =  ^{
-    __strong typeof(self) strongSelf = weakSelf;
-    if (strongSelf) {
-      [strongSelf doSomething]; // strongSelf != nil
-      // preemption occurs, strongSelf still not nil
-      [strongSelf doSomethingElse]; // strongSelf != nil
-    }
-    else {
-        // Probably nothing...
-        return;
-    }
+	__strong typeof(self) strongSelf = weakSelf;
+	if (strongSelf) {
+		[strongSelf doSomething]; // strongSelf != nil
+		// preemption occurs, strongSelf still not nil
+		[strongSelf doSomethingElse]; // strongSelf != nil
+	} else {
+		// Probably nothing...
+		return;
+	}
 };
-
-Dereferencing a __weak pointer is not allowed due to possible null value caused by race condition, assign it to a strong variable first.
-It can be shown with the following code:
-
+```
+Dereferencing a `__weak` pointer is not allowed due to possible `null` value caused by race condition, assign it to a strong variable first. It can be shown with the following code:
+```objectivec
 __weak typeof(self) weakSelf = self;
 myObj.myBlock =  ^{
     id localVal = weakSelf->someIVar;
 };
+```
+_Case 1 should be used only when the block is not assigned to a property, otherwise it will lead to a retain cycle.
 
-Case 1 should be used only when the block is not assigned to a property, otherwise it will lead to a retain cycle.
+_Case 2 should be used when the block is assigned to a property and self is referenced only once and the block has a single statement._
 
-Case 2 should be used when the block is assigned to a property and self is referenced only once and the block has a single statement.
-
-Case 3 should be used when the block is assigned to a property and self is referenced more the once and the block has more than a statement.
+_Case 3 should be used when the block is assigned to a property and self is referenced more the once and the block has more than a statement._
 
 http://albertodebortoli.com/blog/2013/04/21/objective-c-blocks-under-the-hood/
-
 http://albertodebortoli.com/blog/2013/08/03/objective-c-blocks-caveat/
-
 https://www.mikeash.com/pyblog/friday-qa-2009-08-14-practical-blocks.html
+http://rypress.com/tutorials/objective-c/blocks
+http://clang.llvm.org/docs/Block-ABI-Apple.html#imported-variables
 
-Замыкание (англ. closure) в программировании — функция, в теле которой присутствуют ссылки на переменные, объявленные вне тела этой функции и не в качестве её параметров (а в окружающем коде). Говоря другим языком, замыкание — функция, которая ссылается на свобод-ные переменные в своём контексте. Замыкание, так же как и экземпляр объекта, есть способ представления функциональности и данных, связанных и упакованных вместе.
-Лямбда-выражение (в программировании) — это специальный синтаксис для объявления анонимных функторов по месту их использования. Используя лямбда-выражения, можно объявлять функции в любом месте кода. Обычно лямбда-выражение допускает замыкание на лексиче-ский контекст, в котором это выражение использовано. Лямбда-выражения поддерживаются во многих языках программирования (C, Com-mon Lisp, Python, PHP, C#, F#, Visual Basic .NET, C++, Java и других).
-Нестандартное расширение синтаксиса языков программирования C/C++/Objective-C, позво-ляющее инкапсулировать код и данные в один объект. Блоковые объекты это C-уровневые синтаксические функции. Они похожи на стандартные функции C, но в дополнение к исполня-емому коду они также могут содержать переменные привязанные к автоматической (стеку) или управляемой (куче) памяти. Поэтому блок может поддерживать набор состояний (дан-ные), которые он может использовать, чтобы повлиять на поведение при выполнении. Блоки особенно полезны в качестве обратного вызова, потому что блок несет как код, который будет выполняться на обратном вызове, так и данные, необходимые во время этого выполнения.
-
-A lambda is just an anonymous function - a function defined with no name. In some languages, such as Scheme, they are equivalent to named functions. In fact, function definition is re-written as binding a lambda to a variable internally. In other languages, like Python, there are some (rather needless) distinctions between them, but they behave the same way otherwise.
-
-A closure is any function which closes over the environment in which it was defined. This means that it can access variables not in its parameter list. Examples:
-
-def func(): return h
-def anotherfunc(h):
-   return func()
-This will cause an error, because func does not close over the environment in anotherfunc - h is undefined. func only closes over the global environment. This will work:
-
-def anotherfunc(h):
-    def func(): return h
-    return func()
-Because here, func is defined in anotherfunc, and in python 2.3 and greater (or some number like this) when they almost got closures correct (mutation still doesn't work), this means that it closes over anotherfunc's environment and can access variables inside of it. In Python 3.1+, mutation works too when using the nonlocal keyword.
-
-Another important point - func will continue to close over anotherfunc's environment even when it's no longer being evaluated in anotherfunc. This code will also work:
-
-def anotherfunc(h):
-    def func(): return h
-    return func
-
-print anotherfunc(10)()
-This will print 10.
-
-This, as you notice, has nothing to do with lambda's - they are two different (although related) concepts.
-
+## Примеры объявления и использования блоков
+```objectivec
 #import "NSArray+Map.h"
 
 @implementation NSArray (Map)
@@ -3600,22 +3652,92 @@ NSArray *mappedArray = [array map:^id(id element) {
 }];
 
 NSArray *longStrings = [strings select: ^BOOL (id obj) { return [obj length] > 5; }];
+```
 
 As a local variable:
+```objectivec
 returnType (^blockName)(parameterTypes) = ^returnType(parameters) {...};
-
+```
 As a property:
+```objectivec
 @property (nonatomic, copy) returnType (^blockName)(parameterTypes);
-
+```
 As a method parameter:
+```objectivec
 - (void)someMethodThatTakesABlock:(returnType (^)(parameterTypes))blockName;
-
+````
 As an argument to a method call:
+```objectivec
 [someObject someMethodThatTakesABlock:^returnType (parameters) {...}];
-
+```
 As a typedef:
+```objectivec
 typedef returnType (^TypeName)(parameterTypes);
 TypeName blockName = ^returnType(parameters) {...};
+```
+## В чем отличие блока от лямбды и замыкания
+Замыкание (англ. closure) в программировании — функция, в теле которой присутствуют ссылки на переменные, объявленные вне тела этой функции и не в качестве её параметров (а в окружающем коде). Говоря другим языком, замыкание — функция, которая ссылается на свобод-ные переменные в своём контексте. Замыкание, так же как и экземпляр объекта, есть способ представления функциональности и данных, связанных и упакованных вместе.
+
+A closure is any function which closes over the environment in which it was defined. This means that it can access variables not in its parameter list. Examples:
+
+def func(): return h
+def anotherfunc(h):
+   return func()
+This will cause an error, because func does not close over the environment in anotherfunc - h is undefined. func only closes over the global environment. This will work:
+
+def anotherfunc(h):
+    def func(): return h
+    return func()
+Because here, func is defined in anotherfunc, and in python 2.3 and greater (or some number like this) when they almost got closures correct (mutation still doesn't work), this means that it closes over anotherfunc's environment and can access variables inside of it. In Python 3.1+, mutation works too when using the nonlocal keyword.
+
+Another important point - func will continue to close over anotherfunc's environment even when it's no longer being evaluated in anotherfunc. This code will also work:
+
+def anotherfunc(h):
+    def func(): return h
+    return func
+
+print anotherfunc(10)()
+This will print 10.
+
+This, as you notice, has nothing to do with lambda's - they are two different (although related) concepts.
+
+Лямбда-выражение (в программировании) — это специальный синтаксис для объявления анонимных функторов по месту их использования. Используя лямбда-выражения, можно объявлять функции в любом месте кода. Обычно лямбда-выражение допускает замыкание на лексический контекст, в котором это выражение использовано. Лямбда-выражения поддерживаются во многих языках программирования (C, Com-mon Lisp, Python, PHP, C#, F#, Visual Basic .NET, C++, Java и других).
+Нестандартное расширение синтаксиса языков программирования C/C++/Objective-C, позволяющее инкапсулировать код и данные в один объект. Блоковые объекты это C-уровневые синтаксические функции. Они похожи на стандартные функции C, но в дополнение к исполня-емому коду они также могут содержать переменные привязанные к автоматической (стеку) или управляемой (куче) памяти. Поэтому блок может поддерживать набор состояний (данные), которые он может использовать, чтобы повлиять на поведение при выполнении. Блоки особенно полезны в качестве обратного вызова, потому что блок несет как код, который будет выполняться на обратном вызове, так и данные, необходимые во время этого выполнения.
+A lambda is just an anonymous function - a function defined with no name. In some languages, such as Scheme, they are equivalent to named functions. In fact, function definition is re-written as binding a lambda to a variable internally. In other languages, like Python, there are some (rather needless) distinctions between them, but they behave the same way otherwise.
+
+As lower level languages, C and C++ had no concept of anonymous functions. To add them, new syntax had to be created. Because of this, Objective-C blocks and C++0x lambdas ended up with somewhat different syntax. An empty Objective-C block looks like this:
+
+    ^{}
+Whereas an empty C++0x lambda looks like this:
+    []{}
+So far not much different. They both use the standard C {} symbols to separate a block of code, with a special symbol to indicate that this is a block or lambda, not a normal C block. In both cases, the {} section takes normal code.
+The anonymous function can take arguments by writing them in parentheses, in the style of function arguments, after the leading bit:
+
+    ^(int x, NSString *y){} // ObjC, take int and NSString*
+    [](int x, std::string y){} // C++, take int and std::string
+In both languages, a value can be returned, and the return type can be inferred from the return statement:
+    ^{ return 42; } // ObjC, returns int
+    []{ return 42; } // C++, returns int
+Here, the two features begin to diverge. With C++0x lambdas, the return type can only be inferred if the lambda contains a single statement, and that statement is a return statement. So while the above is valid, this is not:
+    []{ if(something) return 42; else return 43; }
+In a more complicated lambda with an inferred return type, the return type is always inferred to be void. The code above will therefore produce an error, because it's invalid to return 42 from something with a return type of void.
+
+Замыкание (англ. closure) в программировании — процедура, которая ссылается на свободные переменные в своём лексическом контексте.
+
+На примере лямбда это анонимный метод который допускает замыкание.
+
+//oldArray 1, 2, 5, 10, 20
+var newArray = oldArray.Select(x=>x > 5); // замыкание не используется
+
+int y = 1;
+var newArray = oldArray.Select(x=>x * y); // замыкание используется
+
+Ну вообще это разные вещи.
+Лямбда-функция это жаргонное название анонимной функции, то есть функции у которой нет имени.
+
+Замыкание, строго говоря, никак не связано с анонимностью. Замыкание - это по сути вложенная функция, которая может обращаться к переменным в функции, в которую она вложена. Поэтому можно говорить, что замыкание - это функция, у которой есть состояние. При этом замыкающаяся функция может быть анонимной(то есть лямбдой), а может и не быть.
+
+Лямбда-функция, аналогично, может быть замыканием, а может и не быть (если она не обращается к переменным, объявленным вне её).
 
 Обратный вызов
 Ситуация, в которой код ожидает внешних событий, называется обратным вызовом. Для про-граммистов Objective-C существуют три основных формы обратного вызова.
@@ -3805,8 +3927,7 @@ array.sort({ [unowned self] (item1: Int, item2: Int) -> Bool in return item1 < i
 As a function parameter with explicit capture semantics and inferred parameters / return type:
 array.sort({ [unowned self] in return item1 < item2 })
 
-# Рандомные вопросы и задачи
-
+# Общие вопросы и задачи
 ## Inout parameters, pass by value, pass by reference
 When you pass a variable to a function, you are passing a copy of its value to the function instead of your variable itself. If you modified the value of the variable in your function and you printed it when the function is done executing, you'd see the variable still has the original value you originally gave it.
 
