@@ -3609,7 +3609,7 @@ myObj.myBlock =  ^{
     id localVal = weakSelf->someIVar;
 };
 ```
-_Case 1 should be used only when the block is not assigned to a property, otherwise it will lead to a retain cycle.
+_Case 1 should be used only when the block is not assigned to a property, otherwise it will lead to a retain cycle._
 
 _Case 2 should be used when the block is assigned to a property and self is referenced only once and the block has a single statement._
 
@@ -3630,16 +3630,19 @@ http://clang.llvm.org/docs/Block-ABI-Apple.html#imported-variables
 - (NSArray *)map:(id (^)(id))block {
 	// takes an id, returns an id
 	NSMutableArray *ret = [NSMutableArray array];
-	for(id obj in self)
+	for (id obj in self) {
 		[ret addObject:block(obj)];
+	}
 	return ret;
 }
 
 - (NSArray *)select:(BOOL (^)(id obj))block {
 	NSMutableArray *new = [NSMutableArray array];
-	for(id obj in self)
-		if(block(obj))
+	for (id obj in self) {
+		if (block(obj)) {
 			[new addObject: obj];
+		}
+	}
 	return new;
 }
 
@@ -3679,123 +3682,134 @@ TypeName blockName = ^returnType(parameters) {...};
 Замыкание (англ. closure) в программировании — функция, в теле которой присутствуют ссылки на переменные, объявленные вне тела этой функции и не в качестве её параметров (а в окружающем коде). Говоря другим языком, замыкание — функция, которая ссылается на свобод-ные переменные в своём контексте. Замыкание, так же как и экземпляр объекта, есть способ представления функциональности и данных, связанных и упакованных вместе.
 
 A closure is any function which closes over the environment in which it was defined. This means that it can access variables not in its parameter list. Examples:
-
+```python
 def func(): return h
 def anotherfunc(h):
-   return func()
-This will cause an error, because func does not close over the environment in anotherfunc - h is undefined. func only closes over the global environment. This will work:
-
+	return func()
+```   
+This will cause an error, because func does not close over the environment in anotherfunc - `h` is undefined. func only closes over the global environment. This will work:
+```python
 def anotherfunc(h):
-    def func(): return h
+	def func(): return h
     return func()
-Because here, func is defined in anotherfunc, and in python 2.3 and greater (or some number like this) when they almost got closures correct (mutation still doesn't work), this means that it closes over anotherfunc's environment and can access variables inside of it. In Python 3.1+, mutation works too when using the nonlocal keyword.
+```
+Because here, `func` is defined in `anotherfunc`, and in python 2.3 and greater (or some number like this) when they almost got closures correct (mutation still doesn't work), this means that it closes over `anotherfunc`'s environment and can access variables inside of it. In Python 3.1+, mutation works too when using the `nonlocal` keyword.
 
-Another important point - func will continue to close over anotherfunc's environment even when it's no longer being evaluated in anotherfunc. This code will also work:
-
+Another important point - `func` will continue to close over `anotherfunc`'s environment even when it's no longer being evaluated in `anotherfunc`. This code will also work:
+```python
 def anotherfunc(h):
     def func(): return h
     return func
 
 print anotherfunc(10)()
+``
 This will print 10.
 
 This, as you notice, has nothing to do with lambda's - they are two different (although related) concepts.
 
-Лямбда-выражение (в программировании) — это специальный синтаксис для объявления анонимных функторов по месту их использования. Используя лямбда-выражения, можно объявлять функции в любом месте кода. Обычно лямбда-выражение допускает замыкание на лексический контекст, в котором это выражение использовано. Лямбда-выражения поддерживаются во многих языках программирования (C, Com-mon Lisp, Python, PHP, C#, F#, Visual Basic .NET, C++, Java и других).
-Нестандартное расширение синтаксиса языков программирования C/C++/Objective-C, позволяющее инкапсулировать код и данные в один объект. Блоковые объекты это C-уровневые синтаксические функции. Они похожи на стандартные функции C, но в дополнение к исполня-емому коду они также могут содержать переменные привязанные к автоматической (стеку) или управляемой (куче) памяти. Поэтому блок может поддерживать набор состояний (данные), которые он может использовать, чтобы повлиять на поведение при выполнении. Блоки особенно полезны в качестве обратного вызова, потому что блок несет как код, который будет выполняться на обратном вызове, так и данные, необходимые во время этого выполнения.
-A lambda is just an anonymous function - a function defined with no name. In some languages, such as Scheme, they are equivalent to named functions. In fact, function definition is re-written as binding a lambda to a variable internally. In other languages, like Python, there are some (rather needless) distinctions between them, but they behave the same way otherwise.
+Лямбда-выражение (в программировании) — это специальный синтаксис для объявления анонимных функторов по месту их использования. Используя лямбда-выражения, можно объявлять функции в любом месте кода. Обычно лямбда-выражение допускает замыкание на лексический контекст, в котором это выражение использовано. Лямбда-выражения поддерживаются во многих языках программирования (C, Common Lisp, Python, PHP, C#, F#, Visual Basic .NET, C++, Java и других).
+Нестандартное расширение синтаксиса языков программирования C/C++/Objective-C, позволяющее инкапсулировать код и данные в один объект. Блоковые объекты это C-уровневые синтаксические функции. Они похожи на стандартные функции C, но в дополнение к исполняемому коду они также могут содержать переменные привязанные к автоматической (стеку) или управляемой (куче) памяти. Поэтому блок может поддерживать набор состояний (данные), которые он может использовать, чтобы повлиять на поведение при выполнении. Блоки особенно полезны в качестве обратного вызова, потому что блок несет как код, который будет выполняться на обратном вызове, так и данные, необходимые во время этого выполнения.
+A lambda is just an anonymous function - a function defined with no name. In some languages, such as Scheme, they are equivalent to named functions. In fact, function definition is rewritten as binding a lambda to a variable internally. In other languages, like Python, there are some (rather needless) distinctions between them, but they behave the same way otherwise.
 
 As lower level languages, C and C++ had no concept of anonymous functions. To add them, new syntax had to be created. Because of this, Objective-C blocks and C++0x lambdas ended up with somewhat different syntax. An empty Objective-C block looks like this:
-
-    ^{}
+```
+^{}
+```
 Whereas an empty C++0x lambda looks like this:
-    []{}
-So far not much different. They both use the standard C {} symbols to separate a block of code, with a special symbol to indicate that this is a block or lambda, not a normal C block. In both cases, the {} section takes normal code.
+```
+[]{}
+```
+So far not much different. They both use the standard C `{}` symbols to separate a block of code, with a special symbol to indicate that this is a block or lambda, not a normal C block. In both cases, the `{}` section takes normal code.
 The anonymous function can take arguments by writing them in parentheses, in the style of function arguments, after the leading bit:
-
-    ^(int x, NSString *y){} // ObjC, take int and NSString*
-    [](int x, std::string y){} // C++, take int and std::string
+```objectivec
+^(int x, NSString *y){} // ObjC, take int and NSString*
+```
+```c++
+[](int x, std::string y){} // C++, take int and std::string
+```
 In both languages, a value can be returned, and the return type can be inferred from the return statement:
-    ^{ return 42; } // ObjC, returns int
-    []{ return 42; } // C++, returns int
+```objectivec
+^{ return 42; } // ObjC, returns int
+```
+```c++
+[]{ return 42; } // C++, returns int
+```
 Here, the two features begin to diverge. With C++0x lambdas, the return type can only be inferred if the lambda contains a single statement, and that statement is a return statement. So while the above is valid, this is not:
-    []{ if(something) return 42; else return 43; }
+```c++
+[]{ if(something) return 42; else return 43; }
+```
 In a more complicated lambda with an inferred return type, the return type is always inferred to be void. The code above will therefore produce an error, because it's invalid to return 42 from something with a return type of void.
 
 Замыкание (англ. closure) в программировании — процедура, которая ссылается на свободные переменные в своём лексическом контексте.
-
 На примере лямбда это анонимный метод который допускает замыкание.
-
+```c#
 //oldArray 1, 2, 5, 10, 20
 var newArray = oldArray.Select(x=>x > 5); // замыкание не используется
 
 int y = 1;
 var newArray = oldArray.Select(x=>x * y); // замыкание используется
-
+```
 Ну вообще это разные вещи.
 Лямбда-функция это жаргонное название анонимной функции, то есть функции у которой нет имени.
+Замыкание, строго говоря, никак не связано с анонимностью. Замыкание - это по сути вложенная функция, которая может обращаться к переменным в функции, в которую она вложена. Поэтому можно говорить, что замыкание - это функция, у которой есть состояние. При этом замыкающаяся функция может быть анонимной (то есть лямбдой), а может и не быть. Лямбда-функция, аналогично, может быть замыканием, а может и не быть (если она не обращается к переменным, объявленным вне её).
 
-Замыкание, строго говоря, никак не связано с анонимностью. Замыкание - это по сути вложенная функция, которая может обращаться к переменным в функции, в которую она вложена. Поэтому можно говорить, что замыкание - это функция, у которой есть состояние. При этом замыкающаяся функция может быть анонимной(то есть лямбдой), а может и не быть.
+## Обратный вызов
+Ситуация, в которой код ожидает внешних событий, называется обратным вызовом. Для программистов Objective-C существуют три основных формы обратного вызова.
+1. Приемник/действие: перед началом ожидания вы говорите: «Когда произойдет Х, отправь это конкретное сообщение этому конкретному объекту». Объект, получающий сообщение, называется приемником. Селектор сообщения и есть действие.
+2. Вспомогательные объекты: перед началом ожидания вы говорите: «Здесь имеется вспомогательный объект, поддерживающий твой протокол. Когда что-нибудь произойдет, отправляй ему сообщения. Вспомогательные объекты часто называются делегатами или источниками данных.
+3. Оповещения: имеется объект, называемый центром оповещений. Перед началом ожидания вы говорите ему: «Этот объект ожидает таких-то оповещений. При поступлении одного из них отправь объекту это сообщение». Когда происходит Х, объект отправляет оповещение центру оповещений, а последний пересылает его вашему объекту.
+4. Блоки
 
-Лямбда-функция, аналогично, может быть замыканием, а может и не быть (если она не обращается к переменным, объявленным вне её).
+__Example 1__
 
-Обратный вызов
-Ситуация, в которой код ожидает внешних событий, называется обратным вызовом. Для про-граммистов Objective-C существуют три основных формы обратного вызова.
-*	Приемник/действие: перед началом ожидания вы говорите: «Когда произойдет Х, отправь это конкретное сообщение этому конкретному объекту». Объект, получающий сообщение, называется приемником. Селектор сообщения и есть действие.
-*	Вспомогательные объекты: перед началом ожидания вы говорите: «Здесь имеется вспомо-гательный объект, поддерживающий твой протокол. Когда что-нибудь произойдет, от-правляй ему сообщения. Вспомогательные объекты часто называются делегатами или ис-точниками данных.
-*	Оповещения: имеется объект, называемый центром оповещений. Перед началом ожидания вы говорите ему: «Этот объект ожидает таких-то оповещений. При поступлении одного из них отправь объекту это сообщение». Когда происходит Х, объект отправляет оповещение центру оповещений, а последний пересылает его вашему объекту.
-
-There is no "callback" in C - not more than any other generic programming concept.
-
-They're implemented using function pointers. Here's an example:
-
-void populate_array(int *array, size_t arraySize, int (*getNextValue)(void))
-{
+There is no "callback" in C - not more than any other generic programming concept. They're implemented using function pointers. Here's an example:
+```c
+void populate_array(int *array, size_t arraySize, int (*getNextValue)(void)) {
     for (size_t i=0; i<arraySize; i++)
         array[i] = getNextValue();
 }
 
-int getNextRandomValue(void)
-{
+int getNextRandomValue(void) {
     return rand();
 }
 
-int main(void)
-{
+int main(void) {
     int myarray[10];
     populate_array(myarray, 10, getNextRandomValue);
     ...
 }
-Here, the populate_array function takes a function pointer as its third parameter, and calls it to get the values to populate the array with. We've written the callback getNextRandomValue, which returns a random-ish value, and passed a pointer to it to populate_array. populate_array will call our callback function 10 times and assign the returned values to the elements in the given array.
+```
+Here, the `populate_array` function takes a function pointer as its third parameter, and calls it to get the values to populate the array with. We've written the callback `getNextRandomValue`, which returns a random-ish value, and passed a pointer to it to `populate_array`. `populate_array` will call our callback function 10 times and assign the returned values to the elements in the given array.
 
-Here is an example of callbacks in C.
+__Example 2__
 
-Let's say you want to write some code that allows registering callbacks to be called when some event occurs.
-
-First define the type of function used for the callback:
-
+Let's say you want to write some code that allows registering callbacks to be called when some event occurs. First define the type of function used for the callback:
+```c
 typedef void (*event_cb_t)(const struct event *evt, void *userdata);
+```
 Now, define a function that is used to register a callback:
-
+```c
 int event_cb_register(event_cb_t cb, void *userdata);
+```
 This is what code would look like that registers a callback:
-
-static void my_event_cb(const struct event *evt, void *data)
-{
+```c
+static void my_event_cb(const struct event *evt, void *data) {
     /* do stuff and things with the event */
 }
 
 ...
    event_cb_register(my_event_cb, &my_custom_data);
 ...
+```
 In the internals of the event dispatcher, the callback may be stored in a struct that looks something like this:
-
+```c
 struct event_cb {
     event_cb_t cb;
     void *data;
 };
+```
 This is what the code looks like that executes a callback.
-
+```c
 struct event_cb *callback;
 
 ...
@@ -3803,130 +3817,193 @@ struct event_cb *callback;
 /* Get the event_cb that you want to execute */
 
 callback->cb(event, callback->data);
+```
 
-Когда использовать блоки, делегаты, KVO и уведомления?
-Block
-*	1–3 callbacks
-*	Single observer
-Delegate
-*	Many callbacks
-*	Single observer
-*	Formal interface
-KVO
-*	Any number of observers
-*	Just want to be notified of changes to state of an object
-*	Simplistic updates, unrelated to behavior
-Notifications
-*	Multiple observers
-*	Observer 'far away' from observee
+## Когда использовать блоки, делегаты, KVO и уведомления?
+__Block__
 
-Swift closures and functions
+* 1–3 callbacks
+* Single observer
+
+__Delegate__
+
+* Many callbacks
+* Single observer
+* Formal interface
+
+__KVO__
+
+* Any number of observers
+* Just want to be notified of changes to state of an object
+* Simplistic updates, unrelated to behavior
+
+__Notifications__
+
+* Multiple observers
+* Observer 'far away' from observee
+
+##Swift closures and functions
+```swift
 ()->()
+```
 Closures in Swift are similar to blocks in C and Objective-C.
-Closures are first-class objects, so that they can be nested and passed around (as do blocks in Objec-tive-C). In Swift, functions are just a special case of closures.
+Closures are first-class objects, so that they can be nested and passed around (as do blocks in Objective-C). In Swift, functions are just a special case of closures.
 
-Defining a function:
-You define a function with the func keyword. Functions can take and return none, one or multiple parameters (tuples).
-Return values follow the -> sign.
+_Defining a function:_
+
+You define a function with the `func` keyword. Functions can take and return none, one or multiple parameters (tuples).
+Return values follow the `->` sign.
+```swift
 func jediGreet(name: String, ability: String) -> (farewell: String, mayTheForceBeWithYou: String) {
-return ("Good bye, \(name).", " May the \(ability) be with you.")
+	return ("Good bye, \(name).", " May the \(ability) be with you.")
 }
-
-Calling a function:
+```
+_Calling a function:_
+```swift
 let retValue = jediGreet("old friend", "Force")
 println(retValue)
 println(retValue.farewell)
 println(retValue.mayTheForceBeWithYou)
+```
+_Function types_
 
-Function types
 Every function has its own function type, made up of the parameter types and the return type of the function itself.
 For example the following function:
+```swift
 func sum(x: Int, y: Int) -> (result: Int) { return x + y }
+```
 has a function type of:
+```swift
 (Int, Int) -> (Int)
+```
 Function types can thus be used as parameters types or as return types for nesting functions.
 
-Passing and returning functions
+_Passing and returning functions_
+
 The following function is returning another function as its result which can be later assigned to a variable and called.
-func jediTrainer () -> ((String, Int) -> String) {
-func train(name: String, times: Int) -> (String) {
-return "\(name) has been trained in the Force \(times) times"
+```swift
+func jediTrainer() -> ((String, Int) -> String) {
+	func train(name: String, times: Int) -> (String) {
+		return "\(name) has been trained in the Force \(times) times"
   	}
   	return train
 }
 let train = jediTrainer()
 train("Obi Wan", 3)
+```
+_Variadic functions_
 
-Variadic functions
-Variadic functions are functions that have a variable number of arguments (indicated by ... after the argument's type) that can be accessed into their body as an array.
+Variadic functions are functions that have a variable number of arguments (indicated by `...` after the argument's type) that can be accessed into their body as an array.
+```swift
 func jediBladeColor (colors: String...) -> () {
-for color in colors {
-println("\(color)")
+	for color in colors {
+		println("\(color)")
   	}
 }
 jediBladeColor("red","green")
+```
 
-Closures
+__Closures__
+```swift
 {()->() in}
+```
+_Defining a closure:_
 
-Defining a closure:
-Closures are typically enclosed in curly braces { } and are defined by a function type () -> (), where -> separates the arguments and the return type, followed by the in keyword which separates the closure header from its body.
+Closures are typically enclosed in curly braces `{ }` and are defined by a function type `() -> ()`, where `->` separates the arguments and the return type, followed by the `in` keyword which separates the closure header from its body.
+```swift
 { (params) -> returnType in
   statements
 }
+```
 An example could be the map function applied to an Array:
+```swift
 let padawans = ["Knox", "Avitla", "Mennaus"]
-padawans.map({
-(padawan: String) -> String in
-"\(padawan) has been trained!"
+padawans.map({(padawan: String) -> String in
+	"\(padawan) has been trained!"
 })
+```
 
-Closures with known types:
+_Closures with known types:_
 When the type of the closure's arguments are known, you can do as follows:
+```swift
 func applyMutliplication(value: Int, multFunction: Int -> Int) -> Int {
-return multFunction(value)
+	return multFunction(value)
 }
 
 applyMutliplication(2, {value in
-value * 3
+	value * 3
 })
+```
 
-Closures shorthand argument names:
-Closure arguments can be references by position ($0, $1, ...) rather than by name
+_Closures shorthand argument names:_
+
+Closure arguments can be references by position `($0, $1, ...)` rather than by name
+```swift
 applyMutliplication(2, {$0 * 3})
+```
 Furthermore, when a closure is the last argument of a function, parenthesis can be omitted as such:
+```swift
 applyMutliplication(2) {$0 * 3}
-
-How Do I Declare a Closure in Swift?
-As a variable:
+```
+##How Do I Declare a Closure in Swift?
+_As a variable:_
+```swift
 var closureName: (parameterTypes) -> (returnType)
-As an optional variable:
+```
+_As an optional variable:_
+```swift
 var closureName: ((parameterTypes) -> (returnType))?
-As a type alias:
+```
+_As a type alias:_
+```swift
 typealias closureType = (parameterTypes) -> (returnType)
-As a constant:
+```
+_As a constant:_
+```swift
 let closureName: closureType = { ... }
-As an argument to a function call:
+```
+_As an argument to a function call:_
+```swift
 func({(parameterTypes) -> (returnType) in statements})
-As a function parameter:
+```
+_As a function parameter:_
+```swift
 array.sort({ (item1: Int, item2: Int) -> Bool in return item1 < item2 })
-As a function parameter with implied types:
+```
+_As a function parameter with implied types:_
+```swift
 array.sort({ (item1, item2) -> Bool in return item1 < item2 })
-As a function parameter with implied return type:
+```
+_As a function parameter with implied return type:_
+```swift
 array.sort({ (item1, item2) in return item1 < item2 })
-As the last function parameter:
+```
+_As the last function parameter:_
+```swift
 array.sort { (item1, item2) in return item1 < item2 }
-As the last parameter, using shorthand argument names:
+```
+_As the last parameter, using shorthand argument names:_
+```swift
 array.sort { return $0 < $1 }
-As the last parameter, with an implied return value:
+```
+_As the last parameter, with an implied return value:_
+```swift
 array.sort { $0 < $1 }
-As the last parameter, as a reference to an existing function:
+```
+_As the last parameter, as a reference to an existing function:_
+```swift
 array.sort(<)
-As a function parameter with explicit capture semantics:
-array.sort({ [unowned self] (item1: Int, item2: Int) -> Bool in return item1 < item2 })
-As a function parameter with explicit capture semantics and inferred parameters / return type:
+```
+_As a function parameter with explicit capture semantics:_
+```swift
+array.sort({ [unowned self] (item1: Int, item2: Int) -> Bool in
+	return item1 < item2
+})
+```
+_As a function parameter with explicit capture semantics and inferred parameters / return type:_
+```swift
 array.sort({ [unowned self] in return item1 < item2 })
-
+```
 # Общие вопросы и задачи
 ## Inout parameters, pass by value, pass by reference
 When you pass a variable to a function, you are passing a copy of its value to the function instead of your variable itself. If you modified the value of the variable in your function and you printed it when the function is done executing, you'd see the variable still has the original value you originally gave it.
