@@ -3616,9 +3616,13 @@ _Case 2 should be used when the block is assigned to a property and self is refe
 _Case 3 should be used when the block is assigned to a property and self is referenced more the once and the block has more than a statement._
 
 http://albertodebortoli.com/blog/2013/04/21/objective-c-blocks-under-the-hood/
+
 http://albertodebortoli.com/blog/2013/08/03/objective-c-blocks-caveat/
+
 https://www.mikeash.com/pyblog/friday-qa-2009-08-14-practical-blocks.html
+
 http://rypress.com/tutorials/objective-c/blocks
+
 http://clang.llvm.org/docs/Block-ABI-Apple.html#imported-variables
 
 ## Примеры объявления и использования блоков
@@ -3654,7 +3658,7 @@ NSArray *mappedArray = [array map:^id(id element) {
 	return [NSNumber numberWithInt:[current intValue] * [current intValue]];
 }];
 
-NSArray *longStrings = [strings select: ^BOOL (id obj) { return [obj length] > 5; }];
+NSArray *longStrings = [strings select:^BOOL (id obj) { return [obj length] > 5; }];
 ```
 
 As a local variable:
@@ -3702,7 +3706,7 @@ def anotherfunc(h):
     return func
 
 print anotherfunc(10)()
-``
+```
 This will print 10.
 
 This, as you notice, has nothing to do with lambda's - they are two different (although related) concepts.
