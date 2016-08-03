@@ -4010,28 +4010,20 @@ array.sort({ [unowned self] in return item1 < item2 })
 ```
 # Общие вопросы и задачи
 ## Inout parameters, pass by value, pass by reference
+__Explanation 1__
+
 When you pass a variable to a function, you are passing a copy of its value to the function instead of your variable itself. If you modified the value of the variable in your function and you printed it when the function is done executing, you'd see the variable still has the original value you originally gave it.
-
 An in-out parameter takes "the variable itself", instead of a copy. and as such you can modify it.
-
 In out parameters are akin to references in C++.
-
- Function parameters are always passed by value. Pass-by-reference is simulated in C by explicitly passing pointer values. C program source text is free-format, using the semicolon as a statement terminator and curly braces for grouping blocks of statements.
-
- Objective-C only support passing parameters by value. The problem here has probably been fixed already (Since this question is more than a year old) but I need to clarify some things regarding arguments and Objective-C.
-
+Function parameters are always passed by value. Pass-by-reference is simulated in C by explicitly passing pointer values. C program source text is free-format, using the semicolon as a statement terminator and curly braces for grouping blocks of statements.
+Objective-C only support passing parameters by value. The problem here has probably been fixed already (Since this question is more than a year old) but I need to clarify some things regarding arguments and Objective-C.
 Objective-C is a strict superset of C which means that everything C does, Obj-C does it too.
-
 By having a quick look at Wikipedia, you can see that Function parameters are always passed by value
-
-Objective-C is no different. What's happening here is that whenever we are passing an object to a function (In this case a UILabel *), we pass the value contained at the pointer's address.
-
-Whatever you do, it will always be the value of what you are passing. If you want to pass the value of the reference you would have to pass it a **object (Like often seen when passing NSError).
-
+Objective-C is no different. What's happening here is that whenever we are passing an object to a function (In this case a `UILabel *`), we pass the value contained at the pointer's address.
+Whatever you do, it will always be the value of what you are passing. If you want to pass the value of the reference you would have to pass it a `**object` (Like often seen when passing `NSError`).
 This is the same thing with scalars, they are passed by value, hence you can modify the value of the variable you received in your method and that won't change the value of the original variable that you passed to the function.
-
 Here's an example to ease the understanding:
-
+```objectivec
 - (void)parentFunction {
     int i = 0;
     [self modifyValueOfPassedArgument:i];
@@ -4043,8 +4035,9 @@ Here's an example to ease the understanding:
     j = 23;
     //j now == 23, but this hasn't changed the value of i.
 }
+```
 If you wanted to be able to modify i, you would have to pass the value of the reference by doing the following:
-
+```objectivec
 - (void)parentFunction {
     int i = 0; //Stack allocated. Kept it that way for sake of simplicity
     [self modifyValueOfPassedReference:&i];
@@ -4056,11 +4049,11 @@ If you wanted to be able to modify i, you would have to pass the value of the re
     *j = 23;
     //j now == 23, and i also == 23!
 }
+```
+__Explanation 2__
 
 Say I want to share a web page with you.
-
 If I tell you the URL, I'm passing by reference. You can use that URL to see the same web page I can see. If that page is changed, we both see the changes. If you delete the URL, all you're doing is destroying your reference to that page - you're not deleting the actual page itself.
-
 If I print out the page and give you the printout, I'm passing by value. Your page is a disconnected copy of the original. You won't see any subsequent changes, and any changes that you make (e.g. scribbling on your printout) will not show up on the original page. If you destroy the printout, you have actually destroyed your copy of the object - but the original web page remains intact.
 ```c++
 // passes a pointer (called reference in java) to an integer
@@ -4103,108 +4096,121 @@ int main() {
     // pointer was copied but what pointer references was changed.
     assert(value == 10 && pointer == &value);
 }
+```
 
-- (void)test
-{
+__Explanation 3__
+
+```objectivec
+- (void)test {
      NSString *stringVar = @"UPPER CASE STRING";
      [self changeString:stringVar];
      NSLog(@"value after changed : %@", stringVar);
 }
 
-- (void)changeString:(NSString*)string
-{
+- (void)changeString:(NSString *)string {
      string = [string lowercaseString];
 }
-
+```
 I thought the output should be upper case string. But it comes out to be UPPER CASE STRING.
 
 The [string lowercaseString] call creates a new NSString object that you assign to the local variable string. This does not change the value of stringVar outside the changeString function. The pointer itself is passed by value.
 
 One way to do what you want, is to pass a pointer to a pointer:
-
--(void) test
-{
+```objectivec
+- (void)test {
      NSString *stringVar = @"UPPER CASE STRING";
      [self changeString:&stringVar];
-     NSLog(@"value after changed : %@", stringVar);
+     NSLog(@"value after changed: %@", stringVar);
 }
 
--(void) changeString:(NSString**)string
-{
+- (void)changeString:(NSString **)string {
      *string = [*string lowercaseString];
 }
+```
 
-Заполнить строку буквами А, чтобы не делать миллионы итераций:
+##Заполнить строку буквами А, чтобы не делать миллионы итераций:
+```objectivec
 NSString *str = @"a";
 for (int i = 0; i< 5000000; i++) {
-str = [str stringByAppendingString:@"a"];
+	str = [str stringByAppendingString:@"a"];
 }
-Ответ
+```
+_Ответ_
+```objectivec
 str =[@"" stringByPaddingToLength:5000000 withString:@"a" startingAtIndex:0];
+```
 
-Написать процедуру, инвертирующую массив символов (первый элемент должен стать последним, второй пердпоследним и т.д.)?  
-1-ый способ
+##Написать процедуру, инвертирующую массив символов (первый элемент должен стать последним, второй пердпоследним и т.д.)?  
+__Explanation 1__
+```objectivec
 // myString is "hi"
 NSMutableString *reversedString = [NSMutableString string];
 NSInteger charIndex = [myString length];
 while (charIndex > 0) {
-    		charIndex--;
-    		NSRange subStrRange = NSMakeRange(charIndex, 1);
-[reversedString appendString:[myString substringWithRange:subStrRange]];
+    charIndex--;
+    NSRange subStrRange = NSMakeRange(charIndex, 1);
+	[reversedString appendString:[myString substringWithRange:subStrRange]];
 }
 NSLog(@"%@", reversedString); // outputs "ih"
-2-ой способ
+```
+__Explanation 2__
+```objectivec
 array.reverseObjectEnumerator.allObjects;
-3-ий способ
+```
+__Explanation 3__
+```c++
 #include <string.h>
 /* reverse: переворачивает строку s (результат в s) */
-void reverse(char s[])
-{
-int c, i, j;
-
-for (i = 0, j = strlen(s) - 1; i < j; i++, j--) {
-с = s[i];
-        	s[i] = s[j];
-        	s[j] = c;
-} 	
+void reverse(char s[]) {
+	int c, i, j;
+	for (i = 0, j = strlen(s) - 1; i < j; i++, j--) {
+		с = s[i];
+        s[i] = s[j];
+        s[j] = c;
+	} 	
 }
-
-Поверхностное и глубокое копирование?
+```
+##Поверхностное и глубокое копирование?
 Поверхностное копирование — это просто создание нового указателя на те же самые байты в куче. Тоесть, в результате мы можем получить два объекта, которые указывают на одно и тоже значение.
 Глубокое копирование:
+```objectivec
 - (id)copyWithZone:(NSZone *)zone;
 
 @implementation Person
 - (id)copyWithZone:(NSZone *)zone {
-Person *copy = [[self class] allocWithZone:zone];
-copy.name = self.name;
-copy.age = self.age;
-copy.surname = self.surname;
-return copy;
+	Person *copy = [[self class] allocWithZone:zone];
+	copy.name = self.name;
+	copy.age = self.age;
+	copy.surname = self.surname;
+	return copy;
 }
 @end
-
+```
 Пример копирования массива:
+```
 initWithArray:copyItems:(NO or YES)
+```
+##Отличие while от for?
+Единственное отличие `while` от `for` в том, что в них проверяется условие выполнения: ни объявить, ни изменить переменную в конструкции `while` нельзя. Поэтому чтобы выйти из цикла нужно изменять переменные внутри самого цикла так, чтобы условие стало ложным.
 
-Отличие while от for?
-Единственное отличие while от for в том, что в них проверяется условие выполнения: ни объ-явить, ни изменить переменную в конструкции while нельзя. Поэтому чтобы выйти из цикла нужно изменять переменные внутри самого цикла так, чтобы условие стало ложным.
-
-Протокол? Что такое абстрактный класс? Чем абстрактный класс отличается от интер-фейса?
-Базовый класс, который не предполагает создания экземпляров. Абстрактные классы реали-зуют на практике один из принципов ООП — полиморфизм. Абстрактный класс может содер-жать (и не содержать) абстрактные методы и свойства. Абстрактный метод не реализуется для класса, в котором объявлен, однако должен быть реализован для его неабстрактных по-томков. Абстрактные классы представляют собой наиболее общие абстракции, то есть имею-щие наибольший объём и наименьшее содержание.
+##Протокол? Что такое абстрактный класс? Чем абстрактный класс отличается от интерфейса?
+Базовый класс, который не предполагает создания экземпляров. Абстрактные классы реализуют на практике один из принципов ООП — полиморфизм. Абстрактный класс может содержать (и не содержать) абстрактные методы и свойства. Абстрактный метод не реализуется для класса, в котором объявлен, однако должен быть реализован для его неабстрактных потомков. Абстрактные классы представляют собой наиболее общие абстракции, то есть имеющие наибольший объём и наименьшее содержание.
 В Objective-C есть родительский класс NSObject. В языке программирования он как точка в геометрии. Это идеальный класс: в нём нет ничего лишнего, он ничего конкретного делает, но из него можно создать всё что угодно. Такой вот кирпичик мироздания.
-Пример: «Примус» — может быть наследником абстрактного класса «Нагревательный при-бор»
+Пример: «Примус» — может быть наследником абстрактного класса «Нагревательный прибор»
 Главное отличие класса от интерфейса — в том, что класс состоит из интерфейса и реализации.
-Язык Objective-C содержит полноценную поддержку протоколов (это аналог интерфейса в Java и абстрактного класса в C++, который также иногда принято называть интерфейсом). Прото-кол представляет собой просто список описаний методов. Объект реализует протокол, если он содержит реализации всех методов, описанных в протоколе. Абстрактные классы могут со-держать в себе реализацию некоторых методов, интерфейсы содержат только прототипы.
-Однажды кто-то сказал: «То, что ты есть, и то, что ты делаешь – не одно и то же». Это утверждение справедливо и для объектов: класс объекта не всегда совпадает с его ролью в ра-ботающей системе. Например, объект может быть экземпляром NSМutаblеАrrау, тогда как в приложении он может обеспечивать управление очередью заданий печати. Действительно хо-рошо написанный класс имеет более общую природу, которая не ограничивается его ролью в одном конкретном приложении. Это позволяет по разному использовать экземпляры данного класса (полиморфизм). Мы уже говорили о том, как определить класс. Возможно ли определить роль? В определенной степени для определения роли можно использовать конструкцию @protocol.
+Язык Objective-C содержит полноценную поддержку протоколов (это аналог интерфейса в Java и абстрактного класса в C++, который также иногда принято называть интерфейсом). Протокол представляет собой просто список описаний методов. Объект реализует протокол, если он содержит реализации всех методов, описанных в протоколе. Абстрактные классы могут со-держать в себе реализацию некоторых методов, интерфейсы содержат только прототипы.
+Однажды кто-то сказал: «То, что ты есть, и то, что ты делаешь – не одно и то же». Это утверждение справедливо и для объектов: класс объекта не всегда совпадает с его ролью в работающей системе. Например, объект может быть экземпляром `NSМutаblеАrrау`, тогда как в приложении он может обеспечивать управление очередью заданий печати. Действительно хорошо написанный класс имеет более общую природу, которая не ограничивается его ролью в одном конкретном приложении. Это позволяет по разному использовать экземпляры данного класса (полиморфизм). Мы уже говорили о том, как определить класс. Возможно ли определить роль? В определенной степени для определения роли можно использовать конструкцию `@protocol`.
 
-Какие существуют root классы в iOS? Для чего нужны root классы?
+##Какие существуют root классы в iOS? Для чего нужны root классы?
 NSObject, NSProxy
 A root class inherits from no other class and defines an interface and behavior common to all objects in the hierarchy below it. All objects in that hierarchy ultimately inherit from the root class. A root class is sometimes referred to as a base class. The root class of all Objective-C classes is NSObject, which is part of the Foundation framework. All objects in a Cocoa or Cocoa Touch application ultimately inherit from NSObject. This class is the primary access point whereby other classes interact with the Objective-C runtime. It also declares the fundamental object interface and implements basic object behavior, including introspection, memory management, and method invocation. Cocoa and Cocoa Touch objects derive the ability to behave as objects in large part from the root class. The Foundation framework defines another root class, NSProxy, but this class is rarely used in Cocoa applications and never in Cocoa Touch applications.
 
-Чем категория отличается от расширения (extention, неименованная категория)?
-Категория позволяет расширить функционал класса. При этом не требуется исходников класса и добавленные методы автоматически становятся доступными всем классам, унаследованным от изменяемого. Категория имеет свое имя, список методов и имя класса, который она расши-ряет.
-Описание категории имеет следующий вид:
+##Чем категория отличается от расширения (extention, неименованная категория)?
+Категория позволяет расширить функционал класса. При этом не требуется исходников класса и добавленные методы автоматически становятся доступными всем классам, унаследованным от изменяемого. Категория имеет свое имя, список методов и имя класса, который она расширяет.
+
+__Описание категории имеет следующий вид:__
+
+```objectivec
 #import "ClassName.h"
 @interface ClassName (CategoryName)
 объявление методов
@@ -4214,58 +4220,71 @@ A root class inherits from no other class and defines an interface and behavior 
 @implementation ClassName (CategoryName)
 реализация методов
 @end
-Что делают категории?
-1.	Позволяют разбить определение класса по нескольким файлам. В идеале класс должен выполнять одну конкретную роль, но иногда это не так, например в случае реализации фасада и некоторых других шаблонов. В этом случае удобно описать его в нескольких файлах
-2.	Позволяют действительно элегантно добавить отсутствующую функциональность к существующему классу
-3.	Создают опережающие ссылки для закрытых методов
-4.	Позволяют добавление неформального протокола
-Подводные камни
-*	Невозможность добавления переменных
-*	Возможная коллизия имен с самим классом, поэтому необходимо использовать ориги-нальные префиксы в наименовании своих методов.
-*	Невозможно вызвать [super method]; из категории
-Расширение
-Одна из разновидностей категорий. Они по сути являются категориями с тем отличием, что интерфейс расширения описывается в имплементации основного класса до @implementation, а реализация прописывается в основном в любом месте имплементации класса и не пишется название категории. В отличии от категорий, расширения используются для собственных классов для сокрытия части реализации.
+```
+__Что делают категории?__
+
+1. Позволяют разбить определение класса по нескольким файлам. В идеале класс должен выполнять одну конкретную роль, но иногда это не так, например в случае реализации фасада и некоторых других шаблонов. В этом случае удобно описать его в нескольких файлах
+2. Позволяют действительно элегантно добавить отсутствующую функциональность к существующему классу
+3. Создают опережающие ссылки для закрытых методов
+4. Позволяют добавление неформального протокола
+
+__Подводные камни__
+
+* Невозможность добавления переменных
+* Возможная коллизия имен с самим классом, поэтому необходимо использовать ориги-нальные префиксы в наименовании своих методов.
+* Невозможно вызвать `[super method];` из категории
+
+_Расширение_
+Одна из разновидностей категорий. Они по сути являются категориями с тем отличием, что интерфейс расширения описывается в имплементации основного класса до `@implementation`, а реализация прописывается в основном в любом месте имплементации класса и не пишется название категории. В отличии от категорий, расширения используются для собственных классов для сокрытия части реализации.
 A class extension bears some similarity to a category, but it can only be added to a class for which you have the source code at compile time (the class is compiled at the same time as the class extension).
+```objectivec
 @interface SomeClass ()
 - (void) anAdditionalMethod;
 @end
+```
+##Можно ли добавить ivar в категорию?
+Директива `@interface` для категорий не может добавлять переменных экземпляра. Однако, она может определять, что категория поддерживает дополнительные протоколы.
 
-Можно ли добавить ivar в категорию?
-Директива @interface для категорий не может добавлять переменных экземпляра. Однако, она может определять, что категория поддерживает дополнительные протоколы.
+##Когда лучше использовать категорию, а когда наследование?
+В отличие от наследования, категории не могут добавлять новые переменные в класс. Однако, вы можете переопределять существующие методы в классе, но должны быть очень осторожны. Запомните, что все изменения сделанные в классе через категории повлияют на все экземпляры данного объекта в программе.
 
-Когда лучше использовать категорию, а когда наследование?
-В отличие от наследования, категории не могут добавлять новые переменные в класс. Однако, вы можете переопределять существующие методы в классе, но должны быть очень осторож-ны. Запомните, что все изменения сделанные в классе через категории повлияют на все эк-земпляры данного объекта в программе.
-
-Формальные и неформальные протоколы
+##Формальные и неформальные протоколы
 Цели для которых используются протоколы:
-*	Ожидание, что класс поддерживающий протокол выполнит описанные в протоколе функции
-*	Поддержка протокола на уровне объекта, не раскрывая методы и реализацию самого класса (в противоположность наследованию)
-*	В виду отсутствия множественного наследования - объединить общие черты нескольких классов
-Формальные протоколы
+* Ожидание, что класс поддерживающий протокол выполнит описанные в протоколе функции
+* Поддержка протокола на уровне объекта, не раскрывая методы и реализацию самого класса (в противоположность наследованию)
+* В виду отсутствия множественного наследования - объединить общие черты нескольких классов
+
+__Формальные протоколы__
+
 Объявление формального протокола гарантирует, что все методы объявленные протоколом будут реализованы классом
-Неформальные протоколы
-Добавление категории к классу NSObject называется созданием неформального протокола. При работе с неформальными протоколами мы реализуем только те методы, которые хотим.
-Узнать поддержевает ли класс какой либо метод можно с помощью селекторов
+
+__Неформальные протоколы__
+
+Добавление категории к классу NSObject называется созданием неформального протокола. При работе с неформальными протоколами мы реализуем только те методы, которые хотим. Узнать поддержевает ли класс какой либо метод можно с помощью селекторов:
+```objectivec
 @selector(метод)
 First *f = [[First alloc] init];
 if ([f respondsToSelector:@selector(setName:)]) {
   	NSLog (@"Метод поддерживается");
 }
-Подводные камни
-*	[NSObject self] may return a class, or an object
-*	[NSObject super] is undefined
+```
 
-Есть ли приватные или защищенные методы в Objective-C?
+__Подводные камни__
+
+* `[NSObject self]` may return a class, or an object
+* `[NSObject super]` is undefined
+
+##Есть ли приватные или защищенные методы в Objective-C?
 Нет. Использовать расширение.
-Для имитации private методов с помощью расширения, нужно в .m файле, перед @implementation добавить безымянную категорию. Для класса Something ее определение бу-дет выглядеть как @interface Something () ... @end. Стоит обратить особое внимание на пустые скобки — они показывают, что мы определяем именно безымянную категорию. После этого, мы можем добавлять в категорию методы, которые будут для нас считаться private. За счет то-го, что категория безымянная, имплементация данных методов может находиться рядом с им-плементацией основных методов в разделе @implementation .. @end и нет необходимости со-здавать отдельные разделы для имплементации категорий. А за счет того, что она находится в .m файле, которые никто не подключает через #import (вы ведь их не подключаете, да?), ви-димость методов для автодополнения ограничена текущим файлом. Конечно, послать объекту это сообщение извне все равно возможно, но от случайного вызова вы точно застрахованы.
+Для имитации private методов с помощью расширения, нужно в .m файле, перед `@implementation` добавить безымянную категорию. Для класса `Something` ее определение будет выглядеть как `@interface Something () ... @end`. Стоит обратить особое внимание на пустые скобки — они показывают, что мы определяем именно безымянную категорию. После этого, мы можем добавлять в категорию методы, которые будут для нас считаться private. За счет того, что категория безымянная, имплементация данных методов может находиться рядом с им-плементацией основных методов в разделе `@implementation .. @end` и нет необходимости создавать отдельные разделы для имплементации категорий. А за счет того, что она находится в .m файле, которые никто не подключает через `#import` (вы ведь их не подключаете, да?), ви-димость методов для автодополнения ограничена текущим файлом. Конечно, послать объекту это сообщение извне все равно возможно, но от случайного вызова вы точно застрахованы.
 
-Что не так с этим кодом? Зачем нужны инициализаторы? [[[SomeClass alloc] init] init];
-У тебя есть класс A, который имеет поле NSString *b и в ините ты делаешь _b = @"somestring"; Стринг b не хранится в памяти выделенной под A – в этой памяти хранится лишь ссылка на b, а сам объект создается во вне. При повторном ините соответственно стринг просто пересоздастся не стерев старый и получим утекший стринг. Вообще, такая ситуация есть далеко не везде, и далеко не всегда вызовет проблемы. Но кастомные повторные инициализации реально могут вызывать утечки памяти зависит от конкретного типа объекта. Двойной инит может вызвать утечку. А может не вызвать. Каждый конкретный класс - отдельный вопрос. Я бы на собеседовании ответил - в каких случаях и для какого класса вы собираетесь вызывать двойную инициализацию?
-Класс NSObject содержит метод с именем init. После выделения памяти новому экземпляру от-правляется сообщение init, чтобы экземпляр мог инициализировать собой переменные экзем-пляров реальными значениями. Таким образом, alloc выделяет память для объекта, а init гото-вит объект к работе. Использование init выглядит примерно так:
-NSMutableArray *things = [[NSMutableArray alloc] init];
-Следует учитывать, что init является методом экземпляра, который возвращает адрес инициа-лизированного объекта. Он обеспечивает инициализацию NSObject.
+##Что не так с этим кодом? Зачем нужны инициализаторы?
+```objectivec
+[[[SomeClass alloc] init] init];
+```
+У тебя есть класс A, который имеет поле `NSString *b` и в ините ты делаешь `_b = @"somestring";` Стринг b не хранится в памяти выделенной под A – в этой памяти хранится лишь ссылка на b, а сам объект создается вовне. При повторном ините соответственно стринг просто пересоздастся не стерев старый и получим утекший стринг. Вообще, такая ситуация есть далеко не везде, и далеко не всегда вызовет проблемы. Но кастомные повторные инициализации реально могут вызывать утечки памяти — зависит от конкретного типа объекта. Двойной инит может вызвать утечку. А может не вызвать. Каждый конкретный класс - отдельный вопрос. Я бы на собеседовании ответил: "В каких случаях и для какого класса вы собираетесь вызывать двойную инициализацию?"
 
-Что такое назначеный инициализатор (designated initializer), напишите любой элемен-тарный инициализатор, почему он так выглядит? if (self  = [super...])
+##Что такое назначеный инициализатор (designated initializer), напишите любой элементарный инициализатор, почему он так выглядит? `if (self  = [super...])`
 Класс содержит только один основной инициализатор. Если класс содержит другие инициали-заторы, то их реализация должна вызывать (прямо или косвенно) основной инициализатор.
 *	Если класс имеет несколько инициализаторов, только один из них должен выполнять ре-альную работу. Этот метод называется основным инцициалuзатором. Все остальные инициа-лизаторы должны вызывать основной инициализатор (прямо или косвенно).
 *	Основной инициализатор вызывает основной инициализатор суперкласса перед инициа-лизацией своих переменных экземпляров.
