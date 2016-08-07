@@ -4285,28 +4285,33 @@ __Подводные камни__
 У тебя есть класс A, который имеет поле `NSString *b` и в ините ты делаешь `_b = @"somestring";` Стринг b не хранится в памяти выделенной под A – в этой памяти хранится лишь ссылка на b, а сам объект создается вовне. При повторном ините соответственно стринг просто пересоздастся не стерев старый и получим утекший стринг. Вообще, такая ситуация есть далеко не везде, и далеко не всегда вызовет проблемы. Но кастомные повторные инициализации реально могут вызывать утечки памяти — зависит от конкретного типа объекта. Двойной инит может вызвать утечку. А может не вызвать. Каждый конкретный класс - отдельный вопрос. Я бы на собеседовании ответил: "В каких случаях и для какого класса вы собираетесь вызывать двойную инициализацию?"
 
 ##Что такое назначеный инициализатор (designated initializer), напишите любой элементарный инициализатор, почему он так выглядит? `if (self  = [super...])`
-Класс содержит только один основной инициализатор. Если класс содержит другие инициали-заторы, то их реализация должна вызывать (прямо или косвенно) основной инициализатор.
-*	Если класс имеет несколько инициализаторов, только один из них должен выполнять ре-альную работу. Этот метод называется основным инцициалuзатором. Все остальные инициа-лизаторы должны вызывать основной инициализатор (прямо или косвенно).
-*	Основной инициализатор вызывает основной инициализатор суперкласса перед инициа-лизацией своих переменных экземпляров.
-*	Если имя основного инициализатора вашего класса отличается от имени основного иници-ализатора его супер класса, вы должны переопределить основной инициализатор суперк-ласса, чтобы он вызывал новый основной инициализатор.
-*	Если класс содержит несколько инициализаторов, четко укажите в заголовочном файле, какой из них является основным.
-Установившейся практикой в таком случае является выделение среди всех init-методов одного, называемого designated initializer. Все остальные init-методы должны вызывать его и только он вызывает унаследованный init метод.
-- initWithName: (const char *) theName {  // designated initializer
-[super init];                       // call inherited method
-name = strdup(theName);
-}
-- init {
-return [self initWithName:@"name"];
+Класс содержит только один основной инициализатор. Если класс содержит другие инициализаторы, то их реализация должна вызывать (прямо или косвенно) основной инициализатор.
+* Если класс имеет несколько инициализаторов, только один из них должен выполнять реальную работу. Этот метод называется основным инцициалuзатором. Все остальные инициализаторы должны вызывать основной инициализатор (прямо или косвенно).
+* Основной инициализатор вызывает основной инициализатор суперкласса перед инициализацией своих переменных экземпляров.
+* Если имя основного инициализатора вашего класса отличается от имени основного инициализатора его супер класса, вы должны переопределить основной инициализатор суперкласса, чтобы он вызывал новый основной инициализатор.
+* Если класс содержит несколько инициализаторов, четко укажите в заголовочном файле, какой из них является основным.
+Установившейся практикой в таком случае является выделение среди всех init-методов одного, называемого designated initializer. Все остальные init-методы должны вызывать его и только он вызывает унаследованный init-метод.
+```objectivec
+// designated initializer
+- initWithName: (const char *) theName {  
+	// call inherited method
+	[super init];                       
+	name = strdup(theName);
 }
 
-Какой метод вызовется: класса A или класса B? Как надо изменить код, чтобы вызвался метод класса A?
+- init {
+	return [self initWithName:@"name"];
+}
+```
+##Какой метод вызовется: класса A или класса B? Как надо изменить код, чтобы вызвался метод класса A?
+```objectivec
 @interface A : NSObject
 - (void)someMethod;
 @end
 
 @implementation A
 - (void)someMethod {
-NSLog(@"This is class A");
+	NSLog(@"This is class A");
 }
 @end
 
@@ -4315,7 +4320,7 @@ NSLog(@"This is class A");
 
 @implementation B
 - (void)someMethod {
-NSLog(@"This is class B");
+	NSLog(@"This is class B");
 }
 @end
 
@@ -4324,73 +4329,81 @@ NSLog(@"This is class B");
 
 @implementation C
 - (void)method {
-A *a = [B new]; //Вызовется метод класса B. A *a = [A new]; ???
-[a someMethod];
+	A *a = [B new];
+	[a someMethod];
 }
 @end
+```
+Вызовется метод класса B.
 
-Что выведется в консоль? Почему?
+##Что выведется в консоль? Почему?
+```objectivec
 - (BOOL)objectsCount {
-NSMutableArray *array = [NSMutableArray new];
-for (NSInteger i = 0; i < 1024; i++) {
-[array addObject:[NSNumber numberWithInt:i]];
+	NSMutableArray *array = [NSMutableArray new];
+	for (NSInteger i = 0; i < 1024; i++) {
+		[array addObject:[NSNumber numberWithInt:i]];
+	}
+	return array.count; //return array.count > 0;
 }
-return array.count; //return array.count > 0;
-}
-- (void)someMethod {
-if ([self objectsCount]) {
-NSLog(@"has objects");
-} else {
-NSLog(@"no objects");
-}
-}
-При касте из NSUInteger в BOOL проверяется на равенство нулю последний несущий байт чис-ла, который равен нулю, если число кратно 256.
 
-Как работают push нотификации?
-iOS-приложения не могут долгое время находиться в фоновом режиме. В целях сохранения за-ряда батареи приложениям, работающим в фоне, разрешено выполнять ограниченный набор действий. Вместо того, чтобы беспрерывно проверять события или производить какие-либо действия в фоновом режиме, вы можете создать серверную сторону приложения, которая бу-дет выполнять эти действия. А когда наступит интересующее событие, серверная сторона сможет отправить приложению push-уведомление! Абсолютно любое push-уведомление мо-жет выполнять следующие три действия:
-*	Показать короткое текстовое сообщение.
-*	Воспроизвести короткий звуковой сигнал.
-*	Установить число на бейдже иконки приложения.
+- (void)someMethod {
+	if ([self objectsCount]) {
+		NSLog(@"has objects");
+	} else {
+		NSLog(@"no objects");
+	}
+}
+```
+При касте из NSUInteger в BOOL проверяется на равенство нулю последний несущий байт числа, который равен нулю, если число кратно 256.
+
+##Как работают push нотификации?
+iOS-приложения не могут долгое время находиться в фоновом режиме. В целях сохранения заряда батареи приложениям, работающим в фоне, разрешено выполнять ограниченный набор действий. Вместо того, чтобы беспрерывно проверять события или производить какие-либо действия в фоновом режиме, вы можете создать серверную сторону приложения, которая будет выполнять эти действия. А когда наступит интересующее событие, серверная сторона сможет отправить приложению push-уведомление! Абсолютно любое push-уведомление может выполнять следующие три действия:
+* Показать короткое текстовое сообщение.
+* Воспроизвести короткий звуковой сигнал.
+* Установить число на бейдже иконки приложения.
 
 APNS cервер – Apple Push Notification Server.
 
-Memory warning
+##Memory warning
 iOS 2.0 and later.
 Your app never calls this method directly. Instead, this method is called when the system determines that the amount of available memory is low. You can override this method to release any additional memory used by your view controller. If you do, your implementation of this method must call the super implementation at some point.
+```objectivec
 - (void)applicationDidReceiveMemoryWarning:(UIApplication *)application {
-/*
-Free up as much memory as possible by purging cached data objects that can be recreated (or reloaded from disk) later.
-*/
+	/*
+	Free up as much memory as possible by purging cached data objects that can be recreated (or reloaded from disk) later.
+	*/
 }
-- (void)didReceiveMemoryWarning {
-// Releases the view if it doesn't have a superview.
-    	[super didReceiveMemoryWarning];
-    	// Release any cached data, images, etc that aren't in use.
-}
-Если на устройстве заканчивается память в центр уведомлений приходит сообще-ние UIApplicationDidReceiveMemoryWarningNotification, наш обьект может об этом узнать через уведомления и что-либо сделать, например почистить кеш или сохранить данные.
 
-Как лучше всего загрузить UIImage c диска (с кеша)?
-Кеширование уменьшает количество необходимых обращений к сети, улучшает впечатление от работы с программой во время полного отсутствия интернета или проблем с сетевым со-единением. После загрузки ответа сервера, его копия сохраняется в локальном кеше. В следу-ющий раз при посылке такого же запроса, ответ будет возвращен мгновенно, без обращения к сети. NSURLCache прозрачным для пользователя образом вернет закешированные данные. Для использования NSURLCache нужно установить значение синглтона sharedURLCache. Это можно сделать в методе application:didFinishLaunchingWithOptions:
-- (BOOL)application:(UIApplication *)application didFinishLaunchingWithOptions:(NSDictionary *)launchOptions {
-NSURLCache *URLCache = [[NSURLCache alloc]
-initWithMemoryCapacity:4 * 1024 * 1024
-    diskCapacity:20 * 1024 * 1024
-                                           diskPath:nil];
-[NSURLCache setSharedURLCache:URLCache];
+- (void)didReceiveMemoryWarning {
+	// Releases the view if it doesn't have a superview.
+    [super didReceiveMemoryWarning];
+    // Release any cached data, images, etc that aren't in use.
 }
+```
+Если на устройстве заканчивается память в центр уведомлений приходит сообщение `UIApplicationDidReceiveMemoryWarningNotification`, наш обьект может об этом узнать через уведомления и что-либо сделать, например почистить кеш или сохранить данные.
+
+##Как лучше всего загрузить UIImage c диска (с кеша)?
+Кеширование уменьшает количество необходимых обращений к сети, улучшает впечатление от работы с программой во время полного отсутствия интернета или проблем с сетевым соединением. После загрузки ответа сервера, его копия сохраняется в локальном кеше. В следующий раз при посылке такого же запроса, ответ будет возвращен мгновенно, без обращения к сети. NSURLCache прозрачным для пользователя образом вернет закешированные данные. Для использования NSURLCache нужно установить значение синглтона `sharedURLCache`. Это можно сделать в методе `application:didFinishLaunchingWithOptions`:
+```objectivec
+- (BOOL)application:(UIApplication *)application didFinishLaunchingWithOptions:(NSDictionary *)launchOptions {
+	NSURLCache *URLCache = [[NSURLCache alloc] initWithMemoryCapacity:4 * 1024 * 1024 diskCapacity:20 * 1024 * 1024 diskPath:nil];
+	[NSURLCache setSharedURLCache:URLCache];
+}
+
 NSArray *paths = NSSearchPathForDirectoriesInDomains(NSCachesDirectory, NSUserDomainMask, YES);
 NSString *cachePath = [paths objectAtIndex:0];
 NSURL *fileURL = [NSURL fileURLWithPath:[cachePath stringByAppendingPathComponent:@"Matsedl.pdf"]];
-
-Какой контент лучше хранить в Documents, а какой в Cache?
+```
+##Какой контент лучше хранить в Documents, а какой в Cache?
 Кеш - это специальный буфер (контейнер), содержащий информацию. Эта информация может быть запрошена с наибольшей вероятностью. Соответственно, доступ к этому буферу должен быть очень быстрым, он должен быть быстрее чем доступ к сети или к данным на жестком диске. В операционной системе iOS присутствует функция кэширования, но прямого доступа к данным в кэше нету. Для получения доступа следует использовать класс NSCache, о котором и пойдет речь в данном примере.
-*	Only documents and other data that is user-generated, or that cannot otherwise be recreated by your application, should be stored in the <Application_Home>/Documents directory and will be automatically backed up by iCloud.
-*	Data that can be downloaded again or regenerated should be stored in the <Application_Home>/Library/Caches directory. Examples of files you should put in the Caches directory include database cache files and downloadable content, such as that used by magazine, newspaper, and map applications.
-*	Data that is used only temporarily should be stored in the <Application_Home>/tmp directory. Although these files are not backed up to iCloud, remember to delete those files when you are done with them so that they do not continue to consume space on the user’s device.
-*	Use the "do not back up" attribute for specifying files that should remain on device, even in low storage situations. Use this attribute with data that can be recreated but needs to persist even in low storage situations for proper functioning of your app or because customers expect it to be available during offline use. This attribute works on marked files regardless of what directory they are in, including the Documents directory. These files will not be purged and will not be included in the user's iCloud or iTunes backup. Because these files do use on-device storage space, your app is responsible for monitoring and purging these files periodically.
+* Only documents and other data that is user-generated, or that cannot otherwise be recreated by your application, should be stored in the <Application_Home>/Documents directory and will be automatically backed up by iCloud.
+* Data that can be downloaded again or regenerated should be stored in the <Application_Home>/Library/Caches directory. Examples of files you should put in the Caches directory include database cache files and downloadable content, such as that used by magazine, newspaper, and map applications.
+* Data that is used only temporarily should be stored in the <Application_Home>/tmp directory. Although these files are not backed up to iCloud, remember to delete those files when you are done with them so that they do not continue to consume space on the user’s device.
+* Use the "do not back up" attribute for specifying files that should remain on device, even in low storage situations. Use this attribute with data that can be recreated but needs to persist even in low storage situations for proper functioning of your app or because customers expect it to be available during offline use. This attribute works on marked files regardless of what directory they are in, including the Documents directory. These files will not be purged and will not be included in the user's iCloud or iTunes backup. Because these files do use on-device storage space, your app is responsible for monitoring and purging these files periodically.
 
-Как из строки вытащить подстроку?
-С помощью методов: substringToIndex:, substringFromIndex: и substringWithRange:. Можно так-же разделить строку на подстроки (основано на разделителе строки) методом componentsSeparatedByString:
+##Как из строки вытащить подстроку?
+С помощью методов: `substringToIndex:`, `substringFromIndex:` и `substringWithRange:`. Можно также разделить строку на подстроки (основано на разделителе строки) методом `componentsSeparatedByString:`
+```objectivec
 NSString *source = @"0123456789";
 NSString *firstFour = [source substringToIndex:4];
 // firstFour содержит: @"0123"
@@ -4401,166 +4414,196 @@ NSString *twoToSix = [source substringWithRange:twoToSixRange];
 // twoToSix содержит: @"2345"
 NSArray *split = [source componentsSeparatedByString:@"45"];
 // массив split содержит: { @"0123", @"6789" }
+```
 
-NSCoding, archiving?
-NSCoder — это абстрактный класс который преобразует поток данных. Используется для архи-вации и разархивации объектов.
-Протокол <NSCoding> позволяет реализовать архивирование или разархивирование данных. Например у нас есть обьект мы его можем сохранить, а при следующей загрузке приложения подгрузить обратно. Часто программе требуется хранить состояние объектов в файле для дальнейшего их полного либо частичного восстановления, а также работы с ними. Такой про-цесс называют сериализацией. Многие современные языки и фреймворки предоставляют для этого вспомогательные средства. Рассмотрим, что нам предоставляет Cocoa Framework для Objective-C.
-Сериализованный объект – объект, преобразованный в поток байтов для сохранения в файле или передачи по сети. NS(M)Array, NS(M)Dictionary, NS(M)Data, NS(M)String, NSNumber, NSDate. Сохранить состояние объекта в Cocoa Framework можно двумя способами при помощи:
-1.	архивации (archivation)
-2.	сериализации (serialization)
-Каждый из них имеет свои области применения. Так, при помощи сериализации нельзя сохра-нить объект пользовательского класса. Рассмотрим подробнее оба способа. Протокол <NSCo-ding> объявляет два метода, которые должен реализовать класс, так что экземпляры этого класса могут быть закодированы и декодированы. Эта возможность обеспечивает основу для архивирования (где объекты и другие структуры хранятся на диске) и распространения (где объекты копируются в разные адресные пространства).
-encodeWithCoder:
-Кодирует приемник с помощью данного архиватора. (обязательный)
+##NSCoding, archiving?
+NSCoder — это абстрактный класс который преобразует поток данных. Используется для архивации и разархивации объектов.
+Протокол `<NSCoding>` позволяет реализовать архивирование или разархивирование данных. Например у нас есть обьект мы его можем сохранить, а при следующей загрузке приложения подгрузить обратно. Часто программе требуется хранить состояние объектов в файле для дальнейшего их полного либо частичного восстановления, а также работы с ними. Такой процесс называют сериализацией. Многие современные языки и фреймворки предоставляют для этого вспомогательные средства. Рассмотрим, что нам предоставляет Cocoa Framework для Objective-C.
+Сериализованный объект – объект, преобразованный в поток байтов для сохранения в файле или передачи по сети. `NS(M)Array`, `NS(M)Dictionary`, `NS(M)Data`, `NS(M)String`, `NSNumber`, `NSDate`. Сохранить состояние объекта в Cocoa Framework можно двумя способами при помощи:
+
+1. архивации (archivation)
+2. сериализации (serialization)
+
+Каждый из них имеет свои области применения. Так, при помощи сериализации нельзя сохранить объект пользовательского класса. Рассмотрим подробнее оба способа. Протокол `<NSCoding>` объявляет два метода, которые должен реализовать класс, так что экземпляры этого класса могут быть закодированы и декодированы. Эта возможность обеспечивает основу для архивирования (где объекты и другие структуры хранятся на диске) и распространения (где объекты копируются в разные адресные пространства).
+
+`encodeWithCoder:` Кодирует приемник с помощью данного архиватора. (обязательный)
+```objectivec
 - (void)encodeWithCoder:(NSCoder *)encoder
-initWithCoder:
-Возвращает объект инициализированный из данных в данном разархиваторе. (обязательный)
+```
+`initWithCoder:` Возвращает объект инициализированный из данных в данном разархиваторе. (обязательный)
+```objectivec
 - (id)initWithCoder:(NSCoder *)decoder
-Создание архивов
-Самый простой способ создать архив - использовать метод archiveRootObject:toFile: архиватора. Этот метод класса создает временный экземпляр архиватора и записывает объект в файл.
+```
+_Создание архивов_
+Самый простой способ создать архив - использовать метод `archiveRootObject:toFile:` архиватора. Этот метод класса создает временный экземпляр архиватора и записывает объект в файл.
+```objectivec
 MapView *myMapView;
 result = [NSKeyedArchiver archiveRootObject:myMapView toFile:@"/tmp/MapArchive"];
-Чтение архивов
+```
+_Чтение архивов_
 Для чтения архивов, также как и для записи (см. выше), можно использовать 2 метода.
 Первый - простой и пригодный для большинства случаев - с использованием метода класса:
+```objectivec
 MapView *myMapView;
 myMapView = [NSKeyedUnarchiver unarchiveObjectWithFile:@"/tmp/MapArchive"];
-Второй метод предполагает создание экземпляра объекта NSKeyedUnarchiver.
+```
+Второй метод предполагает создание экземпляра объекта `NSKeyedUnarchiver`.
 
-Как работает UITableView?
-UITableView :
-UIScrollView <NSCoding> :
-UIView <NSCoding> :
-UIResponder <NSCoding, UIAppearance, UIAppearanceContainer, UIDynamicItem> :
-NSObject
-
-UITableViewController :
-UIViewController <UITableViewDelegate, UITableViewDataSource> :
-UIResponder <NSCoding, UIAppearanceContainer> :
-NSObject
-
-
+##Как работает UITableView?
+```
+UITableView : UIScrollView <NSCoding> : UIView <NSCoding> : UIResponder <NSCoding, UIAppearance, UIAppearanceContainer, UIDynamicItem> : NSObject
+UITableViewController : UIViewController <UITableViewDelegate, UITableViewDataSource> : UIResponder <NSCoding, UIAppearanceContainer> : NSObject
+```
 
 Ячейки table view, которые больше не отображаются на экране, не выкидываются. Их можно адаптировать под повторное использование, указав идентификатор в процессе инициализа-ции. Когда ячейка table view, отмеченная для повторного использования, пропадает с экрана, table view помещает ее в очередь для повторного использования в дальнейшем. Когда объект table view dataSource запрашивает у table view новую ячейку и указывает идентификатор, table view сначала проверяет очередь ячеек для повторного использования на предмет наличия не-обходимой ячейки. Если ячейка table view не была обнаружена, то table view создает новую, передавая ее затем объекту dataSource.
+```objectivec
 UITableViewCell *cell = [tableView dequeueReusableCellWithIdentifier:CellIdentifier forIndexPath:indexPath];
+```
 
-Константы, typedef, enum, #define
-typedef используется для объявления нового типа данных – это команда компилятору и предпо-лагает символьный тип данных.
-#define – команда препроцессору и может содержать числовые значения.
+##Константы, typedef, enum, #define
+`typedef` используется для объявления нового типа данных – это команда компилятору и предполагает символьный тип данных.
 
-Переменные, значения которых не изменяются (как, например, математическая постоянная pi), Такие данные называются константами. В Objective-C существует два распространенных способа определения констант:
-*	#define
-*	глобальные переменные
+`#define` – команда препроцессору и может содержать числовые значения.
 
+Переменные, значения которых не изменяются (как, например, математическая постоянная `pi`), Такие данные называются константами. В Objective-C существует два распространенных способа определения констант:
+* `#define`
+* глобальные переменные
+
+```objectivec
 #define M_PI 3.14159265358979323846264338327950288
-Директива #define приказывает препропессору: «Каждый раз, когда ты встречаешь Х, замени его на У еще до того, как компилятор увидит код».
+```
+Директива `#define` приказывает препропессору: «Каждый раз, когда ты встречаешь Х, замени его на У еще до того, как компилятор увидит код».
 
-Вместо #define программисты Objective-C обычно используют для хранения постоянных зна-чений глобальные переменные. При написании масса NSLocale эта глобальная переменная встречалась в двух местах. В файле NSLocale.h переменная была объявлена примерно так
+Вместо `#define` программисты Objective-C обычно используют для хранения постоянных значений глобальные переменные. При написании масса `NSLocale` эта глобальная переменная встречалась в двух местах. В файле NSLocale.h переменная была объявлена примерно так
+```objectivec
 extern NSString const *NSLocaleCurrencyCode;
-
-Ключевое слово соnst говорит о том, что указатель не будет изменяться в течение всего жиз-ненного цикла программы. Ключевое слово extern означает: «Я гарантирую, что это существу-ет, но оно определяется в другом файле». И действительно, файл NSLocale.m содержит строку следующего вида:
+```
+Ключевое слово `соnst` говорит о том, что указатель не будет изменяться в течение всего жизненного цикла программы. Ключевое слово extern означает: «Я гарантирую, что это существует, но оно определяется в другом файле». И действительно, файл NSLocale.m содержит строку следующего вида:
+```objectivec
 NSString const *NSLocaleCurrencyCode = @"currency";
+```
+__`#define` и глобальные переменные__
 
-#define и глобальные переменные
-Если для определения констант можно использовать как #define, так и глобальные перемен-ные (включая enum), почему программисты Objective-C обычно используют
-глобальные переменные? Иногда глобальные переменные повышают быстродействие про-граммы. Например, при работе с глобальной переменной для сравнения строк можно исполь-зовать == вместо isEqual: (а математическая операция выполняется быстрее отправки сообще-ния). Кроме того, с глобальными переменными удобнее работать в отладчике. Используйте для констант глобальные переменные и enum, а не #define.
+Если для определения констант можно использовать как `#define`, так и глобальные переменные (включая `enum`), почему программисты Objective-C обычно используют глобальные переменные? Иногда глобальные переменные повышают быстродействие программы. Например, при работе с глобальной переменной для сравнения строк можно использовать `==` вместо `isEqual:` (а математическая операция выполняется быстрее отправки сообщения). Кроме того, с глобальными переменными удобнее работать в отладчике. Используйте для констант глобальные переменные и `enum`, а не `#define`.
 
-enum
-Часто в программе требуется определить набор констант. Допустим, вы программируете блендер с пятью рабочими режимами. Ваш класс Blender содержит метод setSpeed:. Было бы хорошо, если бы тип аргумента указывал, что допустимыми являются только пять конкретных значений. Для этого в программе определяется перечисляемый тип, или перечисление:
+__`enum`__
+
+Часто в программе требуется определить набор констант. Допустим, вы программируете блендер с пятью рабочими режимами. Ваш класс `Blender` содержит метод `setSpeed:`. Было бы хорошо, если бы тип аргумента указывал, что допустимыми являются только пять конкретных значений. Для этого в программе определяется перечисляемый тип, или перечисление:
+```objectivec
 enum BlenderSpeed {
-BlenderSpeedStir = 1,
-BlenderSpeedChop = 2,
-BlenderSpeedLiquify = 5,
-BlenderSpeedPulse = 9,
-BlenderSpeedIceCrush = 15
+	BlenderSpeedStir = 1,
+	BlenderSpeedChop = 2,
+	BlenderSpeedLiquify = 5,
+	BlenderSpeedPulse = 9,
+	BlenderSpeedIceCrush = 15
 };
+
 @interface Blender : NSObject {
-//пять допустимых значений скорости
+	//пять допустимых значений скорости
  	enum BlenderSpeed speed;
 }
+
 //setSpeed: получает одно из пяти допустимых значений
 - (void)setSpeed:(enum BlenderSpeed)x;
+
 @end
-Чтобы разработчикам не приходилось постоянно вводить enum BlenderSpeed, они часто опре-деляют сокращенную запись с использованием
+```
+Чтобы разработчикам не приходилось постоянно вводить `enum BlenderSpeed`, они часто определяют сокращенную запись с использованием
+```objectivec
 typedef enum {
-BlenderSpeedStir = 1,
-BlenderSpeedChop = 2,
-BlenderSpeedLiquify = 5,
-BlenderSpeedPulse = 9,
-BlenderSpeedIceCrush = 15
+	BlenderSpeedStir = 1,
+	BlenderSpeedChop = 2,
+	BlenderSpeedLiquify = 5,
+	BlenderSpeedPulse = 9,
+	BlenderSpeedIceCrush = 15
 } BlenderSpeed;
+
 @interface Blender : NSObject {
-//пять допустимых значений скорости
-BlenderSpeed speed;
+	//пять допустимых значений скорости
+	BlenderSpeed speed;
 }
+
 //setSpeed: получает одно из пяти допустимых значений
 - (void)setSpeed:(BlenderSpeed)x;
+
 @end
+```
 Часто для программиста совершенно неважно, какими числами представлены пять скоростей - лишь бы они отличались друг от друга. Значения элементов перечисления можно не указы-вать, в этом случае компилятор сгенерирует их автоматически:
 typedef enum {
-BlenderSpeedStir,
-BlenderSpeedChop,
-BlenderSpeedLiquify,
-BlenderSpeedPulse,
-BlenderSpeedIceCrush
+	BlenderSpeedStir,
+	BlenderSpeedChop,
+	BlenderSpeedLiquify,
+	BlenderSpeedPulse,
+	BlenderSpeedIceCrush
 } BlenderSpeed;
 
-
-Объявление структуры
-Как правило, объявление структуры используется в программе многократно,
-поэтому для типа структур обычно создается typedef - псевдоним для объявления типа, позво-ляющий использовать его как обычный тип данных.
+__Объявление структуры__
+Как правило, объявление структуры используется в программе многократно, поэтому для типа структур обычно создается `typedef` - псевдоним для объявления типа, позво-ляющий использовать его как обычный тип данных.
+```objectivec
 typedef struct {
-float heightInMeters;
-int weightInKilos;
+	float heightInMeters;
+	int weightInKilos;
 } Person;
+```
 
-Что такое awakeFromNib?
+##Что такое awakeFromNib?
 NSNibAwaking Protocol Reference
 (informal protocol)
 Prepares the receiver for service after it has been loaded from an Interface Builder archive, or nib file.
-- (void)awakeFromNib;
+`- (void)awakeFromNib;`
 An awakeFromNib message is sent to each object loaded from the archive, but only if it can respond to the message, and only after all the objects in the archive have been loaded and initialized. When an object receives an awakeFromNib message, it is guaranteed to have all its outlet instance variables set.
 Note: During Interface Builder’s test mode, this method is also sent to objects instantiated from loaded palettes, which include executable code for the objects. It is not sent to objects created using the Classes display of the nib file window in Interface Builder.
 An example of how you might use awakeFromNib is shown below. Suppose your nib file has two custom views that must be positioned relative to each other at runtime. Trying to position them at initialization time might fail because the other view might not yet be unarchived and initialized yet. However, you can position both of them in the nib file owner’s awakeFromNib method. In the code below, firstView and secondView are outlets of the file’s owner.
 Когда объекты из .nib разархивированы:
 
-
-Что происходит когода мы пытаемся вызвать метод у nil указателя? Разница между nil и Nil.
-На самом деле, в контексте указателей применим как NULL, так и 0, ввиду того что первый — не более чем макрос-обёртка для второго:
+##Что происходит когода мы пытаемся вызвать метод у `nil` указателя? Разница между `nil` и `Nil`.
+На самом деле, в контексте указателей применим как `NULL`, так и 0, ввиду того что первый — не более чем макрос-обёртка для второго:
+```objectivec
 #define NULL ((void *)0)
-nil это указатель на нулевой объект:
+```
+`nil` это указатель на нулевой объект:
+```objectivec
 #if !defined(nil)
-#define nil (id)0
+	#define nil (id)0
 #endif
-Но и это ещё не всё: в дополнение к четырём вышеперечисленным мнемоникам, Foundation определяет макрос Nil (не путать с nil) — нулевой указатель типа Class:
+```
+Но и это ещё не всё: в дополнение к четырём вышеперечисленным мнемоникам, Foundation определяет макрос `Nil` (не путать с `nil`) — нулевой указатель типа `Class`:
+```objectivec
 #if !defined(Nil)
-#define Nil (Class)0
+	#define Nil (Class)0
 #endif
-NSNull используется внутри фреймворка Foundation и некоторых других для того, чтобы обой-ти ограничение стандартных коллекций, вроде NSArray или NSDictionary, заключающееся в том, что они не могут содержать в себе значения nil.
-*	0 = 0 Ноль — он везде ноль
-*	NULL = (void *)0 Нулевой указатель в языке Си
-*	nil = (id)0 Нулевой указатель на объект Objective-C
-*	Nil = (Class)0 Нулевой указатель типа Class в Objective-C
-*	NSNull = [NSNull null] Синглтон класса NSNull — обёртки над nil и Null
-Иногда разработчики той или иной функции (метода) допускают возможность, что не все входные параметры могут быть заданы пользователем. Например, метод -capitalizedStringWithLocale: класса NSString принимает в качестве аргумента локаль (объект класса NSLocale), либо nil — в последнем случае при изменении регистра строки будет исполь-зоваться каноническая декомпозиция (NFD) Unicode-символов независимо от настроек локали на компьютере пользователя (то есть, данный метод будет эквивалентен методу -capitalizedString).
+```
+`NSNull` используется внутри фреймворка Foundation и некоторых других для того, чтобы обойти ограничение стандартных коллекций, вроде `NSArray` или `NSDictionary`, заключающееся в том, что они не могут содержать в себе значения `nil`.
+
+* `0 = 0` Ноль — он везде ноль
+* `NULL = (void *)0` Нулевой указатель в языке Си
+* `nil = (id)0` Нулевой указатель на объект Objective-C
+* `Nil = (Class)0` Нулевой указатель типа `Class` в Objective-C
+* `NSNull = [NSNull null]` Синглтон класса `NSNull` — обёртки над `nil` и `Null`
+
+Иногда разработчики той или иной функции (метода) допускают возможность, что не все входные параметры могут быть заданы пользователем. Например, метод `-capitalizedStringWithLocale:` класса `NSString` принимает в качестве аргумента локаль (объект класса `NSLocale`), либо `nil` — в последнем случае при изменении регистра строки будет использоваться каноническая декомпозиция (NFD) Unicode-символов независимо от настроек локали на компьютере пользователя (то есть, данный метод будет эквивалентен методу `-capitalizedString`).
+
 Инициализация и «опустошение» объектов (например, для того, чтобы сообщить об ошибке):
-
+```objectivec
 - (NSDictionary *)dictionaryForLicenseFile:(NSString *)path {
-NSData *licenseFile = [NSData dataWithContentsOfFile:path];
-/*
-«Достаточно, вы мне плюнули в душу!»
-*/
-if (!licenseFile) {
-return nil;
-}            
-return [self dictionaryForLicenseData:licenseFile];
+	NSData *licenseFile = [NSData dataWithContentsOfFile:path];
+	/*
+	«Достаточно, вы мне плюнули в душу!»
+	*/
+	if (!licenseFile) {
+		return nil;
+	}            
+	return [self dictionaryForLicenseData:licenseFile];
 }  	
-В ответ на посылаемое ему сообщение nil не бросает исключение, а попросту игнорирует это сообщение. То есть, nil из Objective-C ведёт себя как "черная дыра". Это пустота. Это ничто. При посылке к nil-у любого сообщения, всё что вы получите назад - это nil. Не будет никаких ис-ключений, никаких возвращенных значений. Ничего.
+```
+В ответ на посылаемое ему сообщение `nil` не бросает исключение, а попросту игнорирует это сообщение. То есть, `nil` из Objective-C ведёт себя как "черная дыра". Это пустота. Это ничто. При посылке к `nil`-у любого сообщения, всё что вы получите назад - это `nil`. Не будет никаких исключений, никаких возвращенных значений. Ничего.
 
-Что такое неформальный протокол?
-Категория с описанными, но не реализованными методами называется неформальным прото-колом. Неформальные протоколы часто определяются для корневого класса NSObject, при этом они не имеют реализации в самом классе. Каждый подкласс будет отвечать на сообщения описанные в категории, но при этом будут делать что-то полезное только реализованные методы. Методы, по мере необходимости, могут быть реализованы в подклассах, при этом реализуемые методы должны быть объявлены в секции @interface.
+##Что такое неформальный протокол?
+Категория с описанными, но не реализованными методами называется неформальным протоколом. Неформальные протоколы часто определяются для корневого класса NSObject, при этом они не имеют реализации в самом классе. Каждый подкласс будет отвечать на сообщения описанные в категории, но при этом будут делать что-то полезное только реализованные методы. Методы, по мере необходимости, могут быть реализованы в подклассах, при этом реализуемые методы должны быть объявлены в секции `@interface`.
 
-В чем разница между NSString и char? (Что значит приставка NS в общем?)
-Приставка NS это абревиатура от NextStep операционной системы на основе которой и создана часть MAC OS. Apple в свое время купил и использует до сих пор.
+##В чем разница между `NSString` и `char`? (Что значит приставка `NS` в общем?)
+Приставка `NS` это абревиатура от NextStep операционной системы на основе которой и создана часть MAC OS. Apple в свое время купил и использует до сих пор.
+```objectivec
 сhar *myCharPtr = "This is a string.";
 //In memory: myCharPtr contains an address, e.g. |0x27648164|
 //at address 0x27648164: |T|h|i|s| |i|s| |a| |s|t|r|i|n|g|.|\0|
@@ -4568,32 +4611,32 @@ return [self dictionaryForLicenseData:licenseFile];
 NSString *myStringPtr = @"This is an NSString.";
 //In memory: myStringPtr contains e.g. |0x27648164|
 //at address 0x27648164: |Object data|length|You don't know what else|UTF-16 data|etc.|
+```
+##Опишите иерархию классов от UIButton до NSObject.
+`UIButton : UIControl : UIView : UIResponder : NSObject`
 
-Опишите иерархию классов от UIButton до NSObject.
-UIButton : UIControl : UIView : UIResponder : NSObject
-
-Что такое контекст (context)?
-Все рисование происходит в контексте (context), который определяет, где происходит рисова-ние. Чтобы получить context используется Си-функция UIGraphicsGetCurrentContext. В iOS центр координат при рисовании находится в левом верхнем углу, а не в левом нижнем, как у Mac OS X.
+##Что такое контекст (context)?
+Все рисование происходит в контексте (context), который определяет, где происходит рисование. Чтобы получить context используется Си-функция UIGraphicsGetCurrentContext. В iOS центр координат при рисовании находится в левом верхнем углу, а не в левом нижнем, как у Mac OS X.
+```objectivec
 - (void)drawRect:(CGRect)rect {
-// Получим context
-CGContextRef context = UIGraphicsGetCurrentContext();
-CGContextClearRect(context, rect); // Очистим context
-CGContextSetRGBFillColor(context, 255, 0, 0, 1);
-CGContextFillRect(context, CGRectMake(20, 20, 100, 100));
+	// Получим context
+	CGContextRef context = UIGraphicsGetCurrentContext();
+	CGContextClearRect(context, rect); // Очистим context
+	CGContextSetRGBFillColor(context, 255, 0, 0, 1);
+	CGContextFillRect(context, CGRectMake(20, 20, 100, 100));
 }
-[NSArray arrayWithObjects: a, b, c, nil]; зачем nil вконце?
+```
+
+##[NSArray arrayWithObjects: a, b, c, nil]; зачем nil вконце?
 Чтобы закончить список объектов, которые содержит массив. Этим значением мы даем знать компилятору, что массив окончен.
 
-Сработает ли таймер? Что нужно чтобы сработал?
-	void startTimer(void *threadId) {
-			[NSTimer scheduleTimerWithTimeInterval:10.0f  
-			                                target:aTarget
-			                              selector:@selector(tick:)
-			                              userInfo:nil
-			                               repeats:NO];
-	}
-	pthread_create(&thread, NULL, startTimer, (void *)t);
-
+##Сработает ли таймер? Что нужно чтобы сработал?
+```objectivec
+void startTimer(void *threadId) {
+	[NSTimer scheduleTimerWithTimeInterval:10.0f target:aTarget selector:@selector(tick:) userInfo:nil repeats:NO];
+}
+pthread_create(&thread, NULL, startTimer, (void *)t);
+```
 Что такое xib и storyboard, в чем отличие, что лучше использовать?
 
 Nib файл содержит интерфейс программы посредством xml (один экран). Это не просто храни-лище интерфейса программы, но и хранит связи между объектами, а также инициализирует многие из них без дополнительного кода.
