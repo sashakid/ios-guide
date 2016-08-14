@@ -164,6 +164,7 @@
 	- [Closures](#Closures)
 	- [How Do I Declare a Closure in Swift?](#How Do I Declare a Closure in Swift?)
 	- [Чем отличаются лямбда, замыкание и блок?](#Чем отличаются лямбда, замыкание и блок?) 🖊
+- [Autolayout](#Autolayout)
 - [Общие вопросы и задачи](#Общие вопросы и задачи)
 	- [Inout parameters, pass by value, pass by reference](#Inout parameters, pass by value, pass by reference)
 	- [Заполнить строку буквами А, чтобы не делать миллионы итераций](#Заполнить строку буквами А, чтобы не делать миллионы итераций)
@@ -3260,6 +3261,9 @@ NSRegularExpression *regex = [NSRegularExpression regularExpressionWithPattern:@
 Для парсинга XML в Objective-C существует класс `NSXMLParser`. О нахождении каких-либо элементов парсер уведомляет свой делегат. Делегат должен следовать протоколу `NSXMLParserDelegate`.
 HTML (HyperText Markup Language) is a markup language (it’s in the name!) that tells browsers how to layout a web page. By its very nature, this content is in a hierarchy that defines where within the page a piece of information is to be displayed. You may also be aware of XML (eXtensible Markup Language). This also defines a hierarchy of information, and you may at this point be thinking that perhaps HTML is related to XML. You’d be right to think that, and also wrong!
 There are two flavors of HTML: the one that is pure XML, and the original, where-it-all-started HTML. HTML is “sort of” an XML document, but with more relaxed rules.
+
+<img src="https://github.com/sashakid/ios-guide/blob/master/Images/html_parsing.png">
+
 Represent object in a stream, JSON better then HTML or XML.
 JSON (JavaScript Object Notation) is a lightweight data-interchange format. It is easy for humans to read and write. It is easy for machines to parse and generate. It is based on a subset of the JavaScript Programming Language, Standard ECMA-262 3rd Edition - December 1999. JSON is a text format that is completely language independent but uses conventions that are familiar to programmers of the C-family of languages, including C, C++, C#, Java, JavaScript, Perl, Python, and many others. These properties make JSON an ideal data-interchange language.
 ```json
@@ -3436,6 +3440,8 @@ __Пример SQLite__
 ## Что такое Managed object context?
 Управляемый объект контекста служит в качестве шлюза для основной коллекции объектов, известных под общим названием сохранение стека, некиим посредником между объектами приложения и внешним хранилищем данных. В нижней части стека постоянное хранилище объекта.
 
+<img src="https://github.com/sashakid/ios-guide/blob/master/Images/nsmanagedobjectcontext.png">
+
 Если вы хотите сохранить сделанные вами изменения, контекст гарантирует, что ваши объекты находятся в допустимом состоянии. Если это так, то изменения будут записаны в постоянное хранилище (или хранилища), добавит новые записи для объектов, созданных и удалит записи для объектов, которые удалены.
 
 ## Что такое Persistent store coordinator?
@@ -3491,6 +3497,8 @@ The advantage is that the tests are described in plain English and ensures the s
 Also, in agile software development, user acceptance testing involves creating tests to mirror the user stories created by/for the software's customer during development. If the tests pass, it means the software should meet the customer's requirements and the stories can be considered complete. An acceptance test suite is basically an executable specification written in a domain specific language that describes the tests in the language used by the users of the system.
 
 # Блоки
+
+<img src="https://github.com/sashakid/ios-guide/blob/master/Images/blocks.png">
 
 Objective-C blocks introduce a new class of language-level types to represent block types. They match the standard (but tricky) syntax for C function pointer types, but with a `^` in place of the `*`:
 ```c
@@ -4008,6 +4016,106 @@ _As a function parameter with explicit capture semantics and inferred parameters
 ```swift
 array.sort({ [unowned self] in return item1 < item2 })
 ```
+
+# Autolayout
+
+_"Use Auto Layout"_ determines whether a storyboard uses the Auto Layout features introduced in iOS 6 to automatically layout your interface using constraints.
+_"Use Size Classes"_ enables a new Xcode 6 feature called size classes that lets you use Auto Layout to build one interface for all devices and customize constraint constants, and certain views and constraints for different interface idioms while reusing the general layout. It saves the work and repetitiveness of having to build and maintain both MainiPhone and MainiPad storyboards.
+
+__External Changes__
+
+External changes occur when the size or shape of your superview changes.
+
+__Internal Changes__
+
+Internal changes occur when the size of the views or controls in your user interface change.
+
+There are three main approaches to laying out a user interface.
+1. you can programmatically lay out the user interface
+2. you can use autoresizing masks to automate some of the responses to external change
+3. you can use Auto Layout.
+The frame defined the view’s origin, height, and width in the superview’s coordinate system.
+
+<img src="https://github.com/sashakid/ios-guide/blob/master/Images/autolayout_frame1.png"><img src="https://github.com/sashakid/ios-guide/blob/master/Images/autolayout_frame2.png">
+
+The layout of your view hierarchy is defined as a series of linear equations. Each constraint represents a single equation. Your goal is to declare a series of equations that has one and only one possible solution.
+
+<img src="https://github.com/sashakid/ios-guide/blob/master/Images/autolayout.png">
+
+When calculating solutions, Auto Layout attempts to satisfy all the constraints in priority order from highest to lowest. If it cannot satisfy an optional constraint, that constraint is skipped and it continues on to the next constraint.
+
+Some views have a natural size given their current content. This is referred to as their _intrinsic content size_.
+
+The content hugging pulls the view inward so that it fits snugly around the content.
+
+The compression resistance pushes the view outward so that it does not clip the content.
+
+<img src="https://github.com/sashakid/ios-guide/blob/master/Images/intrinsic.png">
+
+```
+// Compression Resistance
+View.height >= 0.0 * NotAnAttribute + IntrinsicHeight
+View.width >= 0.0 * NotAnAttribute + IntrinsicWidth
+
+// Content Hugging
+View.height <= 0.0 * NotAnAttribute + IntrinsicHeight
+View.width <= 0.0 * NotAnAttribute + IntrinsicWidth
+```
+These properties only take effect for views which define an intrinsic content size, otherwise there is no content size defined that could resist compression or be hugged.
+The top and bottom layout guides represent the upper and lower edge of the visible content area for the currently active view controller.
+
+Auto Layout does not operate on views’ frame, but on their alignment rect. It’s easy to forget the subtle difference, because in many cases they are the same.
+
+Unsatisfiable layouts occur when the system cannot find a valid solution for the current set of constraints. Two or more required constraints conflict, because they cannot all be true at the same time.
+When the system detects a unsatisfiable layout at runtime, it performs the following steps:
+1. Auto Layout identifies the set of conflicting constraints.
+2. It breaks one of the conflicting constraints and checks the layout. The system continues to break constraints until it finds a valid layout.
+3. Auto Layout logs information about the conflict and the broken constraints to the console.
+As soon as you know about the error, the solution is typically very straightforward. Either remove one of the constraints, or change it to an optional constraint.
+
+Ambiguous layouts occur when the system of constraints has two or more valid solutions. There are two main causes:
+1. The layout needs additional constraints to uniquely specify the position and loca-tion of every view. After you determine which views are ambiguous, just add constraints to uniquely specify both the view’s position and its size.
+2. The layout has conflicting optional constraints with the same priority, and the sys-tem does not know which constraint it should break.
+Here, you need to tell the system which constraint it should break, by changing the priorities so that they are no longer equal. The system breaks the constraint having the lowest priority first.
+When an ambiguous layout occurs at runtime, Auto Layout chooses one of the possible solutions to use. This means the layout may or may not appear as you expect. Furthermore, there are no warnings written to the console, and there is no way to set a breakpoint for ambiguous layouts.
+There are a few methods you can call to help identify ambiguous layouts. All of the-se methods should be used only for debugging. Set a breakpoint somewhere where you can access the view hierarchy, and then call one of the following methods from the console:
+`hasAmbiguousLayout` Available for both iOS and OS X. Call this method on a misplaced view. It returns YES if the view’s frame is ambiguous. Otherwise, it returns NO.
+`exerciseAmbiguityInLayout` Available for both iOS and OS X. Call this method on a view with ambiguous layout. This will toggle the system between the possible valid solutions.
+`constraintsAffectingLayoutForAxis:` Available for iOS. Call this method on a view. It returns an array of all the constraints affecting that view along the specified axis.
+`constraintsAffectingLayoutForOrientation` Available for OS X. Call this method on a view. It returns an array of all the con-straints affecting that view along the specified orientation.
+`_autolayoutTrace` Available as a private method in iOS. Call this method on a view. It returns a string with diagnostic information about the entire view hierarchy containing that view. Ambiguous views are labeled, and so are views that have translatesAutoresizingMaskIntoConstraints set to YES.
+
+Four of these are the Final size classes:
+1. Compact-Compact
+2. Compact-Regular
+3. Regular-Compact
+4. Regular-Regular
+
+Base size classes:
+5. Compact-Any
+6. Regular-Any
+7. Any-Compact
+8. Any-Regular
+9. Any-Any
+
+It is typically easiest to work from the most general size class to the most specific. Select the default layout for your app, and design this layout in the Any-Any size class. Then modify the other Base or Final size classes as needed.
+
+Compared to working with springs and struts, Auto Layout introduces two additional steps to the process before views can be displayed:
+* updating constraints
+* laying out views
+Each step is dependent on the one before; display depends on layout, and layout depends on updating constraints.
+
+The first step – updating constraints – can be considered a “measurement pass.” It happens bottom-up (from subview to super view) and prepares the information needed for the layout pass to actually set the views’ frame. You can trigger this pass by calling setNeedsUpdateConstraints. Any changes you make to the system of constraints itself will automatically trigger this. However, it is useful to notify Auto Layout about changes in custom views that could affect the layout. Speaking of cus-tom views, you can override updateConstraints to add the local constraints needed for your view in this phase.
+
+The second step – layout – happens top-down (from super view to subview). This layout pass actually applies the solution of the constraint system to the views by setting their frames (on OS X) or their center and bounds (on iOS). You can trigger this pass by calling setNeedsLayout, which does not actually go ahead and apply the layout immediately, but takes note of your request for later. This way you don’t have to worry about calling it too often, since all the layout requests will be coalesced into one layout pass.
+To force the system to update the layout of a view tree immediately, you can call `layoutIfNeeded` / `layoutSubtreeIfNeeded` (on iOS and OS X respectively). This can be helpful if your next steps rely on the views’ frame being up to date. In your custom views you can override `layoutSubviews` / `layout` to gain full control over the layout pass. We will show use cases for this later on.
+
+Finally, the display pass renders the views to screen and is independent of whether you’re using Autolayout or not. It operates top-down and can be triggered by calling `setNeedsDisplay`, which results in a deferred redraw coalescing all those calls. Overriding the familiar drawRect: is how you gain full control over this stage of the display process in your custom views.
+
+Since each step depends on the one before it, the display pass will trigger a layout pass if any layout changes are pending. Similarly, the layout pass will trigger updating the constraints if the constraint system has pending changes.
+
+It’s important to remember that these three steps are not a one-way street. Constraint-based layout is an iterative process. The layout pass can make changes to the constraints based on the previous layout solution, which again triggers updating the constraints following another layout pass. This can be leveraged to create advanced layouts of custom views, but you can also get stuck in an infinite loop if every call of your custom implementation of layoutSubviews results in another layout pass.
+
 # Общие вопросы и задачи
 ## Inout parameters, pass by value, pass by reference
 __Explanation 1__
@@ -4212,13 +4320,16 @@ __Описание категории имеет следующий вид:__
 
 ```objectivec
 #import "ClassName.h"
+
 @interface ClassName (CategoryName)
-объявление методов
+	объявление методов
 @end
-Реализация категории выглядит следующим образом:
+
+//Реализация категории выглядит следующим образом:
 #import "CategoryName.h"
+
 @implementation ClassName (CategoryName)
-реализация методов
+	реализация методов
 @end
 ```
 __Что делают категории?__
@@ -4362,6 +4473,8 @@ iOS-приложения не могут долгое время находит�
 * Воспроизвести короткий звуковой сигнал.
 * Установить число на бейдже иконки приложения.
 
+<img src="https://github.com/sashakid/ios-guide/blob/master/Images/apns.png">
+
 APNS cервер – Apple Push Notification Server.
 
 ##Memory warning
@@ -4455,6 +4568,9 @@ UITableView : UIScrollView <NSCoding> : UIView <NSCoding> : UIResponder <NSCodin
 UITableViewController : UIViewController <UITableViewDelegate, UITableViewDataSource> : UIResponder <NSCoding, UIAppearanceContainer> : NSObject
 ```
 
+<img src="https://github.com/sashakid/ios-guide/blob/master/Images/tableview1.png">
+<img src="https://github.com/sashakid/ios-guide/blob/master/Images/tableview2.png">
+
 Ячейки table view, которые больше не отображаются на экране, не выкидываются. Их можно адаптировать под повторное использование, указав идентификатор в процессе инициализа-ции. Когда ячейка table view, отмеченная для повторного использования, пропадает с экрана, table view помещает ее в очередь для повторного использования в дальнейшем. Когда объект table view dataSource запрашивает у table view новую ячейку и указывает идентификатор, table view сначала проверяет очередь ячеек для повторного использования на предмет наличия не-обходимой ячейки. Если ячейка table view не была обнаружена, то table view создает новую, передавая ее затем объекту dataSource.
 ```objectivec
 UITableViewCell *cell = [tableView dequeueReusableCellWithIdentifier:CellIdentifier forIndexPath:indexPath];
@@ -4537,6 +4653,9 @@ typedef enum {
 	BlenderSpeedIceCrush
 } BlenderSpeed;
 
+<img src="https://github.com/sashakid/ios-guide/blob/master/Images/flags1.png">
+<img src="https://github.com/sashakid/ios-guide/blob/master/Images/flags2.png">
+
 __Объявление структуры__
 Как правило, объявление структуры используется в программе многократно, поэтому для типа структур обычно создается `typedef` - псевдоним для объявления типа, позво-ляющий использовать его как обычный тип данных.
 ```objectivec
@@ -4555,6 +4674,8 @@ An awakeFromNib message is sent to each object loaded from the archive, but only
 Note: During Interface Builder’s test mode, this method is also sent to objects instantiated from loaded palettes, which include executable code for the objects. It is not sent to objects created using the Classes display of the nib file window in Interface Builder.
 An example of how you might use awakeFromNib is shown below. Suppose your nib file has two custom views that must be positioned relative to each other at runtime. Trying to position them at initialization time might fail because the other view might not yet be unarchived and initialized yet. However, you can position both of them in the nib file owner’s awakeFromNib method. In the code below, firstView and secondView are outlets of the file’s owner.
 Когда объекты из .nib разархивированы:
+
+<img src="https://github.com/sashakid/ios-guide/blob/master/Images/awakefromnib.png">
 
 ##Что происходит когода мы пытаемся вызвать метод у `nil` указателя? Разница между `nil` и `Nil`.
 На самом деле, в контексте указателей применим как `NULL`, так и 0, ввиду того что первый — не более чем макрос-обёртка для второго:
@@ -4656,6 +4777,8 @@ Storyboard имеет массу преимуществ перед nib-ами.
 Минусы:
 * Не все так гладко, конечно, и у storyboard есть ограничения. Storyboard Editor пока не такой мощный как Interface Builder, есть кое-что что IB может, а Storyboard Editor нет.
 сториборд? - это структурное задание связи между ксибками. Например я обычно на сториборд накидываю несколько вьюшек, как хотят дизайнеры, причем половина вьюшек грузятся из соответствующих ксибок, а половина генерятся программно. В результате 80 процентов правок вносятся в течении минуты в сториборде, еще 15 в течении 3 минут в ксибке, а те, которые требуют измене-ния кода - редкие и им простительно уделить побольше внимания
+
+<img src="https://github.com/sashakid/ios-guide/blob/master/Images/storyboards.png">
 
 ***
 
@@ -4772,7 +4895,8 @@ struct Value2 {
 
 # Задачи
 ## Задача про банерокрутилку
-Из заданного списка вывести поочередно, рандомно, а главное, без повторений, все его эле-менты.
+Из заданного списка вывести поочередно, рандомно, а главное, без повторений, все его элементы.
+```java
 import java.util.Random;
 class Banner
 {
@@ -4796,23 +4920,25 @@ class Banner
 		}
 	}
 }
-Теперь кратко и по сути, что здесь происходит. Пока в списке есть элементы, мы берем слу-чайное число в пространстве длины массива, выводим его, потом последний элемент ставим на место только что выведенного, а индекс длины уменьшаем на единицу, пока не останется ничего.
+```
+Теперь кратко и по сути, что здесь происходит. Пока в списке есть элементы, мы берем случайное число в пространстве длины массива, выводим его, потом последний элемент ставим на место только что выведенного, а индекс длины уменьшаем на единицу, пока не останется ничего.
 
-Задача на регулярное выражение
+## Задача на регулярное выражение
 В системе авторизации есть следующее ограничение на формат логина: он должен начинаться с латинской буквы, может состоять из латинских букв, цифр, точки и минуса и должен закан-чиваться латинской буквой или цифрой. Минимальная длина логина — 1 символ. Максимальная — 20 символов.
+```objectivec
 BOOL loginTester(NSString* login) {
     NSError *error = NULL;
-    NSRegularExpression *regex = [NSRegularExpression
-        regularExpressionWithPattern:@"\\A[a-zA-Z](([a-zA-Z0-9\\.\\-]{0,18}[a-zA-Z0-9])|[a-zA-Z0-9]){0,1}\\z"
-        options:NSRegularExpressionCaseInsensitive error:&error];
+    NSRegularExpression *regex = [NSRegularExpression regularExpressionWithPattern:@"\\A[a-zA-Z](([a-zA-Z0-9\\.\\-]{0,18}[a-zA-Z0-9])|[a-zA-Z0-9]){0,1}\\z" options:NSRegularExpressionCaseInsensitive error:&error];
     // Здесь надо бы проверить ошибки, но если регулярное выражение оттестированное и
     // не из пользовательского ввода - можно пренебречь.
     NSRange rangeOfFirstMatch = [regex rangeOfFirstMatchInString:login options:0 range:NSMakeRange(0, [login length])];
     return (BOOL)(rangeOfFirstMatch.location!=NSNotFound);
 }
+```
 
-Метод, возвращающий N наиболее часто встречающихся слов во входной строке.
--(NSArray*)mostFrequentWordsInString:(NSString*)string count:(NSUInteger)count {
+## Метод, возвращающий N наиболее часто встречающихся слов во входной строке.
+```objectivec
+- (NSArray *)mostFrequentWordsInString:(NSString *)string count:(NSUInteger)count {
     // получаем массив слов.
     // такой подход для человеческих языков будет работать хорошо.
     // для языков, вроде китайского, или когда язык заранее не известен,
@@ -4820,25 +4946,18 @@ BOOL loginTester(NSString* login) {
     NSMutableCharacterSet *separators = [[NSCharacterSet whitespaceAndNewlineCharacterSet] mutableCopy];
     [separators formUnionWithCharacterSet:[NSCharacterSet punctuationCharacterSet]];
     NSArray *words = [string componentsSeparatedByCharactersInSet:separators];
-
     NSCountedSet *set = [NSCountedSet setWithArray:words];
-
     // тут бы пригодился enumerateByCount, но его нет.
     // будем строить вручную
     NSMutableArray *selectedWords = [NSMutableArray arrayWithCapacity:count];
     NSMutableArray *countsOfSelectedWords = [NSMutableArray arrayWithCapacity:count];
-
     for (NSString *word in set) {
         NSUInteger wordCount = [set countForObject:word];
-        NSNumber *countOfFirstSelectedWord = [countsOfSelectedWords count] ?
-            [countsOfSelectedWords objectAtIndex:0] : nil; // в iOS 7 появился firstObject
+        NSNumber *countOfFirstSelectedWord = [countsOfSelectedWords count] ? [countsOfSelectedWords objectAtIndex:0] : nil; // в iOS 7 появился firstObject
         if ([selectedWords count] < count || wordCount >= [countOfFirstSelectedWord unsignedLongValue]) {
             NSNumber *wordCountNSNumber = [NSNumber numberWithUnsignedLong:wordCount];
             NSRange range = NSMakeRange(0, [countsOfSelectedWords count]);
-            NSUInteger indexToInsert = [countsOfSelectedWords indexOfObject:wordCountNSNumber inSortedRange:range
-                options:NSBinarySearchingInsertionIndex
-                usingComparator:^(NSNumber *n1, NSNumber *n2)
-            {
+            NSUInteger indexToInsert = [countsOfSelectedWords indexOfObject:wordCountNSNumber inSortedRange:range options:NSBinarySearchingInsertionIndex usingComparator:^(NSNumber *n1, NSNumber *n2) {
                 NSUInteger _n1 = [n1 unsignedLongValue];
                 NSUInteger _n2 = [n2 unsignedLongValue];
                 if (_n1 == _n2)
@@ -4862,16 +4981,14 @@ BOOL loginTester(NSString* login) {
     // но возвращать вместо immutable класса его mutable сабклас нехорошо - может привести к багам
 }
 // очень интересный метод для юнитестов: правильный результат может быть разным и зависит от порядка слов в строке.
+```
 Я бы именно такой подход и использовал, если бы мне нужно было решить эту задачу в реальном iOS приложении, при условии, что я понимаю, откуда будут браться входные данные для поиска и предполагаю, что размеры входной строки не будут больше нескольких мегабайт. Вполне разумное допущение для iOS приложения, на мой взгляд. Иначе на входе не было бы строки, а был бы файл. При реально больших входных данных прийдется попотеть над регулярным выражением для перебора слов, чтоб избавиться от одного промежуточного массива. Такое регулярное выражение очень зависит от языка — то что сработает для русского не проканает для китайского. А вот что делать со словами дальше — кроме прямолинейного алгоритма в голову ничего не приходит. Если бы нужно было выбрать одно наиболее часто встречающееся слово — это Fast Majority Voting. Но вся красота этого алгоритма в том, что он работает для выбора одного значения. Модификаций алгоритма для выбора N значений мне не известны. Самому модифицировать не получилось.
 
-Используя NSURLConnection, напишите метод для асинхронной загрузки текстового документа по HTTP. Приведите пример его использования.
--(void)pullTextFromURLString:(NSString*)urlString completion:(void(^)(NSString*text))callBack {
-    NSURLRequest *request = [NSURLRequest requestWithURL: [NSURL URLWithString:urlString]
-        cachePolicy:NSURLRequestUseProtocolCachePolicy timeoutInterval:60.0];
-    [NSURLConnection sendAsynchronousRequest:request
-        queue:[NSOperationQueue mainQueue]
-        completionHandler:^(NSURLResponse *response, NSData *data, NSError *error)
-    {
+## Используя NSURLConnection, напишите метод для асинхронной загрузки текстового документа по HTTP. Приведите пример его использования.
+```objectivec
+- (void)pullTextFromURLString:(NSString *)urlString completion:(void(^)(NSString *text))callBack {
+    NSURLRequest *request = [NSURLRequest requestWithURL: [NSURL URLWithString:urlString] cachePolicy:NSURLRequestUseProtocolCachePolicy timeoutInterval:60.0];
+    [NSURLConnection sendAsynchronousRequest:request queue:[NSOperationQueue mainQueue] completionHandler:^(NSURLResponse *response, NSData *data, NSError *error) {
         if (error) {
             NSLog(@"Error %@", error.localizedDescription);
         } else {
@@ -4880,8 +4997,10 @@ BOOL loginTester(NSString* login) {
         }
     }];
 }
+```
 
-Перечислите все проблемы, которые вы видите в приведенном ниже коде. Предложите, как их исправить.
+## Перечислите все проблемы, которые вы видите в приведенном ниже коде. Предложите, как их исправить.
+```objectivec
 NSOperation *operation = [NSBlockOperation blockOperationWithBlock:^{
     for (int i = 0; i < 1000; ++i) {
         if ([operation isCancelled]) return;
@@ -4889,7 +5008,9 @@ NSOperation *operation = [NSBlockOperation blockOperationWithBlock:^{
     }
 }];
 [queue addOperation:operation];
+```
 Лично я вижу проблему в том, что переменная operation, «захваченная» блоком при создании блока, еще не проинициализирована до конца. Какое реально значение этой переменной будет в момент «захвата», зависит от того, используется ли этот код в методе класса или в простой функции. Вполне возможно, что сгенерированный код будет вполне работоспособен и так, но мне этот код не ясен. Как выйти из ситуации? Так:
+```objectivec
 NSBlockOperation *operation = [[NSBlockOperation alloc] init];
 [operation addExecutionBlock:^{
     for (int i = 0; i < 1000; ++i) {
@@ -4898,22 +5019,26 @@ NSBlockOperation *operation = [[NSBlockOperation alloc] init];
     }
 }];
 [queue addOperation:operation];
-Возможно, достаточно было бы просто добавить модификатор __block в объявление перемен-ной operation. Но так, как в коде выше — наверняка. Некоторые даже создают __weak копию переменной operation и внутри блока используют ее. Хорошо подумав я решил, что в данном конкретном случае, когда известно время жизни переменной operation и блока — это из-лишне. Ну и я бы подумал, стоит ли использовать NSBlockOperation для таких сложных кон-струкций. Разумных доводов привести не могу — вопрос личных предпочтений.
-Что еще с этим кодом не так? Я не люблю разных магических констант в коде и вместо 1000 использовал бы define, const, sizeof или что-то в этом роде.
-В длинных циклах в objective-c нужно помнить об autoreleased переменных и, если такие пере-менные используются в функции или методе process, а сам этот метод или функция об этом не заботится, нужно завернуть этот вызов в @autoreleasepool {}. Создание нового пула при каж-дой итерации цикла может оказаться накладным или излишним. Если не используется ARC, можно создавать новый NSAutoreleasePool каждые, допустим, 10 итераций цикла. Если исполь-зуется ARC, такой возможности нет. Кстати, это, наверное, единственный довод не использо-вать ARC.
-По коду не ясно, меняются ли данные в процессе обработки, обращается ли кто-то еще к этим данным во время обработки из других потоков, какие используются структуры данных, забо-тится ли сам process о монопольном доступе к данным тогда когда это нужно. Может понадо-биться позаботиться о блокировках.
+```
+Возможно, достаточно было бы просто добавить модификатор `__block` в объявление переменной operation. Но так, как в коде выше — наверняка. Некоторые даже создают `__weak` копию переменной operation и внутри блока используют ее. Хорошо подумав я решил, что в данном конкретном случае, когда известно время жизни переменной operation и блока — это излишне. Ну и я бы подумал, стоит ли использовать `NSBlockOperation` для таких сложных конструкций. Разумных доводов привести не могу — вопрос личных предпочтений.
+Что еще с этим кодом не так? Я не люблю разных магических констант в коде и вместо 1000 использовал бы `define`, `const`, `sizeof` или что-то в этом роде.
+В длинных циклах в objective-c нужно помнить об autoreleased переменных и, если такие пере-менные используются в функции или методе process, а сам этот метод или функция об этом не заботится, нужно завернуть этот вызов в `@autoreleasepool {}`. Создание нового пула при каждой итерации цикла может оказаться накладным или излишним. Если не используется ARC, можно создавать новый NSAutoreleasePool каждые, допустим, 10 итераций цикла. Если исполь-зуется ARC, такой возможности нет. Кстати, это, наверное, единственный довод не использо-вать ARC.
+По коду не ясно, меняются ли данные в процессе обработки, обращается ли кто-то еще к этим данным во время обработки из других потоков, какие используются структуры данных, заботится ли сам process о монопольном доступе к данным тогда когда это нужно. Может понадобиться позаботиться о блокировках.
 
-Doh. Dear future googlers: of course operation is nil when copied by the block, but it doesn't have to be copied. It can be qualified with __block like so:
+Doh. Dear future googlers: of course operation is nil when copied by the block, but it doesn't have to be copied. It can be qualified with `__block` like so:
+```objectivec
 //THIS MIGHT LEAK! See the update below.
 __block NSBlockOperation *operation = [NSBlockOperation blockOperationWithBlock:^{
    while( ! [operation isCancelled]){
       //do something...
    }
 }];
-UPDATE:
-Upon further meditation, it occurs to me that this will create a retain cycle under ARC. In ARC, I be-lieve __block storage is retained. If so, we're in trouble, because NSBlockOperation also keeps a strong references to the passed in block, which now has a strong reference to the operation, which has a strong reference to the passed in block, which…
-It's a little less elegant, but using an explicit weak reference should break the cycle:
+```
+_UPDATE:_
 
+Upon further meditation, it occurs to me that this will create a retain cycle under ARC. In ARC, I believe `__block` storage is retained. If so, we're in trouble, because NSBlockOperation also keeps a strong references to the passed in block, which now has a strong reference to the operation, which has a strong reference to the passed in block, which…
+It's a little less elegant, but using an explicit weak reference should break the cycle:
+```objectivec
 NSBlockOperation *operation = [[NSBlockOperation alloc] init];
 __weak NSBlockOperation *weakOperation = operation;
 [operation addExecutionBlock:^{
@@ -4921,10 +5046,10 @@ __weak NSBlockOperation *weakOperation = operation;
       //do something...
    }
 }];
+```
 
-Anyone that has ideas for a more elegant solution, please comment!
-
-Напишите запрос, возвращающий названия треков, скачанных более 1000 раз.
+## Напишите запрос, возвращающий названия треков, скачанных более 1000 раз.
+```sql
 CREATE TABLE tracks (
   id INT NOT NULL AUTO_INCREMENT,
   name VARCHAR(255) NOT NULL,
@@ -4938,134 +5063,12 @@ CREATE TABLE track_downloads (
   ip INT NOT NULL,
   PRIMARY KEY (download_id)
 )
-
+```
 Вот такой запрос справляется с задачей замечательно:
+```sql
 select name from tracks where id in
     (select track_id from
         (select track_id, count(*) as track_download_count from track_downloads
             group by track_id order by track_download_count desc)
-where track_download_count > 1000)
-
-Autolayout
-
-"Use Auto Layout" determines whether a storyboard uses the Auto Layout fea-tures introduced in iOS 6 to automatically layout your interface using constraints.
-"Use Size Classes" enables a new Xcode 6 feature called size classes that lets you use Auto Layout to build one interface for all devices and customize constraint constants, and certain views and constraints for different interface idioms while reusing the general layout. It saves the work and repetitiveness of having to build and maintain both MainiPhone and MainiPad storyboards.
-
-External Changes
-External changes occur when the size or shape of your superview changes.
-
-Internal Changes
-Internal changes occur when the size of the views or controls in your user interface change.
-
-There are three main approaches to laying out a user interface.
-1.	you can programmatically lay out the user interface
-2.	you can use autoresizing masks to automate some of the responses to external change
-3.	you can use Auto Layout.
-
-The frame defined the view’s origin, height, and width in the superview’s coordinate system.
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-The layout of your view hierarchy is defined as a series of linear equations. Each constraint represents a single equation. Your goal is to declare a series of equations that has one and only one possible solution.
-
-
-
-
-
-
-
-
-
-
-When using Auto Layout, the goal is to provide a series of equations that have one and only one possible solution. Ambiguous constraints have more than one possible solution. Unsatisfiable constraints don’t have valid solutions.
-When calculating solutions, Auto Layout attempts to satisfy all the constraints in pri-ority order from highest to lowest. If it cannot satisfy an optional constraint, that con-straint is skipped and it continues on to the next constraint.
-Some views have a natural size given their current content. This is referred to as their intrinsic content size.
-The content hugging pulls the view inward so that it fits snugly around the content. The compression resistance pushes the view outward so that it does not clip the content.
-
-
-
-
-		// Compression Resistance
-		View.height >= 0.0 * NotAnAttribute + IntrinsicHeight
-		View.width >= 0.0 * NotAnAttribute + IntrinsicWidth
-
-		// Content Hugging
-		View.height <= 0.0 * NotAnAttribute + IntrinsicHeight
-		View.width <= 0.0 * NotAnAttribute + IntrinsicWidth
-
-These properties only take effect for views which define an intrinsic content size, otherwise there is no content size defined that could resist compression or be hugged.
-The top and bottom layout guides represent the upper and lower edge of the visible content area for the currently active view controller.
-
-Auto Layout does not operate on views’ frame, but on their alignment rect. It’s easy to forget the subtle difference, because in many cases they are the same.
-
-Unsatisfiable layouts occur when the system cannot find a valid solution for the current set of constraints. Two or more required constraints conflict, because they cannot all be true at the same time.
-When the system detects a unsatisfiable layout at runtime, it performs the following steps:
-1.	Auto Layout identifies the set of conflicting constraints.
-2.	It breaks one of the conflicting constraints and checks the layout. The system continues to break constraints until it finds a valid layout.
-3.	Auto Layout logs information about the conflict and the broken constraints to the console.
-As soon as you know about the error, the solution is typically very straightforward. Either remove one of the constraints, or change it to an optional constraint.
-
-Ambiguous layouts occur when the system of constraints has two or more valid solutions. There are two main causes:
-1.	The layout needs additional constraints to uniquely specify the position and loca-tion of every view. After you determine which views are ambiguous, just add constraints to uniquely specify both the view’s position and its size.
-2.	The layout has conflicting optional constraints with the same priority, and the sys-tem does not know which constraint it should break.
-Here, you need to tell the system which constraint it should break, by changing the priorities so that they are no longer equal. The system breaks the constraint having the lowest priority first.
-When an ambiguous layout occurs at runtime, Auto Layout chooses one of the possible solutions to use. This means the layout may or may not appear as you expect. Furthermore, there are no warnings written to the console, and there is no way to set a breakpoint for ambiguous layouts.
-There are a few methods you can call to help identify ambiguous layouts. All of the-se methods should be used only for debugging. Set a breakpoint somewhere where you can access the view hierarchy, and then call one of the following methods from the console:
-		hasAmbiguousLayout
-Available for both iOS and OS X. Call this method on a misplaced view. It returns YES if the view’s frame is ambiguous. Otherwise, it returns NO.
-
-		exerciseAmbiguityInLayout
-Available for both iOS and OS X. Call this method on a view with ambiguous layout. This will toggle the system between the possible valid solutions.
-
-		constraintsAffectingLayoutForAxis:
-Available for iOS. Call this method on a view. It returns an array of all the constraints affecting that view along the specified axis.
-
-		constraintsAffectingLayoutForOrientation
- Available for OS X. Call this method on a view. It returns an array of all the con-straints affecting that view along the specified orientation.
-
-		_autolayoutTrace
-Available as a private method in iOS. Call this method on a view. It returns a string with diagnostic information about the entire view hierarchy containing that view. Ambiguous views are labeled, and so are views that have translatesAutoresizingMaskIntoConstraints set to YES.
-
-Four of these are the Final size classes:
-1.	Compact-Compact
-2.	Compact-Regular
-3.	Regular-Compact
-4.	Regular-Regular
-
-Base size classes:
-5.	Compact-Any
-6.	Regular-Any
-7.	Any-Compact
-8.	Any-Regular
-9.	Any-Any
-
-It is typically easiest to work from the most general size class to the most specific. Select the default layout for your app, and design this layout in the Any-Any size class. Then modify the other Base or Final size classes as needed.
-
-Compared to working with springs and struts, Auto Layout introduces two additional steps to the process before views can be displayed:
-*	updating constraints
-*	laying out views
-Each step is dependent on the one before; display depends on layout, and layout depends on updating constraints.
-
-The first step – updating constraints – can be considered a “measurement pass.” It happens bottom-up (from subview to super view) and prepares the information needed for the layout pass to actually set the views’ frame. You can trigger this pass by calling setNeedsUpdateConstraints. Any changes you make to the system of constraints itself will automatically trigger this. However, it is useful to notify Auto Layout about changes in custom views that could affect the layout. Speaking of cus-tom views, you can override updateConstraints to add the local constraints needed for your view in this phase.
-
-The second step – layout – happens top-down (from super view to subview). This layout pass actually applies the solution of the constraint system to the views by setting their frames (on OS X) or their center and bounds (on iOS). You can trigger this pass by calling setNeedsLayout, which does not actually go ahead and apply the layout immediately, but takes note of your request for later. This way you don’t have to worry about calling it too often, since all the layout requests will be coalesced into one layout pass.
-To force the system to update the layout of a view tree immediately, you can call layoutIfNeeded/layoutSubtreeIfNeeded (on iOS and OS X respectively). This can be helpful if your next steps rely on the views’ frame being up to date. In your custom views you can override layoutSubviews/layout to gain full control over the layout pass. We will show use cases for this later on.
-
-Finally, the display pass renders the views to screen and is independent of whether you’re using Auto Layout or not. It operates top-down and can be triggered by calling setNeedsDisplay, which results in a deferred redraw coalescing all those calls. Overriding the familiar drawRect: is how you gain full control over this stage of the display process in your custom views.
-
-Since each step depends on the one before it, the display pass will trigger a layout pass if any layout changes are pending. Similarly, the layout pass will trigger updat-ing the constraints if the constraint system has pending changes.
-
-It’s important to remember that these three steps are not a one-way street. Con-straint-based layout is an iterative process. The layout pass can make changes to the constraints based on the previous layout solution, which again triggers updating the constraints following another layout pass. This can be leveraged to create advanced layouts of custom views, but you can also get stuck in an infinite loop if every call of your custom implementation of layoutSubviews results in another layout pass.
+				where track_download_count > 1000)
+```
