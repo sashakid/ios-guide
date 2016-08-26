@@ -127,10 +127,10 @@
 - [Multithreading](#Multithreading)
 	- [POSIX Threads](#POSIX Threads)
 	- [NSThread](#NSThread)
-	- [Run Loops](#Run Loops) 🖊
+	- [Run Loops 🖊](#Run Loops)
 	- [Для чего при разработке под iOS использовать POSIX-потоки?](#Для чего при разработке под iOS использовать POSIX-потоки?)
 - [Concurrency](#Concurrency)
-	- [GCD (Grand Central Dispatch)](#GCD (Grand Central Dispatch)) 🖊
+	- [GCD (Grand Central Dispatch 🖊)](#GCD (Grand Central Dispatch)) 
 	- [NSOperationQueue](#NSOperationQueue)
 	- [NSObject instance methods](#NSObject instance methods)
 	    - [Что такое мьютекс?](#Что такое мьютекс?)
