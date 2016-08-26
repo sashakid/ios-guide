@@ -2992,7 +2992,8 @@ usually referred to as Pthreads, is a POSIX standard for threads defines an API 
 * Mutexes
 * Condition variables
 * Synchronization between threads using read/write locks and barriers
-Implementations of the API are available on many Unix-like POSIX-conformant operating systems such as FreeBSD, NetBSD, OpenBSD, GNU/Linux, Mac OS X and Solaris. DR-DOS and Microsoft Win-dows implementations also exist.
+
+Implementations of the API are available on many Unix-like POSIX-conformant operating systems such as FreeBSD, NetBSD, OpenBSD, GNU/Linux, Mac OS X and Solaris. DR-DOS and Microsoft Windows implementations also exist.
 ## NSThread
 is a simple Objective-C wrapper around pthreads. This makes the code look more familiar in a Cocoa environment. For example, you can define a thread as a subclass of NSThread, which encapsulates the code you want to run in the background.
 ## Run Loops
