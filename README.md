@@ -22,14 +22,14 @@
 	- [Ассоциативный массив](#Ассоциативный-массив)
 	- [Множество](#Множество)
 	- [Список](#Список)
-	- [Стек и фреймы](#Стек-и-фреймы)
+	- [Стек и фрейм](#Стек-и-фрейм)
 	- [Очередь FIFO](#Очередь-fifo)
 	- [Дек](#Дек)
 	- [Куча](#Куча)
 	- [Граф](#Граф)
 - [Коллекции в Objective-C](#Коллекции-в-objective-c)
 	- [Разница между set и array](#Разница-между-set-и-array)
-	- [Difference between `NSArray` and `CFArray`](#Difference-between-nsarray-and-cfarray)
+	- [Difference between NSArray and CFArray](#Difference-between-nsarray-and-cfarray)
 	- [Enumeration](#Enumeration)
 	- [How to use `NSPredicate` to filter data](#How-to-use-nspredicate-to-filter-data)
 	- [Сортировка массивов](#Cортировка массивов)
@@ -468,7 +468,7 @@ NSSet *set = [NSSet setWithObjects:@"1", @"2", @"3", @"4", @"5", @"6", @"7", @"8
 NSLog(@"%@", set);
 ```
 
-## Difference between `NSArray` and `CFArray`
+## Difference between NSArray and CFArray
 What's the point of them both existing? There are a few reasons.
 If you want to provide a C API, like the Carbon API, and you need things like arrays and dictionaries of referenced-counted objects, you want a library like Core Foundation (which provides CFArray), and of course it needs to have a C API.
 If you want to write libraries for third-parties to use on Windows (for example), you need to provide a C API.
