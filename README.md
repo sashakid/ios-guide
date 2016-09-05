@@ -29,7 +29,7 @@
 	- [Граф](#Граф)
 - [Коллекции в Objective-C](#Коллекции-в-objective-c)
 	- [Разница между set и array](#Разница-между-set-и-array)
-	- [Difference between NSArray and CFArray](#Difference-between-nsarray-and-cfarray)
+	- [Difference between NSArray and CFArray](#Difference-between-NSArray-and-CFArray)
 	- [Enumeration](#Enumeration)
 	- [How to use `NSPredicate` to filter data](#How-to-use-nspredicate-to-filter-data)
 	- [Сортировка массивов](#Cортировка массивов)
