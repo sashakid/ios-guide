@@ -217,26 +217,26 @@
 
 ######Бит и байт
 Информация –– мера разрешения неопределенности.
-Бит (`Binary digIT`, `bit` – кусочек) выбран как мера неопределенности с двумя возможными состояниями: `истина | ложь`, `да | нет`, `1 | 0`. Любые данные в компьютере представлены в виде последовательности битов. Цифровая И. хранится благодаря различию между разными величинами какой-либо физической характеристики (ток, напряжение) => чем больше велечин, которые нужно различать, тем меньше различий между смежными величинами => тем менее надежна память. В двоичной системе следует различать всего два состояния => это самый надеждный метод кодирования И. 8 бит памяти позволяет хранить `2^8 = 256` комбинаций нулей и единиц.
+Бит (`Binary digIT`, `bit` – кусочек) выбран как мера неопределенности с двумя возможными состояниями: `истина | ложь`, `да | нет`, `1 | 0`. Любые данные в компьютере представлены в виде последовательности битов. Цифровая информация хранится благодаря различию между разными величинами какой-либо физической характеристики (ток, напряжение) => чем больше велечин, которые нужно различать, тем меньше различий между смежными величинами => тем менее надежна память. В двоичной системе следует различать всего два состояния => это самый надеждный метод кодирования информации. 8 бит памяти позволяет хранить `2^8 = 256` комбинаций нулей и единиц.
 ######Память
-Сверхоперативная, оперативная и внешняя. Некоторые регистры сверхоперативной П. (в которые могут помещаться аргументы арифметических операций) находятся в ЦП. Также они используются для хранения текущих или следующих команд. Оперативная П. – для запо-минания более постоянной И. Каждая ячейка ОП имеет свой идентификатор (адрес) в массиве ячеек П. Самая маленькая ячейка имеет размер 8 бит (байт). Внешняя П. служит для долговременного хранения И., используется для хранения самих программ.
+Сверхоперативная, оперативная и внешняя. Некоторые регистры сверхоперативной памяти, в которые могут помещаться аргументы арифметических операций, находятся в ЦП. Также они используются для хранения текущих или следующих команд. Оперативная память служит для запоминания более постоянной информации. Каждая ячейка оперативной памяти имеет свой идентификатор (адрес) в массиве ячеек памяти. Самая маленькая ячейка имеет размер 8 бит (байт). Внешняя память служит для долговременного хранения информации, используется для хранения самих программ.
 ######Тип данных, абстрактный тип данных
 Например:
 - натуральные, целые, вещественные   
 - литеры, строки
 - `int`, `float`, `char` (в языке СИ)
-Тип данных указывает, как будут использоваться определенные наборы битов. Функция задает операции, выполняемые над данными. Структура служит для группировки порций И. Указатели – для непрямой ссылки на И. АТД – тип данных с доступом через интерфейс, реализация – скрыта. Доступ к переменным – через операции, определенные в интерфейсе.
+Тип данных указывает, как будут использоваться определенные наборы битов. Функция задает операции, выполняемые над данными. Структура служит для группировки порций информации. Указатели – для непрямой ссылки на информацию. Абстрактный тип данных – тип данных с доступом через интерфейс, реализация которого скрыта. Доступ к переменным – через операции, определенные в интерфейсе.
 
 ######Структура данных
-Пространственное понятие: схема организации И. в компьютере. Множество элементов данных и множество связей между ними. От выбора СД зависит производительность программы. Тип СД определяет:
+Пространственное понятие: схема организации информации в компьютере. Множество элементов данных и множество связей между ними. От выбора структуры данных зависит производительность программы. Тип структуры данных определяет:
 - Как хранятся данные в структуре (выделение памяти, представление данных)
-- Множество допустимых значений, который принимает объект в СД
+- Множество допустимых значений, который принимает объект в структуре данных
 - Множество операций, которые могут применяться к объекту
-Операции над СД – `CRUD`: `CREATE` `READ` `UPDATE` `DELETE`
+Операции над структурами данных – `CRUD`: `CREATE` `READ` `UPDATE` `DELETE`
 
 <img src="https://github.com/sashakid/ios-guide/blob/master/Images/data_structures_crud.png">
 
-СД в ООП реализуется в виде классов, данные хранятся в переменных класса, системе предписаний соответстует набор методов класса.
+Структура данных в ООП реализуется в виде классов, данные хранятся в переменных класса, системе предписаний соответстует набор методов класса.
 
 ПРОСТЫЕ БАЗОВЫЕ (числовые, символьные, логические, перечисление, интервал, указатели)
 
@@ -246,18 +246,18 @@
 
 ДИНАМИЧЕСКИЕ (связный список, граф, дерево)
 ######Алгоритмы
-«Рецепт расчета» – метод, разработанный для решения задачи, пригодный для реализации в компьютерной программе. Сам алгоритм является абстракцией, но его представление – конкретно и может меняться в зависимости от архитектуры компьютера, ЯП и т. д. Представление алгоритма конструируется из блоков – примитивов. Набор примитивов и правил, как комбинировать эти примитивы для воплощения более сложных идей организуют ЯП. Примитив состоит из синтаксической и семантической части. Описание алгоритма на низком уровне – неудобно, поэтому используются абстракции для примитивов более высокого уровня, которые состоят из примитивов низкого. Итерационная структура – выполнение набора инструкций в циклическом режиме. Рекурсивная – каждая стадия повторения цикла реализуется как подзадача предыдущей стадии. Чтобы оценить производительность нужно подсчитать кол-во операций. Различают временную сложность и пространственную (используемая память).
+«Рецепт расчета» – метод, разработанный для решения задачи, пригодный для реализации в компьютерной программе. Сам алгоритм является абстракцией, но его представление – конкретно и может меняться в зависимости от архитектуры компьютера, языка программирования и т. д. Представление алгоритма конструируется из блоков – примитивов. Набор примитивов и правил, как комбинировать эти примитивы для воплощения более сложных идей организуют язык программирования. Примитив состоит из синтаксической и семантической части. Описание алгоритма на низком уровне – неудобно, поэтому используются абстракции для примитивов более высокого уровня, которые состоят из примитивов низкого. Итерационная структура – выполнение набора инструкций в циклическом режиме. Рекурсивная – каждая стадия повторения цикла реализуется как подзадача предыдущей стадии. Чтобы оценить производительность нужно подсчитать количество операций. Различают временную сложность и пространственную (используемая память).
 
-`О` – (сложность в наихудшем случае), асимптотическая верхняя оценка кол-ва операций => времени работы (худший вариант). При оценке берется кол-во операций, возрастающих быстрее всего.
+`О` – (сложность в наихудшем случае), асимптотическая верхняя оценка количества операций => времени работы (худший вариант). При оценке берется количество операций, возрастающих быстрее всего.
 
 `Ω` – сложность в лучшем случае
 
 `Θ` – сложность в среднем, когда оценка `Ω = О`
 
 Наилучшая оценка алгоритма – `О(1)`, константная, когда алгоритм без циклов и рекурсии.
-ЯП служит для точного описания АТД и алгоритмов. Компилятор транслирует текст программы на ЯП в машинный код, связывая каждый идентификатор (имя) с адресом памяти.
+Язык программирования служит для точного описания абстрактных структур данных и алгоритмов. Компилятор транслирует текст программы на языке программирования в машинный код, связывая каждый идентификатор (имя) с адресом памяти.
 ######Программа
-СД и алгоритмы – это материалы, из которых строятся программы и сам компьютер. В основе работы компьютера – умение работать с двоичными данными, битами, под командами ЦП в виде специальных инструкций – алгоритмов. Задачи редко выражаются в виде битов: они выражаются в виде чисел, символов, строк и более сложных структур – последовательностей, списков, деревьев и т. д. Задача, которую решает программа – преобразование входных данных в выходные.
+Структуры данных и алгоритмы – это материалы, из которых строятся программы и сам компьютер. В основе работы компьютера – умение работать с двоичными данными, битами, под командами центрального процессора в виде специальных инструкций – алгоритмов. Задачи редко выражаются в виде битов: они выражаются в виде чисел, символов, строк и более сложных структур – последовательностей, списков, деревьев и т. д. Задача, которую решает программа – преобразование входных данных в выходные.
 ######Объект
 Сущность в  виртуальном пространстве, которой можно посылать сообщения и которая может на них реагировать, используя свои данные, появляющаяся при создании экземпляра класса или копирования прототипа, обладающая определённым состоянием и поведением, имеющая заданные значения свойств (атрибутов) и операций над ними (методов). Как правило, при рассмотрении объектов выделяется то, что объекты принадлежат одному или нескольким классам, которые определяют поведение или роль (являются моделями) объекта. Термины «экземпляр класса» и «объект» взаимозаменяемы. Объект, наряду с понятием класс, является важным понятием объектно-ориентированного подхода. Объекты обладают свойствами наследования, инкапсуляции и полиморфизма.
 ######Прототип
@@ -301,21 +301,23 @@
 <img src="https://github.com/sashakid/ios-guide/blob/master/Images/data_structures_kinds2.png">
 
 ## Массив
-Фиксированный набор данных одного типа в виде непрерывного ряда. Простая базовая статическая СД с последовательным распределением элементов в памяти с прямым или произвольным доступом (одномерный массив – вектор, двухмерный – матрица).
+Фиксированный набор данных одного типа в виде непрерывного ряда. Простая базовая статическая структура данных с последовательным распределением элементов в памяти с прямым или произвольным доступом (одномерный массив – вектор, двухмерный – матрица).
 
 <img src="https://github.com/sashakid/ios-guide/blob/master/Images/array.png">
 
 Операции
 * Получить элемент за время `log(n)`
 * Записать элемент
+
 Плюсы
 * Доступ за постоянное время
 * Память тратится только на данные
+
 Минусы
 * Статичная, неизменяемая структура
 
 ### Массив в СИ
-Количество элементов массива определено заранее при объявлении массива. Все элементы упорядочены – каждому присвоен порядковый номер, который называется индексом. Доступ к конкретному элементу массива осуществляется с помощью индекса. В языке C все массивы располагаются в отдельной непрерывной области памяти. Первый элемент массива имеет наименьший адрес, а последний – наибольший. Элементы массива могут быть как простыми переменными, так и составными. Элемент массива может иметь несколько индексов. Количе-ство индексов переменной определяет размерность массива. Размерность массивов в языке C не ограничена, но чаще используются одномерные и двумерные массивы. Начальное значение индекса элемента массива для каждого измерения в C – нуль.
+Количество элементов массива определено заранее при объявлении массива. Все элементы упорядочены – каждому присвоен порядковый номер, который называется индексом. Доступ к конкретному элементу массива осуществляется с помощью индекса. В языке Cи все массивы располагаются в отдельной непрерывной области памяти. Первый элемент массива имеет наименьший адрес, а последний – наибольший. Элементы массива могут быть как простыми переменными, так и составными. Элемент массива может иметь несколько индексов. Количество индексов переменной определяет размерность массива. Размерность массивов в языке Cи не ограничена, но чаще используются одномерные и двумерные массивы. Начальное значение индекса элемента массива для каждого измерения в Cи — нуль.
 
 ### Ассоциативный массив
 An associative array, map, symbol table, or dictionary is an abstract data type composed of a collection of pairs, such that each possible key appears at most once in the collection.
@@ -326,13 +328,13 @@ Operations associated with this data type allow:
 * the lookup of the value associated with a particular key
 
 Dictionary (Map) еще называют нагруженным множеством (data + info), где data – ключ, а нагрузка – значение ключа.
-Хеш-таблица – ассоциативный массив, хранит пары   в виде связанного списка (open hash, closed address) или массива пар (closed hash, open address). Индекс элемента равен хеш-функции от ключа i = hash(key). Разбиение множества на подмножества происходит с по-мощью хеш функции (пример: телефонная книга).
+Хеш-таблица – ассоциативный массив, хранит пары  в виде связанного списка (open hash, closed address) или массива пар (closed hash, open address). Индекс элемента равен хеш-функции от ключа i = hash(key). Разбиение множества на подмножества происходит с помощью хеш функции (пример: телефонная книга).
 
 ## Множество
 A set is an abstract data structure that can store certain values, without any particular order, and no repeated values. It is a computer implementation of the mathematical concept of a finite set. Unlike most other collection types, rather than retrieving a specific element from a set, one typically tests a value for membership in a set. Some set data structures are designed for static or frozen sets that do not change after they are constructed. Static sets allow only query operations on their elements — such as checking whether a given value is in the set, or enumerating the values in some arbitrary order. Other variants, called dynamic or mutable sets, allow also the insertion and deletion of elements from the set.
 
 ## Список
-Простейшая динамическая структура, упорядоченное множество с переменным числом эле-ментов.
+Простейшая динамическая структура, упорядоченное множество с переменным числом элементов.
 
 ### Односвязный список
 <img src="https://github.com/sashakid/ios-guide/blob/master/Images/singly_linked_list.png">
@@ -354,10 +356,13 @@ A set is an abstract data structure that can store certain values, without any p
 
 Отличие списка от массива:
 Массив имеет фиксированное время перехода по индексу, но нуждается в монолитном секторе памяти, обладает нефиксированным временем вставки и удаления.
-Список более требователен к памяти, дольше переход по индексу, но значительно быстрее вставка и удаление за `O(1)`. В Java и в C++ явно различаются `List` и `Array`, в ObjC `NSMutableArray` скорее список, чем массив.
+Список более требователен к памяти, дольше переход по индексу, но значительно быстрее вставка и удаление за `O(1)`. В Java и в C++ явно различаются `List` и `Array`, в Objective-C `NSMutableArray` скорее список, чем массив.
 
 ## Стек и фрейм
-Стек – очередь LIFO (last-in-first-out) структурированная область памяти, в отличие от кучи. Последовательный список с переменной длинной, включение и исключение только из верши-ны стека. Состоит из последовательности фреймов. После вызова метода из стека выделяется запрошенная область памяти – фрейм, который хранит значения объявленных переменных.
+Стек – очередь LIFO (last-in-first-out) структурированная область памяти, в отличие от кучи. Последовательный список с переменной длинной, включение и исключение только из вершины стека. Состоит из последовательности фреймов.
+Пример: после вызова метода из стека выделяется запрошенная область памяти – фрейм, который хранит значения объявленных переменных.
+
+Операции:
 *	Включение
 *	Исключение
 *	Определение размера
@@ -369,7 +374,7 @@ A set is an abstract data structure that can store certain values, without any p
 <img src="https://github.com/sashakid/ios-guide/blob/master/Images/stack.png">
 
 ## Очередь FIFO
-Акроним First In, First Out — «первым пришёл — первым ушёл» — способ организации и манипулирования данными относительно времени и приоритетов. Это выражение описывает принцип технической обработки очереди или обслуживания конфликтных требований путём упорядочения процесса по принципу: «первым пришёл — первым обслужен» (ПППО). Тот, кто приходит первым, тот и обслуживается первым, пришедший следующим ждёт, пока обслужи-вание первого не будет закончено, и так далее. В информатике этот термин относится к спосо-бу запоминания данных, обрабатываемых в очереди. Каждый элемент очереди хранится в структуре данных очереди (без исключений). Первые данные, добавленные в очередь, будут первыми из неё удалены, то есть обработка производится последовательно в том же порядке, что и поступление. Это типичное поведение для очереди, хотя и не единственно возможное
+Акроним First In, First Out — «первым пришёл — первым ушёл» — способ организации и манипулирования данными относительно времени и приоритетов. Это выражение описывает принцип технической обработки очереди или обслуживания конфликтных требований путём упорядочения процесса по принципу: «первым пришёл — первым обслужен» (ПППО). Тот, кто приходит первым, тот и обслуживается первым, пришедший следующим ждёт, пока обслуживание первого не будет закончено, и так далее. В информатике этот термин относится к способу запоминания данных, обрабатываемых в очереди. Каждый элемент очереди хранится в структуре данных очереди (без исключений). Первые данные, добавленные в очередь, будут первыми из неё удалены, то есть обработка производится последовательно в том же порядке, что и поступление. Это типичное поведение для очереди, хотя и не единственно возможное.
 
 ## Дек
 Double ended queue – очередь с двумя концами, включение и исключение из любого конца (левого или правого).
@@ -377,13 +382,16 @@ Double ended queue – очередь с двумя концами, включе
 <img src="https://github.com/sashakid/ios-guide/blob/master/Images/dequeue.png">
 
 ## Куча
-Куча как СД – дерево, родитель A >= ребенка B => A – корень кучи. Max куча, Min куча.
+Куча как структура данных представляет собой дерево, где родитель A >= ребенка B => A – корень кучи. Max куча, Min куча.
+
+Операции:
 * Найти max или min
 * Удалить max или min
 * Увеличить ключи или уменьшить
 * Добавить
 * Слияние
-Куча как область памяти – реализация динамически распределяемой памяти, в которой хранятся все объекты. alloc – из кучи выделяется требуемая область памяти.
+
+Куча как область памяти – реализация динамически распределяемой памяти, в которой хранятся все объекты (`alloc` Objective-C – из кучи выделяется требуемая область памяти).
 
 ## Двоичная куча
 
@@ -407,10 +415,9 @@ key[left[x]] < key[x] <= key[right[x]]
 
 <img src="https://github.com/sashakid/ios-guide/blob/master/Images/red_black_tree_statistics.png">
 
-Одно из самобалансирующихся двоичных деревьев поиска, гарантирующих логарифмический рост высоты дерева от числа узлов и быстро выполняющее основные операции дерева поиска: добавление, удаление и поиск узла. Сбалансированность достигается за счёт введения допол-нительного атрибута узла дерева — «цвета». Этот атрибут может принимать одно из двух возможных значений — «чёрный» или «красный».
+Одно из самобалансирующихся двоичных деревьев поиска, гарантирующих логарифмический рост высоты дерева от числа узлов и быстро выполняющее основные операции дерева поиска: добавление, удаление и поиск узла. Сбалансированность достигается за счёт введения дополнительного атрибута узла дерева — «цвета». Этот атрибут может принимать одно из двух возможных значений — «чёрный» или «красный».
 * Узел либо красный, либо чёрный.
-* Корень — чёрный. (В других определениях это правило иногда опускается. Это
-правило слабо влияет на анализ, так как корень всегда может быть изменен с красного на чёрный, но не обязательно наоборот).
+* Корень — чёрный. (В других определениях это правило иногда опускается. Это правило слабо влияет на анализ, так как корень всегда может быть изменен с красного на чёрный, но не обязательно наоборот).
 * Все листья (NIL) — черные.
 * Оба потомка каждого красного узла — черные.
 * Всякий простой путь от данного узла до любого листового узла, являющегося его потомком, содержит одинаковое число черных узлов.
@@ -420,11 +427,11 @@ key[left[x]] < key[x] <= key[right[x]]
 
 __Mutability__
 
-Most collection classes exist in two versions: mutable and immutable (default). What’s the big ad-vantage? Thread safety. Immutable collections are fully thread safe and can be iterated from multiple threads at the same time, without any risk of mutation exceptions. Your API should never expose mutable collections. Of course there’s a cost when going from immutable and mutable and back - the object has to be copied twice, and all objects within will be retained/released. Sometimes it’s more efficient to hold an internal mutable collection and return a copied, immutable object on access. Notably, some of the more modern collection classes like `NSHashTable`, `NSMapTable`, and `NSPointerArray` are mutable by default and don’t have immutable counterparts. They are meant for internal class use, and a use case where you would want those immutable would be quite unusual.
+Most collection classes exist in two versions: mutable and immutable (default). What’s the big advantage? Thread safety. Immutable collections are fully thread safe and can be iterated from multiple threads at the same time, without any risk of mutation exceptions. Your API should never expose mutable collections. Of course there’s a cost when going from immutable and mutable and back - the object has to be copied twice, and all objects within will be retained/released. Sometimes it’s more efficient to hold an internal mutable collection and return a copied, immutable object on access. Notably, some of the more modern collection classes like `NSHashTable`, `NSMapTable`, and `NSPointerArray` are mutable by default and don’t have immutable counterparts. They are meant for internal class use, and a use case where you would want those immutable would be quite unusual.
 
 ## Core Foundation:
 * `CFMutableDictionary`
-The access time for a value in the dictionary is guaranteed to be at worst O(N) for any implemen-tation, current and future, but will often be O(1) (constant time). Insertion or deletion operations will typically be constant time as well, but are O(N*N) in the worst case in some implementations. Access of values through a key is faster than accessing values directly (if there are any such opera-tions). Dictionaries will tend to use significantly more memory than a array with the same number of values.
+The access time for a value in the dictionary is guaranteed to be at worst `O(N)` for any implementation, current and future, but will often be `O(1)` (constant time). Insertion or deletion operations will typically be constant time as well, but are `O(N^2)` in the worst case in some implementations. Access of values through a key is faster than accessing values directly (if there are any such operations). Dictionaries will tend to use significantly more memory than a array with the same number of values.
 * `CFMutableArray`
 * `CFMutableBag`
 * `CFBinaryHeap`
@@ -433,36 +440,37 @@ The access time for a value in the dictionary is guaranteed to be at worst O(N) 
 * `CFMutableSet`
 
 ## Foundation:
-1. `NSArray` (`NSMutableArray`) – управляет упорядоченной коллекцией элементов, называемой массивом. Вы можете использовать объекты этого класса для создания неизменяемых массивов. Это значит, что все элементы объектов класса NSArray доступны только для чтения. Имеется возможность доступа к элементам массива по индексу. Массивы могут хранить элементы различных типов. Массивы поддерживают сортировку и поиск элементов, а также сравнение самих массивов между собой. Для создания изменяемых массивов следует использовать `NSMutableArray`.
-The most interesting part is that Apple doesn’t guarantee `O(1)` access time on individual object access - as you can read in the note about Computational Complexity in the `CFArray.h` `CoreFoundation` header:
-The access time for a value in the array is guaranteed to be at worst `O(lg N)` for any implementation, current and future, but will often be `O(1)` (constant time). Linear search operations similarly have a worst case complexity of `O(Nlg N)`, though typically the bounds will be tighter, and so on. Insertion or deletion operations will typically be linear in the number of values in the array, but may be `O(Nlg N)` clearly in the worst case in some implementations. There are no favored positions within the array for performance; that is, it is not necessarily faster to access values with low indices, or to insert or delete values with high indices, or whatever.
-2. `NSPointerArray` – mutable collection modeled after NSArray but it can also hold `NULL` values, which can be inserted or extracted (and which contribute to the object’s count). Moreover, unlike traditional arrays, you can set the count of the array directly. In a garbage collected environment, if you specify a zeroing weak memory configuration, if an element is collected it is replaced by a `NULL` value.
+1. `NSArray` (`NSMutableArray`) – управляет упорядоченной коллекцией элементов, называемой массивом. Вы можете использовать объекты этого класса для создания неизменяемых массивов. Это значит, что все элементы объектов класса `NSArray` доступны только для чтения. Имеется возможность доступа к элементам массива по индексу. Массивы могут хранить элементы различных типов. Массивы поддерживают сортировку и поиск элементов, а также сравнение самих массивов между собой. Для создания изменяемых массивов следует использовать `NSMutableArray`.
+The most interesting part is that Apple doesn’t guarantee `O(1)` access time on individual object access - as you can read in the note about Computational Complexity in the `CFArray.h` `CoreFoundation` header: The access time for a value in the array is guaranteed to be at worst `O(lg N)` for any implementation, current and future, but will often be `O(1)` (constant time). Linear search operations similarly have a worst case complexity of `O(Nlg N)`, though typically the bounds will be tighter, and so on. Insertion or deletion operations will typically be linear in the number of values in the array, but may be `O(Nlg N)` clearly in the worst case in some implementations. There are no favored positions within the array for performance; that is, it is not necessarily faster to access values with low indices, or to insert or delete values with high indices, or whatever.
+2. `NSPointerArray` – mutable collection modeled after `NSArray` but it can also hold `NULL` values, which can be inserted or extracted (and which contribute to the object’s count). Moreover, unlike traditional arrays, you can set the count of the array directly. In a garbage collected environment, if you specify a zeroing weak memory configuration, if an element is collected it is replaced by a `NULL` value.
 3. `NSDictionary` (`NSMutableDictionary`) – следует использовать когда требуется удобный и эффективный способ хранения данных, ассоциированных с ключом. Объекты класса `NSDictionary` позволяют хранить неизменяемые пары объектов “ключ/значение” различных типов. Ключи в словаре `NSDictionary` не могут дублироваться, повторение значений допускается. Типы ключей и значений могут, но не обязаны совпадать. Особенно эффективными по скорости будут операции поиска по ключу, так как словарь специально оптимизирован для них. Если для решения задачи требуется изменение словаря объектов, следует использвать класс `NSMutableDictionary`.
-4. `NSSet` (`NSMutableSet`) – объекты представляют неупорядоченные множества различных объектов. Объект NSSet при создании заполняется множеством объектов, которое не может быть изменено до конца своего существования. Если требуется использовать изменяемые множества, следует воспользоваться классом NSMutableSet. Вы можете использовать множества в качестве альтернативы массивам, когда порядок элементов не важен, но требуется быстрое определение `O(1)` принадлежности объекта множеству. Операция определения принадлежности выполняется значительно быстрее в сравнении с массивами
-NSSet can only work efficiently if the hashing method used is balanced; if all objects are in the same hash bucket, then NSSet is not much faster in object-existence checking than NSArray. Variants of `NSSet` are also `NSCountedSet`, and the non-toll-free counter-variant `CFBag` / `CFMutableBag`.
-5. `NSOrderedSet` (`NSMutableOrderedSet`) – объявляет программный интерфейс для упорядоченного множества объектов. Класс NSOrderedSet объявляет программный интерфейс для неизменяемых множеств различных объектов. Вы задаёте записи неизменяемого множества на этапе его создания, после этого записи не могут быть изменены. С другой стороны, класс `NSMutableOrderedSet`, объявляет программный интерфейс для динамически изменяемых множеств различных объектов. Динамического или изменяемые множества позволяет добавлять и удалять записи в любое время, автоматически выделяя память по мере необходимости. Вы можете использовать упорядоченные множества как альтернативу массивам, когда порядок элементов является важным и требуется высокая скорость поиска элементов в коллекции. Класс `NSMutableOrderedSet` объявляет программный интерфейс к изменяемому упорядоченному множеству различных объектов. Объекты класса NSMutableOrderedSet объекты не похожи на массивы языка `С`. Во время создания такого множества вы можете указать размер, но реальный размер всё равно будет равен `0`.
-6. `NSCountedSet` – объявляет программный интерфейс к изменяемой, неупорядоченной коллекции нечетких объектов. Счётное множество также известно как bag. Каждый отдельный объект, вставленный в NSCountedSet, имеет счётчик, связанный с ним. Объект `NSCountedSet` отслеживает количество раз, когда объекты были вставлены, и требует, чтобы объекты были удалены такое же количество раз. В то же время, внутри объекта `NSSet` существует только один экземпляр вставляемого объекта, даже если этот объект был добавлен в множество несколько раз.
+4. `NSSet` (`NSMutableSet`) – объекты представляют неупорядоченные множества различных объектов. Объект `NSSet` при создании заполняется множеством объектов, которое не может быть изменено до конца своего существования. Если требуется использовать изменяемые множества, следует воспользоваться классом `NSMutableSet`. Вы можете использовать множества в качестве альтернативы массивам, когда порядок элементов не важен, но требуется быстрое определение `O(1)` принадлежности объекта множеству. Операция определения принадлежности выполняется значительно быстрее в сравнении с массивами
+`NSSet` can only work efficiently if the hashing method used is balanced; if all objects are in the same hash bucket, then `NSSet` is not much faster in object-existence checking than `NSArray`. Variants of `NSSet` are also `NSCountedSet`, and the non-toll-free counter-variant `CFBag` / `CFMutableBag`.
+5. `NSOrderedSet` (`NSMutableOrderedSet`) – объявляет программный интерфейс для упорядоченного множества объектов. Класс `NSOrderedSet` объявляет программный интерфейс для неизменяемых множеств различных объектов. Вы задаёте записи неизменяемого множества на этапе его создания, после этого записи не могут быть изменены. С другой стороны, класс `NSMutableOrderedSet`, объявляет программный интерфейс для динамически изменяемых множеств различных объектов. Динамического или изменяемые множества позволяет добавлять и удалять записи в любое время, автоматически выделяя память по мере необходимости. Вы можете использовать упорядоченные множества как альтернативу массивам, когда порядок элементов является важным и требуется высокая скорость поиска элементов в коллекции. Класс `NSMutableOrderedSet` объявляет программный интерфейс к изменяемому упорядоченному множеству различных объектов. Объекты класса `NSMutableOrderedSet` объекты не похожи на массивы языка Си. Во время создания такого множества вы можете указать размер, но реальный размер всё равно будет равен `0`.
+6. `NSCountedSet` – объявляет программный интерфейс к изменяемой, неупорядоченной коллекции нечетких объектов. Счётное множество также известно как `Bag`. Каждый отдельный объект, вставленный в `NSCountedSet`, имеет счётчик, связанный с ним. Объект `NSCountedSet` отслеживает количество раз, когда объекты были вставлены, и требует, чтобы объекты были удалены такое же количество раз. В то же время, внутри объекта `NSSet` существует только один экземпляр вставляемого объекта, даже если этот объект был добавлен в множество несколько раз.
 7. `NSIndexSet` (`NSMutableIndexSet`) – represents an immutable collection of unique unsigned integers, known as indexes because of the way they are used. This collection is referred to as an index set. You use index sets in your code to store indexes into some other data structure. For example, given an `NSArray` object, you could use an index set to identify a subset of objects in that array. You should not use index sets to store an arbitrary collection of integer values because index sets store indexes as sorted ranges. This makes them more efficient than storing a collection of individual integers. It also means that each index value can only appear once in the index set. The designated initializers of the `NSIndexSet` class are: `init`, `initWithIndexesInRange:`, and `initWithIndexSet:`. You must not subclass the `NSIndexSet` class. The mutable subclass of `NSIndexSet` is `NSMutableIndexSet`.
 8. `NSHashTable` – в отличие от NSSet, поддерживает слабые ссылки. Он может содержать слабые ссылки на объекты. Объекты класса NSHashTable могут содержать произвольные указатели, хранимые объекты не ограничиваются объектами классов. Можно настроить экземпляр `NSHashTable` для работы с произвольными указателями, а не только с объектами классов. Благодаря своим свойствам, класс `NSHashTable` это не множество, потому что он может вести себя по-другому.
 9. `NSMapTable` – is a general-purpose analogue of `NSDictionary`. Contrasted with the behavior of `NSDictionary` / `NSMutableDictionary`, `NSMapTable` has the following characteristics:
+
 * `NSDictionary` / `NSMutableDictionary` copies keys, and holds strong references to values.
 * `NSMapTable` is mutable, without an immutable counterpart.
 * `NSMapTable` can hold keys and values with weak references, in such a way that entries are removed when either the key or value is deallocated.
 * `NSMapTable` can copy its values on input.
 * `NSMapTable` can contain arbitrary pointers, and use pointer identity for equality and hashing checks.
+
 Usage: Instances where one might use `NSMapTable` include non-copyable keys and storing weak references to keyed delegates or another kind of weak object.
 
 10. `NSIndexPath` – представляет путь к конкретному узлу в виде дерева вложенных массивов коллекций. Этот путь известен как индексный путь. Каждый индекс в индексном пути представляет индекс в массиве дочерних элементов от одного узла в дереве к другому.
 
 <img src="https://github.com/sashakid/ios-guide/blob/master/Images/complexity.png">
 
-_NSArray is the best choice to use for a list of items if you're going to iterate over them in se-quence, or access directly by index. They are also efficient to use as a queue or stack, as adding or removing items from either the beginning or is O(1). Checking to see if an object exists in the array using containsObject: is an O(N) operation, as it may take up to N comparisons to find the match._
-_NSSet is a great choice for checking containsObject: due to efficient hashing algorithms. Add-ing/removing items is always O(1). In addition, you have fast set arithmetic operations._
-_NSDictionary is a great choice if you have a natural key you can use to access objects. This has no inherent order, but if you know the key you can retrieve any object as O(1)._
+_`NSArray` is the best choice to use for a list of items if you're going to iterate over them in sequence, or access directly by index. They are also efficient to use as a queue or stack, as adding or removing items from either the beginning or is `O(1)`. Checking to see if an object exists in the array using containsObject: is an `O(N)` operation, as it may take up to `N` comparisons to find the match._
+_`NSSet` is a great choice for checking containsObject: due to efficient hashing algorithms. Adding/removing items is always O(1). In addition, you have fast set arithmetic operations._
+_`NSDictionary` is a great choice if you have a natural key you can use to access objects. This has no inherent order, but if you know the key you can retrieve any object as `O(1)`._
 
 ## Разница между Set и Array?
-`NSSet` предназначен для создания несортированных массивов данных (например каких-либо объектов). Существует модифицируемая версия класса `NSSet` — это `NSMutableSet`, используя которую можно добавлять и удалять элементы. Стоит обратить внимание, что объект, кото-рый хранится в `NSSet`, встречается только один раз. Т.е. все элементы `NSSet` — уникальные.
-Добавить дубликат элемента в `NSMutableSet` у вас также не получится. Для создания несортированного массива, в котором можно использовать неуникальные элементы, можно использо-вать `NSCountedSet`. Основным преимуществом NSCountedSet перед использованием классического массива `NSArray` является то, что элемент может быть продублирован огромное количество раз и при этом занимать памяти как один элемент. Это объясняется тем, что `NSCountedSet` хранит в памяти только одну копию элемента и запоминает сколько раз этот элемент встречается. Если для вас не важен порядок элементов внутри массива и вы используете действительно большие объемы информации, то использование `NSSet` повысит производительность приложения за счет снижения потребляемой памяти. Несмотря на то, что количество элемен-тов хранящихся в памяти будет одинаковым, `NSSet` не тратит память на то, чтобы помнить в какой последовательности хранятся элементы.
+`NSSet` предназначен для создания несортированных массивов данных (например каких-либо объектов). Существует модифицируемая версия класса `NSSet` — это `NSMutableSet`, используя которую можно добавлять и удалять элементы. Стоит обратить внимание, что объект, который хранится в `NSSet`, встречается только один раз. Т.е. все элементы `NSSet` — уникальные.
+Добавить дубликат элемента в `NSMutableSet` у вас также не получится. Для создания несортированного массива, в котором можно использовать неуникальные элементы, можно использовать `NSCountedSet`. Основным преимуществом `NSCountedSet` перед использованием классического массива `NSArray` является то, что элемент может быть продублирован огромное количество раз и при этом занимать памяти как один элемент. Это объясняется тем, что `NSCountedSet` хранит в памяти только одну копию элемента и запоминает сколько раз этот элемент встречается. Если для вас не важен порядок элементов внутри массива и вы используете действительно большие объемы информации, то использование `NSSet` повысит производительность приложения за счет снижения потребляемой памяти. Несмотря на то, что количество элементов хранящихся в памяти будет одинаковым, `NSSet` не тратит память на то, чтобы помнить в какой последовательности хранятся элементы.
 ```objectivec
 NSSet *set = [NSSet setWithObjects:@"1", @"2", @"3", @"4", @"5", @"6", @"7", @"8", @"9", @"0", nil];
 NSLog(@"%@", set);
@@ -470,12 +478,16 @@ NSLog(@"%@", set);
 
 ## Difference between NSArray and CFArray
 What's the point of them both existing? There are a few reasons.
-If you want to provide a C API, like the Carbon API, and you need things like arrays and dictionaries of referenced-counted objects, you want a library like Core Foundation (which provides CFArray), and of course it needs to have a C API.
-If you want to write libraries for third-parties to use on Windows (for example), you need to provide a C API.
-If you want to write a low-level library, say for interfacing with your operating system's kernel, and you want avoid the overhead of Objective-C messaging, you need a C API.
+
+* If you want to provide a C API, like the Carbon API, and you need things like arrays and dictionaries of referenced-counted objects, you want a library like Core Foundation (which provides CFArray), and of course it needs to have a C API.
+* If you want to write libraries for third-parties to use on Windows (for example), you need to provide a C API.
+* If you want to write a low-level library, say for interfacing with your operating system's kernel, and you want avoid the overhead of Objective-C messaging, you need a C API.
+
 So those are good reasons for having Core Foundation, a pure C library.
+
 But if you want to provide a higher-level, more pleasant API in Objective-C, you want Objective-C objects that represent arrays, dictionaries, reference-counted objects, and so on. So you need Foundation, which is an Objective-C library.
-When should you use one or the other? Generally, you should use the Objective-C classes (e.g. NSArray) whenever you can, because the Objective-C inter-face is more pleasant to use: myArray.count (or [myArray count]) is easier to read and write than CFArrayGetCount(myArray). You should use the Core Foundation API only when you really need to: when you're on a platform that doesn't have Objective-C, or when you need features that the Core Foundation API provides but the Objective-C objects lack. For example, you can specify callbacks when creating a CFArray or a CFDictionary that let you store non-reference-counted objects. The NSArray and NSDictionary classes don't let you do that - they always assume you are storing reference-counted objects.
+
+When should you use one or the other? Generally, you should use the Objective-C classes (e.g. `NSArray`) whenever you can, because the Objective-C interface is more pleasant to use: `myArray.count` (or `[myArray count]`) is easier to read and write than `CFArrayGetCount(myArray)`. You should use the Core Foundation API only when you really need to: when you're on a platform that doesn't have Objective-C, or when you need features that the Core Foundation API provides but the Objective-C objects lack. For example, you can specify callbacks when creating a `CFArray` or a `CFDictionary` that let you store non-reference-counted objects. The `NSArray` and `NSDictionary` classes don't let you do that - they always assume you are storing reference-counted objects.
 Are the CF objects just legacy objects? Not at all. In fact, Nextstep existed for years with just the Objective-C Foundation library and no Core Foundation library. When Apple needed to support both the Carbon API and the Cocoa API on top of the same lower-level operating system facilities, they created Core Foundation support both.
 
 ## Enumeration
@@ -483,8 +495,9 @@ Enumeration is where computation gets interesting. It's one thing to encode logi
 * Procedural increments a pointer within a loop
 * Object Oriented applies a function or block to each object in a collection
 * Functional works through a data structure recursively
-Cocoa содержит три основных способа перечисления содержимого коллекции. К ним относятся быстрое перечисление и блочное перечисление. Существует также NSEnumerator класс, хотя в целом был замещен быстрым перечислением.
-Быстрое перечисление является предпочтительным методом перечисления содержимого кол-лекции, поскольку оно обеспечивает следующие преимущества:
+
+Cocoa содержит три основных способа перечисления содержимого коллекции. К ним относятся быстрое перечисление и блочное перечисление. Существует также `NSEnumerator` класс, хотя в целом был замещен быстрым перечислением.
+Быстрое перечисление является предпочтительным методом перечисления содержимого коллекции, поскольку оно обеспечивает следующие преимущества:
 * Перечисление является более эффективным, чем использование NSEnumerator напрямую.
 * Синтаксис краток
 * Перечислитель вызывает исключение, если вы измените коллекции при перечислении.
@@ -492,7 +505,7 @@ Cocoa содержит три основных способа перечисле
 
 __C Loops (for/while)__
 
-for and while loops are the "classic" method of iterating over a collection. Anyone who's taken Comput-er Science 101 has written code like this before:
+for and while loops are the "classic" method of iterating over a collection. Anyone who's taken Computer Science 101 has written code like this before:
 ```objectivec
 for (NSUInteger i = 0; i < [array count]; i++) {
 	id object = array[i];
@@ -509,14 +522,14 @@ for (id object in array) {
     NSLog(@"%@", object);
 }
 ```
-Поведение для быстрого перечисления немного отличается в зависимости от типа коллекции. Массивы и наборы перечисляют их содержимое, а словари перечисляют свои ключи. NSIndexSet и NSIndexPath не поддерживают быстрое перечисление.
+Поведение для быстрого перечисления немного отличается в зависимости от типа коллекции. Массивы и наборы перечисляют их содержимое, а словари перечисляют свои ключи. `NSIndexSet` и `NSIndexPath` не поддерживают быстрое перечисление.
 ```objectivec
 NSString *key;
 for (key in someDictionary) {
    	NSLog(@"Key: %@, Value %@", key, [someDictionary objectForKey: key]);
 }
 ```
-In Cocoa, comprehensions are available to any class that implements the NSFastEnumeration protocol, including NSArray, NSSet, and NSDictionary.
+In Cocoa, comprehensions are available to any class that implements the `NSFastEnumeration` protocol, including `NSArray`, `NSSet`, and `NSDictionary`.
 Использование перечислений на основе блоков `NSArray`, `NSDictionary` и `NSSet` разрешают перечисление их содержимого с помощью блоков. Для перечисления с блоком, вызовите соответствующий метод и укажите блок для использования.
 ```objectivec
 NSArray *anArray = [NSArray arrayWithObjects:@"A", @"B", @"D", @"M", nil];
@@ -528,12 +541,12 @@ NSString *string = @"c";
 	}
 }];
 ```
-Для перечисления `NSArray`, параметр `index` полезен для одновременного перечисления. Без этого параметра, единственный способ получить доступ к индексу был бы использованием метода indexOfObject:, который является неэффективным. stop параметр важен для производительности, так как он позволяет остановить перечисление раньше, на основе некоторого условия, определяемого в пределах блока. Методы перечисления на основе блока в других коллекциях, немного отличаются по названию.
+Для перечисления `NSArray`, параметр `index` полезен для одновременного перечисления. Без этого параметра, единственный способ получить доступ к индексу был бы использованием метода `indexOfObject:`, который является неэффективным. `stop` параметр важен для производительности, так как он позволяет остановить перечисление раньше, на основе некоторого условия, определяемого в пределах блока. Методы перечисления на основе блока в других коллекциях, немного отличаются по названию.
 
 __Использование перечислителя NSEnumerator__
 
-Абстрактный класс, экземпляры подклассов которого перечисляют коллекции других объек-тов, таких как массивы и словари. Все методы создания определены в классах коллекций, та-ких как NSArray, NSSet и NSDictionary, которые обеспечивают специальные объекты NSEnumerator для перечисления их содержимого. Например, класс NSArray имеет два метода, которые возвращают объект NSEnumerator: objectEnumerator и reverseObjectEnumerator. NSDictionary также имеет два метода, которые возвращают объект NSEnumerator: keyEnumerator и objectE-numerator. Эти методы позволяют перечислить содержимое словаря по ключу или по значению, соответственно. Вы отправляете nextObject, чтобы вновь созданный объект NSEnumerator возвращал следующий объект в оригинальной коллекции. Когда коллекция будет исчерпана, то возвращается nil. Вы не можете "сбросить" перечислитель после того, как он исчерпал свои коллекции. Подклассы NSEnumerator, используемые NSArray, NSDictionary и NSSet сохраняют коллекцию во время перечисления. Когда перечисление закончено, временные коллекции освобождаются.
-Примечание: не безопасно изменение коллекции во время её перечисления. Некоторые кол-лекции в настоящее время поддерживают такие операции, но такое поведение не гарантиро-вано в будущем.
+Абстрактный класс, экземпляры подклассов которого перечисляют коллекции других объектов, таких как массивы и словари. Все методы создания определены в классах коллекций, таких как `NSArray`, `NSSet` и `NSDictionary`, которые обеспечивают специальные объекты `NSEnumerator` для перечисления их содержимого. Например, класс `NSArray` имеет два метода, которые возвращают объект `NSEnumerator`: `objectEnumerator` и `reverseObjectEnumerator`. `NSDictionary` также имеет два метода, которые возвращают объект `NSEnumerator`: `keyEnumerator` и `objectEnumerator`. Эти методы позволяют перечислить содержимое словаря по ключу или по значению, соответственно. Вы отправляете `nextObject`, чтобы вновь созданный объект `NSEnumerator` возвращал следующий объект в оригинальной коллекции. Когда коллекция будет исчерпана, то возвращается `nil`. Вы не можете "сбросить" перечислитель после того, как он исчерпал свои коллекции. Подклассы `NSEnumerator`, используемые `NSArray`, `NSDictionary` и `NSSet` сохраняют коллекцию во время перечисления. Когда перечисление закончено, временные коллекции освобождаются.
+Примечание: не безопасно изменение коллекции во время её перечисления. Некоторые коллекции в настоящее время поддерживают такие операции, но такое поведение не гарантировано в будущем.
 Для перечисления коллекции, вы должны создать новый перечислитель.
 ```objective-c
 NSMutableDictionary *myMutableDictionary = ... ;
@@ -557,8 +570,8 @@ __Dictionary__
 
 <img src="https://github.com/sashakid/ios-guide/blob/master/Images/dictionary_performance.png">
 
-Why is `NSFastEnumeration` so slow here? Iterating the dictionary usually requires both key and object; fast enumeration can only help for the key, and we have to fetch the object every time ourselves. Using the block-based enumerateKeysAndObjectsUsingBlock: is more efficient since both objects can be more efficiently prefetched.
-Using NSPredicate to Filter Data
+Why is `NSFastEnumeration` so slow here? Iterating the dictionary usually requires both key and object; fast enumeration can only help for the key, and we have to fetch the object every time ourselves. Using the block-based `enumerateKeysAndObjectsUsingBlock:` is more efficient since both objects can be more efficiently prefetched.
+
 If you look at an arbitrary code base, chances are you’ll sooner or later run into a piece of code similar to this one:
 ```objectivec
 NSMutableArray *oldSkoolFiltered = [[NSMutableArray alloc] init];
@@ -572,7 +585,7 @@ It’s a straight-forward approach to filtering an array of items (in this case,
 
 __Simple filtering with NSPredicate__
 
-Thanks to Cocoa, we can simplify the code by using NSPredicate. NSPredicate is the object representation of an if-statement, or, more formally, a predicate. Predicates are expressions that evaluate to a truth value, i.e. true or false. We can use them to perform validation and filtering. In Cocoa, we can use NSPredicate to evaluate single objects, filter arrays and perform queries against Core Data data sets. Let’s have a look at how our example looks like when using `NSPredicate`:
+Thanks to Cocoa, we can simplify the code by using NSPredicate. NSPredicate is the object representation of an if-statement, or, more formally, a predicate. Predicates are expressions that evaluate to a truth value, i.e. true or false. We can use them to perform validation and filtering. In Cocoa, we can use `NSPredicate` to evaluate single objects, filter arrays and perform queries against Core Data data sets. Let’s have a look at how our example looks like when using `NSPredicate`:
 ```objectivec
 NSPredicate *predicate = [NSPredicate predicateWithFormat:@"publisher == %@", @"Apress"];
 NSArray *filtered  = [bookshelf filteredArrayUsingPredicate:predicate];
@@ -580,17 +593,17 @@ NSArray *filtered  = [bookshelf filteredArrayUsingPredicate:predicate];
 
 __Filtering with Regular Expressions__
 
-Regular Expressions can be used to solve almost any problem ;-) so it’s good to know you can use them in NSPredicates as well. To use regular expressions in your NSPredicate, you need to use the MATCHES operator. Let’s filter all books that are about iPad or iPhone programming:
+Regular Expressions can be used to solve almost any problem, so it’s good to know you can use them in `NSPredicates` as well. To use regular expressions in your `NSPredicate`, you need to use the `MATCHES` operator. Let’s filter all books that are about iPad or iPhone programming:
 ```objectivec
 predicate = [NSPredicate predicateWithFormat:@"title MATCHES '.*(iPhone|iPad).*'"];
 filtered = [bookshelf filteredArrayUsingPredicate:predicate];
 dumpBookshelf(@"Books that contain 'iPad' or 'iPhone' in their title", filtered);
 ```
-You need to obey some rules when using regular expressions in NSPredicate: most importantly, you cannot use regular expression metacharacters inside a pattern set.
+You need to obey some rules when using regular expressions in `NSPredicate`: most importantly, you cannot use regular expression metacharacters inside a pattern set.
 
 __Filtering using set operations__
 
-Let’s for a moment assume you want to filter all books that have been published by your favorite publishers. Using the IN operator, this is rather simple: first, we need to set up a set containing the publishers we’re interested in. Then, we can create the predicate and finally perform the filtering operation:
+Let’s for a moment assume you want to filter all books that have been published by your favorite publishers. Using the `IN` operator, this is rather simple: first, we need to set up a set containing the publishers we’re interested in. Then, we can create the predicate and finally perform the filtering operation:
 ```objectivec
 NSArray *favoritePublishers = [NSArray arrayWithObjects:@"Apress", @"O'Reilly", nil];
 predicate = [NSPredicate predicateWithFormat:@"publisher IN %@", favoritePublishers];
@@ -600,7 +613,7 @@ dumpBookshelf(@"Books published by my favorite publishers", filtered);
 
 __Advanced filtering thanks to KVC goodness__
 
-NSPredicate relies on key-value coding to achieve its magic. On one hand this means your classes need to be KVC compliant in order to be queried using NSPredicate (at least the attributes you want to query). On the other hand, this allows us to perform some very interesting things with very little lines of code. Let’s for example retrieve a list of books written by authors with the name “Mark”:
+NSPredicate relies on key-value coding to achieve its magic. On one hand this means your classes need to be KVC compliant in order to be queried using `NSPredicate` (at least the attributes you want to query). On the other hand, this allows us to perform some very interesting things with very little lines of code. Let’s for example retrieve a list of books written by authors with the name “Mark”:
 ```objectivec
 predicate = [NSPredicate predicateWithFormat:@"authors.lastName CONTAINS %@", @"Mark" ];
 filtered  = [bookshelf filteredArrayUsingPredicate:predicate];
@@ -609,10 +622,12 @@ In case we’d want to return the value of one of the aggregate functions, we do
 
 __Сортировка массивов__
 
-Вам может потребоваться разместить несколько созданных пользователем строк в алфавит-ном порядке, либо вам потребуется разместить номера в убыванию или по возрастанию – ис-пользуйте дескрипторы блоков и селекторов. Дескрипторы сортировки (экземпляры NSSortDescriptor) обеспечивают удобный и абстрактный способ описания порядка сортировки.
+Вам может потребоваться разместить несколько созданных пользователем строк в алфавитном порядке, либо вам потребуется разместить номера в убыванию или по возрастанию – используйте дескрипторы блоков и селекторов. Дескрипторы сортировки (экземпляры NSSortDescriptor) обеспечивают удобный и абстрактный способ описания порядка сортировки.
 Простая сортировка по алфавиту:
+```objectivec
 NSArray *myArray = @[@"v", @"a", @"c", @"b", @"z"];
 NSLog(@"%@", [myArray sortedArrayUsingSelector:@selector(caseInsensitiveCompare:)]);
+```
 `sortedArrayUsingDescriptors`: или `sortUsingDescriptors`:
 ```objectivec
 //Сначала создадим массив из словарей
@@ -678,7 +693,7 @@ NSArray *sortedArray = [array sortedArrayUsingComparator: ^(id obj1, id obj2) {
 
 __Сортировка с помощью функций и селекторов__
 
-Следующий листинг иллюстрирует использование методов `sortedArrayUsingSelector:`, `sortedArrayUsingFunction:context:`, и `sortedArrayUsingFunction:context:hint:`. Самым сложным из этих методов является `sortedArrayUsingFunction:context:hint:`. Он наиболее эффективен, когда у вас есть большой массив (N записей), которые вам надо отсортировать раз и затем лишь слег-ка изменить (P добавлений и удалений, где P гораздо меньше, чем N). Вы можете использовать работу, которую вы сделали в оригинальнй сортировке, и сделать своего рода слияние между N "старых" предметов и Р "новых" предметов. Чтобы получить соответствующую подсказку, вы используете sortedArrayHint когда исходный массив был отсортирован, и держите его, пока вам это нужно (если вы хотите, отсортировать массив после того, как он был изменен).
+Следующий листинг иллюстрирует использование методов `sortedArrayUsingSelector:`, `sortedArrayUsingFunction:context:`, и `sortedArrayUsingFunction:context:hint:`. Самым сложным из этих методов является `sortedArrayUsingFunction:context:hint:`. Он наиболее эффективен, когда у вас есть большой массив (`N` записей), которые вам надо отсортировать раз и затем лишь слегка изменить (`P` добавлений и удалений, где `P` гораздо меньше, чем `N`). Вы можете использовать работу, которую вы сделали в оригинальнй сортировке, и сделать своего рода слияние между `N` "старых" предметов и `Р` "новых" предметов. Чтобы получить соответствующую подсказку, вы используете sortedArrayHint когда исходный массив был отсортирован, и держите его, пока вам это нужно (если вы хотите, отсортировать массив после того, как он был изменен).
 ```objectivec
 NSInteger alphabeticSort(id string1, id string2, void *reverse) {
 	if (*(BOOL *)reverse == YES) {
@@ -796,19 +811,19 @@ typedef NS_OPTIONS(NSUInteger, NSBinarySearchingOptions) {
                     options:(NSBinarySearchingOptions)options
             usingComparator:(NSComparator)cmp;
 ```
-Why would you want to use this? Methods like containsObject: and `indexOfObject:` start at index `0` and search every object until the match is found - they don’t require the array to be sorted but have a performance characteristic of `O(n)`. Binary search, on the other hand, requires the array to be sorted, but only needs `O(log n)` time. Thus, for one million entries, binary search requires, at most, 21 comparisons, while the naive linear search would require an average of 500,000 comparisons.
+Why would you want to use this? Methods like `containsObject:` and `indexOfObject:` start at index `0` and search every object until the match is found - they don’t require the array to be sorted but have a performance characteristic of `O(n)`. Binary search, on the other hand, requires the array to be sorted, but only needs `O(log n)` time. Thus, for one million entries, binary search requires, at most, 21 comparisons, while the naive linear search would require an average of 500,000 comparisons.
 
 __Time to search for 1000 entries within 1000000 objects.__
 ```
 Linear: 54130.38[ms].
 Binary: 7.62[ms]
 ```
-For comparison, the search for a specific index with NSOrderedSet took 0.23 ms - that’s more than 30 times faster, even compared to binary search. Keep in mind that sorting is expensive as well. Apple uses merge sort, which takes `O(n*log n)`, so if you just have to call `indexOfObject:` once, there’s no need for binary search.
+For comparison, the search for a specific index with `NSOrderedSet` took 0.23 ms - that’s more than 30 times faster, even compared to binary search. Keep in mind that sorting is expensive as well. Apple uses merge sort, which takes `O(n*log n)`, so if you just have to call `indexOfObject:` once, there’s no need for binary search.
 
 ## Сортировка вставками
 `O(n^2), частично отсортированный массив`
 
-Суть его заключается в том что, на каждом шаге алгоритма мы берем один из элементов мас-сива, находим позицию для вставки и вставляем. Стоит отметить что массив из 1-го элемента считается отсортированным.
+Суть его заключается в том что, на каждом шаге алгоритма мы берем один из элементов массива, находим позицию для вставки и вставляем. Стоит отметить что массив из 1-го элемента считается отсортированным.
 
 *	Устойчив
 *	Может сортировать массив по мере его поступления
@@ -829,7 +844,7 @@ void insertionSort(int array[], int size) {
 ## Сортировка пузырьком
 `O(n^2)`
 
-Алгоритм состоит из повторяющихся проходов по сортируемому массиву. За каждый проход элементы последовательно сравниваются попарно и, если порядок в паре неверный, выполняется обмен элементов. Проходы по массиву повторяются N-1 раз или до тех пор, пока на очередном проходе не окажется, что обмены больше не нужны, что означает — массив отсортирован. При каждом проходе алгоритма по внутреннему циклу, очередной наибольший элемент массива ставится на своё место в конце массива рядом с предыдущим «наибольшим элементом», а наименьший элемент перемещается на одну позицию к началу массива («всплывает» до нужной позиции как пузырёк в воде, отсюда и название алгоритма).
+Алгоритм состоит из повторяющихся проходов по сортируемому массиву. За каждый проход элементы последовательно сравниваются попарно и, если порядок в паре неверный, выполняется обмен элементов. Проходы по массиву повторяются `N-1` раз или до тех пор, пока на очередном проходе не окажется, что обмены больше не нужны, что означает — массив отсортирован. При каждом проходе алгоритма по внутреннему циклу, очередной наибольший элемент массива ставится на своё место в конце массива рядом с предыдущим «наибольшим элементом», а наименьший элемент перемещается на одну позицию к началу массива («всплывает» до нужной позиции как пузырёк в воде, отсюда и название алгоритма).
 
 * Эффективен для небольших массивов из-за сложности
 ```c
@@ -895,19 +910,20 @@ int selectionSort(int array[], int size) {
 ## Быстрая сортировка
 `O(n*log(n)), разделяй и властвуй`
 
-QuickSort является существенно улучшенным вариантом алгоритма сортировки с помощью прямого обмена (его варианты известны как «Пузырьковая сортировка» и «Шейкерная сортировка»), известного, в том числе, своей низкой эффективностью. Принципиальное отличие состоит в том, что в первую очередь производятся перестановки на наибольшем возможном рас-стоянии и после каждого прохода элементы делятся на две независимые группы. Любопытный факт: улучшение самого неэффективного прямого метода сортировки дало в результате один из наиболее эффективных улучшенных методов.
+QuickSort является существенно улучшенным вариантом алгоритма сортировки с помощью прямого обмена (его варианты известны как «Пузырьковая сортировка» и «Шейкерная сортировка»), известного, в том числе, своей низкой эффективностью. Принципиальное отличие состоит в том, что в первую очередь производятся перестановки на наибольшем возможном расстоянии и после каждого прохода элементы делятся на две независимые группы. Любопытный факт: улучшение самого неэффективного прямого метода сортировки дало в результате один из наиболее эффективных улучшенных методов.
 Общая идея алгоритма состоит в следующем:
 
 1. Выбрать из массива элемент, называемый опорным. Это может быть любой из элементов массива.
 2. Сравнить все остальные элементы с опорным и переставить их в массиве так, чтобы разбить массив на три непрерывных отрезка, следующие друг за другом — «меньшие опорного», «равные» и «большие».
 3. Для отрезков «меньших» и «больших» значений выполнить рекурсивно ту же последовательность операций, если длина отрезка больше единицы.
+
 На практике массив обычно делят не на три, а на две части, например, «меньшие опорного» и «равные и большие». Такой подход в общем случае эффективнее, так как упрощает алгоритм разделения.
 
 Достоинства:
 
 * Один из самых быстродействующих (на практике) из алгоритмов внутренней сортировки общего назначения.
 * Прост в реализации.
-* Требует лишь `O(lg n)` дополнительной памяти для своей работы. (Не улучшенный рекурсивный алгоритм в худшем случае O(n) памяти)
+* Требует лишь `O(lg n)` дополнительной памяти для своей работы. (Не улучшенный рекурсивный алгоритм в худшем случае `O(n)` памяти)
 * Хорошо сочетается с механизмами кэширования и виртуальной памяти.
 * Допускает естественное распараллеливание (сортировка выделенных подмассивов в параллельно выполняющихся подпроцессах).
 * Допускает эффективную модификацию для сортировки по нескольким ключам (в частности — алгоритм Седжвика для сортировки строк): благодаря тому, что в процессе разделения автоматически выделяется отрезок элементов, равных опорному, этот отрезок можно сразу же сортировать по следующему ключу.
@@ -1086,11 +1102,11 @@ __Компиляция__ — трансляция программы, соста
 * Операции над битами
 * Адресная арифметика
 
-`Си` – универсальный язык программирования, считается удобным для системного программирования, хотя он удобен и для написания при-кладных программ. Среди преимуществ языка `Си` следует отметить переносимость программ на компьютеры различной архитектуры и из одной операционной системы в другую, лаконичность записи алгоритмов, логическую стройность программ, а также возможность получить программный код, сравнимый по скорости выполнения с программами, написанными на языке ассемблера. Последнее связано с тем, что хотя `Си` является языком высокого уровня, имеющим полный набор конструкций структурного программирования, он также обладает набором низкоуровневых средств, обеспечивающих доступ к аппаратным средствам компьютера.
-Программа на `Cи` состоит из программных единиц одного типа – функций. Аргументы могут передаваться функциям посредством копирования значений этих аргументов; при этом вызванная функция не может изменить фактический аргумент в вызывающей подпрограмме.
+Си – универсальный язык программирования, считается удобным для системного программирования, хотя он удобен и для написания прикладных программ. Среди преимуществ языка Си следует отметить переносимость программ на компьютеры различной архитектуры и из одной операционной системы в другую, лаконичность записи алгоритмов, логическую стройность программ, а также возможность получить программный код, сравнимый по скорости выполнения с программами, написанными на языке ассемблера. Последнее связано с тем, что хотя Си является языком высокого уровня, имеющим полный набор конструкций структурного программирования, он также обладает набором низкоуровневых средств, обеспечивающих доступ к аппаратным средствам компьютера.
+Программа на Cи состоит из программных единиц одного типа – функций. Аргументы могут передаваться функциям посредством копирования значений этих аргументов; при этом вызванная функция не может изменить фактический аргумент в вызывающей подпрограмме.
 Возможен иной вариант – передача параметра по ссылке, когда явно передается указатель, т.е. адрес, при этом функция сможет изменить объект, на который ссылается указатель.
-В `Си` предусмотрен ряд операций низкого уровня: прямой доступ к памяти, операции над битами данных и адресной арифметики.
-Программы на языке `Си` компактны и гибки. Язык `Си` доверяет программисту и разрешает ему практически все; из-за этого `Си` нельзя считать языком надежного программирования, и вся ответственность за качество программы лежит на программисте, который должен знать особен-ности языка и его реализации. Программа, написанная на языке Си, состоит из операторов. Каждый оператор вызывает выполнение некоторых действий на соответствующем шаге выполнения программы.
+В Си предусмотрен ряд операций низкого уровня: прямой доступ к памяти, операции над битами данных и адресной арифметики.
+Программы на языке Си компактны и гибки. Язык Си доверяет программисту и разрешает ему практически все; из-за этого Си нельзя считать языком надежного программирования, и вся ответственность за качество программы лежит на программисте, который должен знать особенности языка и его реализации. Программа, написанная на языке Си, состоит из операторов. Каждый оператор вызывает выполнение некоторых действий на соответствующем шаге выполнения программы.
 При написании операторов применяются латинские прописные и строчные буквы, цифры и специальные знаки. К таким знакам, например, относятся: точка `.`, запятая `,`, двоеточие `:`, точка с запятой `;` и др. Совокупность символов, используемых в языке, называется алфавитом языка. Программы оперируют с различными данными, которые могут быть простыми и структурированными. Простые данные - это целые и вещественные числа, символы и указатели (адреса объектов в памяти). Целые числа не имеют, а вещественные имеют дробную часть. Структурированные данные - это массивы и структуры.
 
 <img src="https://github.com/sashakid/ios-guide/blob/master/Images/c_types.png">
