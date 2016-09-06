@@ -27,9 +27,9 @@
 	- [Дек](#Дек)
 	- [Куча](#Куча)
 	- [Граф](#Граф)
-- [Коллекции в Objective-C](#Коллекции-в-objective-c)
-	- [Разница между set и array](#Разница-между-set-и-array)
-	- [Difference between NSArray and CFArray](#Difference-between-NSArray-and-CFArray)
+- [Коллекции в Objective-C](#коллекции-в-objective-c)
+	- [Разница между set и array](#разница-между-set-и-array)
+	- [Difference between NSArray and CFArray](#difference-between-nsarray-and-cfarray)
 	- [Enumeration](#Enumeration)
 	- [How to use NSPredicate to filter data](#How-to-use-nspredicate-to-filter-data)
 	- [Сортировка массивов](#Cортировка массивов)
@@ -460,7 +460,7 @@ The most interesting part is that Apple doesn’t guarantee `O(1)` access time o
 
 Usage: Instances where one might use `NSMapTable` include non-copyable keys and storing weak references to keyed delegates or another kind of weak object.
 
-10. `NSIndexPath` – представляет путь к конкретному узлу в виде дерева вложенных массивов коллекций. Этот путь известен как индексный путь. Каждый индекс в индексном пути представляет индекс в массиве дочерних элементов от одного узла в дереве к другому.
+10.`NSIndexPath` – представляет путь к конкретному узлу в виде дерева вложенных массивов коллекций. Этот путь известен как индексный путь. Каждый индекс в индексном пути представляет индекс в массиве дочерних элементов от одного узла в дереве к другому.
 
 <img src="https://github.com/sashakid/ios-guide/blob/master/Images/complexity.png">
 
