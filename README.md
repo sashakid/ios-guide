@@ -1116,7 +1116,7 @@ __Компиляция__ — трансляция программы, соста
 
 <img src="https://github.com/sashakid/ios-guide/blob/master/Images/binary.png">
 
-Однако компьютерам удобнее иметь дело со степенями `2`. Программисты часто используют шестнадцатеричную систему (`16 = 2^4`) - особенно при работе с отдельными разрядами целых чисел. В качестве дополнительных цифр в шестнадцатеричной системе используются буквы `а`, `b`, `с`, `d`, `е` и `f`. Таким образом, счет в шестнадцатеричной системе выглядит так: `0 1 2 3 4 5 6 7 8 9 а b  с d е f 10 11 ...` Числа, записанные в шестнадцатеричной системе, обозначаются префиксом `0х`.
+Однако компьютерам удобнее иметь дело со степенями `2`. Программисты часто используют шестнадцатеричную систему (`16 = 2^4`) - особенно при работе с отдельными разрядами целых чисел. В качестве дополнительных цифр в шестнадцатеричной системе используются буквы `а`, `b`, `с`, `d`, `е` и `f`. Таким образом, счет в шестнадцатеричной системе выглядит так: `0 1 2 3 4 5 6 7 8 9 а b с d е f 10 11 ...` Числа, записанные в шестнадцатеричной системе, обозначаются префиксом `0х`.
 
 <img src="https://github.com/sashakid/ios-guide/blob/master/Images/hexadecimal.png">
 
@@ -1238,14 +1238,14 @@ yPtr = &y;
 
 `const` с указателем значит, что значение переменной не изменяется.
 
-## Почему `(NSError **)` использует указатель на указатель?
+## Почему (NSError **) использует указатель на указатель?
 _Explanation 1:_
 if you pass a pointer to an object to your function, the function can only modify what the pointer is pointing to.
-if you pass a pointer to a pointer to an object then the function can modify the pointer to point to an-other object.
+if you pass a pointer to a pointer to an object then the function can modify the pointer to point to another object.
 In the case of NSError, the function might want to create a new NSError object and pass you back a pointer to that NSError object. Thus, you need double indirection so that the pointer can be modified.
 
 _Explanation 2:_
-A pointer to a pointer is a form of multiple indirection, or a chain of pointers. Normally, a pointer con-tains the address of a variable. When we define a pointer to a pointer, the first pointer contains the address of the second pointer, which points to the location that contains the actual value as shown below.
+A pointer to a pointer is a form of multiple indirection, or a chain of pointers. Normally, a pointer contains the address of a variable. When we define a pointer to a pointer, the first pointer contains the address of the second pointer, which points to the location that contains the actual value as shown below.
 
 <img src="https://github.com/sashakid/ios-guide/blob/master/Images/pointers.png">
 
@@ -1281,7 +1281,7 @@ Value available at **pptr = 3000
 ```
 with a regular parameter, say `int` you get a local copy
 with a pointer parameter, say `int*` you can modify what it points to
-with a double pointer parameter, say `int**` you can modify the pointer itself, ie 'repoint' it.
+with a double pointer parameter, say `int**` you can modify the pointer itself, i.e. 'repoint' it.
 
 ## How to return 2+ values from a function?
 
@@ -1382,7 +1382,7 @@ You can return two values with help of block:
     }];
 }
 ```
-## What is the difference between `char * const` and `const char *`?
+## What is the difference between char * const and const char *?
 
 Существует четыре способа передачи в функцию указателя
 
@@ -1393,7 +1393,7 @@ You can return two values with help of block:
 
 <img src="https://github.com/sashakid/ios-guide/blob/master/Images/const_pointer.png">
 
-## Что значит `n&(n – 1)`?
+## Что значит n&(n – 1)?
 It's figuring out if `n` is either `0` or an exact power of two.
 It works because a binary power of two is of the form `1000...000` and subtracting one will give you `111...111`. Then, when you `AND` those together, you get zero, such as with:
 ```
