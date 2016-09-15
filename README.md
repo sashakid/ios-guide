@@ -70,7 +70,7 @@
 	- [App lifecycle](#app-lifecycle)
 	- [Возможные состояния программы](#возможные-состояния-программы)
 	- [Жизненный цикл UIViewController](#жизненный-цикл-uiviewController)
-	- [Представления](#представления)
+	- [UIView](#uiview)
 - [MEMORY MANAGEMENT](#memory-management)
 	- [Память в стеке и в куче](#память-в-стеке-и-в-куче)
 	- [Manual retain-release](#manual-retain-release)
@@ -1792,7 +1792,7 @@ But at the same time, you can basically disregard the documentation considering 
 
 <img src="https://github.com/sashakid/ios-guide/blob/master/Images/uiviewcontroller.png">
 
-## Представления
+## UIView
 The UIView (UIResponder : NSObject) Объект, рисующий контент в прямоугольной области экрана и управляющий событиями, вызванными касаниями экрана пользователем. Представ-ление также может содержать другие представления, называемые субпредставлениями. При добавлении субпредставления к представлению контейнер называется родительским пред-ставлением, а его субпредставление называется дочерним представлением. Сочетание роди-тельского представления, его дочерних представлений (а так же их дочерних представлений, если таковые имеются) образует иерархию представлений.
 Интерфейс состоит из представлений (UIView).  
 UIWindow (UIView : UIResponder : NSObject) – единственный экземпляр  в приложении, который играет роль контейнера для всех представлений. class defines an object known as a window that manages and coordinates the views an app displays on a device screen. Unless an app can display content on an external device screen, an app has only one window. The two principal functions of a window are
@@ -4518,7 +4518,7 @@ Your app never calls this method directly. Instead, this method is called when t
 ```
 Если на устройстве заканчивается память в центр уведомлений приходит сообщение `UIApplicationDidReceiveMemoryWarningNotification`, наш обьект может об этом узнать через уведомления и что-либо сделать, например почистить кеш или сохранить данные.
 
-##Как лучше всего загрузить UIImage c диска (с кеша)?
+## Как лучше всего загрузить из кеша?
 Кеширование уменьшает количество необходимых обращений к сети, улучшает впечатление от работы с программой во время полного отсутствия интернета или проблем с сетевым соединением. После загрузки ответа сервера, его копия сохраняется в локальном кеше. В следующий раз при посылке такого же запроса, ответ будет возвращен мгновенно, без обращения к сети. NSURLCache прозрачным для пользователя образом вернет закешированные данные. Для использования NSURLCache нужно установить значение синглтона `sharedURLCache`. Это можно сделать в методе `application:didFinishLaunchingWithOptions`:
 ```objectivec
 - (BOOL)application:(UIApplication *)application didFinishLaunchingWithOptions:(NSDictionary *)launchOptions {
@@ -4530,14 +4530,14 @@ NSArray *paths = NSSearchPathForDirectoriesInDomains(NSCachesDirectory, NSUserDo
 NSString *cachePath = [paths objectAtIndex:0];
 NSURL *fileURL = [NSURL fileURLWithPath:[cachePath stringByAppendingPathComponent:@"Matsedl.pdf"]];
 ```
-##Какой контент лучше хранить в Documents, а какой в Cache?
+## Какой контент лучше хранить в Documents, а какой в Cache?
 Кеш - это специальный буфер (контейнер), содержащий информацию. Эта информация может быть запрошена с наибольшей вероятностью. Соответственно, доступ к этому буферу должен быть очень быстрым, он должен быть быстрее чем доступ к сети или к данным на жестком диске. В операционной системе iOS присутствует функция кэширования, но прямого доступа к данным в кэше нету. Для получения доступа следует использовать класс NSCache, о котором и пойдет речь в данном примере.
 * Only documents and other data that is user-generated, or that cannot otherwise be recreated by your application, should be stored in the <Application_Home>/Documents directory and will be automatically backed up by iCloud.
 * Data that can be downloaded again or regenerated should be stored in the <Application_Home>/Library/Caches directory. Examples of files you should put in the Caches directory include database cache files and downloadable content, such as that used by magazine, newspaper, and map applications.
 * Data that is used only temporarily should be stored in the <Application_Home>/tmp directory. Although these files are not backed up to iCloud, remember to delete those files when you are done with them so that they do not continue to consume space on the user’s device.
 * Use the "do not back up" attribute for specifying files that should remain on device, even in low storage situations. Use this attribute with data that can be recreated but needs to persist even in low storage situations for proper functioning of your app or because customers expect it to be available during offline use. This attribute works on marked files regardless of what directory they are in, including the Documents directory. These files will not be purged and will not be included in the user's iCloud or iTunes backup. Because these files do use on-device storage space, your app is responsible for monitoring and purging these files periodically.
 
-##Как из строки вытащить подстроку?
+## Как из строки вытащить подстроку?
 С помощью методов: `substringToIndex:`, `substringFromIndex:` и `substringWithRange:`. Можно также разделить строку на подстроки (основано на разделителе строки) методом `componentsSeparatedByString:`
 ```objectivec
 NSString *source = @"0123456789";
@@ -4552,7 +4552,7 @@ NSArray *split = [source componentsSeparatedByString:@"45"];
 // массив split содержит: { @"0123", @"6789" }
 ```
 
-##NSCoding, archiving?
+## NSCoding, archiving?
 NSCoder — это абстрактный класс который преобразует поток данных. Используется для архивации и разархивации объектов.
 Протокол `<NSCoding>` позволяет реализовать архивирование или разархивирование данных. Например у нас есть обьект мы его можем сохранить, а при следующей загрузке приложения подгрузить обратно. Часто программе требуется хранить состояние объектов в файле для дальнейшего их полного либо частичного восстановления, а также работы с ними. Такой процесс называют сериализацией. Многие современные языки и фреймворки предоставляют для этого вспомогательные средства. Рассмотрим, что нам предоставляет Cocoa Framework для Objective-C.
 Сериализованный объект – объект, преобразованный в поток байтов для сохранения в файле или передачи по сети. `NS(M)Array`, `NS(M)Dictionary`, `NS(M)Data`, `NS(M)String`, `NSNumber`, `NSDate`. Сохранить состояние объекта в Cocoa Framework можно двумя способами при помощи:
@@ -4585,7 +4585,7 @@ myMapView = [NSKeyedUnarchiver unarchiveObjectWithFile:@"/tmp/MapArchive"];
 ```
 Второй метод предполагает создание экземпляра объекта `NSKeyedUnarchiver`.
 
-##Как работает UITableView?
+## Как работает UITableView?
 ```
 UITableView : UIScrollView <NSCoding> : UIView <NSCoding> : UIResponder <NSCoding, UIAppearance, UIAppearanceContainer, UIDynamicItem> : NSObject
 UITableViewController : UIViewController <UITableViewDelegate, UITableViewDataSource> : UIResponder <NSCoding, UIAppearanceContainer> : NSObject
@@ -4599,7 +4599,7 @@ UITableViewController : UIViewController <UITableViewDelegate, UITableViewDataSo
 UITableViewCell *cell = [tableView dequeueReusableCellWithIdentifier:CellIdentifier forIndexPath:indexPath];
 ```
 
-##Константы, typedef, enum, #define
+## Константы, typedef, enum, #define
 `typedef` используется для объявления нового типа данных – это команда компилятору и предполагает символьный тип данных.
 
 `#define` – команда препроцессору и может содержать числовые значения.
@@ -4688,7 +4688,7 @@ typedef struct {
 } Person;
 ```
 
-##Что такое awakeFromNib?
+## Что такое awakeFromNib?
 NSNibAwaking Protocol Reference
 (informal protocol)
 Prepares the receiver for service after it has been loaded from an Interface Builder archive, or nib file.
@@ -4700,7 +4700,7 @@ An example of how you might use awakeFromNib is shown below. Suppose your nib fi
 
 <img src="https://github.com/sashakid/ios-guide/blob/master/Images/awakefromnib.png">
 
-##Что происходит когода мы пытаемся вызвать метод у `nil` указателя? Разница между `nil` и `Nil`.
+## Что происходит когда мы пытаемся вызвать метод у nil указателя? Разница между nil и Nil
 На самом деле, в контексте указателей применим как `NULL`, так и 0, ввиду того что первый — не более чем макрос-обёртка для второго:
 ```objectivec
 #define NULL ((void *)0)
