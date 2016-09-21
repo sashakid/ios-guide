@@ -528,9 +528,15 @@ for (key in someDictionary) {
 }
 ```
 In Cocoa, comprehensions are available to any class that implements the `NSFastEnumeration` protocol, including `NSArray`, `NSSet`, and `NSDictionary`.
-Использование перечислений на основе блоков `NSArray`, `NSDictionary` и `NSSet` разрешают перечисление их содержимого с помощью блоков.
+Быстрое перечисление является предпочтительным методом перечисления содержимого коллекции, поскольку оно обеспечивает следующие преимущества:
+
+* Перечисление является более эффективным, чем использование NSEnumerator напрямую.
+* Синтаксис краток
+* Перечислитель вызывает исключение, если вы измените коллекции при перечислении.
+* Вы можете выполнять несколько перечислений одновременно.
 
 __Блочное перечисление__
+
 Для перечисления с блоком, вызовите соответствующий метод и укажите блок для использования.
 ```objectivec
 NSArray *anArray = [NSArray arrayWithObjects:@"A", @"B", @"D", @"M", nil];
@@ -544,17 +550,11 @@ NSString *string = @"c";
 ```
 Для перечисления `NSArray`, параметр `index` полезен для одновременного перечисления. Без этого параметра, единственный способ получить доступ к индексу был бы использованием метода `indexOfObject:`, который является неэффективным. `stop` параметр важен для производительности, так как он позволяет остановить перечисление раньше, на основе некоторого условия, определяемого в пределах блока. Методы перечисления на основе блока в других коллекциях, немного отличаются по названию.
 
-Быстрое перечисление является предпочтительным методом перечисления содержимого коллекции, поскольку оно обеспечивает следующие преимущества:
-* Перечисление является более эффективным, чем использование NSEnumerator напрямую.
-* Синтаксис краток
-* Перечислитель вызывает исключение, если вы измените коллекции при перечислении.
-* Вы можете выполнять несколько перечислений одновременно.
-
 __Использование перечислителя NSEnumerator__
 
 Абстрактный класс, экземпляры подклассов которого перечисляют коллекции других объектов, таких как массивы и словари. Все методы создания определены в классах коллекций, таких как `NSArray`, `NSSet` и `NSDictionary`, которые обеспечивают специальные объекты `NSEnumerator` для перечисления их содержимого. Например, класс `NSArray` имеет два метода, которые возвращают объект `NSEnumerator`: `objectEnumerator` и `reverseObjectEnumerator`. `NSDictionary` также имеет два метода, которые возвращают объект `NSEnumerator`: `keyEnumerator` и `objectEnumerator`. Эти методы позволяют перечислить содержимое словаря по ключу или по значению, соответственно. Вы отправляете `nextObject`, чтобы вновь созданный объект `NSEnumerator` возвращал следующий объект в оригинальной коллекции. Когда коллекция будет исчерпана, то возвращается `nil`. Вы не можете "сбросить" перечислитель после того, как он исчерпал свои коллекции. Подклассы `NSEnumerator`, используемые `NSArray`, `NSDictionary` и `NSSet` сохраняют коллекцию во время перечисления. Когда перечисление закончено, временные коллекции освобождаются.
-Примечание: не безопасно изменение коллекции во время её перечисления. Некоторые коллекции в настоящее время поддерживают такие операции, но такое поведение не гарантировано в будущем.
-Для перечисления коллекции, вы должны создать новый перечислитель.
+_Примечание:_ не безопасно изменение коллекции во время её перечисления. Некоторые коллекции в настоящее время поддерживают такие операции, но такое поведение не гарантировано в будущем.
+Для перечисления коллекции, вы должны создать новый перечислитель:
 ```objective-c
 NSMutableDictionary *myMutableDictionary = ... ;
 NSMutableArray *keysToDeleteArray = [NSMutableArray arrayWithCapacity:[myMutableDictionary count]];
@@ -605,7 +605,7 @@ Regular Expressions can be used to solve almost any problem, so it’s good to k
 ```objectivec
 predicate = [NSPredicate predicateWithFormat:@"title MATCHES '.*(iPhone|iPad).*'"];
 filtered = [bookshelf filteredArrayUsingPredicate:predicate];
-dumpBookshelf(@"Books that contain 'iPad' or 'iPhone' in their title", filtered);
+NSLog(@"Books that contain 'iPad' or 'iPhone' in their title", filtered);
 ```
 You need to obey some rules when using regular expressions in `NSPredicate`: most importantly, you cannot use regular expression metacharacters inside a pattern set.
 
@@ -616,7 +616,7 @@ Let’s for a moment assume you want to filter all books that have been publishe
 NSArray *favoritePublishers = [NSArray arrayWithObjects:@"Apress", @"O'Reilly", nil];
 predicate = [NSPredicate predicateWithFormat:@"publisher IN %@", favoritePublishers];
 filtered  = [bookshelf filteredArrayUsingPredicate:predicate];
-dumpBookshelf(@"Books published by my favorite publishers", filtered);
+NSLog(@"Books published by my favorite publishers", filtered);
 ```
 
 __Advanced filtering thanks to KVC goodness__
@@ -626,7 +626,10 @@ NSPredicate relies on key-value coding to achieve its magic. On one hand this me
 predicate = [NSPredicate predicateWithFormat:@"authors.lastName CONTAINS %@", @"Mark" ];
 filtered  = [bookshelf filteredArrayUsingPredicate:predicate];
 ```
-In case we’d want to return the value of one of the aggregate functions, we don’t need to use NSPredicate itself, but instead use KVC directly. Let’s retrieve the average price of all books on our shelf: ```NSNumber *average = [bookshelf valueForKeyPath:@"@avg.price"];```
+In case we’d want to return the value of one of the aggregate functions, we don’t need to use NSPredicate itself, but instead use KVC directly. Let’s retrieve the average price of all books on our shelf:
+```objectivec
+NSNumber *average = [bookshelf valueForKeyPath:@"@avg.price"];
+```
 
 ## Sorting
 __Сортировка массивов__
@@ -637,7 +640,7 @@ __Сортировка массивов__
 NSArray *myArray = @[@"v", @"a", @"c", @"b", @"z"];
 NSLog(@"%@", [myArray sortedArrayUsingSelector:@selector(caseInsensitiveCompare:)]);
 ```
-`sortedArrayUsingDescriptors`: или `sortUsingDescriptors`:
+`sortedArrayUsingDescriptors:` или `sortUsingDescriptors:`
 ```objectivec
 //Сначала создадим массив из словарей
 NSString *LAST = @"lastName";
@@ -1059,7 +1062,10 @@ int fibonacciIterative(int position) {
 __Программирование__ — процесс создания компьютерных программ.
 В узком смысле (так называемое кодирование) под программированием понимается написание инструкций (программ) на конкретном языке программирования (часто по уже имеющемуся алгоритму — плану, методу решения поставленной задачи). В настоящее время активно используются интегрированные среды разработки (IDE), включающие в свой состав также редактор для ввода и редактирования текстов программ, отладчики для поиска и устранения ошибок, трансляторы с различных языков программирования, компоновщики для сборки программы из нескольких модулей и другие служебные модули. С помощью текстового редактора программист производит набор и редактирования текста создаваемой программы, который называют исходным кодом. Язык программирования определяет синтаксис и изначальную семантику исходного кода. Компилятор преобразует текст программы в машинный код, непосредственно исполняемый электронными компонентами компьютера. Интерпретатор создаёт виртуальную машину для выполнения программы, которая полностью или частично берёт на себя функции исполнения программ.
 Код –> препроцессор (#define, etc. – развертывание, замена) –> компилятор –> машинный код
-Язык программирования — формальная знаковая система, предназначенная для записи компьютерных программ. Классы языков программирования:
+
+Язык программирования — формальная знаковая система, предназначенная для записи компьютерных программ.
+
+Классы языков программирования:
 
 * Функциональные
 
@@ -1088,15 +1094,13 @@ _C#, C++, Java. Objective-C, Perl, Python, Scala, Ruby, Smaltalk, PHP_
 
 __API__ – интерфейс программирования приложений (иногда интерфейс прикладного программирования) (application programming interface) — набор готовых классов, процедур, функций, структур и констант, предоставляемых приложением (библиотекой, сервисом) для использования во внешних программных продуктах. Используется программистами для написания всевозможных приложений. API операционных систем: Cocoa, Windows API. API не решение для системы (как фреймворк), а доступ к функциям другой системы.
 
-__IDE__ — интегрированная среда разработки (integrated development environment) — система программных средств, используемая программистами для разработки программного обеспечения.
+__IDE__ - интегрированная среда разработки (integrated development environment) — система программных средств, используемая программистами для разработки программного обеспечения.
 Обычно, среда разработки включает в себя:
 
 * текстовый редактор
 * компилятор и/или интерпретатор
 * средства автоматизации сборки
 * отладчик
-
-Иногда содержит также средства для интеграции с системами управления версиями и разнообразные инструменты для упрощения конструирования графического интерфейса пользователя. Многие современные среды разработки также включают браузер классов, инспектор объектов и диаграмму иерархии классов — для использования при объектно-ориентированной разработке ПО. Частный случай IDE — среды визуальной разработки, которые включают в себя возможность визуального редактирования интерфейса программы.
 
 __Высокоуровневый язык программирования__ — язык программирования, разработанный для быстроты и удобства использования программистом. Основная черта высокоуровневых языков — это абстракция, то есть введение смысловых конструкций, кратко описывающих такие структуры данных и операции над ними, описания которых на машинном коде (или другом низкоуровневом языке программирования) очень длинны и сложны для понимания.
 
@@ -1243,7 +1247,7 @@ yPtr = &y;
 2. Вызов по ссылке с аргументами ссылками
 3. Вызов по ссылке с аргументами указателями
 
-Указатели как и ссылки тоже можно использовать для модификации оного или более значений переменных в вызывающем операторе, или передавать указатели на большие объекты данных, чтобы избежать расходов, сопутствующих передаче объектов по значению.
+Указатели как и ссылки тоже можно использовать для модификации одного или более значений переменных в вызывающем операторе, или передавать указатели на большие объекты данных, чтобы избежать расходов, сопутствующих передаче объектов по значению.
 
 `const` с указателем значит, что значение переменной не изменяется.
 
@@ -1251,7 +1255,7 @@ yPtr = &y;
 _Explanation 1:_
 if you pass a pointer to an object to your function, the function can only modify what the pointer is pointing to.
 if you pass a pointer to a pointer to an object then the function can modify the pointer to point to another object.
-In the case of NSError, the function might want to create a new NSError object and pass you back a pointer to that NSError object. Thus, you need double indirection so that the pointer can be modified.
+In the case of `NSError`, the function might want to create a new `NSError` object and pass you back a pointer to that `NSError` object. Thus, you need double indirection so that the pointer can be modified.
 
 _Explanation 2:_
 A pointer to a pointer is a form of multiple indirection, or a chain of pointers. Normally, a pointer contains the address of a variable. When we define a pointer to a pointer, the first pointer contains the address of the second pointer, which points to the location that contains the actual value as shown below.
@@ -1288,9 +1292,11 @@ Value of var = 3000
 Value available at *ptr = 3000
 Value available at **pptr = 3000
 ```
-with a regular parameter, say `int` you get a local copy
-with a pointer parameter, say `int*` you can modify what it points to
-with a double pointer parameter, say `int**` you can modify the pointer itself, i.e. 'repoint' it.
+with a regular parameter, say `int`, you get a local copy
+
+with a pointer parameter, say `int*`, you can modify what it points to
+
+with a double pointer parameter, say `int**`, you can modify the pointer itself, i.e. 'repoint' it.
 
 ## How to return 2+ values from a function?
 
