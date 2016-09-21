@@ -31,8 +31,8 @@
 	- [Разница между Set и Array](#разница-между-set-и-array)
 	- [Difference between NSArray and CFArray](#difference-between-nsarray-and-cfarray)
 	- [Enumeration](#enumeration)
-	- [How to use NSPredicate to filter data](#how-to-use-nspredicate-to-filter-data)
-	- [Сортировка массивов](#сортировка-массивов)
+	- [Filtering](#filtering)
+	- [Sorting](#sorting)
 - [Алгоритмы](#алгоритмы)
 	- [Нотация «большое О»](#нотация-большое-о)
 	- [Последовательный поиск](последовательный-поиск)
@@ -357,6 +357,7 @@ A set is an abstract data structure that can store certain values, without any p
 *	Поиск только последовательный путем перебора за `O(n)`
 
 Отличие списка от массива:
+
 Массив имеет фиксированное время перехода по индексу, но нуждается в монолитном секторе памяти, обладает нефиксированным временем вставки и удаления.
 Список более требователен к памяти, дольше переход по индексу, но значительно быстрее вставка и удаление за `O(1)`. В Java и в C++ явно различаются `List` и `Array`, в Objective-C `NSMutableArray` скорее список, чем массив.
 
@@ -393,7 +394,7 @@ Double ended queue – очередь с двумя концами, включе
 * Добавить
 * Слияние
 
-Куча как область памяти – реализация динамически распределяемой памяти, в которой хранятся все объекты (`alloc` Objective-C – из кучи выделяется требуемая область памяти).
+Куча как область памяти – реализация динамически распределяемой памяти, в которой хранятся все объекты (вызов `alloc` в Objective-C выделяет из кучи требуемую область памяти).
 
 ## Двоичная куча
 
@@ -442,13 +443,13 @@ The access time for a value in the dictionary is guaranteed to be at worst `O(N)
 * `CFMutableSet`
 
 ## Foundation:
-1. `NSArray` (`NSMutableArray`) – управляет упорядоченной коллекцией элементов, называемой массивом. Вы можете использовать объекты этого класса для создания неизменяемых массивов. Это значит, что все элементы объектов класса `NSArray` доступны только для чтения. Имеется возможность доступа к элементам массива по индексу. Массивы могут хранить элементы различных типов. Массивы поддерживают сортировку и поиск элементов, а также сравнение самих массивов между собой. Для создания изменяемых массивов следует использовать `NSMutableArray`.
+1. `NSArray` (`NSMutableArray`) – управляет упорядоченной коллекцией элементов, называемой массивом. Вы можете использовать объекты этого класса для создания неизменяемых массивов. Это значит, что все элементы объектов класса `NSArray` доступны только для чтения. Имеется возможность доступа к элементам массива по индексу. Массивы могут хранить элементы различных типов. Массивы поддерживают сортировку и поиск элементов, а также сравнение самих массивов между собой.
 The most interesting part is that Apple doesn’t guarantee `O(1)` access time on individual object access - as you can read in the note about Computational Complexity in the `CFArray.h` `CoreFoundation` header: The access time for a value in the array is guaranteed to be at worst `O(lg N)` for any implementation, current and future, but will often be `O(1)` (constant time). Linear search operations similarly have a worst case complexity of `O(Nlg N)`, though typically the bounds will be tighter, and so on. Insertion or deletion operations will typically be linear in the number of values in the array, but may be `O(Nlg N)` clearly in the worst case in some implementations. There are no favored positions within the array for performance; that is, it is not necessarily faster to access values with low indices, or to insert or delete values with high indices, or whatever.
 2. `NSPointerArray` – mutable collection modeled after `NSArray` but it can also hold `NULL` values, which can be inserted or extracted (and which contribute to the object’s count). Moreover, unlike traditional arrays, you can set the count of the array directly. In a garbage collected environment, if you specify a zeroing weak memory configuration, if an element is collected it is replaced by a `NULL` value.
-3. `NSDictionary` (`NSMutableDictionary`) – следует использовать когда требуется удобный и эффективный способ хранения данных, ассоциированных с ключом. Объекты класса `NSDictionary` позволяют хранить неизменяемые пары объектов “ключ/значение” различных типов. Ключи в словаре `NSDictionary` не могут дублироваться, повторение значений допускается. Типы ключей и значений могут, но не обязаны совпадать. Особенно эффективными по скорости будут операции поиска по ключу, так как словарь специально оптимизирован для них. Если для решения задачи требуется изменение словаря объектов, следует использвать класс `NSMutableDictionary`.
-4. `NSSet` (`NSMutableSet`) – объекты представляют неупорядоченные множества различных объектов. Объект `NSSet` при создании заполняется множеством объектов, которое не может быть изменено до конца своего существования. Если требуется использовать изменяемые множества, следует воспользоваться классом `NSMutableSet`. Вы можете использовать множества в качестве альтернативы массивам, когда порядок элементов не важен, но требуется быстрое определение `O(1)` принадлежности объекта множеству. Операция определения принадлежности выполняется значительно быстрее в сравнении с массивами
+3. `NSDictionary` (`NSMutableDictionary`) – следует использовать когда требуется удобный и эффективный способ хранения данных, ассоциированных с ключом. Объекты класса `NSDictionary` позволяют хранить неизменяемые пары объектов “ключ/значение” различных типов. Ключи в словаре `NSDictionary` не могут дублироваться, повторение значений допускается. Типы ключей и значений могут, но не обязаны совпадать. Особенно эффективными по скорости будут операции поиска по ключу, так как словарь специально оптимизирован для них.
+4. `NSSet` (`NSMutableSet`) – объекты представляют неупорядоченные множества различных объектов. Вы можете использовать множества в качестве альтернативы массивам, когда порядок элементов не важен, но требуется быстрое определение `O(1)` принадлежности объекта множеству. Операция определения принадлежности выполняется значительно быстрее в сравнении с массивами.
 `NSSet` can only work efficiently if the hashing method used is balanced; if all objects are in the same hash bucket, then `NSSet` is not much faster in object-existence checking than `NSArray`. Variants of `NSSet` are also `NSCountedSet`, and the non-toll-free counter-variant `CFBag` / `CFMutableBag`.
-5. `NSOrderedSet` (`NSMutableOrderedSet`) – объявляет программный интерфейс для упорядоченного множества объектов. Класс `NSOrderedSet` объявляет программный интерфейс для неизменяемых множеств различных объектов. Вы задаёте записи неизменяемого множества на этапе его создания, после этого записи не могут быть изменены. С другой стороны, класс `NSMutableOrderedSet`, объявляет программный интерфейс для динамически изменяемых множеств различных объектов. Динамического или изменяемые множества позволяет добавлять и удалять записи в любое время, автоматически выделяя память по мере необходимости. Вы можете использовать упорядоченные множества как альтернативу массивам, когда порядок элементов является важным и требуется высокая скорость поиска элементов в коллекции. Класс `NSMutableOrderedSet` объявляет программный интерфейс к изменяемому упорядоченному множеству различных объектов. Объекты класса `NSMutableOrderedSet` объекты не похожи на массивы языка Си. Во время создания такого множества вы можете указать размер, но реальный размер всё равно будет равен `0`.
+5. `NSOrderedSet` (`NSMutableOrderedSet`) – объявляет программный интерфейс для упорядоченного множества объектов. Вы задаёте записи неизменяемого множества на этапе его создания, после этого записи не могут быть изменены. Вы можете использовать упорядоченные множества как альтернативу массивам, когда порядок элементов является важным и требуется высокая скорость поиска элементов в коллекции. Класс `NSMutableOrderedSet` объявляет программный интерфейс к изменяемому упорядоченному множеству различных объектов. Объекты класса `NSMutableOrderedSet` объекты не похожи на массивы языка Си. Во время создания такого множества вы можете указать размер, но реальный размер всё равно будет равен `0`.
 6. `NSCountedSet` – объявляет программный интерфейс к изменяемой, неупорядоченной коллекции нечетких объектов. Счётное множество также известно как `Bag`. Каждый отдельный объект, вставленный в `NSCountedSet`, имеет счётчик, связанный с ним. Объект `NSCountedSet` отслеживает количество раз, когда объекты были вставлены, и требует, чтобы объекты были удалены такое же количество раз. В то же время, внутри объекта `NSSet` существует только один экземпляр вставляемого объекта, даже если этот объект был добавлен в множество несколько раз.
 7. `NSIndexSet` (`NSMutableIndexSet`) – represents an immutable collection of unique unsigned integers, known as indexes because of the way they are used. This collection is referred to as an index set. You use index sets in your code to store indexes into some other data structure. For example, given an `NSArray` object, you could use an index set to identify a subset of objects in that array. You should not use index sets to store an arbitrary collection of integer values because index sets store indexes as sorted ranges. This makes them more efficient than storing a collection of individual integers. It also means that each index value can only appear once in the index set. The designated initializers of the `NSIndexSet` class are: `init`, `initWithIndexesInRange:`, and `initWithIndexSet:`. You must not subclass the `NSIndexSet` class. The mutable subclass of `NSIndexSet` is `NSMutableIndexSet`.
 8. `NSHashTable` – в отличие от NSSet, поддерживает слабые ссылки. Он может содержать слабые ссылки на объекты. Объекты класса NSHashTable могут содержать произвольные указатели, хранимые объекты не ограничиваются объектами классов. Можно настроить экземпляр `NSHashTable` для работы с произвольными указателями, а не только с объектами классов. Благодаря своим свойствам, класс `NSHashTable` это не множество, потому что он может вести себя по-другому.
@@ -466,12 +467,12 @@ Usage: Instances where one might use `NSMapTable` include non-copyable keys and 
 
 <img src="https://github.com/sashakid/ios-guide/blob/master/Images/complexity.png">
 
-_`NSArray` is the best choice to use for a list of items if you're going to iterate over them in sequence, or access directly by index. They are also efficient to use as a queue or stack, as adding or removing items from either the beginning or is `O(1)`. Checking to see if an object exists in the array using containsObject: is an `O(N)` operation, as it may take up to `N` comparisons to find the match._
-_`NSSet` is a great choice for checking containsObject: due to efficient hashing algorithms. Adding/removing items is always O(1). In addition, you have fast set arithmetic operations._
+_`NSArray` is the best choice to use for a list of items if you're going to iterate over them in sequence, or access directly by index. They are also efficient to use as a queue or stack, as adding or removing items from either the beginning or is `O(1)`. Checking to see if an object exists in the array using `containsObject:` is an `O(N)` operation, as it may take up to `N` comparisons to find the match._
+_`NSSet` is a great choice for checking `containsObject:` due to efficient hashing algorithms. Adding/removing items is always `O(1)`. In addition, you have fast set arithmetic operations._
 _`NSDictionary` is a great choice if you have a natural key you can use to access objects. This has no inherent order, but if you know the key you can retrieve any object as `O(1)`._
 
 ## Разница между Set и Array
-`NSSet` предназначен для создания несортированных массивов данных (например каких-либо объектов). Существует модифицируемая версия класса `NSSet` — это `NSMutableSet`, используя которую можно добавлять и удалять элементы. Стоит обратить внимание, что объект, который хранится в `NSSet`, встречается только один раз. Т.е. все элементы `NSSet` — уникальные.
+`NSSet` предназначен для создания несортированных массивов данных (например каких-либо объектов). Стоит обратить внимание, что объект, который хранится в `NSSet`, встречается только один раз. Т.е. все элементы `NSSet` — уникальные.
 Добавить дубликат элемента в `NSMutableSet` у вас также не получится. Для создания несортированного массива, в котором можно использовать неуникальные элементы, можно использовать `NSCountedSet`. Основным преимуществом `NSCountedSet` перед использованием классического массива `NSArray` является то, что элемент может быть продублирован огромное количество раз и при этом занимать памяти как один элемент. Это объясняется тем, что `NSCountedSet` хранит в памяти только одну копию элемента и запоминает сколько раз этот элемент встречается. Если для вас не важен порядок элементов внутри массива и вы используете действительно большие объемы информации, то использование `NSSet` повысит производительность приложения за счет снижения потребляемой памяти. Несмотря на то, что количество элементов хранящихся в памяти будет одинаковым, `NSSet` не тратит память на то, чтобы помнить в какой последовательности хранятся элементы.
 ```objectivec
 NSSet *set = [NSSet setWithObjects:@"1", @"2", @"3", @"4", @"5", @"6", @"7", @"8", @"9", @"0", nil];
@@ -498,12 +499,7 @@ Enumeration is where computation gets interesting. It's one thing to encode logi
 * Object Oriented applies a function or block to each object in a collection
 * Functional works through a data structure recursively
 
-Cocoa содержит три основных способа перечисления содержимого коллекции. К ним относятся быстрое перечисление и блочное перечисление. Существует также `NSEnumerator` класс, хотя в целом был замещен быстрым перечислением.
-Быстрое перечисление является предпочтительным методом перечисления содержимого коллекции, поскольку оно обеспечивает следующие преимущества:
-* Перечисление является более эффективным, чем использование NSEnumerator напрямую.
-* Синтаксис краток
-* Перечислитель вызывает исключение, если вы измените коллекции при перечислении.
-* Вы можете выполнять несколько перечислений одновременно.
+Cocoa содержит три основных способа перечисления содержимого коллекции. К ним относятся классический луп "for", быстрое перечисление и блочное перечисление. Существует также `NSEnumerator` класс, хотя в целом был замещен быстрым перечислением.
 
 __C Loops (for/while)__
 
@@ -532,7 +528,10 @@ for (key in someDictionary) {
 }
 ```
 In Cocoa, comprehensions are available to any class that implements the `NSFastEnumeration` protocol, including `NSArray`, `NSSet`, and `NSDictionary`.
-Использование перечислений на основе блоков `NSArray`, `NSDictionary` и `NSSet` разрешают перечисление их содержимого с помощью блоков. Для перечисления с блоком, вызовите соответствующий метод и укажите блок для использования.
+Использование перечислений на основе блоков `NSArray`, `NSDictionary` и `NSSet` разрешают перечисление их содержимого с помощью блоков.
+
+__Блочное перечисление__
+Для перечисления с блоком, вызовите соответствующий метод и укажите блок для использования.
 ```objectivec
 NSArray *anArray = [NSArray arrayWithObjects:@"A", @"B", @"D", @"M", nil];
 NSString *string = @"c";
@@ -544,6 +543,12 @@ NSString *string = @"c";
 }];
 ```
 Для перечисления `NSArray`, параметр `index` полезен для одновременного перечисления. Без этого параметра, единственный способ получить доступ к индексу был бы использованием метода `indexOfObject:`, который является неэффективным. `stop` параметр важен для производительности, так как он позволяет остановить перечисление раньше, на основе некоторого условия, определяемого в пределах блока. Методы перечисления на основе блока в других коллекциях, немного отличаются по названию.
+
+Быстрое перечисление является предпочтительным методом перечисления содержимого коллекции, поскольку оно обеспечивает следующие преимущества:
+* Перечисление является более эффективным, чем использование NSEnumerator напрямую.
+* Синтаксис краток
+* Перечислитель вызывает исключение, если вы измените коллекции при перечислении.
+* Вы можете выполнять несколько перечислений одновременно.
 
 __Использование перечислителя NSEnumerator__
 
@@ -574,6 +579,7 @@ __Dictionary__
 
 Why is `NSFastEnumeration` so slow here? Iterating the dictionary usually requires both key and object; fast enumeration can only help for the key, and we have to fetch the object every time ourselves. Using the block-based `enumerateKeysAndObjectsUsingBlock:` is more efficient since both objects can be more efficiently prefetched.
 
+## Filtering
 If you look at an arbitrary code base, chances are you’ll sooner or later run into a piece of code similar to this one:
 ```objectivec
 NSMutableArray *oldSkoolFiltered = [[NSMutableArray alloc] init];
@@ -622,6 +628,7 @@ filtered  = [bookshelf filteredArrayUsingPredicate:predicate];
 ```
 In case we’d want to return the value of one of the aggregate functions, we don’t need to use NSPredicate itself, but instead use KVC directly. Let’s retrieve the average price of all books on our shelf: ```NSNumber *average = [bookshelf valueForKeyPath:@"@avg.price"];```
 
+## Sorting
 __Сортировка массивов__
 
 Вам может потребоваться разместить несколько созданных пользователем строк в алфавитном порядке, либо вам потребуется разместить номера в убыванию или по возрастанию – используйте дескрипторы блоков и селекторов. Дескрипторы сортировки (экземпляры NSSortDescriptor) обеспечивают удобный и абстрактный способ описания порядка сортировки.
