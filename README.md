@@ -202,8 +202,6 @@
 	- [Опишите иерархию классов от UIButton до NSObject](#опишите-иерархию-классов-от-uibutton-до-nsobject.)
 	- [Что такое контекст?](#что-такое-контекст?)
 	- [NSArray arrayWithObjects: a, b, c, nil; зачем nil вконце?](#nsarray-arraywithobjects:-a,-b,-c,-nil;-зачем-nil-вконце?)
-	- [Сработает ли таймер? Что нужно чтобы сработал?](#сработает-ли-таймер?-что-нужно-чтобы-сработал?)
-	- [Что такое xib и storyboard, в чем отличие, что лучше использовать?](#что-такое-xib-и-storyboard,-в-чем-отличие,-что-лучше-использовать?)
 	- [Задача про банерокрутилку](#задача-про-банерокрутилку)
 	- [Задача на регулярное выражение](#задача-на-регулярное-выражение)
 	- [Метод, возвращающий N наиболее часто встречающихся слов во входной строке](#метод,-возвращающий-n-наиболее-часто-встречающихся-слов-во-входной-строке)
@@ -4698,19 +4696,21 @@ typedef struct {
 ```
 
 ## Что такое awakeFromNib?
-NSNibAwaking Protocol Reference
-(informal protocol)
+_NSNibAwaking Protocol Reference (informal protocol)_
+
 Prepares the receiver for service after it has been loaded from an Interface Builder archive, or nib file.
+
 `- (void)awakeFromNib;`
-An awakeFromNib message is sent to each object loaded from the archive, but only if it can respond to the message, and only after all the objects in the archive have been loaded and initialized. When an object receives an awakeFromNib message, it is guaranteed to have all its outlet instance variables set.
-Note: During Interface Builder’s test mode, this method is also sent to objects instantiated from loaded palettes, which include executable code for the objects. It is not sent to objects created using the Classes display of the nib file window in Interface Builder.
-An example of how you might use awakeFromNib is shown below. Suppose your nib file has two custom views that must be positioned relative to each other at runtime. Trying to position them at initialization time might fail because the other view might not yet be unarchived and initialized yet. However, you can position both of them in the nib file owner’s awakeFromNib method. In the code below, firstView and secondView are outlets of the file’s owner.
-Когда объекты из .nib разархивированы:
+
+An `awakeFromNib` message is sent to each object loaded from the archive, but only if it can respond to the message, and only after all the objects in the archive have been loaded and initialized. When an object receives an awakeFromNib message, it is guaranteed to have all its outlet instance variables set.
+
+_Note:_ During Interface Builder’s test mode, this method is also sent to objects instantiated from loaded palettes, which include executable code for the objects. It is not sent to objects created using the Classes display of the nib file window in Interface Builder.
+An example of how you might use `awakeFromNib` is shown below. Suppose your nib file has two custom views that must be positioned relative to each other at runtime. Trying to position them at initialization time might fail because the other view might not yet be unarchived and initialized yet. However, you can position both of them in the nib file owner’s `awakeFromNib` method. In the code below, `firstView` and `secondView` are outlets of the file’s owner:
 
 <img src="https://github.com/sashakid/ios-guide/blob/master/Images/awakefromnib.png">
 
 ## Что происходит когда мы пытаемся вызвать метод у nil указателя? Разница между nil и Nil
-На самом деле, в контексте указателей применим как `NULL`, так и 0, ввиду того что первый — не более чем макрос-обёртка для второго:
+На самом деле, в контексте указателей применим как `NULL`, так и `0`, ввиду того что первый — не более чем макрос-обёртка для второго:
 ```objectivec
 #define NULL ((void *)0)
 ```
@@ -4749,10 +4749,10 @@ An example of how you might use awakeFromNib is shown below. Suppose your nib fi
 	return [self dictionaryForLicenseData:licenseFile];
 }  	
 ```
-В ответ на посылаемое ему сообщение `nil` не бросает исключение, а попросту игнорирует это сообщение. То есть, `nil` из Objective-C ведёт себя как "черная дыра". Это пустота. Это ничто. При посылке к `nil`-у любого сообщения, всё что вы получите назад - это `nil`. Не будет никаких исключений, никаких возвращенных значений. Ничего.
+В ответ на посылаемое ему сообщение `nil` не бросает исключение, а попросту игнорирует это сообщение. То есть, `nil` из Objective-C ведёт себя как "черная дыра". Это пустота. Это ничто. При посылке к `nil` любого сообщения, всё что вы получите назад - это `nil`. Не будет никаких исключений, никаких возвращенных значений. Ничего.
 
 ## Что такое неформальный протокол?
-Категория с описанными, но не реализованными методами называется неформальным протоколом. Неформальные протоколы часто определяются для корневого класса NSObject, при этом они не имеют реализации в самом классе. Каждый подкласс будет отвечать на сообщения описанные в категории, но при этом будут делать что-то полезное только реализованные методы. Методы, по мере необходимости, могут быть реализованы в подклассах, при этом реализуемые методы должны быть объявлены в секции `@interface`.
+Категория с описанными, но не реализованными методами называется неформальным протоколом. Неформальные протоколы часто определяются для корневого класса `NSObject`, при этом они не имеют реализации в самом классе. Каждый подкласс будет отвечать на сообщения описанные в категории, но при этом будут делать что-то полезное только реализованные методы. Методы, по мере необходимости, могут быть реализованы в подклассах, при этом реализуемые методы должны быть объявлены в секции `@interface`.
 
 ## В чем разница между NSString и char? Что значит приставка NS в общем?
 Приставка `NS` это абревиатура от NextStep операционной системы на основе которой и создана часть MAC OS. Apple в свое время купил и использует до сих пор.
@@ -4769,7 +4769,7 @@ NSString *myStringPtr = @"This is an NSString.";
 `UIButton : UIControl : UIView : UIResponder : NSObject`
 
 ## Что такое контекст?
-Все рисование происходит в контексте (context), который определяет, где происходит рисование. Чтобы получить context используется Си-функция UIGraphicsGetCurrentContext. В iOS центр координат при рисовании находится в левом верхнем углу, а не в левом нижнем, как у Mac OS X.
+Все рисование происходит в контексте (context), который определяет, где происходит рисование. Чтобы получить context используется Си функция `UIGraphicsGetCurrentContext`. В iOS центр координат при рисовании находится в левом верхнем углу, а не в левом нижнем, как у Mac OS X.
 ```objectivec
 - (void)drawRect:(CGRect)rect {
 	// Получим context
@@ -4782,35 +4782,6 @@ NSString *myStringPtr = @"This is an NSString.";
 
 ## NSArray arrayWithObjects: a, b, c, nil; зачем nil вконце?
 Чтобы закончить список объектов, которые содержит массив. Этим значением мы даем знать компилятору, что массив окончен.
-
-## Сработает ли таймер? Что нужно чтобы сработал?
-```objectivec
-void startTimer(void *threadId) {
-	[NSTimer scheduleTimerWithTimeInterval:10.0f target:aTarget selector:@selector(tick:) userInfo:nil repeats:NO];
-}
-pthread_create(&thread, NULL, startTimer, (void *)t);
-```
-
-## Что такое xib и storyboard, в чем отличие, что лучше использовать?
-
-__Nib__ файл содержит интерфейс программы посредством xml (один экран). Это не просто хранилище интерфейса программы, но и хранит связи между объектами, а также инициализирует многие из них без дополнительного кода.
-File's owner – объект, владеющий копией ниб файла.
-First Responder – первый реагирующий объект, с которым взаимодействует пользователь.
-Outlet – переменная–указатель, ссылающаяся на объект в ниб-файле.
-Action – связь объекта интерфейса с методами в классе контроллера.
-
-__StoryBoard__
-Вместо nib файла для каждого view controller, ваше приложение использует единый storyboard который включает в себя дизайн всех view controller и связей между ними.
-Storyboard имеет массу преимуществ перед nib-ами.
-Плюсы:
-* Storyboard — лучшее понимание концепта работы всех экранов и связей. Проще следить когда все в одном, чем открывать множество nib.
-* Storyboard описывает переходы между разными экранами. Эти переходы называются “segue” (сегвей) и вы создаете их путем ctrl-перетаскивания с одного view controller на другой. Спасибо segue — теперь требуется меньше кода для написания UI.
-* Storyboards делают работу с table view много легче, с новыми фичами prototype cell and static cell. Вы можете проектировать table view почти полностью в storyboard editor, что значительно сокращает требуемый код.
-Минусы:
-* Не все так гладко, конечно, и у storyboard есть ограничения. Storyboard Editor пока не такой мощный как Interface Builder, есть кое-что что IB может, а Storyboard Editor нет.
-сториборд? - это структурное задание связи между ксибками. Например я обычно на сториборд накидываю несколько вьюшек, как хотят дизайнеры, причем половина вьюшек грузятся из соответствующих ксибок, а половина генерятся программно. В результате 80 процентов правок вносятся в течении минуты в сториборде, еще 15 в течении 3 минут в ксибке, а те, которые требуют измене-ния кода - редкие и им простительно уделить побольше внимания
-
-<img src="https://github.com/sashakid/ios-guide/blob/master/Images/storyboards.png">
 
 ***
 
