@@ -151,9 +151,8 @@
 	- [Парсинг JSON, HTML, XML](#парсинг json, html, xml)
 - [Data](#data)
 	- [Что такое Core Data?](#что-такое-core-data?)
+	- [Опишите стек Core Data](#опишите-стек-core-data)
 	- [В каких случаях лучше использовать SQLite, а в каких Core Data?](#в-каких-случаях-лучше-использовать-sqlite,-а-в-каких-core-data?)
-	- [Что такое Managed object context?](#что-такое-managed-object-context?)
-	- [Что такое Persistent store coordinator?](#что-такое-persistent-store-coordinator?)
 	- [Какие есть нюансы при использовании Core Data в разных потоках? Как синхронизировать данные между потоками?](#какие-есть-нюансы-при-использовании-core-data-в-разных-потоках?-как-синхронизировать-данные-между-потоками?)
 	- [Какие типы хранилищ поддерживает CoreData?](#какие-типы-хранилищ-поддерживает-core-data?)
 	- [Что такое ленивая загрузка? Что ее связывает с Core Data? Опишите ситуация когда она может быть полезной? Что такое faulting?](#что-такое-ленивая-загрузка?-что-ее-связывает-с-core-data?-опишите-ситуация-когда-она-может-быть-полезной?-что-такое-faulting?)
@@ -1927,7 +1926,7 @@ Don't get too excited, though. It's only supported for a single kind of object: 
 @property (nonatomic, retain) NSNumber *count;
 @end;
 ```
-В свойстве объявляется два метода доступа. Как правило, вы должны попросить компилятор для синтезации методов, однако, поучительно посмотреть, как они могли бы быть реализованы. В `get` акцессоре, вы просто возвращаете переменную экземпляра, так что нет необходимости в `retain` или `release`:
+В свойстве объявляется два метода доступа. Как правило, вы должны попросить компилятор для синтезации методов, однако, поучительно посмотреть, как они могли бы быть реализованы. В `get` методе, вы просто возвращаете переменную экземпляра, так что нет необходимости в `retain` или `release`:
 ```objectivec
 - (NSNumber *)count {
 	return _count;
@@ -1960,7 +1959,7 @@ __Использование методов доступа для установ
 	[self setCount:zero];
 }
 ```
-Обратите внимание, что оба используют `set` метод акцессора.
+Обратите внимание, что оба используют `set` метод доступа.
 Следующий код почти наверняка работает правильно для простых случаев, но как заманчиво бы это не выглядело, чтобы отказаться от методов доступа, сделав это почти наверняка в будущем приведет к ошибке на определенном этапе (например, если вы забыли сохранить или освободить, или если изменится семантика управления памятью для переменной экземпляра).
 ```objectivec
 - (void)reset {
@@ -2232,11 +2231,11 @@ for (NSURL *url in urls) {
 2 способ: App – Targets – Build Phases – Compile Sources – поставить флаг `-fno-objc-arc`
 
 ## Основные темы управления памятью, такие как владение `retain` / `release` / `autorelease`
-* Что случится если вы добавите только что созданный объект в Mutable Array, и пошлете ему сообщение release?
+* Что случится если вы добавите только что созданный объект в `NSMutableArray`, и пошлете ему сообщение `release`?
 
 //объект останется в массиве
 
-* Что случится если послать сообщение release массиву?
+* Что случится если послать сообщение `release` массиву?
 
 //массив удалится
 
@@ -2297,7 +2296,7 @@ Ball *ball = [[[[Ball alloc] init] autorelease] autorelease];
 Да. Это создает таймер который вызывает селектор в RunLoop'е текущего потока (thread).
 
 ## Вы можете объяснить, что происходит когда вы посылаете объекту сообщение autorelease?
-Когда вы посылаете объекту сообщение `autorelease`, его счетчик ссылок уменьшится на 1 в определенный момент в будущем. Объект будет добавлен в autorelease pool (пул автоосвобождения) в текущем потоке (thread). Цикл главного потока (main thread loop "NSRunLoop") создает autorelease pool в начале функции и освобождает его в конце. Это устанавливает pool на время выполнения задачи. Это также означает что авторелизные (объекты помещенные в пул) объекты созданные в течение выполнеения задачи не будут уничтожены пока задача не завершится. Это может привести к излишнему потреблению памяти для задачи (объекты будут уже не нужны но освободятся только в конце задачи). Вы также можете попробовать создать вложенный пул и освободить его раньше, или использовать NSOperationQueue с его собственным пулом.
+Когда вы посылаете объекту сообщение `autorelease`, его счетчик ссылок уменьшится на 1 в определенный момент в будущем. Объект будет добавлен в autorelease pool (пул автоосвобождения) в текущем потоке (thread). Цикл главного потока (main thread loop `NSRunLoop`) создает autorelease pool в начале функции и освобождает его в конце. Это устанавливает pool на время выполнения задачи. Это также означает что авторелизные (объекты помещенные в пул) объекты созданные в течение выполнеения задачи не будут уничтожены пока задача не завершится. Это может привести к излишнему потреблению памяти для задачи (объекты будут уже не нужны но освободятся только в конце задачи). Вы также можете попробовать создать вложенный пул и освободить его раньше, или использовать NSOperationQueue с его собственным пулом.
 
 ## Объясните что такое retain count?
 Подсчет ссылок (retain count) — это механизм с помощью которого в Objective-C реализовано управление памятью. Когда вы создаете объект, его счетчик ссылок (retain count) установлен на `1`. Когда вы посылаете объекту сообщение `retain` , его счетчик ссылок увеличивается на `1`. Когда вы посылаете объекту сообщение `release` , его счетчик ссылок уменьшается на `1`. Когда вы посылаете объекту сообщение autorelease , его счетчик ссылок уменьшится на `1` в определенный момент в будующем. Когда счетчик ссылок объекта становится равным `0` то объект уничтожается (`dealloc`).
@@ -2312,7 +2311,7 @@ __How Cocoa Adapts Design Patterns__
 You can find adaptations of design patterns throughout Cocoa, in both its OS X and iOS versions. Mechanisms and architectures based on patterns are common in Cocoa frameworks and in the Objective-C runtime and language. Cocoa often puts its own distinctive spin on a pattern because its designs are influenced by factors such as language capabilities or existing architectures.
 This section contains summaries of most of the design patterns cataloged in Design Patterns: Elements of Reusable Object-Oriented Software. Each section not only summarizes the pattern but discusses the Cocoa implementations of it. Only patterns that Cocoa implements are listed, and each description of a pattern in the following sections pertains to a particular Cocoa context.
 Implementations of design patterns in Cocoa come in various forms. Some of the designs described in the following sections, such as protocols and categories, are features of the Objective-C language. In other cases, the “instance of a pattern” is implemented in one class or a group of related classes (for example, class clusters and singleton classes). And in other cases the pattern adaptation is a major framework architecture, such as the responder chain. Some of the pattern-based mechanisms you get almost “for free” while others require some work on your part. And even if Cocoa does not implement a pattern, you are encouraged to do so yourself when the situation warrants it; for example, object composition (Decorator pattern) is often a better technique than subclassing for extending class behavior.
-Two design patterns are reserved for later sections, Model-View-Controller (MVC) and object model-ing. MVC is a compound, or aggregate pattern, meaning that it is based on several catalog patterns. Object modeling has no counterpart in the Gang of Four catalog, instead originating from the domain of relational databases. Yet MVC and object modeling are perhaps the most important and pervasive design patterns in Cocoa, and to a large extent they are interrelated patterns. They play a crucial role in the design of several technologies, including bindings, undo management, scripting, and the document architecture. To learn more about these patterns, see The Model-View-Controller Design Pattern and Object Modeling.
+Two design patterns are reserved for later sections, Model-View-Controller (MVC) and object modeling. MVC is a compound, or aggregate pattern, meaning that it is based on several catalog patterns. Object modeling has no counterpart in the Gang of Four catalog, instead originating from the domain of relational databases. Yet MVC and object modeling are perhaps the most important and pervasive design patterns in Cocoa, and to a large extent they are interrelated patterns. They play a crucial role in the design of several technologies, including bindings, undo management, scripting, and the document architecture. To learn more about these patterns, see The Model-View-Controller Design Pattern and Object Modeling.
 ## Communication Patterns
 
 <img src="https://github.com/sashakid/ios-guide/blob/master/Images/communication_patterns.png">
@@ -2331,7 +2330,7 @@ Two design patterns are reserved for later sections, Model-View-Controller (MVC)
 __MVC__
 
 View может общаться с Моделью
-M не воздействует на V или C. Контроллер следить за моделью сам и принимает решения.
+M не воздействует на V или C. Контроллер должен следить за моделью сам и принимает решения.
 
 __MVP__
 
@@ -2385,7 +2384,7 @@ Delegation in Cocoa is also part of the Template Method pattern (Template Method
 
 __Uses and Limitations__
 
-Delegation is a common design in the Cocoa frameworks. Many classes in the AppKit and UIKit frameworks send messages to delegates, including `NSApplication`, `UIApplication`, `UITableView`, and several subclasses of `NSView`. Some classes in the Foundation framework, such as `NSXMLParser` and a NSStream, also maintain delegates. You should always use a class’s delegation mechanism instead of subclassing the class, unless the delegation methods do not allow you to accomplish your goal.
+Delegation is a common design in the Cocoa frameworks. Many classes in the AppKit and UIKit frameworks send messages to delegates, including `NSApplication`, `UIApplication`, `UITableView`, and several subclasses of `NSView`. Some classes in the Foundation framework, such as `NSXMLParser` and a `NSStream`, also maintain delegates. You should always use a class’s delegation mechanism instead of subclassing the class, unless the delegation methods do not allow you to accomplish your goal.
 Although you can dynamically change the delegate, only one object can be a delegate at a time. Thus if you want multiple objects to be informed of a particular program event at the same time, you cannot use delegation. However, you can use the notification mechanism for this purpose. A delegate automatically receives notifications from its delegating framework object as long as the delegate implements one or more of the notification methods declared by the framework class. See the discussion of notifications in the Observer pattern.
 Delegating objects in AppKit do not retain their delegates or data sources.
 
@@ -2394,7 +2393,7 @@ Class clusters are a design pattern that the Foundation framework makes extensiv
 
 <img src="https://github.com/sashakid/ios-guide/blob/master/Images/cluster.png">
 
-`NSMutableArray` is not a concrete class, it is just the abstract superclass of a class cluster. The documentation for NSMutableArray does have information about how to subclass, but also strongly advises you not to! Only subclass if you have a special need for actual storage. A class cluster means that the actual class will be chosen at runtime. An array created empty, may not use the same class as an array created with 1000 items. The runtime can do smart choices of what implementation to use for you. In practice NSMutableArray will be a bridged CFArray. Nothing you need to worry about, but you might see it if you inspect the type of your arrays in the debugger, you will never see NSArray, but quite often NSCFArray. As mentioned before, subclassing is not the same as extending a class. Objective-C has the concept of categories. A category is similar to what other programming languages call mixins. If you for example want a convenience method on NSMutableArray to sort all members on a property, then define the category interface in a .h file.
+`NSMutableArray` is not a concrete class, it is just the abstract superclass of a class cluster. The documentation for `NSMutableArray` does have information about how to subclass, but also strongly advises you not to! Only subclass if you have a special need for actual storage. A class cluster means that the actual class will be chosen at runtime. An array created empty, may not use the same class as an array created with 1000 items. The runtime can do smart choices of what implementation to use for you. In practice `NSMutableArray` will be a bridged `CFArray`. Nothing you need to worry about, but you might see it if you inspect the type of your arrays in the debugger, you will never see `NSArray`, but quite often `NSCFArray`. As mentioned before, subclassing is not the same as extending a class. Objective-C has the concept of categories. A category is similar to what other programming languages call mixins. If you for example want a convenience method on `NSMutableArray` to sort all members on a property, then define the category interface in a .h file.
 
 <img src="https://github.com/sashakid/ios-guide/blob/master/Images/cluster_description.png">
 
@@ -2443,10 +2442,12 @@ __Criticism:__
 
 ## Adapter
 The Adapter design pattern converts the interface of a class into another interface that clients expect. Adapter lets classes work together that couldn’t otherwise because of incompatible interfaces. It decouples the client from the class of the targeted object.
-Protocols
+
+__Protocols__
+
 A protocol is a language-level (Objective-C) feature that makes it possible to define interfaces that are instances of the Adapter pattern. A protocol is essentially a series of method declarations unassociated with a class. (In Java, interface is synonymous with protocol.) If you want a client object to communicate with another object, but the objects’ incompatible interfaces make that difficult, you can define a protocol. The class of the other object then formally adopts the protocol and “conforms” to it by implementing one or more of the methods of the protocol. The protocol may require the conforming class to implement some of its methods and may leave the implementation of others optional. The client object can then send messages to the other object through the protocol interface.
-Protocols make a set of method declarations independent of the class hierarchy. They make it possible to group objects on the basis of conformance to a protocol as well as class inheritance. The `NSObject` method conformsToProtocol: permits you to verify an object’s protocol affiliation.
-Cocoa has informal protocols as well as formal protocols. An informal protocol is a category on the `NSObject` class, thus making any object a potential implementer of any method in the category (see Categories). The methods in an informal protocol can be selectively implemented. Informal protocols are part of the implementation of the delegation mechanism in OS X (see Delegation).
+Protocols make a set of method declarations independent of the class hierarchy. They make it possible to group objects on the basis of conformance to a protocol as well as class inheritance. The `NSObject` method `conformsToProtocol:` permits you to verify an object’s protocol affiliation.
+Cocoa has informal protocols as well as formal protocols. An informal protocol is a category on the `NSObject` class, thus making any object a potential implementer of any method in the category. The methods in an informal protocol can be selectively implemented. Informal protocols are part of the implementation of the delegation mechanism in OS X.
 Note that the design of protocols does not perfectly match the description of the Adapter pattern. But it achieves the goal of the pattern: allowing classes with otherwise incompatible interfaces to work together.
 
 _Uses and Limitations_
@@ -2465,7 +2466,7 @@ The creation of an `NSInvocation` object requires an `NSMethodSignature` object,
 _Uses and Limitations_
 
 `NSInvocation` objects are part of the programmatic interfaces of distributed objects, undo management, message forwarding, and timers. You can also use invocation objects in similar contexts where you need to decouple an object sending a message from the object that receives the message.
-The distributed objects technology is for interprocess communication. See Proxy for more on distributed objects.
+The distributed objects technology is for interprocess communication.
 
 ## The Target-Action Mechanism
 
@@ -2481,14 +2482,16 @@ A Cocoa application for OS X can use the target-action mechanism to instruct a c
 ## Composite
 The Composite design pattern composes related objects into tree structures to represent part-whole hierarchies. The pattern lets clients treat individual objects and compositions of objects uniformly.
 The Composite pattern is part of the Model-View-Controller aggregate pattern, which is describe in The Model-View-Controller Design Pattern.
-View Hierarchy
+
+__View Hierarchy__
+
 The views in a window are internally structured into a view hierarchy. At the root of the hierarchy is a window and its content view, a transparent view that fills the window’s content rectangle. Views that are added to the content view become subviews of it, and they become the superviews of any views added to them. Except for the content view, a view has one (and only one) superview and zero or any number of subviews. You perceive this structure as containment: a superview contains its subviews.
 
 <img src="https://github.com/sashakid/ios-guide/blob/master/Images/view_hierarchy.png">
 
 The view hierarchy is a structural architecture that plays a part in both drawing and event handling. A view has two bounding rectangles, its frame and its bounds, that affect how graphics operations with the view take place. The frame is the exterior boundary; it locates the view in its superview’s coordinate system, defines its size, and clips drawing to the view’s edges. The bounds, the interior bounding rectangle, defines the internal coordinate system of the surface where the view draws itself.
 When a window is asked by the windowing system to prepare itself for display, superviews are asked to render themselves before their subviews. When you send some messages to a view, for example, a message that requests a view to redraw itself, the message is propagated to subviews. You can thus treat a branch of the view hierarchy as a unified view.
-The view hierarchy is also used by the responder chain for handling events and action messages. See the summary of the responder chain in Chain of Responsibility.
+The view hierarchy is also used by the responder chain for handling events and action messages.
 
 _Uses and Limitations_
 
@@ -2499,12 +2502,12 @@ The Decorator design pattern attaches additional responsibilities to an object d
 
 _General Comments_
 
-Decorator is a pattern for object composition, which is something that you are encouraged to do in your own code. Cocoa, however, provides some classes and mechanisms of its own that are based on the pattern. In these implementations, the extending object does not completely duplicate the inter-face of the object that it wraps, and the implementations use different techniques for interface sharing.
+Decorator is a pattern for object composition, which is something that you are encouraged to do in your own code. Cocoa, however, provides some classes and mechanisms of its own that are based on the pattern. In these implementations, the extending object does not completely duplicate the interface of the object that it wraps, and the implementations use different techniques for interface sharing.
 Cocoa uses the Decorator pattern in the implementation of several of its classes, including `NSAttributedString`, `NSScrollView`, `UIDatePicker`. The latter two classes are examples of compound views, which group together simple objects of other view classes and coordinate their interaction.
 
 ## Categories
 
-A category is a feature of the Objective-C language that enables you to add methods (interface and implementation) to a class without having to make a subclass. There is no runtime difference—within the scope of your program—between the original methods of the class and the methods added by the category. The methods in the category become part of the class type and are inherited by all the class’s subclasses.
+A category is a feature of the Objective-C language that enables you to add methods (interface and implementation) to a class without having to make a subclass. There is no runtime difference, within the scope of your program, between the original methods of the class and the methods added by the category. The methods in the category become part of the class type and are inherited by all the class’s subclasses.
 As with delegation, categories are not a strict adaptation of the Decorator pattern, fulfilling the intent but taking a different path to implementing that intent. The behavior added by categories is a compile-time artifact, and is not something dynamically acquired. Moreover, categories do not encapsulate an instance of the class being extended.
 
 _Uses and Limitations_
@@ -2513,9 +2516,11 @@ The Cocoa frameworks define numerous categories, most of them informal protocols
 
 ## Facade
 
-The Facade design pattern provides a unified interface to a set of interfaces in a subsystem. The pat-tern defines a higher-level interface that makes the subsystem easier to use by reducing complexity and hiding the communication and dependencies between subsystems.
-NSImage
-The `NSImage` class of the AppKit framework provides a unified interface for loading and using images that can be bitmap-based (such as those in JPEG, PNG, or TIFF format) or vector-based (such as those in EPS or PDF format). NSImage can keep more than one representation of the same image; each representation is a kind of NSImageRep object. NSImage automates the choice of the representation that is appropriate for a particular type of data and for a given display device. It also hides the details of image manipulation and selection so that the client can use many different underlying representations interchangeably.
+The Facade design pattern provides a unified interface to a set of interfaces in a subsystem. The pattern defines a higher-level interface that makes the subsystem easier to use by reducing complexity and hiding the communication and dependencies between subsystems.
+
+__NSImage__
+
+The `NSImage` class of the AppKit framework provides a unified interface for loading and using images that can be bitmap-based (such as those in JPEG, PNG, or TIFF format) or vector-based (such as those in EPS or PDF format). NSImage can keep more than one representation of the same image; each representation is a kind of `NSImageRep` object. NSImage automates the choice of the representation that is appropriate for a particular type of data and for a given display device. It also hides the details of image manipulation and selection so that the client can use many different underlying representations interchangeably.
 
 _Uses and Limitations_
 
@@ -2527,12 +2532,12 @@ The Iterator design pattern provides a way to access the elements of an aggregat
 
 __Enumerators__
 
-The `NSEnumerator` class in the Foundation framework implements the Iterator pattern. The private, concrete subclass of the abstract NSEnumerator class returns enumerator objects that sequentially traverse collections of various types, arrays, sets, dictionaries (values and keys), returning objects in the collection to clients.
+The `NSEnumerator` class in the Foundation framework implements the Iterator pattern. The private, concrete subclass of the abstract `NSEnumerator` class returns enumerator objects that sequentially traverse collections of various types, arrays, sets, dictionaries (values and keys), returning objects in the collection to clients.
 `NSDirectoryEnumerator` is a distantly related class. Instances of this class recursively enumerate the contents of a directory in the file system.
 
 _Uses and Limitations_
 
-The collection classes such as `NSArray`, `NSSet`, and `NSDictionary` include methods that return an enumerator appropriate to the type of collection. All enumerators work in the same manner. You send a nextObject message to the enumerator object in a loop that exits when nil is returned instead of the next object in the collection.
+The collection classes such as `NSArray`, `NSSet`, and `NSDictionary` include methods that return an enumerator appropriate to the type of collection. All enumerators work in the same manner. You send a `nextObject` message to the enumerator object in a loop that exits when `nil` is returned instead of the next object in the collection.
 You can also use fast enumeration to access the elements of a collection; this language feature is described in Fast Enumeration.
 
 ## Mediator
@@ -2550,20 +2555,20 @@ Archiving converts the objects in a program, along with those objects’ propert
 
 _Uses and Limitations_
 
-Generally, you want to archive those objects in your program whose state you want to preserve. Model objects almost always fall into this category. You write an object to an archive by encoding it, and you read that object from an archive by decoding it. Encoding and decoding are operations that you perform using an `NSCoder` object, preferably using the keyed archiving technique (requiring you to invoke methods of the NSKeyedArchiver and `NSKeyedUnarchiver` classes). The object being encoded and decoded must conform to the `NSCoding` protocol; the methods of this protocol are invoked during archiving.
+Generally, you want to archive those objects in your program whose state you want to preserve. Model objects almost always fall into this category. You write an object to an archive by encoding it, and you read that object from an archive by decoding it. Encoding and decoding are operations that you perform using an `NSCoder` object, preferably using the keyed archiving technique (requiring you to invoke methods of the `NSKeyedArchiver` and `NSKeyedUnarchiver` classes). The object being encoded and decoded must conform to the `NSCoding` protocol; the methods of this protocol are invoked during archiving.
 
 ## Proxy
 The Proxy design pattern provides a surrogate, or placeholder, for another object in order to control access to that other object. You use this pattern to create a representative, or proxy, object that controls access to another object, which may be remote, expensive to create, or in need of securing. This pattern is structurally similar to the Decorator pattern but it serves a different purpose; Decorator adds behavior to an object whereas Proxy controls access to an object.
 
 __NSProxy__
 
-The `NSProxy` class defines the interface for objects that act as surrogates for other objects, even for objects that don’t yet exist. A proxy object typically forwards a message sent to it to the object that it represents, but it can also respond to the message by loading the represented object or transforming itself into it. Although `NSProxy` is an abstract class, it implements the `NSObject` protocol and other fundamental methods expected of a root object; it is, in fact, the root class of a hierarchy just as the NSObject class is.
+The `NSProxy` class defines the interface for objects that act as surrogates for other objects, even for objects that don’t yet exist. A proxy object typically forwards a message sent to it to the object that it represents, but it can also respond to the message by loading the represented object or transforming itself into it. Although `NSProxy` is an abstract class, it implements the `NSObject` protocol and other fundamental methods expected of a root object; it is, in fact, the root class of a hierarchy just as the `NSObject` class is.
 Concrete subclasses of `NSProxy` can accomplish the stated goals of the Proxy pattern, such as lazy instantiation of expensive objects or acting as sentry objects for security. `NSDistantObject`, a concrete subclass of `NSProxy` in the Foundation framework, implements a remote proxy for transparent distributed messaging. `NSDistantObject` objects are part of the architecture for distributed objects. By acting as proxies for objects in other processes or threads, they help to enable communication between objects in those threads or processes.
 `NSInvocation` objects, which are an adaptation of the Command pattern, are also part of the distributed objects architecture.
 
 _Uses and Limitations_
 
-Cocoa employs `NSProxy` objects only in distributed objects. The NSProxy objects are specifically instances of the concrete subclasses `NSDistantObject` and `NSProtocolChecker`. You can use distributed objects not only for interprocess messaging (on the same or different computers) but you can also use it to implement distributed computing or parallel processing. If you want to use proxy objects for other purposes, such as the creation of expensive resources or security, you have to implement your own concrete subclass of `NSProxy`.
+Cocoa employs `NSProxy` objects only in distributed objects. The `NSProxy` objects are specifically instances of the concrete subclasses `NSDistantObject` and `NSProtocolChecker`. You can use distributed objects not only for interprocess messaging (on the same or different computers) but you can also use it to implement distributed computing or parallel processing. If you want to use proxy objects for other purposes, such as the creation of expensive resources or security, you have to implement your own concrete subclass of `NSProxy`.
 
 ## Ленивая загрузка 	
 Приём в программировании, когда некоторая ресурсоёмкая операция (создание объекта, вычисление значения) выполняется непосредственно перед тем, как будет использован её результат. Таким образом, инициализация выполняется «по требованию», а не заблаговременно. Аналогичная идея находит применение в самых разных областях: например, компиляция «на лету» и логистическая концепция «Точно в срок». Частный случай ленивой инициализации — создание объекта в момент обращения к нему — является одним из порождающих шаблонов проектирования.
@@ -2582,6 +2587,7 @@ _Недостатки_
 	static NSString *CellIdentifier = @"CellIdentifier";
 	cell = [tableView dequeueReusableCellWithIdentifier:CellIdentifier];
 	if (cell == nil) {
+		//ленивая загрузка
 		cell = [[UITableViewCell alloc] initWithStyle:UITableViewCellStyleDefault reuseIdentifier:CellIdentifier];
 	}
 	cell.textLabel.text = someText;
@@ -2592,6 +2598,7 @@ _Недостатки_
 ## Observer
 Определяет одно-ко-многим отношение между объектами, и если изменения происходят в объекте – все подписанные на него объекты тут же узнают про это изменение. Идея проста: объект который мы называем Subject – дает возможность другим объектам, которые реализуют интерфейс Observer, подписываться и отписываться от изменений происходящик в Subject. Когда изменение происходит – всем заинетерсованным объектам высылается сообщение, что изменение произошло. В нашем случае – Subject – это издатель газеты, Observer это мы с вами – те кто подписывается на газету, ну и собственно изменение – это выход новой газеты, а оповещение – отправка газеты всем кто подписался.
 Когда используется паттерн:
+
 * Когда Вам необходимо сообщить всем объектам подписанным на изменения, что изменение произошло, при этом вы не знаете типы этих объектов.
 Изменения в одном объекте требуют чтоб состояние изменилось в других объектах, при чем количество объектов может быть разное.
 
@@ -2602,18 +2609,18 @@ Notificaiton – механизм использования возможнос�
 NSNotification *broadCastMessage = [NSNotification notificationWithName:@"broadcastMessage" object:self];
 NSNotificationCenter *notificationCenter = [NSNotificationCenter defaultCenter];
 ```
-Как видим, мы создали объект типа `NSNotification`, в котором мы указали имя нашего оповещения: “broadcastMessage”, и, собственно, сообщили о нем через `NotificationCenter`.
+Как видим, мы создали объект типа `NSNotification`, в котором мы указали имя нашего оповещения: `“broadcastMessage”`, и, собственно, сообщили о нем через `NotificationCenter`.
 Чтобы подписаться на событие в объекте который заинтересован в изменении стоит использовать следующую конструкцию:
 ```objectivec
 NSNotificationCenter *notificationCenter = [NSNotificationCenter defaultCenter];
 [notificationCenter addObserver:self selector:@selector(update:) name:@"broadcastMessage" object:nil];
 ```
-Собственно, из кода все более-менее понятно: мы подписываемся на событие, и вызывается метод который задан в свойстве selector.
+Собственно, из кода все более-менее понятно: мы подписываемся на событие, и вызывается метод который задан в свойстве `selector`.
 
 ## KVC
 Key-value coding is a mechanism for accessing an object’s properties indirectly, using strings to identify properties, rather than through invocation of an accessor method or accessing them directly through instance variables. In essence, key-value coding defines the patterns and method signatures that your application’s accessor methods implement.
 Implementing key-value coding compliant accessors in your application is an important design principle. Accessors help to enforce proper data encapsulation, isolate memory management to centralized locations, and facilitate integration with other technologies such as key-value observing, Core Data, Cocoa bindings, and scriptability.
-Соответствующие методы определены в NSObject, поэтому каждый объект
+Соответствующие методы определены в `NSObject`, поэтому каждый объект
 поддерживает данную возможность.
 ```objectivec
 [a setProductName:@"Washing Machine"];
@@ -2634,16 +2641,22 @@ double averageSalary = totalSalary / [employees count];
 ```objectivec
 [employees valueForKeyPath:@"@avg.salary"];
 ```
-KVC Collection Operators allows actions to be performed on a collection using key path notation in valueForKeyPath:. Any time you see @ in a key path, it denotes a particular aggregate function whose result can be returned or chained, just like any other key path. Collection Operators fall into one of three different categories, according to the kind of value they return:
+KVC Collection Operators allows actions to be performed on a collection using key path notation in `valueForKeyPath:`. Any time you see `@` in a key path, it denotes a particular aggregate function whose result can be returned or chained, just like any other key path. Collection Operators fall into one of three different categories, according to the kind of value they return:
+
 1. Simple Collection Operators return strings, numbers, or dates, depending on the operator.
 2. Object Operators return an array.
 3. Array and Set Operators return an array or set, depending on the operator.
 
 Simple Collection Operators
-`@count` Returns the number of objects in the collection as an NSNumber.
-`@sum` Converts each object in the collection to a double, computes the sum, and returns the sum as an NSNumber.
-`@avg` Takes the double value of each object in the collection, and returns the average value as an NSNumber.
-`@max` Determines the maximum value using compare:. Objects must support comparison with one another for this to work.
+
+`@count` Returns the number of objects in the collection as an `NSNumber`.
+
+`@sum` Converts each object in the collection to a double, computes the sum, and returns the sum as an `NSNumber`.
+
+`@avg` Takes the double value of each object in the collection, and returns the average value as an `NSNumber`.
+
+`@max` Determines the maximum value using `compare:`. Objects must support comparison with one another for this to work.
+
 `@min` Same as `@max`, but returns the minimum value in the collection.
 
 ## KVO
@@ -2665,7 +2678,7 @@ __Плюсы__
 __Недостатки__
 
 * Первая и очень важная проблема — это заметное падение производительности при обильном использовании KVO. Не стоит писать код, где ваши объекты общаются в основном через KVO. Рассматривайте KVO как вспомогательно средство для работы с чужим кодом, а не как основной инструмент.
-* Второй проблемой является необходимость очень аккуратно писать код при использовании KVO. Так как строковые идентификаторов не проверяются компилятором на валидность, то это может привести к ошибкам при переименовании переменных. Также, KVO очень чувствительно к порядку добавления / удаления наблюдателей. Так, если наблюдатель пытается отписаться от наблюдаемого, на который наблюдатель в данный момент не подписан, то происходит крэш. Если же, наоброт, наблюдатель не отпи-шется до того, как наблюдаемый будет уничтожен, то произойдет утечка памяти. Все это приводит к тому, что легко прострелить себе ногу при добавлении / удалении наблюдателей из разных мест кода. Наиболее простой способ обезопасить себя – это хранить в наблюдателе ссылку на объект наблюдения, метод присвоения которой опи-сан следующим образом:
+* Второй проблемой является необходимость очень аккуратно писать код при использовании KVO. Так как строковые идентификаторов не проверяются компилятором на валидность, то это может привести к ошибкам при переименовании переменных. Также, KVO очень чувствительно к порядку добавления / удаления наблюдателей. Так, если наблюдатель пытается отписаться от наблюдаемого, на который наблюдатель в данный момент не подписан, то происходит крэш. Если же, наоброт, наблюдатель не отпишется до того, как наблюдаемый будет уничтожен, то произойдет утечка памяти. Все это приводит к тому, что легко прострелить себе ногу при добавлении / удалении наблюдателей из разных мест кода. Наиболее простой способ обезопасить себя – это хранить в наблюдателе ссылку на объект наблюдения, метод присвоения которой описан следующим образом:
 ```objectivec
 - (void) setObservable:(id)observable {
 	[_observable addObserver:self forKeyPath:@"property" options:NSKeyValueObservingOptionNew context:nil];
@@ -2726,7 +2739,7 @@ __Френд-зона (Friend zone):__ Неуместное использова
 
 Основные правила:
 
-* Центры оповещений не владеют своими наблюдателями. Если объект является наблюда-телем, он обычно удаляется из центра оповещений в своем методе `dealloc`:
+* Центры оповещений не владеют своими наблюдателями. Если объект является наблюдателем, он обычно удаляется из центра оповещений в своем методе `dealloc`:
 ```objectivec
 - (void)dealloc {
 	[[NSNotificationCenter defaultCenter] removeObserver:self];
@@ -2783,7 +2796,7 @@ _Плюсы_
 _Минусы_
 
 * No compile time to checks to ensure that notifications are correctly handled by observers.
-* Required to un-register with the notification center if your previously registered object is deallocated.
+* Required to unregister with the notification center if your previously registered object is deallocated.
 * Not very traceable. Attempting to debug issues related to application flow and control can be very difficult.
 * Third party object required to manage the link between controllers and observer objects.
 * Notification Names, and UserInfo dictionary keys need to be known by both the observers and the controllers. If these are not defined in a common place, they can very easily become out of sync.
@@ -2794,7 +2807,7 @@ __Наблюдение__
 _Плюсы_
 
 * Can provide an easy way to sync information between two objects. For example, a model and a view.
-* Allows us to respond to state changes inside objects that we did not create, and don’t have ac-cess to alter the implementations of (SKD objects).
+* Allows us to respond to state changes inside objects that we did not create, and don’t have access to alter the implementations of (SKD objects).
 * Can provide us with the new value and previous value of the property we are observing.
 * Can use key paths to observe properties, thus nested objects can be observed.
 * Complete abstraction of the object being observed, as it does not need any extra code to allow it to be observed.
@@ -2802,7 +2815,7 @@ _Плюсы_
 _Минусы_
 
 * The properties we wish to observe, must be defined using strings. Thus no compile time warnings or checking occurs.
-* Re-factoring of properties can leave our observation code no longer working.
+* Refactoring of properties can leave our observation code no longer working.
 * Complex “IF” statements required if an object is observing multiple values. This is because all observation code is directed through a single method.
 * Need to remove the observer when it is deallocated.
 
@@ -2811,7 +2824,7 @@ _Минусы_
 <img src="https://github.com/sashakid/ios-guide/blob/master/Images/runtime_explanation2.png">
 
 The heart of this power is the Objective-C runtime, provided by libobjc. The Objective-C runtime is a collection of functions that provides the dynamic features of Objective-C. It includes such core functions
-As `objc_msgSend`, which is called every time you use the [object message]; syntax. It also includes functions to allow you to inspect and modify the class hierarchy at runtime, including creating new classes and methods. Библиотека времени выполнения. Objective-C is a runtime-oriented language. Now the question that arises is, what is a runtime language? A runtime language is a language that decides what to implement in a function and other decisions during the runtime of the applications. Is Objective-C a runtime language? NO. It is a runtime-oriented language, which means that whenever it is possible, it defers decisions from compile and link time to the time when the code in the application is actually being executed. Функции и структуры Runtime-библиотеки определены в нескольких заголовочных файлах: `NSObjCRuntime.h`, `objc.h`, `runtime.h` и `message.h`.
+As `objc_msgSend`, which is called every time you use the `[object message];` syntax. It also includes functions to allow you to inspect and modify the class hierarchy at runtime, including creating new classes and methods. Библиотека времени выполнения. Objective-C is a runtime-oriented language. Now the question that arises is, what is a runtime language? A runtime language is a language that decides what to implement in a function and other decisions during the runtime of the applications. Is Objective-C a runtime language? NO. It is a runtime-oriented language, which means that whenever it is possible, it defers decisions from compile and link time to the time when the code in the application is actually being executed. Функции и структуры Runtime-библиотеки определены в нескольких заголовочных файлах: `NSObjCRuntime.h`, `objc.h`, `runtime.h` и `message.h`.
 Система вызова методов в Objective-C реализована через посылку сообщений объекту. Каждый вызов метода транслируется в соответствующий вызов функции `objc_msgSend`:
 ```objectivec
 // Вызов метода
@@ -2822,15 +2835,13 @@ objc_msgSend(array, @selector(insertObject:atIndex:), foo, 1);
 Вызов `objc_msgSend` инициирует процесс поиска реализации метода, соответствующего селектору, переданному в функцию. Реализация метода ищется в так называемой таблице диспетчеризации класса. Поскольку этот процесс может быть достаточно продолжительным, с каждым классом ассоциирован кеш методов. После первого вызова любого метода, результат поиска его реализации будет закеширован в классе. Если реализация метода не найдена в самом классе, дальше поиск продолжается вверх по иерархии наследования — в суперклассах данного класса. Если же и при поиске по иерархии результат не достигнут, в дело вступает механизм динамического поиска — вызывается один из специальных методов: `resolveInstanceMethod` или `resolveClassMethod` (динамическое переопределение методов).
 
 ## Что такое указатель isa? Для чего он нужен?
-Каждый объект Objective-C содержит в себе атрибут `isa` - указатель на class object для данного объекта. class object автоматически создается компилятором и существует как один экземпляр, на который через isa ссылаются все экземпляры данного класса.
-First there is a pointer to your class definition. Then each of your superclasses’ ivars (instance varia-bles) are laid out as struct properties, and then your class’s ivars are laid out as struct properties. This structure is called objc_object, and a pointer to it is called `id`:
+Каждый объект Objective-C содержит в себе атрибут `isa` - указатель на class object для данного объекта. class object автоматически создается компилятором и существует как один экземпляр, на который через `isa` ссылаются все экземпляры данного класса.
+First there is a pointer to your class definition. Then each of your superclasses’ ivars (instance variables) are laid out as struct properties, and then your class’s ivars are laid out as struct properties. This structure is called `objc_object`, and a pointer to it is called `id`:
 ```objectivec
 typedef struct objc_object {
 	Class isa;
 } *id;
 ```
-The Class structure contains a metaclass pointer (more on that in a moment), a superclass pointer, and data about the class. The data of particular interest are the name, ivars, methods, properties, and protocols. Don’t worry too much about the internal structure of Class. There are public functions to access all the information you need. Каждый объект в Objective-C должен начинаться с Class isa, даже объекты классов. Так что же это такое?
-Как следует из названия и типа, переменная isa указывает, какому классу принадлежит тот или иной объект. Каждый объект в Objective-C должен начинаться с isa, иначе runtime не будет знать, что же с ним делать. Вся информация о типе каждого конкретного объекта скрывается за этим крохотным указателем. Оставшийся кусок объекта, с точки зрения runtime, представ-ляет из себя просто огромный BLOB (массив двоичных данных), не дающий никакой информа-ции. Только лишь классы могут придать этому куску какой-то смысл.
 
 <img src="https://github.com/sashakid/ios-guide/blob/master/Images/isa.png">
 
@@ -2886,7 +2897,7 @@ struct point {
 
 `isKindOfClass:`
 
-Возвращает логическое значение, указывающее, является ли приемник экземпляром заданного класса или экземпляром любого класса, который наследует от этого класса. (обязательный).
+Возвращает логическое значение, указывающее, является ли приемник экземпляром заданного класса или экземпляром любого класса, который наследует от этого класса (обязательный):
 ```objectivec
 `- (BOOL)isKindOfClass:(Class)aClass`
 ```
@@ -2956,7 +2967,7 @@ int i = [s intValue];
 ```objectivec
 MyArray *array = [MyArray arrayWithObjects:@(1), @(2), nil];
 ```
-Теперь вы видите, почему возвращаемый тип arrayWithObjects: должен быть `id`. Если бы это был `(NSArray *)`, то подклассы потребует, чтобы они были приведены к необходимому классу.
+Теперь вы видите, почему возвращаемый тип `arrayWithObjects:` должен быть `id`. Если бы это был `(NSArray *)`, то подклассы потребует, чтобы они были приведены к необходимому классу.
 
 ## Директивы компилятора
 `@implementation` Определяет начало определения (реализации) класса или категории.
@@ -2985,11 +2996,11 @@ MyArray *array = [MyArray arrayWithObjects:@(1), @(2), nil];
 
 `@try` Defines a block of code that will be tested to determine if an exception should be thrown.
 
-`@catch()` Defines a block of code for handling a thrown exception. Takes an argument, typically of type NSException, but can be of other types.
+`@catch()` Defines a block of code for handling a thrown exception. Takes an argument, typically of type `NSException`, but can be of other types.
 
 `@finally` Defines a block of code that gets executed whether an exception is thrown or not. This code will always be executed.
 
-`@throw` Throws an exception. Earlier, we mentioned that you can throw exceptions from objects other than NSException instances, but that you should avoid doing so. The reason is that not every Cocoa framework catches exceptions thrown by objects other than NSExcep-tion. To ensure that Cocoa works right with your exceptions, you should throw NSException objects only. Think of it like the old saying that you don’t have to floss all your teeth, just the ones you want to keep. You’ll typically use `@try`, `@catch`, and `@finally` together in one structure. It goes a little something like this:
+`@throw` Throws an exception. Earlier, we mentioned that you can throw exceptions from objects other than `NSException` instances, but that you should avoid doing so. The reason is that not every Cocoa framework catches exceptions thrown by objects other than `NSException`. To ensure that Cocoa works right with your exceptions, you should throw `NSException` objects only. Think of it like the old saying that you don’t have to floss all your teeth, just the ones you want to keep. You’ll typically use `@try`, `@catch`, and `@finally` together in one structure. It goes a little something like this:
 ```objectivec
 @try {
     // code you want to execute that might throw an exception.
@@ -3006,7 +3017,7 @@ MyArray *array = [MyArray arrayWithObjects:@(1), @(2), nil];
 
 `@autoreleasepool` В тех приложения, в которых вы используете автоматический подсчет ссылок (ARC), вы должны использовать `@autoreleasepool` как замену для `NSAutoreleasePool`. И вообще, `@autoreleasepool` примерно в 6 раз быстрее, чем `NSAutoreleasePool`, поэтому Apple рекомендует использовать его даже для не-ARC приложений. Кроме того, вы не должны определять переменную внутри блока `@autoreleasepool` и затем продолжать использовать ее после. Подобный код должен быть исключен.
 
-`@selector` Возвращает специальный тип селекторов SEL выбранного метода Objective-C. Генерирует предупреждение компилятора, если метода не объявлен или не существует. Это имя метода закодированное специальным образом, используемым objective-c для быстрого поиска. Указание компилятору на селектор происходит при помощи директивы `@selector(methodName)`
+`@selector` Возвращает специальный тип селекторов SEL выбранного метода Objective-C. Генерирует предупреждение компилятора, если метода не объявлен или не существует. Это имя метода закодированное специальным образом, используемым Objective-C для быстрого поиска. Указание компилятору на селектор происходит при помощи директивы `@selector(methodName)`
 
 `@encode` Возвращает кодировку типа.
 
@@ -3016,13 +3027,16 @@ MyArray *array = [MyArray arrayWithObjects:@(1), @(2), nil];
 
 `@import` Модуль прекомпилированных заголовков, позволяющий экономить время по сравнению с компиляцией заголовков при `#import`. Не надо линковать фреймворк.
 
-`#import <Cocoa/Cocoa.h> = @import Cocoa;`
-
+```objectivec
+#import <Cocoa/Cocoa.h> //is the same as
+@import Cocoa;
+```
 # Multithreading
 Although operation queues and dispatch queues are the preferred way to perform tasks concurrently, they are not a panacea. Depending on your application, there may still be times when you need to create custom threads. If you do create custom threads, you should strive to create as few threads as possible yourself and you should use those threads only for specific tasks that cannot be implemented any other way.
 Threads are still a good way to implement code that must run in real time. Dispatch queues make every attempt to run their tasks as fast as possible but they do not address real time constraints. If you need more predictable behavior from code running in the background, threads may still offer a better alternative.
 ## POSIX Threads
-usually referred to as Pthreads, is a POSIX standard for threads defines an API for creating and ma-nipulating threads. Pthreads defines a set of C programming language types, functions and constants. It is implemented with a pthread.h header and a thread library. There are around 100 Pthreads procedures, all prefixed "pthread_" and they can be categorized into four groups:
+usually referred to as Pthreads, is a POSIX standard for threads defines an API for creating and manipulating threads. Pthreads defines a set of C programming language types, functions and constants. It is implemented with a pthread.h header and a thread library. There are around 100 Pthreads procedures, all prefixed `pthread_` and they can be categorized into four groups:
+
 * Thread management - creating, joining threads etc.
 * Mutexes
 * Condition variables
@@ -3030,20 +3044,20 @@ usually referred to as Pthreads, is a POSIX standard for threads defines an API 
 
 Implementations of the API are available on many Unix-like POSIX-conformant operating systems such as FreeBSD, NetBSD, OpenBSD, GNU/Linux, Mac OS X and Solaris. DR-DOS and Microsoft Windows implementations also exist.
 ## NSThread
-is a simple Objective-C wrapper around pthreads. This makes the code look more familiar in a Cocoa environment. For example, you can define a thread as a subclass of NSThread, which encapsulates the code you want to run in the background.
+is a simple Objective-C wrapper around pthreads. This makes the code look more familiar in a Cocoa environment. For example, you can define a thread as a subclass of `NSThread`, which encapsulates the code you want to run in the background.
 ## Run Loops
-Циклы выполнения – часть инфраструктуры, используемой для управления событиями при-бывающими асинхронно в потоке. Ждет данные от одного или нескольких источников, чтобы запустить код на исполнение. Циклы выполнения работают по мониторингу одного или не-скольких источников событий для потока. Как только события прибыли, система пробуждает поток и отправляет события на цикл выполнения, который затем передает их указанным об-работчикам. Если нет событий готовых быть обработанными, цикл выполнения ставит поток в режим сна.
-Одна из опасностей потокового программирования, это конфликты ресурсов между несколь-кими потоками. Если несколько потоков пытаются использовать или модифицировать один и тот же ресурс в одно и то же время, то могут возникнуть проблемы. Один из способов решить проблему заключается в устранении общего ресурса в целом и убедиться, что каждый поток имеет свой собственный набор ресурсов, на котором он работает. Поддержание совершенно разных ресурсов, это не вариант, и придется, для синхронизации доступа к ресурсу прибегать к помощи замков, условий, атомарных операций, и других методов.
-Замки обеспечивают грубую форму силы для защиты кода, который может быть выполнен только одним потоком одновременно. Наиболее распространенный тип блокировки взаимного исключения блокировки, также известный как мьютекс. Кроме замков, система обеспечивает поддержку для условий, которые обеспечивают надлежащую последовательность задач в рамках вашего приложения. Условие действует как привратник, блокируя определенный по-ток до приведения определенного состояния в значение истина. Когда это произойдет, поток освобождается и продолжает выполняться. И POSIX и Foundation framework оба оказывают прямую поддержку условий.
+Циклы выполнения – часть инфраструктуры, используемой для управления событиями, прибывающими асинхронно в потоке. Ждет данные от одного или нескольких источников, чтобы запустить код на исполнение. Циклы выполнения работают по мониторингу одного или нескольких источников событий для потока. Как только события прибыли, система пробуждает поток и отправляет события на цикл выполнения, который затем передает их указанным обработчикам. Если нет событий готовых быть обработанными, цикл выполнения ставит поток в режим сна.
+Одна из опасностей потокового программирования, это конфликты ресурсов между несколькими потоками. Если несколько потоков пытаются использовать или модифицировать один и тот же ресурс в одно и то же время, то могут возникнуть проблемы. Один из способов решить проблему заключается в устранении общего ресурса в целом и убедиться, что каждый поток имеет свой собственный набор ресурсов, на котором он работает. Поддержание совершенно разных ресурсов, это не вариант, и для синхронизации доступа к ресурсу придется прибегать к помощи замков, условий, атомарных операций, и других методов.
+Замки обеспечивают грубую форму силы для защиты кода, который может быть выполнен только одним потоком одновременно. Наиболее распространенный тип блокировки взаимного исключения блокировки, также известный как мьютекс. Кроме замков, система обеспечивает поддержку для условий, которые обеспечивают надлежащую последовательность задач в рамках вашего приложения. Условие действует как привратник, блокируя определенный поток до приведения определенного состояния в значение истина. Когда это произойдет, поток освобождается и продолжает выполняться. И POSIX и Foundation framework оба оказывают прямую поддержку условий.
 Run loops are not technically a concurrency mechanism like GCD or operation queues, because they don’t enable the parallel execution of tasks. However, run loops tie in directly with the execution of tasks on the main dispatch/operation queue and they provide a mechanism to execute code asynchronously. Run loops can be a lot easier to use than operation queues or GCD, because you don’t have to deal with the complexity of concurrency and still get to do things asynchronously.
-A run loop is always bound to one particular thread. The main run loop associated with the main thread has a central role in each Cocoa and CocoaTouch application, because it handles UI events, timers, and other kernel events. Whenever you schedule a timer, use a NSURLConnection or call per-formSelector:withObject:afterDelay:, the run loop is used behind the scenes in order to perform these asynchronous tasks. Whenever you use a method which relies on the run loop, it is important to remember that run loops can be run in different modes. Each mode defines a set of events the run loop is going to react to. This is a clever way to temporarily prioritize certain tasks over others in the main run loop. A typical example of this is scrolling on iOS. While you’re scrolling, the run loop is not running in its default mode, and therefore, it’s not going to react to, for example, a timer you have scheduled before. Once scrolling stops, the run loop returns to the default mode and the events which have been queued up are executed. If you want a timer to fire during scrolling, you need to add it to the run loop in the NSRunLoopCommonModes mode. The main thread always has the main run loop set up and running. Other threads though don’t have a run loop configured by default. You can set up a run loop for other threads too, but you will rarely need to do this. Most of the time it is much easier to use the main run loop. If you need to do heavier work that you don’t want to execute on the main thread, you can still dispatch it onto another queue after your code is called from the main run loop.
-You can think of a Run Loop to be an event processing for-loop associated to a thread. This is provided by the system for every thread, but it's only run automatically for the main thread. Note that running run loops and executing a thread are two distinct concepts. You can execute a thread without running a run loop, when you're just performing long calculations and you don't have to respond to various events. If you want to respond to various events from a secondary thread, you retrieve the run loop associated to the thread by [NSRunLoop currentRunLoop]; and run it. The events run loops can handle is called input sources. You can add input sources to a run-loop.
+A run loop is always bound to one particular thread. The main run loop associated with the main thread has a central role in each Cocoa and CocoaTouch application, because it handles UI events, timers, and other kernel events. Whenever you schedule a timer, use a `NSURLConnection` or call `performSelector:withObject:afterDelay`:, the run loop is used behind the scenes in order to perform these asynchronous tasks. Whenever you use a method which relies on the run loop, it is important to remember that run loops can be run in different modes. Each mode defines a set of events the run loop is going to react to. This is a clever way to temporarily prioritize certain tasks over others in the main run loop. A typical example of this is scrolling on iOS. While you’re scrolling, the run loop is not running in its default mode, and therefore, it’s not going to react to, for example, a timer you have scheduled before. Once scrolling stops, the run loop returns to the default mode and the events which have been queued up are executed. If you want a timer to fire during scrolling, you need to add it to the run loop in the `NSRunLoopCommonModes` mode. The main thread always has the main run loop set up and running. Other threads though don’t have a run loop configured by default. You can set up a run loop for other threads too, but you will rarely need to do this. Most of the time it is much easier to use the main run loop. If you need to do heavier work that you don’t want to execute on the main thread, you can still dispatch it onto another queue after your code is called from the main run loop.
+You can think of a Run Loop to be an event processing for-loop associated to a thread. This is provided by the system for every thread, but it's only run automatically for the main thread. Note that _running run loops and executing a thread are two distinct concepts_. You can execute a thread without running a run loop, when you're just performing long calculations and you don't have to respond to various events. If you want to respond to various events from a secondary thread, you retrieve the run loop associated to the thread by `[NSRunLoop currentRunLoop];` and run it. The events run loops can handle is called input sources. You can add input sources to a run loop.
 
 ## Для чего при разработке под iOS использовать POSIX-потоки?
 Use POSIX calls if cross-platform portability is required. If you are writing networking code that runs exclusively in OS X and iOS, you should generally avoid POSIX networking calls, because they are harder to work with than higher-level APIs. However, if you are writing networking code that must be shared with other platforms, you can use the POSIX networking APIs so that you can use the same code everywhere.
 
 # Concurrency
-Concurrency is the notion of multiple things happening at the same time. Threads are subunits of processes, which can be scheduled independently by the operating system scheduler. Virtually all concurrency APIs are built on top of threads under the hood – that’s true for both Grand Central Dispatch and operation queues. You can either use the POSIX thread API, or the Objective-C wrapper around this API, NSThread, to create your own threads.
+Concurrency is the notion of multiple things happening at the same time. Threads are subunits of processes, which can be scheduled independently by the operating system scheduler. Virtually all concurrency APIs are built on top of threads under the hood – that’s true for both Grand Central Dispatch and operation queues. You can either use the POSIX thread API, or the Objective-C wrapper around this API, `NSThread`, to create your own threads.
 
 <img src="https://github.com/sashakid/ios-guide/blob/master/Images/objc_threading.png">
 <img src="https://github.com/sashakid/ios-guide/blob/master/Images/objc_threading_apis.png">
@@ -3065,12 +3079,12 @@ Types of dispatch queues
 __Serial__
 
 Serial queues (also known as private dispatch queues) execute one task at a time in the order in which they are added to the queue. The currently executing task runs on a distinct thread (which can vary from task to task) that is managed by the dispatch queue. Serial queues are often used to synchronize access to a specific resource.
-You can create as many serial queues as you need, and each queue operates concurrently with respect to all other queues. In other words, if you create four serial queues, each queue executes only one task at a time but up to four tasks could still execute concurrently, one from each queue. For information on how to create serial queues, see Creating Serial Dispatch Queues.
+You can create as many serial queues as you need, and each queue operates concurrently with respect to all other queues. In other words, if you create four serial queues, each queue executes only one task at a time but up to four tasks could still execute concurrently, one from each queue.
 
 __Concurrent__
 
 Concurrent queues (also known as a type of global dispatch queue) execute one or more tasks concurrently, but tasks are still started in the order in which they were added to the queue. The currently executing tasks run on distinct threads that are managed by the dispatch queue. The exact number of tasks executing at any given point is variable and depends on system conditions.
-In iOS 5 and later, you can create concurrent dispatch queues yourself by specifying DISPATCH_QUEUE_CONCURRENT as the queue type. In addition, there are four predefined global concurrent queues for your application to use.
+In iOS 5 and later, you can create concurrent dispatch queues yourself by specifying `DISPATCH_QUEUE_CONCURRENT` as the queue type. In addition, there are four predefined global concurrent queues for your application to use.
 
 __Main dispatch queue__
 
@@ -3078,11 +3092,11 @@ The main dispatch queue is a globally available serial queue that executes tasks
 Although you do not need to create the main dispatch queue, you do need to make sure your application drains it appropriately.
 
 ## NSOperationQueue
-Operation queues are a Cocoa abstraction of the queue model exposed by GCD. While GCD offers more low-level control, operation queues implement several convenient features on top of it, which often makes it the best and safest choice for application developers. The NSOperationQueue class has two different types of queues: the main queue and custom queues. The main queue runs on the main thread, and custom queues are processed in the background. In any case, the tasks which are processed by these queues are represented as subclasses of NSOperation. Whereas dispatch queues always execute tasks in first-in, first-out order, operation queues take other factors into account when determining the execution order of tasks. Because the NSOperation class is essentially an abstract base class, you typically define custom subclasses to perform your tasks. However, the Foundation framework does include some concrete subclasses that you can create and use as is to perform tasks.
+Operation queues are a Cocoa abstraction of the queue model exposed by GCD. While GCD offers more low-level control, operation queues implement several convenient features on top of it, which often makes it the best and safest choice for application developers. The `NSOperationQueue` class has two different types of queues: the main queue and custom queues. The main queue runs on the main thread, and custom queues are processed in the background. In any case, the tasks which are processed by these queues are represented as subclasses of `NSOperation`. Whereas dispatch queues always execute tasks in first-in, first-out order, operation queues take other factors into account when determining the execution order of tasks. Because the `NSOperation` class is essentially an abstract base class, you typically define custom subclasses to perform your tasks. However, the Foundation framework does include some concrete subclasses that you can create and use as is to perform tasks.
 
 __Плюсы__
 
-* Можно для каждой очереди настраивать приоритет и количество одновременно выпол-няющихся операций. `NSOperationQueue` самостоятельно создает и поддерживает пул потоков, в которых исполняются `NSOperation`. Так же `NSOperation` предоставляет возможность отменять операции, приостанавливать всю очередь, запускать ее снова и много чего прочего.
+* Можно для каждой очереди настраивать приоритет и количество одновременно выполняющихся операций. `NSOperationQueue` самостоятельно создает и поддерживает пул потоков, в которых исполняются `NSOperation`. Так же `NSOperation` предоставляет возможность отменять операции, приостанавливать всю очередь, запускать ее снова и много чего прочего.
 
 ## NSObject instance methods
 ```objectivec
@@ -3095,6 +3109,7 @@ __Плюсы__
 - (void)performSelectorOnMainThread:(SEL)aSelector withObject:(id)arg waitUntilDone:(BOOL)wait modes:(NSArray *)array;
 ```
 Это один из самых простых и распространенных вариантов. Он требует только указать метод, который будет исполнять этот поток.
+
 * Because these methods are running on their own threads, you must create an autorelease pool for Cocoa objects. The main autorelease pool is associated with the main thread.
 * The methods must not return any values and must either take no arguments or have one object as an argument. In other words, the methods must have one of the following signatures:
 ```objectivec
@@ -3107,30 +3122,30 @@ __Плюсы__
 
 __Минусы__
 
-* Нужно упаковывать все параметры для передачи, и бедные возможности по управлению очередностью, количеством одновременных задач, их приоритетом. На каждый вызов `performSelectorInBackground` будет создаваться отдельный поток. При быстром скроллировании большой таблицы можно довести число потоков до очень большой величины.
+* Нужно упаковывать все параметры для передачи, и бедные возможности по управлению очередностью, количеством одновременных задач, их приоритетом. На каждый вызов `performSelectorInBackground` будет создаваться отдельный поток. При быстром скролле большой таблицы можно довести число потоков до очень большой величины.
 
-In general, you should use the highest level of abstraction that suits your needs. This means that you should usually use NSOperationQueue instead of GCD, unless you need to do something that NSOperationQueue doesn't support.
+In general, you should use the highest level of abstraction that suits your needs. This means that you should usually use `NSOperationQueue` instead of GCD, unless you need to do something that `NSOperationQueue` doesn't support.
 
 ### Что такое мьютекс?
 `@synchronized`
 
-Замки являются одним из наиболее часто используемых инструментов синхронизации. Вы можете использовать замки для защиты критической секции вашего кода, который является сегментом кода, к которому разрешен доступ только одному потоку одновременно. Взаимоис-ключающая (или мьютекс) блокировка действует как защитный барьер вокруг ресурса. Мьютекс является одним из видов семафора, который предоставляет доступ одновременно только одному потоку. Если мьютекс используется и другой поток пытается получить его, что поток блокируется до тех пор пока мьютекс не освободится от своего первоначального владельца. Если несколько потоков соперничают за одни и те же мьютексы, только одному будет разрешен к нему доступ.
+Замки являются одним из наиболее часто используемых инструментов синхронизации. Вы можете использовать замки для защиты критической секции вашего кода, который является сегментом кода, к которому разрешен доступ только одному потоку одновременно. Взаимоисключающая (или мьютекс) блокировка действует как защитный барьер вокруг ресурса. Мьютекс является одним из видов семафора, который предоставляет доступ одновременно только одному потоку. Если мьютекс используется и другой поток пытается получить его, что поток блокируется до тех пор, пока мьютекс не освободится от своего первоначального владельца. Если несколько потоков соперничают за одни и те же мьютексы, только одному будет разрешен к нему доступ.
 
 ### Что такое deadlock?
-Каждый поток захватывает ресурс и ждет, пока другой не осводит второй ресурс. Таким обра-зом, они ждут друг друга вечно.
-Deadlock is an unhappy condition in which two or more competing tasks are each waiting on the other to finish. You can observe this in real life when cars arrive simultaneously at a four-way stop.
+Каждый поток захватывает ресурс и ждет, пока другой не осводит второй ресурс. Таким образом, они ждут друг друга вечно. Deadlock is an unhappy condition in which two or more competing tasks are each waiting on the other to finish. You can observe this in real life when cars arrive simultaneously at a four-way stop.
 
 ### Что такое livelock?
-Система не застревает, но занимается бесполезной работой.
-A livelock occurs when a request for an exclusive lock is repeatedly denied because a series of overlapping shared locks keep interfering. It is an endless loop in program execution. This could be a case when two threads exit allowing each other to write to or update record(s) in a database.
+Система не застревает, но занимается бесполезной работой. A livelock occurs when a request for an exclusive lock is repeatedly denied because a series of overlapping shared locks keep interfering. It is an endless loop in program execution. This could be a case when two threads exit allowing each other to write to or update record(s) in a database.
 
 ### Что такое семафор?
 Семафор позволяет выполнять какой-либо участок кода одновременно только конкретному количеству потоков. В основе семафора лежит счетчик, который и определяет, можно ли выполнять участок кода текущему потоку или нет. Если счетчик больше нуля — поток выполняет код, в противном случае — нет. Семафор в GCD представлен типом `dispatch_semaphore_t`. Для создания семафора существует функция `dispatch_semaphore_create`, которая принимает один аргумент — число потоков, которые могут одновременно выполнять участок кода.
 
 ### Чем отличается dispatch_async от dispatch_sync?
-Когда это возможно, асинхронное выполнение с использованием `dispatch_async` и `dispatch_async_f` функций предпочтительнее, чем синхронный вариант. При добавлении объекта блока или функции в очередь, нет никакого способа узнать, когда этот код будет выполняться. В результате, добавляя блоки или функции асинхронно позволяет запланировать выполнение кода и продолжать делать другую работу из вызывающего потока. Это особенно важно, если вы планировании задачу из основного потока приложения, возможно, в ответ на некоторые пользовательские события.
-Хотя вы должны добавлять задачи асинхронно по мере возможности, все же могут быть случаи, когда вам нужно добавить задачу синхронно, чтобы предотвратить гонку условий или другие ошибки синхронизации. В этих случаях можно использовать функции `dispatch_sync` и `dispatch_sync_f` для добавления задачи в очередь. Эти функции блокируют текущий поток ис-полнения до завершения выполнения указанной задачи.
+Когда это возможно, асинхронное выполнение с использованием `dispatch_async` и `dispatch_async_f` функций предпочтительнее, чем синхронный вариант. При добавлении объекта блока или функции в очередь, нет никакого способа узнать, когда этот код будет выполняться. В результате, добавляя блоки или функции асинхронно позволяет запланировать выполнение кода и продолжать делать другую работу из вызывающего потока. Это особенно важно, если вы планировали выполнить задачу из основного потока приложения, возможно, в ответ на некоторые пользовательские события.
+Хотя вы должны добавлять задачи асинхронно по мере возможности, все же могут быть случаи, когда вам нужно добавить задачу синхронно, чтобы предотвратить гонку условий или другие ошибки синхронизации. В этих случаях можно использовать функции `dispatch_sync` и `dispatch_sync_f` для добавления задачи в очередь. Эти функции блокируют текущий поток исполнения до завершения выполнения указанной задачи.
+
 __Важно:__ Вы никогда не должны вызывать функции `dispatch_sync` или `dispatch_sync_f` из задачи, которая выполняется в той же очереди, в которой вы планируете переход к функции. Это особенно важно для последовательных очередей, которые гарантированно приведут к deadlock, но также следует избегать одновременных очередей.
+
 Следующий пример показывает, как использовать блочные варианты для отправки задачи асинхронно и синхронно:
 ```objectivec
 dispatch_queue_t myCustomQueue;
@@ -3149,7 +3164,7 @@ printf("Оба блока были завершены.\n");
 
 ### Как многопоточность работает с UIKit?
 One of the most common mistakes even experienced iOS/Mac developers make is accessing parts of UIKit/AppKit on background threads. It’s very easy to make the mistake of setting properties like image from a background thread, because their content is being requested from the network in the background anyway. Apple’s code is performance-optimized and will not warn you if you change properties from different threads.
-For the most part, UIKit classes should be used only from an application’s main thread. This is particularly true for classes derived from UIResponder or that involve manipulating your application’s user interface in any way.
+For the most part, UIKit classes should be used only from an application’s main thread. This is particularly true for classes derived from `UIResponder` or that involve manipulating your application’s user interface in any way.
 
 ### Выведется ли в дебагер Hello world? Почему?
 ```objectivec
@@ -3212,7 +3227,7 @@ Atomic – thread safe.
 
 ## Что означает http, tcp?
 Transmission Control Protocol (TCP) (протокол управления передачей) — один из основных протоколов передачи данных Интернета, предназначенный для управления передачей данных в сетях и подсетях TCP/IP.
-HTTP (англ. HyperText Transfer Protocol — «протокол передачи гипертекста») — протокол при-кладного уровня передачи данных (изначально — в виде гипертекстовых документов). Осно-вой HTTP является технология «клиент-сервер», то есть предполагается существование по-требителей (клиентов), которые инициируют соединение и посылают запрос, и поставщиков (серверов), которые ожидают соединения для получения запроса, производят необходимые действия и возвращают обратно сообщение с результатом. Этот протокол описывает взаимодействие между двумя компьютерами (клиентом и сервером), построенное на базе сообщений, называемых запрос (Request) и ответ (Response). Каждое сообщение состоит из трех частей: стартовая строка, заголовки и тело. При этом обязательной является только стартовая строка.
+HTTP (англ. HyperText Transfer Protocol — «протокол передачи гипертекста») — протокол прикладного уровня передачи данных (изначально — в виде гипертекстовых документов). Основой HTTP является технология «клиент-сервер», то есть предполагается существование потребителей (клиентов), которые инициируют соединение и посылают запрос, и поставщиков (серверов), которые ожидают соединения для получения запроса, производят необходимые действия и возвращают обратно сообщение с результатом. Этот протокол описывает взаимодействие между двумя компьютерами (клиентом и сервером), построенное на базе сообщений, называемых запрос (Request) и ответ (Response). Каждое сообщение состоит из трех частей: стартовая строка, заголовки и тело. При этом обязательной является только стартовая строка.
 
 ## Какие различия между HEAD, GET, POST, PUT?
 `GET` Используется для запроса содержимого указанного ресурса. С помощью метода `GET` можно также начать какой-либо процесс. В этом случае в тело ответного сообщения следует включить информацию о ходе выполнения процесса. Клиент может передавать параметры выполнения запроса в URI целевого ресурса после символа `?`:
@@ -3223,7 +3238,7 @@ GET /path/resource?param1=value1&param2=value2 HTTP/1.1
 `HEAD` Аналогичен методу `GET`, за исключением того, что в ответе сервера отсутствует тело. Запрос HEAD обычно применяется для извлечения метаданных, проверки наличия ресурса (валидация URL) и чтобы узнать, не изменился ли он с момента последнего обращения.
 Заголовки ответа могут кэшироваться. При несовпадении метаданных ресурса с соответствующей информацией в кэше копия ресурса помечается как устаревшая.
 
-`POST` Применяется для передачи пользовательских данных заданному ресурсу. Например, в блогах посетители обычно могут вводить свои комментарии к записям в HTML-форму, после чего они передаются серверу методом POST и он помещает их на страницу. При этом передаваемые данные (в примере с блогами — текст комментария) включаются в тело запроса. Аналогично с помощью метода POST обычно загружаются файлы на сервер. В отличие от метода `GET`, метод `POST` не считается идемпотентным[4], то есть многократное повторение одних и тех же запросов `POST` может возвращать разные результаты (например, после каждой отправки комментария будет появляться одна копия этого комментария).
+`POST` Применяется для передачи пользовательских данных заданному ресурсу. Например, в блогах посетители обычно могут вводить свои комментарии к записям в HTML-форму, после чего они передаются серверу методом `POST` и он помещает их на страницу. При этом передаваемые данные (в примере с блогами — текст комментария) включаются в тело запроса. Аналогично с помощью метода `POST` обычно загружаются файлы на сервер. В отличие от метода `GET`, метод `POST` не считается идемпотентным, то есть многократное повторение одних и тех же запросов `POST` может возвращать разные результаты (например, после каждой отправки комментария будет появляться одна копия этого комментария).
 Отправить `POST`-запрос не так тяжело как кажется. Достаточно подготовить «правильный» `NSURLRequest`.
 ```objectivec
 NSString *params = @"param=value&number=1"; // задаем параметры POST запроса
@@ -3236,15 +3251,16 @@ request.HTTPBody = [params dataUsingEncoding:NSUTF8StringEncoding];
 [NSURLConnection sendSynchronousRequest:request returningResponse:nil error:nil];
 ```
 `PUT` Применяется для загрузки содержимого запроса на указанный в запросе URI. Если по заданному URI не существовало ресурса, то сервер создаёт его и возвращает статус `201` (Created). Если же был изменён ресурс, то сервер возвращает `200` (Ok) или `204` (No Content). Сервер не должен игнорировать некорректные заголовки `Content-*`, передаваемые клиентом вместе с сообщением. Если какой-то из этих заголовков не может быть распознан или не допустим при текущих условиях, то необходимо вернуть код ошибки `501` (Not Implemented).
-Фундаментальное различие методов `POST` и `PUT` заключается в понимании предназначений URI ресурсов. Метод POST предполагает, что по указанному URI будет производиться обработка передаваемого клиентом содержимого. Используя PUT, клиент предполагает, что загружаемое содержимое соответствует находящемуся по данному URI ресурсу.
-Единый указатель ресурсов (англ. URL — Uniform Resource Locator) — единообразный лока-тор (определитель местонахождения) ресурса. URL — это стандартизированный способ записи адреса ресурса в сети Интернет.
+Фундаментальное различие методов `POST` и `PUT` заключается в понимании предназначений URI ресурсов. Метод `POST` предполагает, что по указанному URI будет производиться обработка передаваемого клиентом содержимого. Используя `PUT`, клиент предполагает, что загружаемое содержимое соответствует находящемуся по данному URI ресурсу.
 
-__URI__ (англ. Uniform Resource Identifier) — унифицированный (единообразный) идентифика-тор ресурса. URI — это символьная строка, позволяющая идентифицировать какой-либо ресурс: документ, изображение, файл, службу, ящик электронной почты и т. д. Прежде всего, речь идёт, конечно, о ресурсах сети Интернет и Всемирной паутины.
+Единый указатель ресурсов (англ. __URL__ — Uniform Resource Locator) — единообразный локатор (определитель местонахождения) ресурса. URL — это стандартизированный способ записи адреса ресурса в сети Интернет.
+
+__URI__ (англ. Uniform Resource Identifier) — унифицированный (единообразный) идентификатор ресурса. URI — это символьная строка, позволяющая идентифицировать какой-либо ресурс: документ, изображение, файл, службу, ящик электронной почты и т. д. Прежде всего, речь идёт, конечно, о ресурсах сети Интернет и Всемирной паутины.
 URL это частный случай URI. Понятие URI включает в себя, помимо URL, например, ссылки на адреса электронной почты и т.п. URL указывает на Веб-ресурс, вроде сайта, страницы или кон-кретного файла, расположенных на интернет-серверах.
 
 ## Что такое REST архитектура?
-REST (Representational state transfer) – это стиль архитектуры программного обеспечения для распределенных систем, таких как World Wide Web, который, как правило, используется для построения веб-служб. Термин REST был введен в 2000 году Роем Филдингом, одним из авто-ров HTTP-протокола. Системы, поддерживающие REST, называются RESTful-системами.
-В общем случае REST является очень простым интерфейсом управления информацией без использования каких-то дополнительных внутренних прослоек. Каждая единица информации однозначно определяется глобальным идентификатором, таким как URL. Каждая URL в свою очередь имеет строго заданный формат.
+REST (Representational state transfer) – это стиль архитектуры программного обеспечения для распределенных систем, таких как World Wide Web, который, как правило, используется для построения веб-служб. Термин REST был введен в 2000 году Роем Филдингом, одним из авторов HTTP-протокола. Системы, поддерживающие REST, называются RESTful-системами.
+В общем случае REST является очень простым интерфейсом управления информацией без использования каких-то дополнительных внутренних прослоек. Каждая единица информации однозначно определяется глобальным идентификатором, таким как URL. Каждый URL в свою очередь имеет строго заданный формат.
 Вот как это будет выглядеть на примере:
 ```
 GET /book/ — получить список всех книг
@@ -3260,6 +3276,7 @@ REST (сокр. от англ. Representational State Transfer — «перед�
 __Архитектура REST__
 
 Как необходимые условия для построения распределенных REST-приложений Филдинг перечислил следующие:
+
 1. Клиент-серверная архитектура.
 2. Сервер не обязан сохранять информацию о состоянии клиента.
 3. В каждом запросе клиента должно явно содержаться указание о возможности кэширования ответа и получения ответа из существующего кэша
@@ -3267,6 +3284,7 @@ __Архитектура REST__
 5. Унифицированный программный интерфейс сервера. Филдинг приводил URI в качестве примера формата запросов к серверу, а в качестве примера ответа сервера форматы HTML, XML и JSON, различаемые с использованием идентификаторов MIME.
 
 Филдинг указывал, что приложения, не соответствующие приведённым условиям, не могут называться REST-приложениями. Если же все условия соблюдены, то, по его мнению, приложение получит следующие преимущества:
+
 * надёжность (за счет отсутствия необходимости сохранять информацию о состоянии клиента, которая может быть утеряна);
 * производительность (за счет использования кэша);
 * масштабируемость;
@@ -3277,8 +3295,8 @@ __Архитектура REST__
 * способность эволюционировать, приспосабливаясь к новым требованиям (на примере Всемирной паутины).
 
 ## Как загрузить что-то из интернета? NSURL, NSURLSession, NSURLConnection, NSURLRequest
-The iOS SDK allows us to connect to the Internet and retrieve and send data using the NSURLConnection class. JSON serialization and deserialization will all be done using the NSJSONSerialization class. XML parsing will be done using NSXMLParser, and the Twitter connectivity will be done using the Twitter framework.
-The iOS 7 SDK brings along new classes that we can take advantage of in this chapter. One of these classes is the `NSURLSession`, which manages the connectivity to web services in a more thorough way than the NSURLConnection class does. В чем разница?
+The iOS SDK allows us to connect to the Internet and retrieve and send data using the `NSURLConnection` class. JSON serialization and deserialization will all be done using the `NSJSONSerialization` class. XML parsing will be done using `NSXMLParser`, and the Twitter connectivity will be done using the Twitter framework.
+The iOS 7 SDK brings along new classes that we can take advantage of in this chapter. One of these classes is the `NSURLSession`, which manages the connectivity to web services in a more thorough way than the `NSURLConnection` class does.
 ```objectivec
 - (void)getImageFromURL:(NSString *)url {
     dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0), ^{
@@ -3294,13 +3312,13 @@ The iOS 7 SDK brings along new classes that we can take advantage of in this cha
 ## Парсинг JSON, HTML, XML
 Парсинг – обработка данных, разбор входной последовательности с целью получения токенов.
 Токен – лексема, минимальная единица языка, имеющая самостоятельный смысл (имя, знак операции, ключевое слово)
-Регулярные выражения – формальный язык поиска и осуществления манипуляций с подстро-ками в тексте, основанный на использовании метасимволов (символов-джокеров, англ. wildcard characters). По сути это строка-образец (англ. pattern, по-русски её часто называют «шаблоном», «маской»), состоящая из символов и метасимволов и задающая правило поиска. The NSRegularExpression class is used to represent and apply regular expressions to Unicode strings. An instance of this class is an immutable representation of a compiled regular expression pattern and various option flags. Example use the regular expression `\\b(a|b)(c|d)\\b`. This snippet creates a regular expression to match two-letter words, in which the first letter is “a” or “b” and the second letter is “c” or “d”. Specifying `NSRegularExpressionCaseInsensitive` means that matches will be case-insensitive, so this will match “BC”, “aD”, and so forth, as well as their lower-case equivalents.
+Регулярные выражения – формальный язык поиска и осуществления манипуляций с подстроками в тексте, основанный на использовании метасимволов (символов-джокеров, англ. wildcard characters). По сути, это строка-образец (англ. pattern, по-русски её часто называют «шаблоном», «маской»), состоящая из символов и метасимволов и задающая правило поиска. The NSRegularExpression class is used to represent and apply regular expressions to Unicode strings. An instance of this class is an immutable representation of a compiled regular expression pattern and various option flags. Example use the regular expression `\\b(a|b)(c|d)\\b`. This snippet creates a regular expression to match two-letter words, in which the first letter is “a” or “b” and the second letter is “c” or “d”. Specifying `NSRegularExpressionCaseInsensitive` means that matches will be case-insensitive, so this will match “BC”, “aD”, and so forth, as well as their lower-case equivalents.
 ```objectivec
 NSError *error = NULL;
 NSRegularExpression *regex = [NSRegularExpression regularExpressionWithPattern:@"\\b(a|b)(c|d)\\b" options:NSRegularExpressionCaseInsensitive error:&error];
 ```
 Для парсинга XML в Objective-C существует класс `NSXMLParser`. О нахождении каких-либо элементов парсер уведомляет свой делегат. Делегат должен следовать протоколу `NSXMLParserDelegate`.
-HTML (HyperText Markup Language) is a markup language (it’s in the name!) that tells browsers how to layout a web page. By its very nature, this content is in a hierarchy that defines where within the page a piece of information is to be displayed. You may also be aware of XML (eXtensible Markup Language). This also defines a hierarchy of information, and you may at this point be thinking that perhaps HTML is related to XML. You’d be right to think that, and also wrong!
+HTML (HyperText Markup Language) is a markup language, that tells browsers how to layout a web page. By its very nature, this content is in a hierarchy that defines where within the page a piece of information is to be displayed. You may also be aware of XML (eXtensible Markup Language). This also defines a hierarchy of information, and you may at this point be thinking that perhaps HTML is related to XML. You’d be right to think that, and also wrong!
 There are two flavors of HTML: the one that is pure XML, and the original, where-it-all-started HTML. HTML is “sort of” an XML document, but with more relaxed rules.
 
 <img src="https://github.com/sashakid/ios-guide/blob/master/Images/html_parsing.png">
@@ -3344,12 +3362,38 @@ JSON (JavaScript Object Notation) is a lightweight data-interchange format. It i
 
 # Data
 ## Что такое Core Data?
-Apple предоставляет гибкий фрэймворк для работы с хранимыми на устройстве данными — Core Data. Большинство деталей по работе с хранилищем данных Core Data скрывает, позволяя вам сконцентрироваться на том, что действительно делает ваше приложение веселым, уникальным и удобным в использовании. Не смотря на то, что Core Data может хранить данные в реляционной базе данных вроде SQLite, Core Data не является СУБД (системой управления БД). По-правде, Core Data в качестве хранилища может вообще не использовать реляционные базы данных. Core Data скорее является оболочкой/фрэймворком для работы с данными, которая позволяет работать с сущностями и их связями (отношениями к другим объектами), атрибутами, в том виде, который напоминает работы с объектным графом в обычном объектно-ориентированном программировании.
+Apple предоставляет гибкий фреймворк для работы с хранимыми на устройстве данными — Core Data. Большинство деталей по работе с хранилищем данных Core Data скрывает, позволяя вам сконцентрироваться на том, что действительно делает ваше приложение веселым, уникальным и удобным в использовании. Не смотря на то, что Core Data может хранить данные в реляционной базе данных вроде SQLite, Core Data не является СУБД (системой управления БД). По-правде, Core Data в качестве хранилища может вообще не использовать реляционные базы данных. Core Data скорее является оболочкой для работы с данными, которая позволяет работать с сущностями и их связями (отношениями к другим объектами), атрибутами, в том виде, который напоминает работы с объектным графом в обычном объектно-ориентированном программировании.
+
+## Опишите стек Core Data
+
+<img src="https://github.com/sashakid/ios-guide/blob/master/Images/nsmanagedobjectcontext.png">
+
+_NSManagedObjectModel_
+
+The `NSManagedObjectModel` instance describes the data that is going to be accessed by the Core Data stack. During the creation of the Core Data stack, the `NSManagedObjectModel` (often referred to as the “mom”) is loaded into memory as the first step in the creation of the stack. The example code above resolves an `NSURL` from the main application bundle using a known filename (in this example `DataModel.momd`) for the `NSManagedObjectModel`. Once the `NSManagedObjectModel` object is initialized, the `NSPersistentStoreCoordinator` object is constructed.
+
+_NSPersistentStoreCoordinator_
+
+The `NSPersistentStoreCoordinator` sits in the middle of the Core Data stack. The coordinator is responsible for realizing instances of entities that are defined inside of the model. It creates new instances of the entities in the model, and it retrieves existing instances from a persistent store (`NSPersistentStore`). The persistent store can be on disk or in memory. Depending on the structure of the application, it is possible, although uncommon, to have more than one persistent store being coordinated by the `NSPersistentStoreCoordinator`.
+
+Whereas the `NSManagedObjectModel` defines the structure of the data, the `NSPersistentStoreCoordinator` realizes objects from the data in the persistent store and passes those objects off to the requesting `NSManagedObjectContext`. The `NSPersistentStoreCoordinator` also verifies that the data is in a consistent state that matches the definitions in the `NSManagedObjectModel`.
+
+Координатор предназначен для представления фасада для управляемого контекстом объекта, так что группа постоянных хранилищ выглядит как единое совокупное хранилище. Управляемый объект контекста может создать граф объектов на основе объединения всех хранилищ данных координатора. Координатор может быть связан только с одной управляемой объектной моделью. Если Вы хотите положить различные субъекты в различные хранилища, вы должны разделить вашу модель, определяя конфигурацию в управляемой модели объекта.
+
+_NSManagedObjectContext_
+
+The managed object context (`NSManagedObjectContext`) is the object that your application will be interacting with the most, and therefore it is the one that is exposed to the rest of your application. Think of the managed object context as an intelligent scratch pad. When you fetch objects from a persistent store, you bring temporary copies onto the scratch pad where they form an object graph (or a collection of object graphs). You can then modify those objects however you like. Unless you actually save those changes, however, the persistent store remains unaltered.
+
+All managed objects must be registered with a managed object context. You use the context to add objects to the object graph and remove objects from the object graph. The context tracks the changes you make, both to individual objects’ attributes and to the relationships between objects. By tracking changes, the context is able to provide undo and redo support for you. It also ensures that if you change relationships between objects, the integrity of the object graph is maintained.
+
+If you choose to save the changes you have made, the context ensures that your objects are in a valid state. If they are, the changes are written to the persistent store (or stores), new records are added for objects you created, and records are removed for objects you deleted.
+
+Without Core Data, you have to write methods to support archiving and unarchiving of data, to keep track of model objects, and to interact with an undo manager to support undo. In the Core Data framework, most of this functionality is provided for you automatically, primarily through the managed object context.
 
 ## В каких случаях лучше использовать SQLite, а в каких Core Data?
 _Реляционная база данных_ — база данных, основанная на реляционной модели данных. Слово «реляционный» происходит от англ. relation (отношение). Для работы с реляционными БД применяют реляционные СУБД.
 
-_Реляционная модель данных (РМД)_ — логическая модель данных, прикладная теория построения баз данных, кото-рая является приложением к задачам обработки данных таких разделов математики как теории множеств и ло-гика первого порядка. Термин «реляционный» означает, что теория основана на математическом понятии отно-шение (relation). В качестве неформального синонима термину «отношение» часто встречается слово таблица. Необходимо помнить, что «таблица» есть понятие нестрогое и неформальное и часто означает не «отношение» как абстрактное понятие, а визуальное представление отношения на бумаге или экране. Некорректное и нестрогое использование термина «таблица» вместо термина «отношение» нередко приводит к недопониманию. Наиболее частая ошибка состоит в рассуждениях о том, что РМД имеет дело с «плоскими», или «двумерными» таблицами, тогда как таковыми могут быть только визуальные представления таблиц. Отношения же являются абстракциями, и не могут быть ни «плоскими», ни «неплоскими».
+_Реляционная модель данных (РМД)_ — логическая модель данных, прикладная теория построения баз данных, которая является приложением к задачам обработки данных таких разделов математики как теории множеств и логика первого порядка. Термин «реляционный» означает, что теория основана на математическом понятии отношение (relation). В качестве неформального синонима термину «отношение» часто встречается слово таблица. Необходимо помнить, что «таблица» есть понятие нестрогое и неформальное и часто означает не «отношение» как абстрактное понятие, а визуальное представление отношения на бумаге или экране. Некорректное и нестрогое использование термина «таблица» вместо термина «отношение» нередко приводит к недопониманию. Наиболее частая ошибка состоит в рассуждениях о том, что РМД имеет дело с «плоскими», или «двумерными» таблицами, тогда как таковыми могут быть только визуальные представления таблиц. Отношения же являются абстракциями, и не могут быть ни «плоскими», ни «неплоскими».
 
 _ORM_ – Object-relational mapping, объектно-реляционное отображение – преобразование данных между ООП и реляционными базами данных.
 
@@ -3429,11 +3473,12 @@ __Когда нецелесообразно использовать Core Data:_
 __SQLite__
 * Максимальный объем хранимых данных базы SQLite составляет 2 терабайта.
 * Чтение из базы данных может производиться одним и более потоками, например несколько процессов могут одновременно выполнять `SELECT`. Однако запись в базу данных может осуществляться, только, если база в данный момент не занята другим процессом.
-* SQLite не накладывает ограничения на типы данных. Любые данные могут быть занесе-ны в любой столбец. Ограничения по типам данных действуют только на `INTEGER PRIMARY KEY`, который может содержать только 64-битное знаковое целое.
+* SQLite не накладывает ограничения на типы данных. Любые данные могут быть занесены в любой столбец. Ограничения по типам данных действуют только на `INTEGER PRIMARY KEY`, который может содержать только 64-битное знаковое целое.
 
 SQLite версии 3.0 и выше позволяет хранить BLOB данные в любом поле, даже если оно объявлено как поле другого типа.
 Обращение к SQLite базе из двух потоков одновременно неизбежно вызовет краш. Выхода два:
-1. Синхронизируйте обращения при помощи директивы `@synchronized`. Это если поздно менять архитектуру, как было у меня;
+
+1. Синхронизируйте обращения при помощи директивы `@synchronized`.
 2. Если задача закладывается на этапе проектирования, завести менеджер запросов на основе `NSOperationQueue`. Он страхует от ошибок автоматически, а то, что делается автоматически, часто делается без ошибок.
 
 __Пример SQLite__
@@ -3478,15 +3523,6 @@ __Пример SQLite__
     return rc;
 }
 ```
-## Что такое Managed object context?
-Управляемый объект контекста служит в качестве шлюза для основной коллекции объектов, известных под общим названием сохранение стека, некиим посредником между объектами приложения и внешним хранилищем данных. В нижней части стека постоянное хранилище объекта.
-
-<img src="https://github.com/sashakid/ios-guide/blob/master/Images/nsmanagedobjectcontext.png">
-
-Если вы хотите сохранить сделанные вами изменения, контекст гарантирует, что ваши объекты находятся в допустимом состоянии. Если это так, то изменения будут записаны в постоянное хранилище (или хранилища), добавит новые записи для объектов, созданных и удалит записи для объектов, которые удалены.
-
-## Что такое Persistent store coordinator?
-В верхней части стека управляемый объект контекста, в нижней части стека постоянное хранилище объекта. Между управляемым объектом контекста и постоянным хранилищем объекта есть постоянный координатор хранилища. По сути, постоянный координатор хранилища определяет стек. Координатор предназначен для представления фасада для управляемого контекстом объекта, так что группа постоянных хранилищ выглядит как единое совокупное хранилище. Управляемый объект контекста может создать граф объектов на основе объединения всех хранилищ данных координатора. Координатор может быть связан только с одной управляемой объектной моделью. Если Вы хотите положить различные субъекты в различные хранилища, вы должны разделить вашу модель, определяя конфигурацию в управляемой модели объекта.
 
 ## Какие есть нюансы при использовании Core Data в разных потоках? Как синхронизировать данные между потоками?
 1. Create a separate managed object context for each thread and share a single persistent store coordinator. This is the typically-recommended approach.
@@ -3516,6 +3552,7 @@ Faulting isn't unique to Core Data. A similar technique is used in many other fr
 # Тестирование
 ## Unit Tests
 Tests the smallest unit of functionality, typically a method/function (e.g. given a class with a particular state, calling x method on the class should cause y to happen). Unit tests should be focussed on one particular feature (e.g., calling the pop method when the stack is empty should throw an InvalidOperationException). Everything it touches should be done in memory; this means that the test code and the code under test shouldn't:
+
 1.	Call out into (non-trivial) collaborators
 2.	Access the network
 3.	Hit a database
@@ -3562,11 +3599,11 @@ Blocks are Objective-C objects. When you write a block in code, that is an expre
 
 There is a major difference from the constant string syntax. Unlike constant strings, blocks are not exactly the same each time through a piece of code. This is because blocks capture their enclosing scope, and that scope is different every time they're called. In short, each time code execution hits a `^{...}` construct, a new object is created.
 
-Allocating a new object every time would be kind of slow, so blocks take an unusual approach: the object you get from a `^{...}` construct is a stack object. The cost of calling a block is therefore about the same as the cost of calling a C function. This means that it has the same lifetime as local variables, and will be destroyed automatically upon leaving the current scope. Weird, huh?
+Allocating a new object every time would be kind of slow, so blocks take an unusual approach: the object you get from a `^{...}` construct is a stack object. The cost of calling a block is therefore about the same as the cost of calling a C function. This means that it has the same lifetime as local variables, and will be destroyed automatically upon leaving the current scope.
 
 It's frequently useful for a block to outlive the scope where it was created. For example, you may want to return a block, or save it for later. For this to work, you must copy the block. You can do this like any other Objective-C object by sending it the `copy` message. And like any other Objective-C object, if you aren't running under Garbage Collection then you own the resulting object and must eventually dispose of it using `release` or `autorelease`.
 
-Any reference to self is a reference to a local object variable, causing self to be retained. Any reference to an instance variable is an implicit reference to self and causes the same thing.
+Any reference to `self` is a reference to a local object variable, causing `self` to be retained. Any reference to an instance variable is an implicit reference to `self` and causes the same thing.
 
 <img src="https://github.com/sashakid/ios-guide/blob/master/Images/block_capturing.png">
 
@@ -3612,19 +3649,30 @@ Then, inside the invoke function, references to the captured variables are made 
 
 ## When and why block captures `self` and when they don't?
 
-I think the issue is that the networkService may keep a strong reference to the block. And the view controller may have a strong reference to the networkService. So the possible cycle of `VC->NetworkService->block->VC` could exist. However, in this case, it's usually safe to assume that the block will be released after it has run, in which case the cycle is broken. So, in this case, it isn't necessary.
+_Example:_
+```objectivec
+- (void)makeAsyncNetworkCall {
+    [self.networkService performAsyncNetworkCallWithCompletion:^{
+        dispatch_async(dispatch_get_main_queue(), ^{
+                [self.activityIndicatorView stopAnimating];
+            }
+        });
+    }];
+}
+```
+I think the issue is that the `networkService` may keep a strong reference to the block. And the view controller may have a strong reference to the `networkService`. So the possible cycle of `VC->NetworkService->block->VC` could exist. However, in this case, it's usually safe to assume that the block will be released after it has run, in which case the cycle is broken. So, in this case, it isn't necessary.
 
-Where it is necessary is if the block is not released. Say, instead of having a block that runs once after a network call, you have a block that is used as a callback. i.e. the networkService object maintains a strong reference to the block and uses it for all callbacks. In this case, the block will have a strong reference to the VC, and this will create a strong cycle, so a weak reference is preferred.
+Where it is necessary is if the block is not released. Say, instead of having a block that runs once after a network call, you have a block that is used as a callback. i.e. the `networkService` object maintains a strong reference to the block and uses it for all callbacks. In this case, the block will have a strong reference to the VC, and this will create a strong cycle, so a weak reference is preferred.
 
 __Case 1: using the keyword self inside a block:__
 
-If the block is retained by a property, a retain cycle is created between self and the block and both objects can’t be destroyed anymore. If the block is passed around and copied by others, self is retained for each copy.
+If the block is retained by a property, a retain cycle is created between `self` and the block and both objects can’t be destroyed anymore. If the block is passed around and copied by others, `self` is retained for each copy.
 
 The situation for object-type variables is a little more complicated, but the same principle applies.
 
-__Case 2: declaring a `__weak` reference to self outside the block and use it inside the block:__
+__Case 2: declaring a `__weak` reference to `self` outside the block and use it inside the block:__
 
-There is no retain cycle and no matter if the block is retained or not by a property. If the block is passed around and copied by others, when executed, `weakSelf` can have been turned `nil`. The execution of the block can be preempted and different subsequent evaluations of the weakSelf pointer can lead to different values (i.e. `weakSelf` can become `nil` at a certain evaluation).
+There is no retain cycle and no matter if the block is retained or not by a property. If the block is passed around and copied by others, when executed, `weakSelf` can have been turned `nil`. The execution of the block can be preempted and different subsequent evaluations of the `weakSelf` pointer can lead to different values (i.e. `weakSelf` can become `nil` at a certain evaluation).
 ```objectivec
 __weak typeof(self) weakSelf = self;
 dispatch_block_t block =  ^{
@@ -3634,7 +3682,7 @@ dispatch_block_t block =  ^{
 };
 ```
 
-__Case 3: declaring a `__weak` reference to self outside the block and use a `__strong` reference inside the block:__
+__Case 3: declaring a `__weak` reference to `self` outside the block and use a `__strong` reference inside the block:__
 
 There is no retain cycle and, again, no matter if the block is retained or not by a property. If the block is passed around and copied by others, when executed, `weakSelf` can have been turned `nil`. When the strong reference is assigned and it is not `nil`, we are sure that the object is retained for the entire execution of the block if preemption occurs and therefore subsequent evaluations of `strongSelf` will be consistent and will lead to the same value since the object is now retained. If `strongSelf` evaluates to `nil` usually the execution is returned since the block cannot execute properly.
 ```objectivec
@@ -3732,15 +3780,15 @@ typedef returnType (^TypeName)(parameterTypes);
 TypeName blockName = ^returnType(parameters) {...};
 ```
 ## В чем отличие блока от лямбды и замыкания
-Замыкание (англ. closure) в программировании — функция, в теле которой присутствуют ссылки на переменные, объявленные вне тела этой функции и не в качестве её параметров (а в окружающем коде). Говоря другим языком, замыкание — функция, которая ссылается на свобод-ные переменные в своём контексте. Замыкание, так же как и экземпляр объекта, есть способ представления функциональности и данных, связанных и упакованных вместе.
+Замыкание (англ. closure) в программировании — функция, в теле которой присутствуют ссылки на переменные, объявленные вне тела этой функции и не в качестве её параметров (а в окружающем коде). Говоря другим языком, замыкание — функция, которая ссылается на свободные переменные в своём контексте. Замыкание, так же как и экземпляр объекта, есть способ представления функциональности и данных, связанных и упакованных вместе.
 
-A closure is any function which closes over the environment in which it was defined. This means that it can access variables not in its parameter list. Examples:
+Examples:
 ```python
 def func(): return h
 def anotherfunc(h):
 	return func()
 ```   
-This will cause an error, because func does not close over the environment in anotherfunc - `h` is undefined. func only closes over the global environment. This will work:
+This will cause an error, because `func` does not close over the environment in `anotherfunc` - `h` is undefined. `func` only closes over the global environment. This will work:
 ```python
 def anotherfunc(h):
 	def func(): return h
@@ -3756,11 +3804,11 @@ def anotherfunc(h):
 
 print anotherfunc(10)()
 ```
-This will print 10.
+This will print `10`.
 
 This, as you notice, has nothing to do with lambda's - they are two different (although related) concepts.
 
-Лямбда-выражение (в программировании) — это специальный синтаксис для объявления анонимных функторов по месту их использования. Используя лямбда-выражения, можно объявлять функции в любом месте кода. Обычно лямбда-выражение допускает замыкание на лексический контекст, в котором это выражение использовано. Лямбда-выражения поддерживаются во многих языках программирования (C, Common Lisp, Python, PHP, C#, F#, Visual Basic .NET, C++, Java и других).
+Лямбда-выражение — это специальный синтаксис для объявления анонимных функторов по месту их использования. Используя лямбда-выражения, можно объявлять функции в любом месте кода. Обычно лямбда-выражение допускает замыкание на лексический контекст, в котором это выражение использовано. Лямбда-выражения поддерживаются во многих языках программирования (C, Common Lisp, Python, PHP, C#, F#, Visual Basic .NET, C++, Java и других).
 Нестандартное расширение синтаксиса языков программирования C/C++/Objective-C, позволяющее инкапсулировать код и данные в один объект. Блоковые объекты это C-уровневые синтаксические функции. Они похожи на стандартные функции C, но в дополнение к исполняемому коду они также могут содержать переменные привязанные к автоматической (стеку) или управляемой (куче) памяти. Поэтому блок может поддерживать набор состояний (данные), которые он может использовать, чтобы повлиять на поведение при выполнении. Блоки особенно полезны в качестве обратного вызова, потому что блок несет как код, который будет выполняться на обратном вызове, так и данные, необходимые во время этого выполнения.
 A lambda is just an anonymous function - a function defined with no name. In some languages, such as Scheme, they are equivalent to named functions. In fact, function definition is rewritten as binding a lambda to a variable internally. In other languages, like Python, there are some (rather needless) distinctions between them, but they behave the same way otherwise.
 
@@ -3791,10 +3839,9 @@ Here, the two features begin to diverge. With C++0x lambdas, the return type can
 ```c++
 []{ if(something) return 42; else return 43; }
 ```
-In a more complicated lambda with an inferred return type, the return type is always inferred to be void. The code above will therefore produce an error, because it's invalid to return 42 from something with a return type of void.
+In a more complicated lambda with an inferred return type, the return type is always inferred to be `void`. The code above will therefore produce an error, because it's invalid to return `42` from something with a return type of `void`.
 
-Замыкание (англ. closure) в программировании — процедура, которая ссылается на свободные переменные в своём лексическом контексте.
-На примере лямбда это анонимный метод который допускает замыкание.
+Замыкание — процедура, которая ссылается на свободные переменные в своём лексическом контексте. На примере лямбда это анонимный метод который допускает замыкание.
 ```c#
 //oldArray 1, 2, 5, 10, 20
 var newArray = oldArray.Select(x=>x > 5); // замыкание не используется
@@ -3802,12 +3849,12 @@ var newArray = oldArray.Select(x=>x > 5); // замыкание не испол�
 int y = 1;
 var newArray = oldArray.Select(x=>x * y); // замыкание используется
 ```
-Ну вообще это разные вещи.
-Лямбда-функция это жаргонное название анонимной функции, то есть функции у которой нет имени.
+Таким образом, лямбда-функция это жаргонное название анонимной функции, то есть функции у которой нет имени.
 Замыкание, строго говоря, никак не связано с анонимностью. Замыкание - это по сути вложенная функция, которая может обращаться к переменным в функции, в которую она вложена. Поэтому можно говорить, что замыкание - это функция, у которой есть состояние. При этом замыкающаяся функция может быть анонимной (то есть лямбдой), а может и не быть. Лямбда-функция, аналогично, может быть замыканием, а может и не быть (если она не обращается к переменным, объявленным вне её).
 
 ## Обратный вызов
 Ситуация, в которой код ожидает внешних событий, называется обратным вызовом. Для программистов Objective-C существуют три основных формы обратного вызова.
+
 1. Приемник/действие: перед началом ожидания вы говорите: «Когда произойдет Х, отправь это конкретное сообщение этому конкретному объекту». Объект, получающий сообщение, называется приемником. Селектор сообщения и есть действие.
 2. Вспомогательные объекты: перед началом ожидания вы говорите: «Здесь имеется вспомогательный объект, поддерживающий твой протокол. Когда что-нибудь произойдет, отправляй ему сообщения. Вспомогательные объекты часто называются делегатами или источниками данных.
 3. Оповещения: имеется объект, называемый центром оповещений. Перед началом ожидания вы говорите ему: «Этот объект ожидает таких-то оповещений. При поступлении одного из них отправь объекту это сообщение». Когда происходит Х, объект отправляет оповещение центру оповещений, а последний пересылает его вашему объекту.
@@ -3832,7 +3879,7 @@ int main(void) {
     ...
 }
 ```
-Here, the `populate_array` function takes a function pointer as its third parameter, and calls it to get the values to populate the array with. We've written the callback `getNextRandomValue`, which returns a random-ish value, and passed a pointer to it to `populate_array`. `populate_array` will call our callback function 10 times and assign the returned values to the elements in the given array.
+Here, the `populate_array` function takes a function pointer as its third parameter, and calls it to get the values to populate the array with. We've written the callback `getNextRandomValue`, which returns a randomish value, and passed a pointer to it to `populate_array`. `populate_array` will call our callback function 10 times and assign the returned values to the elements in the given array.
 
 __Example 2__
 
@@ -3851,7 +3898,7 @@ static void my_event_cb(const struct event *evt, void *data) {
 }
 
 ...
-   event_cb_register(my_event_cb, &my_custom_data);
+event_cb_register(my_event_cb, &my_custom_data);
 ...
 ```
 In the internals of the event dispatcher, the callback may be stored in a struct that looks something like this:
@@ -3864,7 +3911,6 @@ struct event_cb {
 This is what the code looks like that executes a callback.
 ```c
 struct event_cb *callback;
-
 ...
 
 /* Get the event_cb that you want to execute */
@@ -4061,6 +4107,7 @@ array.sort({ [unowned self] in return item1 < item2 })
 # Autolayout
 
 _"Use Auto Layout"_ determines whether a storyboard uses the Auto Layout features introduced in iOS 6 to automatically layout your interface using constraints.
+
 _"Use Size Classes"_ enables a new Xcode 6 feature called size classes that lets you use Auto Layout to build one interface for all devices and customize constraint constants, and certain views and constraints for different interface idioms while reusing the general layout. It saves the work and repetitiveness of having to build and maintain both MainiPhone and MainiPad storyboards.
 
 __External Changes__
@@ -4072,9 +4119,11 @@ __Internal Changes__
 Internal changes occur when the size of the views or controls in your user interface change.
 
 There are three main approaches to laying out a user interface.
+
 1. you can programmatically lay out the user interface
 2. you can use autoresizing masks to automate some of the responses to external change
 3. you can use Auto Layout.
+
 The frame defined the view’s origin, height, and width in the superview’s coordinate system.
 
 <img src="https://github.com/sashakid/ios-guide/blob/master/Images/autolayout_frame1.png"><img src="https://github.com/sashakid/ios-guide/blob/master/Images/autolayout_frame2.png">
@@ -4087,9 +4136,9 @@ When calculating solutions, Auto Layout attempts to satisfy all the constraints 
 
 Some views have a natural size given their current content. This is referred to as their _intrinsic content size_.
 
-The content hugging pulls the view inward so that it fits snugly around the content.
+__The content hugging__ pulls the view inward so that it fits snugly around the content.
 
-The compression resistance pushes the view outward so that it does not clip the content.
+__The compression resistance__ pushes the view outward so that it does not clip the content.
 
 <img src="https://github.com/sashakid/ios-guide/blob/master/Images/intrinsic.png">
 
@@ -4109,30 +4158,41 @@ Auto Layout does not operate on views’ frame, but on their alignment rect. It�
 
 Unsatisfiable layouts occur when the system cannot find a valid solution for the current set of constraints. Two or more required constraints conflict, because they cannot all be true at the same time.
 When the system detects a unsatisfiable layout at runtime, it performs the following steps:
+
 1. Auto Layout identifies the set of conflicting constraints.
 2. It breaks one of the conflicting constraints and checks the layout. The system continues to break constraints until it finds a valid layout.
 3. Auto Layout logs information about the conflict and the broken constraints to the console.
+
 As soon as you know about the error, the solution is typically very straightforward. Either remove one of the constraints, or change it to an optional constraint.
 
 Ambiguous layouts occur when the system of constraints has two or more valid solutions. There are two main causes:
-1. The layout needs additional constraints to uniquely specify the position and loca-tion of every view. After you determine which views are ambiguous, just add constraints to uniquely specify both the view’s position and its size.
-2. The layout has conflicting optional constraints with the same priority, and the sys-tem does not know which constraint it should break.
+
+1. The layout needs additional constraints to uniquely specify the position and location of every view. After you determine which views are ambiguous, just add constraints to uniquely specify both the view’s position and its size.
+2. The layout has conflicting optional constraints with the same priority, and the system does not know which constraint it should break.
+
 Here, you need to tell the system which constraint it should break, by changing the priorities so that they are no longer equal. The system breaks the constraint having the lowest priority first.
 When an ambiguous layout occurs at runtime, Auto Layout chooses one of the possible solutions to use. This means the layout may or may not appear as you expect. Furthermore, there are no warnings written to the console, and there is no way to set a breakpoint for ambiguous layouts.
-There are a few methods you can call to help identify ambiguous layouts. All of the-se methods should be used only for debugging. Set a breakpoint somewhere where you can access the view hierarchy, and then call one of the following methods from the console:
+There are a few methods you can call to help identify ambiguous layouts. All of these methods should be used only for debugging. Set a breakpoint somewhere where you can access the view hierarchy, and then call one of the following methods from the console:
+
 `hasAmbiguousLayout` Available for both iOS and OS X. Call this method on a misplaced view. It returns YES if the view’s frame is ambiguous. Otherwise, it returns NO.
+
 `exerciseAmbiguityInLayout` Available for both iOS and OS X. Call this method on a view with ambiguous layout. This will toggle the system between the possible valid solutions.
+
 `constraintsAffectingLayoutForAxis:` Available for iOS. Call this method on a view. It returns an array of all the constraints affecting that view along the specified axis.
+
 `constraintsAffectingLayoutForOrientation` Available for OS X. Call this method on a view. It returns an array of all the con-straints affecting that view along the specified orientation.
+
 `_autolayoutTrace` Available as a private method in iOS. Call this method on a view. It returns a string with diagnostic information about the entire view hierarchy containing that view. Ambiguous views are labeled, and so are views that have translatesAutoresizingMaskIntoConstraints set to YES.
 
 Four of these are the Final size classes:
+
 1. Compact-Compact
 2. Compact-Regular
 3. Regular-Compact
 4. Regular-Regular
 
 Base size classes:
+
 5. Compact-Any
 6. Regular-Any
 7. Any-Compact
@@ -4142,16 +4202,18 @@ Base size classes:
 It is typically easiest to work from the most general size class to the most specific. Select the default layout for your app, and design this layout in the Any-Any size class. Then modify the other Base or Final size classes as needed.
 
 Compared to working with springs and struts, Auto Layout introduces two additional steps to the process before views can be displayed:
+
 * updating constraints
 * laying out views
+
 Each step is dependent on the one before; display depends on layout, and layout depends on updating constraints.
 
-The first step – updating constraints – can be considered a “measurement pass.” It happens bottom-up (from subview to super view) and prepares the information needed for the layout pass to actually set the views’ frame. You can trigger this pass by calling setNeedsUpdateConstraints. Any changes you make to the system of constraints itself will automatically trigger this. However, it is useful to notify Auto Layout about changes in custom views that could affect the layout. Speaking of custom views, you can override updateConstraints to add the local constraints needed for your view in this phase.
+The first step – updating constraints – can be considered a “measurement pass.” It happens bottom-up (from subview to super view) and prepares the information needed for the layout pass to actually set the views’ frame. You can trigger this pass by calling setNeedsUpdateConstraints. Any changes you make to the system of constraints itself will automatically trigger this. However, it is useful to notify Auto Layout about changes in custom views that could affect the layout. Speaking of custom views, you can override `updateConstraints` to add the local constraints needed for your view in this phase.
 
-The second step – layout – happens top-down (from super view to subview). This layout pass actually applies the solution of the constraint system to the views by setting their frames (on OS X) or their center and bounds (on iOS). You can trigger this pass by calling setNeedsLayout, which does not actually go ahead and apply the layout immediately, but takes note of your request for later. This way you don’t have to worry about calling it too often, since all the layout requests will be coalesced into one layout pass.
-To force the system to update the layout of a view tree immediately, you can call `layoutIfNeeded` / `layoutSubtreeIfNeeded` (on iOS and OS X respectively). This can be helpful if your next steps rely on the views’ frame being up to date. In your custom views you can override `layoutSubviews` / `layout` to gain full control over the layout pass. We will show use cases for this later on.
+The second step – layout – happens top-down (from super view to subview). This layout pass actually applies the solution of the constraint system to the views by setting their frames (on OS X) or their center and bounds (on iOS). You can trigger this pass by calling `setNeedsLayout`, which does not actually go ahead and apply the layout immediately, but takes note of your request for later. This way you don’t have to worry about calling it too often, since all the layout requests will be coalesced into one layout pass.
+To force the system to update the layout of a view tree immediately, you can call `layoutIfNeeded` / `layoutSubtreeIfNeeded` (on iOS and OS X respectively). This can be helpful if your next steps rely on the views’ frame being up to date. In your custom views you can override `layoutSubviews` / `layout` to gain full control over the layout pass.
 
-Finally, the display pass renders the views to screen and is independent of whether you’re using Autolayout or not. It operates top-down and can be triggered by calling `setNeedsDisplay`, which results in a deferred redraw coalescing all those calls. Overriding the familiar drawRect: is how you gain full control over this stage of the display process in your custom views.
+Finally, the display pass renders the views to screen and is independent of whether you’re using Autolayout or not. It operates top-down and can be triggered by calling `setNeedsDisplay`, which results in a deferred redraw coalescing all those calls. Overriding the familiar `drawRect:` is how you gain full control over this stage of the display process in your custom views.
 
 Since each step depends on the one before it, the display pass will trigger a layout pass if any layout changes are pending. Similarly, the layout pass will trigger updating the constraints if the constraint system has pending changes.
 
@@ -4162,14 +4224,17 @@ It’s important to remember that these three steps are not a one-way street. Co
 __Explanation 1__
 
 When you pass a variable to a function, you are passing a copy of its value to the function instead of your variable itself. If you modified the value of the variable in your function and you printed it when the function is done executing, you'd see the variable still has the original value you originally gave it.
-An in-out parameter takes "the variable itself", instead of a copy. and as such you can modify it.
-In out parameters are akin to references in C++.
+
+An in-out parameter takes "the variable itself", instead of a copy, and as such you can modify it. In-out parameters are akin to references in C++.
+
 Function parameters are always passed by value. Pass-by-reference is simulated in C by explicitly passing pointer values. C program source text is free-format, using the semicolon as a statement terminator and curly braces for grouping blocks of statements.
-Objective-C only support passing parameters by value. The problem here has probably been fixed already (Since this question is more than a year old) but I need to clarify some things regarding arguments and Objective-C.
-Objective-C is a strict superset of C which means that everything C does, Obj-C does it too.
-By having a quick look at Wikipedia, you can see that Function parameters are always passed by value
-Objective-C is no different. What's happening here is that whenever we are passing an object to a function (In this case a `UILabel *`), we pass the value contained at the pointer's address.
-Whatever you do, it will always be the value of what you are passing. If you want to pass the value of the reference you would have to pass it a `**object` (Like often seen when passing `NSError`).
+
+Objective-C only support passing parameters by value. Objective-C is a strict superset of C which means that everything C does, ObjC does it too. By having a quick look at Wikipedia, you can see that function parameters are always passed by value. Objective-C is no different. What's happening here is that whenever we are passing an object to a function (for example, `UILabel *label`), we pass the value contained at the pointer's address.
+
+Whatever you do, it will always be the value of what you are passing.
+
+If you want to pass the value of the reference you would have to pass it a `**object` (Like often seen when passing `NSError`).
+
 This is the same thing with scalars, they are passed by value, hence you can modify the value of the variable you received in your method and that won't change the value of the original variable that you passed to the function.
 Here's an example to ease the understanding:
 ```objectivec
@@ -4185,7 +4250,7 @@ Here's an example to ease the understanding:
     //j now == 23, but this hasn't changed the value of i.
 }
 ```
-If you wanted to be able to modify i, you would have to pass the value of the reference by doing the following:
+If you wanted to be able to modify `i`, you would have to pass the value of the reference by doing the following:
 ```objectivec
 - (void)parentFunction {
     int i = 0; //Stack allocated. Kept it that way for sake of simplicity
@@ -4260,9 +4325,9 @@ __Explanation 3__
      string = [string lowercaseString];
 }
 ```
-I thought the output should be upper case string. But it comes out to be UPPER CASE STRING.
+I thought the output should be `upper case string`. But it comes out to be `UPPER CASE STRING`.
 
-The [string lowercaseString] call creates a new NSString object that you assign to the local variable string. This does not change the value of stringVar outside the changeString function. The pointer itself is passed by value.
+The `[string lowercaseString]` call creates a new `NSString` object that you assign to the local variable string. This does not change the value of `stringVar` outside the `changeString` function. The pointer itself is passed by value.
 
 One way to do what you want, is to pass a pointer to a pointer:
 ```objectivec
