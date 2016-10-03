@@ -475,6 +475,20 @@ _`NSDictionary` is a great choice if you have a natural key you can use to acces
 NSSet *set = [NSSet setWithObjects:@"1", @"2", @"3", @"4", @"5", @"6", @"7", @"8", @"9", @"0", nil];
 NSLog(@"%@", set);
 ```
+```
+{(
+    7,
+    3,
+    8,
+    4,
+    0,
+    9,
+    5,
+    1,
+    6,
+    2
+)}
+```
 
 ## Difference between NSArray and CFArray
 What's the point of them both existing? There are a few reasons.
