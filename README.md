@@ -725,9 +725,7 @@ NSInteger alphabeticSort(id string1, id string2, void *reverse) {
 	return [string1 localizedCaseInsensitiveCompare:string2];
 }
 NSMutableArray *anArray = [NSMutableArray arrayWithObjects:
-@"aa", @"ab", @"ac", @"ad", @"ae", @"af", @"ag", @"ah", @"ai", @"aj", @"ak", @"al", @"am", @"an", @"ao", @"ap", @"aq", @"ar", @"as", @"at", @"au", @"av", @"aw", @"ax", @"ay", @"az", @"ba", @"bb", @"bc", @"bd", @"bf", @"bg", @"bh", @"bi", @"bj", @"bk", @"bl", @"bm", @"bn", @"bo", @"bp", @"bq", @"br", @"bs", @"bt", @"bu", @"bv", @"bw", @"bx", @"by", @"bz", @"ca", @"cb", @"cc", @"cd", @"ce", @"cf", @"cg", @"ch", @"ci", @"cj", @"ck", @"cl", @"cm", @"cn", @"co", @"cp", @"cq", @"cr", @"cs", @"ct", @"cu",
-@"cv", @"cw", @"cx", @"cy", @"cz",
-nil];
+@"aa", @"ab", @"ac", @"ad", @"ae", @"af", @"ag", @"ah", @"ai", @"aj", @"ak", @"al", @"am", @"an", @"ao", @"ap", @"aq", @"ar", @"as", @"at", @"au", @"av", @"aw", @"ax", @"ay", @"az", @"ba", @"bb", @"bc", @"bd", @"bf", @"bg", @"bh", @"bi", @"bj", @"bk", @"bl", @"bm", @"bn", @"bo", @"bp", @"bq", @"br", @"bs", @"bt", @"bu", @"bv", @"bw", @"bx", @"by", @"bz", @"ca", @"cb", @"cc", @"cd", @"ce", @"cf", @"cg", @"ch", @"ci", @"cj", @"ck", @"cl", @"cm", @"cn", @"co", @"cp", @"cq", @"cr", @"cs", @"ct", @"cu", @"cv", @"cw", @"cx", @"cy", @"cz", nil];
 // внимание: anArray отсортирован
 NSData *sortedArrayHint = [anArray sortedArrayHint];
 [anArray insertObject:@"be" atIndex:5];
@@ -5007,8 +5005,10 @@ struct Value2 {
 * как сделать миграцию БД
 * VIPER, MVVM,...?
 * можно ли скачать что-нибудь, пока приложение выполняется в фоне?
-* why do you like swift
 * debugging in core data, what is fault object?
+* Что такое SOLID?
+* Как работает NSNotificationCenter? В каком потоке приходит оповещение?
+* Как реализовать хеш-таблицу? Как избежать коллизий?
 
 ***
 
