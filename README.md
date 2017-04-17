@@ -1,4 +1,4 @@
-#ios-guide
+# ios-guide
 
 ##### Прогресс:
 - [ ] Рабочее оглавление (пока есть проблема разметки с кликабельностью оглавления на других языках, отличных от английского)
@@ -2924,7 +2924,7 @@ If you send a message to an object that does not handle that message, before ann
 
 ## Что такое классы в Objective-C, структура классов?
 ```objectivec
-#import <objc/objc.h>
+# import <objc/objc.h>
 /*
  *	Class Template
  */
@@ -2937,11 +2937,11 @@ struct objc_class {
 	long instance_size;
 	struct objc_ivar_list *ivars;
 
-#if defined(Release3CompatibilityBuild)
+# if defined(Release3CompatibilityBuild)
 	struct objc_method_list *methods;
-#else
+# else
 	struct objc_method_list **methodLists;
-#endif
+# endif
 
 	struct objc_cache *cache;
  	struct objc_protocol_list *protocols;
@@ -3099,7 +3099,7 @@ MyArray *array = [MyArray arrayWithObjects:@(1), @(2), nil];
 `@import` Модуль прекомпилированных заголовков, позволяющий экономить время по сравнению с компиляцией заголовков при `#import`. Не надо линковать фреймворк.
 
 ```objectivec
-#import <Cocoa/Cocoa.h> //is the same as
+# import <Cocoa/Cocoa.h> //is the same as
 @import Cocoa;
 ```
 # Multithreading
@@ -3795,7 +3795,7 @@ http://clang.llvm.org/docs/Block-ABI-Apple.html#imported-variables
 
 ## Примеры объявления и использования блоков
 ```objectivec
-#import "NSArray+Map.h"
+# import "NSArray+Map.h"
 
 @implementation NSArray (Map)
 
@@ -4444,7 +4444,7 @@ array.reverseObjectEnumerator.allObjects;
 ```
 __Способ 3__
 ```c++
-#include <string.h>
+# include <string.h>
 /* reverse: переворачивает строку s (результат в s) */
 void reverse(char s[]) {
 	int c, i, j;
@@ -4507,14 +4507,14 @@ A root class inherits from no other class and defines an interface and behavior 
 __Описание категории имеет следующий вид:__
 
 ```objectivec
-#import "ClassName.h"
+# import "ClassName.h"
 
 @interface ClassName (CategoryName)
 	объявление методов
 @end
 
 //Реализация категории выглядит следующим образом:
-#import "CategoryName.h"
+# import "CategoryName.h"
 
 @implementation ClassName (CategoryName)
 	реализация методов
@@ -4776,7 +4776,7 @@ UITableViewCell *cell = [tableView dequeueReusableCellWithIdentifier:CellIdentif
 * глобальные переменные
 
 ```objectivec
-#define M_PI 3.14159265358979323846264338327950288
+# define M_PI 3.14159265358979323846264338327950288
 ```
 Директива `#define` приказывает препропессору: «Каждый раз, когда ты встречаешь Х, замени его на У еще до того, как компилятор увидит код».
 
@@ -4874,19 +4874,19 @@ An example of how you might use `awakeFromNib` is shown below. Suppose your nib 
 ## Что происходит когда мы пытаемся вызвать метод у nil указателя? Разница между nil и Nil
 На самом деле, в контексте указателей применим как `NULL`, так и `0`, ввиду того что первый — не более чем макрос-обёртка для второго:
 ```objectivec
-#define NULL ((void *)0)
+# define NULL ((void *)0)
 ```
 `nil` это указатель на нулевой объект:
 ```objectivec
-#if !defined(nil)
+# if !defined(nil)
 	#define nil (id)0
-#endif
+# endif
 ```
 Но и это ещё не всё: в дополнение к четырём вышеперечисленным мнемоникам, Foundation определяет макрос `Nil` (не путать с `nil`) — нулевой указатель типа `Class`:
 ```objectivec
-#if !defined(Nil)
+# if !defined(Nil)
 	#define Nil (Class)0
-#endif
+# endif
 ```
 `NSNull` используется внутри фреймворка Foundation и некоторых других для того, чтобы обойти ограничение стандартных коллекций, вроде `NSArray` или `NSDictionary`, заключающееся в том, что они не могут содержать в себе значения `nil`.
 
