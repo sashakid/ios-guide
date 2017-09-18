@@ -1,15 +1,15 @@
 <img src="https://github.com/sashakid/ios-guide/blob/master/Images/ios_guide_logo.png">
 
-* [Основные понятия программирования](basics.md)
+* [Основные понятия программирования](Main/1. basics.md)
 * [Коллекции в Objective-C](objectivec_collections.md)
 * [Алгоритмы](algorithms.md)
 * [Язык СИ](c_language.md)
 * [Паттерны проектирования](design_patterns.md)
 * [iOS](ios.md)
 * [Objective-C](objectivec.md)
-* [MEMORY MANAGEMENT](memory_management.md)
+* [Memory Management](memory_management.md)
 * [Runtime](runtime.md)
-* [Multithreading and concurrency](multithreading_concurrency.md)
+* [Multithreading and Concurrency](multithreading_concurrency.md)
 * [Networking](networking.md)
 * [Data](data.md)
 * [Блоки](blocks.md)
