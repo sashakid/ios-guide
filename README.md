@@ -1,6 +1,6 @@
 <img src="https://github.com/sashakid/ios-guide/blob/master/Images/ios_guide_logo.png">
 
-* [Основные понятия программирования](Main/1. basics.md)
+* [Основные понятия программирования](Main/1_basics.md)
 * [Коллекции в Objective-C](objectivec_collections.md)
 * [Алгоритмы](algorithms.md)
 * [Язык СИ](c_language.md)
