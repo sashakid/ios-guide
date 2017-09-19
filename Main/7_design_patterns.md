@@ -112,11 +112,11 @@ In MVVM there is no Presenter. Instead the View binds directly to a Presentation
 
 <a name="viper"></a>
 ### VIPER
-* __V__ View: displays what it is told to by the Presenter and relays user input back to the Presenter.
-* __I__ Interactor: contains the business logic as specified by a use case.
-* __P__ Presenter: contains view logic for preparing content for display (as received from the Interactor) and for reacting to user inputs (by requesting new data from the Interactor).
-* __E__ Entity: contains basic model objects used by the Interactor.
-* __R__ Routing: contains navigation logic for describing which screens are shown in which order.
+* "__V__", View: displays what it is told to by the Presenter and relays user input back to the Presenter.
+* "__I__", Interactor: contains the business logic as specified by a use case.
+* "__P__", Presenter: contains view logic for preparing content for display (as received from the Interactor) and for reacting to user inputs (by requesting new data from the Interactor).
+* "__E__", Entity: contains basic model objects used by the Interactor.
+* "__R__", Routing: contains navigation logic for describing which screens are shown in which order.
 <img src="https://github.com/sashakid/ios-guide/blob/master/Images/viper.png">
 
 <a name="порождающие-шаблоны"></a>
