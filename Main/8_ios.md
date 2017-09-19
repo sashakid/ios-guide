@@ -1,37 +1,36 @@
 - [iOS](#ios)
 	- [IPhone, resolution, pixels vs points](#iphone,-resolution,-pixels-vs-points)
-	- [Файловая система iOS](#файловая-система-iOS)
-	- [App lifecycle](#app-lifecycle)
-	- [Возможные состояния программы](#возможные-состояния-программы)
+	- [Файловая система iOS](#файловая-система-ios)
+	- [Жизненный цикл приложения](#жизненный-цикл-приложения)
 	- [Жизненный цикл UIViewController](#жизненный-цикл-uiviewController)
 	- [UIView](#uiview)
-  - [Фреймворки](#Фреймворки)
+  - [Фреймворки](#фреймворки)
     - [Core Foundation](#core-foundation)
 	  - [UIKit](#uikit)
     - [CFNetwork](#cfnetwork)
     - [QuartzCore](#quartzcore)
 
+<a name="ios"></a>
 # iOS
-
+<a name="iphone,-resolution,-pixels-vs-points"></a>
 ## IPhone, resolution, pixels vs points?
-
 <img src="https://github.com/sashakid/ios-guide/blob/master/Images/resolutions.png">
-
 A pixel on iOS is the full resolution of the device, which means if I have an image that is 100x100 pixels in length, then the phone will render it 100x100 pixels on a standard non-retina device. However, because newer iPhones have a quadrupled pixel density, that same image will render at 100x100 pixels, but look half that size. The iOS engineers solved this a long time ago (way back in OS X with Quartz) when they introduced Core Graphics' point system. A point is a standard length equivalent to 1x1 pixels on a non-retina device, and 2x2 pixels on a retina device. That way, your 100x100 image will render twice the size on a retina device and basically normalize what the user sees.
 It also provides a standard system of measurement on iOS devices because no matter how the pixel density chanes, there have always been 320x480 points on an iPhone screen and 768x1024 points on an iPad screen.*
 But at the same time, you can basically disregard the documentation considering that retina devices were introduced with iOS 4 at a minimum, and I don't know of too many people still running iOS 3 on a newer iPhone. But if such a case arises, your UIImage would need to be rendered at exactly twice it's dimensions in pixels on a retina iPhone to make up for the pixel density difference.
 
+<a name="файловая-система-ios"></a>
 ## Файловая система iOS
-
 <img src="https://github.com/sashakid/ios-guide/blob/master/Images/file_system.png">
 
-## App lifecycle
-
+<a name="жизненный-цикл-приложения"></a>
+## Жизненный цикл приложения
 <img src="https://github.com/sashakid/ios-guide/blob/master/Images/lifecycle.png">
 
 <img src="https://github.com/sashakid/ios-guide/blob/master/Images/app_states.png">
 
-Возможные состояния программы
+_Возможные состояния программы_
+
 * Not running (не запущенное) — приложение не было запущено или его работа была прекращена
 * Inactive (неактивное) — приложение работает, но не принимает события (например, когда пользователь заблокировал телефон при запущенном приложении)
 * Active (активное) — нормальное состояние приложения при его работе
@@ -41,10 +40,11 @@ But at the same time, you can basically disregard the documentation considering 
 <img src="https://github.com/sashakid/ios-guide/blob/master/Images/app_states_2.png">
 <img src="https://github.com/sashakid/ios-guide/blob/master/Images/app_states_3.png">
 
+<a name="жизненный-цикл-uiviewController"></a>
 ## Жизненный цикл UIViewController
-
 <img src="https://github.com/sashakid/ios-guide/blob/master/Images/uiviewcontroller.png">
 
+<a name="uiview"></a>
 ## UIView
 The UIView (UIResponder : NSObject) Объект, рисующий контент в прямоугольной области экрана и управляющий событиями, вызванными касаниями экрана пользователем. Представ-ление также может содержать другие представления, называемые субпредставлениями. При добавлении субпредставления к представлению контейнер называется родительским пред-ставлением, а его субпредставление называется дочерним представлением. Сочетание роди-тельского представления, его дочерних представлений (а так же их дочерних представлений, если таковые имеются) образует иерархию представлений.
 Интерфейс состоит из представлений (UIView).  
@@ -85,6 +85,7 @@ UIView *view = [[UIView alloc]initWithFrame: appFrame];
 }
 ```
 
+<a name="фреймворки"></a>
 # Фреймворки
 Cocoa (в пер. с англ. - какао) — родная объектно-ориентированная среда разработки приложе-ний для операционной системы Mac OS X производства компании Apple. Это один из пяти ос-новных API, доступных в Mac OS X, — Cocoa, Carbon, Toolbox (для работы старых приложений Mac OS 9), POSIX и Java. Такие языки, как Perl, Python и Ruby не считаются основными, так как на них пока что пишется не так много серьёзных приложений для Mac OS X.
 Приложения, использующие Cocoa, обычно разрабатываются с помощью среды разработки Apple Xcode (в прошлом называвшегося Project Builder) и Interface Builder с использованием языка Objective-C. Однако, среда Cocoa также доступна и при разработке на других языках, та-ких как Ruby, Python и Perl с помощью связующих библиотек (MacRuby, PyObjC и CamelBones соответственно). Также можно писать Cocoa-программы на Objective-C в обычном текстовом редакторе и вручную компилировать их с помощью GCC или make-сценариев для GNUstep.
@@ -138,9 +139,9 @@ Core Text is for apps that need a low-level text-handling technology correlating
 Core Text Lays Out Text. Core Text generates glyphs (from character codes and font data) and positions them relative to each other in glyph runs. It breaks glyph runs into lines, and it assembles lines into multiline frames (such as paragraphs). Core Text also provides glyph- and layout-related data, such as glyph locations and measurement of lines and frames. It handles character attributes and paragraph styles, including various types of tab styles and positioning.
 You Can Manage Fonts With Core Text
 The Core Text font API provides fonts, font collections, font descriptors, and easy access to font data. It also provides support for multiple master fonts, font variations, font cascading, and font linking. Core Text provides an alternative to Quartz for loading your own fonts into the current process, that is, font activation.
-
 <img src="https://github.com/sashakid/ios-guide/blob/master/Images/core_text.png">
 
+<a name="core-foundation"></a>
 ## Core Foundation
 
 Core Foundation (also called CF) is a C application programming interface (API) in Mac OS X & iOS, and is a mix of low-level routines and wrapper functions. Some types in Core Foundation are "toll-free bridged", or interchangeable with a simple cast, with those of their Foundation Kit counterparts. For example, one could create a CFDictionaryRef Core Foundation type, and then later simply use a standard C cast to convert it to its Objective-C counterpart, `(NSDictionary *)`, and then use the desired Objective-C methods on that object as one normally would.
@@ -188,16 +189,16 @@ Does the CoreFoundation Framework provide any advantages that the CocoaFramework
 Several, but generally at a cost of decreased simplicity and increased fragility.
 For example, the CF collections allow you to completely customize how memory is managed and objects are identified; you can provide custom allocation/free/hashing/comparison hooks. Through this, you can "easily" encapsulate non-Objective-C types in CF collections.
 
+<a name="uikit"></a>
 ## UIKit
 The UIKit framework provides the classes needed to construct and manage an application’s user interface for iOS. It provides an application object, event handling, drawing model, windows, views, and controls specifically designed for a touch screen interface.
 The UIKit framework defines a number of functions, many of them used in graphics and drawing operations.
-
 <img src="https://github.com/sashakid/ios-guide/blob/master/Images/uikit.png">
 
+<a name="cfnetwork"></a>
 ## CFNetwork
 CFNetwork is a low-level, high-performance framework that gives you the ability to have detailed control over the protocol stack. It is an extension to BSD sockets, the standard socket abstraction API that provides objects to simplify tasks such as communicating with FTP and HTTP servers or resolving DNS hosts. CFNetwork is based, both physically and theoretically, on BSD sockets.
 Just as CFNetwork relies on BSD sockets, there are a number of Cocoa classes that rely on CFNetwork (NSURL, for example). In addition, the Web Kit is a set of Cocoa classes to display web content in win-dows. Both of these classes are very high level and implement most of the details of the networking protocols by themselves.
-
 <img src="https://github.com/sashakid/ios-guide/blob/master/Images/cfnetwork.png">
 
 __When to Use CFNetwork__
@@ -216,9 +217,9 @@ __CFStream API__
 
 Read and write streams provide an easy way to exchange data to and from a variety of media in a device-independent way. You can create streams for data located in memory, in a file, or on a network (using sockets), and you can use streams without loading all of the data into memory at once.
 A stream is a sequence of bytes transmitted serially over a communications path. Streams are one-way paths, so to communicate bidirectionally an input (read) stream and output (write) stream are necessary. Except for file-based streams, you cannot seek within a stream; once stream data has been provided or consumed, it cannot be retrieved again from the stream. CFStream is an API that provides an abstraction for these streams with two new CFType objects: CFReadStream and CFWriteStream. Both types of stream follow all of the usual Core Foundation API conventions. CFStream is built on top of CFSocket and is the foundation for CFHTTP and CFFTP. As you can see in Figure 1-2, even though CFStream is not officially part of CFNetwork, it is the basis for almost all of CFNetwork.
-
 <img src="https://github.com/sashakid/ios-guide/blob/master/Images/cf.png">
 
+<a name="quartzcore"></a>
 ## QuartzCore
 Quartz 2D is an API of the Core Graphics framework that implements drawing.
 Quartz Core is a framework that includes APIs for animation and image processing.
