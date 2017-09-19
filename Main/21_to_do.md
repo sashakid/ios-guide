@@ -28,7 +28,7 @@
 * в чем отличие QoS User-interactive и user-initiated?
 * почему синглтон это плохо?
 * bridge casting
-* swift optonals, objc new modifiers (`nullable`, etc.). что это и как реализовано?
+* swift optionals, objc new modifiers (`nullable`, etc.). что это и как реализовано?
 * dynamic method resolution
 * swift 1, 2, 3
 * dependency injection
@@ -47,3 +47,4 @@
 * Что происходит, если у объекта вызвать несуществующий метод?
 * Что такое реактивное программирование? Как работает RAC?
 * Что такое функциональное программирование? Какие фичи есть для этого в Swift / Objective-C?
+* Difference between Array VS NSArray VS [AnyObject]
