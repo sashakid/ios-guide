@@ -16,7 +16,7 @@ Most collection classes exist in two versions: mutable and immutable (default). 
 __Массив в СИ__
 
 Количество элементов массива определено заранее при объявлении массива. Все элементы упорядочены – каждому присвоен порядковый номер, который называется индексом. Доступ к конкретному элементу массива осуществляется с помощью индекса. В языке Cи все массивы располагаются в отдельной непрерывной области памяти. Первый элемент массива имеет наименьший адрес, а последний – наибольший. Элементы массива могут быть как простыми переменными, так и составными. Элемент массива может иметь несколько индексов. Количество индексов переменной определяет размерность массива. Размерность массивов в языке Cи не ограничена, но чаще используются одномерные и двумерные массивы. Начальное значение индекса элемента массива для каждого измерения в Cи — нуль.
-<img src="https://github.com/sashakid/ios-guide/blob/master/Images/c_array.png">
+<img src="https://github.com/sashakid/ios-guide/blob/master/Images/c_array.jpg">
 
 ## Core Foundation:
 * `CFArray / CFMutableArray`
@@ -25,13 +25,13 @@ An object of opaque type `CFArray` — is an ordered, compact container of value
 
 * `CFDictionary / CFMutableDictionary`
 
-An object of the CFDictionary type — is a hashing-based collection whose keys for accessing its values are arbitrary, program-defined pieces of data (or pointers to data). Although the key is usually a string (or, in Core Foundation, a `CFString` object), it can be anything that can fit into the size of a pointer—an integer, a reference to a Core Foundation object, even a pointer to a data structure (unlikely as that might be). The keys of dictionaries are unlike the keys of the other collection objects in that, conceptually, they are also contained by the collection along with the values. Dictionaries are primarily useful for holding and organizing data that can be labeled, such as values extracted from text fields in the user interface.
+An object of the `CFDictionary` type — is a hashing-based collection whose keys for accessing its values are arbitrary, program-defined pieces of data (or pointers to data). Although the key is usually a string (or, in Core Foundation, a `CFString` object), it can be anything that can fit into the size of a pointer—an integer, a reference to a Core Foundation object, even a pointer to a data structure (unlikely as that might be). The keys of dictionaries are unlike the keys of the other collection objects in that, conceptually, they are also contained by the collection along with the values. Dictionaries are primarily useful for holding and organizing data that can be labeled, such as values extracted from text fields in the user interface.
 In Core Foundation, a dictionary differs from an array in that the key used to access a particular value in the dictionary remains the same as values are added to or removed from the dictionary—that is, until a value associated with a particular key is replaced or removed. In an array, the key (that is, the index) that is used to retrieve a particular value can change over time as values are added to or deleted from the array. Also, unlike an array, a dictionary does not put its values in any order. To enable later retrieval of a value, the key of the key-value pair should be constant (or be treated as constant); if the key changes after being used to put a value in the dictionary, the value might not be retrievable. The keys of a dictionary form a set; in other words, keys are guaranteed to be unique in a dictionary.
 The access time for a value in the dictionary is guaranteed to be at worst `O(N)` for any implementation, current and future, but will often be `O(1)` (constant time). Insertion or deletion operations will typically be constant time as well, but are `O(N^2)` in the worst case in some implementations. Access of values through a key is faster than accessing values directly (if there are any such operations). Dictionaries will tend to use significantly more memory than a array with the same number of values.
 
 * `CFSet / CFMutableSet`
 
-A set, both in its mathematical sense and in the implementation of CFSet, is an unordered collection of distinct elements. CFSet creates static sets and CFMutableSet creates dynamic sets.
+A set, both in its mathematical sense and in the implementation of `CFSet`, is an unordered collection of distinct elements. `CFSet` creates static sets and `CFMutableSet` creates dynamic sets.
 
 * `CFBag / CFMutableBag`
 
@@ -48,7 +48,7 @@ For managing bit vectors - ordered collections of bit values, which are either `
 
 * `CFTree / CFMutableTree`
 
-You use CFTree to create tree structures that represent hierarchical organizations of information. In such structures, each tree node has exactly one parent tree (except for the root tree, which has no parent) and can have multiple children.
+You use `CFTree` to create tree structures that represent hierarchical organizations of information. In such structures, each tree node has exactly one parent tree (except for the root tree, which has no parent) and can have multiple children.
 
 ## Foundation:
 __Ordered Collections__
@@ -60,7 +60,7 @@ The most interesting part is that Apple doesn’t guarantee `O(1)` access time o
 __Collections of Keys and Values__
 * `NSDictionary / NSMutableDictionary`
 
-Следует использовать когда требуется удобный и эффективный способ хранения данных, ассоциированных с ключом. Объекты класса `NSDictionary` позволяют хранить неизменяемые пары объектов “ключ/значение” различных типов. Ключи в словаре `NSDictionary` не могут дублироваться, повторение значений допускается. Типы ключей и значений могут, но не обязаны совпадать. Особенно эффективными по скорости будут операции поиска по ключу, так как словарь специально оптимизирован для них. Because the dictionary copies each key, keys must conform to the NSCopying protocol. Bear this in mind when choosing what objects to use as keys. Although you can use any object that adopts the NSCopying protocol and implements the hash and isEqual: methods, it is typically bad design to use large objects, such as instances of NSImage, because doing so may incur performance penalties.
+Следует использовать когда требуется удобный и эффективный способ хранения данных, ассоциированных с ключом. Объекты класса `NSDictionary` позволяют хранить неизменяемые пары объектов “ключ/значение” различных типов. Ключи в словаре `NSDictionary` не могут дублироваться, повторение значений допускается. Типы ключей и значений могут, но не обязаны совпадать. Особенно эффективными по скорости будут операции поиска по ключу, так как словарь специально оптимизирован для них. Because the dictionary copies each key, keys must conform to the NSCopying protocol. Bear this in mind when choosing what objects to use as keys. Although you can use any object that adopts the `NSCopying` protocol and implements the hash and isEqual: methods, it is typically bad design to use large objects, such as instances of `NSImage`, because doing so may incur performance penalties.
 
 __Unordered Collections of Objects__
 * `NSSet / NSMutableSet`
@@ -351,7 +351,7 @@ NSInteger alphabeticSort(id string1, id string2, void *reverse) {
 	if (*(BOOL *)reverse == YES) {
 		return [string2 localizedCaseInsensitiveCompare:string1];
 	}
-		return [string1 localizedCaseInsensitiveCompare:string2];
+	return [string1 localizedCaseInsensitiveCompare:string2];
 }
 NSMutableArray *anArray = [NSMutableArray arrayWithObjects:
 @"aa", @"ab", @"ac", @"ad", @"ae", @"af", @"ag", @"ah", @"ai", @"aj", @"ak", @"al", @"am", @"an", @"ao", @"ap", @"aq", @"ar", @"as", @"at", @"au", @"av", @"aw", @"ax", @"ay", @"az", @"ba", @"bb", @"bc", @"bd", @"bf", @"bg", @"bh", @"bi", @"bj", @"bk", @"bl", @"bm", @"bn", @"bo", @"bp", @"bq", @"br", @"bs", @"bt", @"bu", @"bv", @"bw", @"bx", @"by", @"bz", @"ca", @"cb", @"cc", @"cd", @"ce", @"cf", @"cg", @"ch", @"ci", @"cj", @"ck", @"cl", @"cm", @"cn", @"co", @"cp", @"cq", @"cr", @"cs", @"ct", @"cu", @"cv", @"cw", @"cx", @"cy", @"cz", nil];
