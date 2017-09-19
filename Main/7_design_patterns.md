@@ -50,25 +50,25 @@ Two design patterns are reserved for later sections, Model-View-Controller (MVC)
 ## Что такое SOLID?
 SOLID (сокр. от англ. Single responsibility, Open-closed, Liskov substitution, Interface segregation и Dependency inversion) - акроним, введённый Майклом Фэзерсом для первых пяти принципов, названных Робертом Мартином в начале 2000-х, которые означали пять основных принципов ООП и проектирования.
 
-1. __S__ Single responsibility, Принцип единственной ответственности
+1. "__S__", Single responsibility, Принцип единственной ответственности
 
 Обозначает, что каждый объект должен иметь одну ответственность и эта ответственность должна быть полностью инкапсулирована в класс. Все его поведения должны быть направлены исключительно на обеспечение этой ответственности. Следующие приёмы позволяют соблюдать принцип единственной ответственности: разработка через тестирование, выделение класса, фасад, Proxy, DAO.
 
-2. __O__ Open-closed, Принцип открытости / закрытости
+2. "__O__", Open-closed, Принцип открытости / закрытости
 
 Программные сущности должны быть:
 * открыты для расширения: означает, что поведение сущности может быть расширено, путём создания новых типов сущностей.
 * закрыты для изменения: в результате расширения поведения сущности, не должны вносится изменения в код, которые эти сущности использует.
 
-3. __L__ Liskov substitution, Принцип подстановки Барбары Лисков
+3. "__L__", Liskov substitution, Принцип подстановки Барбары Лисков
 
 Даёт определение понятия замещения — если `S` является подтипом `T`, тогда объекты типа `T` в программе могут быть замещены объектами типа `S` без каких-либо изменений желательных свойств этой программы (например, корректность). Более простыми словами можно сказать, что поведение наследуемых классов не должно противоречить поведению, заданному базовым классом, то есть поведение наследуемых классов должно быть ожидаемым для кода, использующего переменную базового типа.
 
-4. __I__ Interface segregation, Принцип разделения интерфейса
+4. "__I__", Interface segregation, Принцип разделения интерфейса
 
 Роберт Мартин определил его так: «Клиенты не должны зависеть от методов, которые они не используют». Принцип разделения интерфейсов говорит о том, что слишком «толстые» интерфейсы необходимо разделять на более маленькие и специфические, чтобы клиенты маленьких интерфейсов знали только о методах, которые необходимы им в работе. В итоге, при изменении метода интерфейса не должны меняться клиенты, которые этот метод не используют.
 
-5. __D__ Dependency inversion, Принцип инверсии зависимостей
+5. "__D__", Dependency inversion, Принцип инверсии зависимостей
 
 Принцип, используемый для уменьшения зацепления в компьютерных программах.
 * Модули верхних уровней не должны зависеть от модулей нижних уровней. Оба типа модулей должны зависеть от абстракций.
@@ -107,6 +107,7 @@ In MVP, the Presenter contains the UI business logic for the View. All invocatio
 In the MVC, the Controller is responsible for determining which View is displayed in response to any action including when the application loads. This differs from MVP where actions route through the View to the Presenter. In MVC, every action in the View correlates with a call to a Controller along with an action. In the web each action involves a call to a URL on the other side of which there is a Controller who responds. Once that Controller has completed its processing, it will return the correct View.
 
 In MVVM there is no Presenter. Instead the View binds directly to a Presentation Model. The Presentation Model is a Model crafted specifically for the View. This means this Model can expose properties that one would never put on a domain model as it would be a violation of separation-of-concerns. In this case, the Presentation Model binds to the domain model, and may subscribe to events coming from that Model. The View then subscribes to events coming from the Presentation Model and updates itself accordingly. The Presentation Model can expose commands which the view uses for invoking actions. The advantage of this approach is that you can essentially remove the code-behind altogether as the PM completely encapsulates all of the behaviour for the view.
+
 <img src="https://github.com/sashakid/ios-guide/blob/master/Images/mvc-mvp-mvvm.png">
 
 <a name="viper"></a>
@@ -204,8 +205,8 @@ _Thread safe_
 		shared = [[MyClass alloc] init];
 		});
 		return shared;
-	}
-	```
+}
+```
 
 __Criticism:__
 
