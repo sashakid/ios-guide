@@ -7,6 +7,7 @@
 	- [What is the difference between char* const and const char*](#what-is-the-difference-between-char-const-and-const-char)
 	- [Что значит n&(n – 1)](#что-значит-n-n–1)
 
+<a name="язык-си"></a>
 # Язык СИ.
 
 * Лаконичность и быстрота (почти как Ассемблер)
@@ -25,6 +26,7 @@
 
 <img src="https://github.com/sashakid/ios-guide/blob/master/Images/c_types.png">
 
+<a name="битовые-операции"></a>
 ## Битовые операции
 В своих программах вы не адресуете отдельные биты, а имеете дело с группами битов - байтами. Если представить байт как 8-разрядное целое число без знака, его биты соответствуют последовательным степеням `2`.
 
@@ -119,6 +121,7 @@ __Примеры битовых операций:__
 ~67 = 188
 ```
 
+<a name="что-такое-указатель-и-ссылка-и-в-чем-разница"></a>
 ## Что такое указатель и ссылка и в чем разница?
 Есть два способа обращения к функции – вызов по значению и вызов по ссылке. При вызове по значению создается копия аргумента и передается вызываемой функции. Изменение копии не влияют на значение оригинала в операторе вызова. Один из минусов этого способа – если передается большой элемент данных, то на его копирование может уйти дополнительное время.
 
@@ -152,6 +155,7 @@ yPtr = &y;
 
 `const` с указателем значит, что значение переменной не изменяется.
 
+<a name="почему-nserror-использует-указатель-на-указатель"></a>
 ## Почему (NSError **) использует указатель на указатель?
 _Explanation 1:_
 if you pass a pointer to an object to your function, the function can only modify what the pointer is pointing to.
@@ -298,40 +302,43 @@ You can return two values with help of block:
     }];
   }
   ```
-  ## What is the difference between char * const and const char *?
 
-  Существует четыре способа передачи в функцию указателя
+<a name="what-is-the-difference-between-char-const-and-const-char"></a>
+## What is the difference between char * const and const char *?
 
-  1. Неконстантный указатель на неконстантные данные
-  2. Неконстнатный указатель на константные данные
-  3. Константный указатель на неконстантные данные
-  4. Константный указатель на константные данные
+Существует четыре способа передачи в функцию указателя
 
-  <img src="https://github.com/sashakid/ios-guide/blob/master/Images/const_pointer.png">
+1. Неконстантный указатель на неконстантные данные
+2. Неконстнатный указатель на константные данные
+3. Константный указатель на неконстантные данные
+4. Константный указатель на константные данные
 
-  ## Что значит n&(n – 1)?
-  It's figuring out if `n` is either `0` or an exact power of two.
-  It works because a binary power of two is of the form `1000...000` and subtracting one will give you `111...111`. Then, when you `AND` those together, you get zero, such as with:
-  ```
-  1000 0000 0000 0000
-  &&  111 1111 1111 1111
-  ==== ==== ==== ====
-  = 0000 0000 0000 0000
-  ```
-  Any non-power-of-two input value will not give you zero when you perform that operation.
-  For example, let's try all the 3-bit combinations:
-  ```
-  <----- binary ---->
-  n     n    n-1   n&(n-1)
-  ---   ---   ---   -------
-  0    000   111     000 *
-  1    001   000     000 *
-  2    010   001     000 *
-  3    011   010     010
-  4    100   011     000 *
-  5    101   100     100
-  6    110   101     100
-  7    111   110     110
-  ```
-  You can see that only `0` and the powers of two (`1`, `2` and `4`) result in a `000-false` bit pattern, all others are non-zero or `true`.
-  See the full Bit Twiddling Hacks document for all sorts of other wonderful (or dastardly, depending on your viewpoint) hackery.
+<img src="https://github.com/sashakid/ios-guide/blob/master/Images/const_pointer.png">
+
+<a name="что-значит-n-n–1"></a>
+## Что значит n&(n – 1)?
+It's figuring out if `n` is either `0` or an exact power of two.
+It works because a binary power of two is of the form `1000...000` and subtracting one will give you `111...111`. Then, when you `AND` those together, you get zero, such as with:
+```
+1000 0000 0000 0000
+&&  111 1111 1111 1111
+==== ==== ==== ====
+= 0000 0000 0000 0000
+```
+Any non-power-of-two input value will not give you zero when you perform that operation.
+For example, let's try all the 3-bit combinations:
+```
+<----- binary ---->
+n     n    n-1   n&(n-1)
+---   ---   ---   -------
+0    000   111     000 *
+1    001   000     000 *
+2    010   001     000 *
+3    011   010     010
+4    100   011     000 *
+5    101   100     100
+6    110   101     100
+7    111   110     110
+```
+You can see that only `0` and the powers of two (`1`, `2` and `4`) result in a `000-false` bit pattern, all others are non-zero or `true`.
+See the full Bit Twiddling Hacks document for all sorts of other wonderful (or dastardly, depending on your viewpoint) hackery.
