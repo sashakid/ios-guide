@@ -23,6 +23,7 @@
 
 <img src="https://github.com/sashakid/ios-guide/blob/master/Images/data_structures_kinds2.png">
 
+<a name="массив"></a>
 ## Массив
 _array_
 
@@ -41,6 +42,7 @@ _array_
 Минусы:
 * Статичная, неизменяемая структура
 
+<a name="ассоциативный-массив"></a>
 ### Ассоциативный массив
 _associative array, map, symbol table, dictionary_
 
@@ -53,6 +55,7 @@ Operations associated with this data type allow:
 
 Ассоциативный массив еще называют нагруженным множеством (data + info), где data – ключ, а нагрузка – значение ключа.
 
+<a name="xеш-таблица"></a>
 #### Хеш-таблица
 _hash table, hash map_
 
@@ -60,26 +63,31 @@ _hash table, hash map_
 
 <img src="https://github.com/sashakid/ios-guide/blob/master/Images/hash_table.png">
 
+<a name="множество"></a>
 ## Множество
 _set_
 
 A set is an abstract data structure that can store certain values, without any particular order, and no repeated values. It is a computer implementation of the mathematical concept of a finite set. Unlike most other collection types, rather than retrieving a specific element from a set, one typically tests a value for membership in a set. Some set data structures are designed for static or frozen sets that do not change after they are constructed. Static sets allow only query operations on their elements — such as checking whether a given value is in the set, or enumerating the values in some arbitrary order. Other variants, called dynamic or mutable sets, allow also the insertion and deletion of elements from the set.
 
+<a name="список"></a>
 ## Список
 _list_
 
 Простейшая динамическая структура, упорядоченное множество с переменным числом элементов.
 
+<a name="связный-список"></a>
 ### Связный список
 _linked list_
 
 <img src="https://github.com/sashakid/ios-guide/blob/master/Images/singly_linked_list.png">
 
+<a name="двусвязный-список"></a>
 ### Двусвязный список
 _doubly linked list_
 
 <img src="https://github.com/sashakid/ios-guide/blob/master/Images/doubly_linked_list.png">
 
+<a name="кольцевой-список"></a>
 ### Кольцевой список
 _circular Linked list_
 
@@ -99,11 +107,13 @@ _circular Linked list_
 Массив имеет фиксированное время перехода по индексу, но нуждается в монолитном секторе памяти, обладает нефиксированным временем вставки и удаления.
 Список более требователен к памяти, дольше переход по индексу, но значительно быстрее вставка и удаление за `O(1)`. В Java и в C++ явно различаются `List` и `Array`, в Objective-C `NSMutableArray` скорее список, чем массив.
 
+<a name="очередь"></a>
 ## Очередь
 _queue_
 
 Абстрактный тип данных с дисциплиной доступа к элементам «первый пришёл — первый вышел» (FIFO, first-in-first-out). Добавление элемента (принято обозначать словом enqueue — поставить в очередь) возможно лишь в конец очереди, выборка — только из начала очереди (что принято называть словом dequeue — убрать из очереди), при этом выбранный элемент из очереди удаляется.
 
+<a name="стек"></a>
 ### Стек
 _stack_
 
@@ -121,6 +131,7 @@ _stack_
 
 <img src="https://github.com/sashakid/ios-guide/blob/master/Images/stack.png">
 
+<a name="дек"></a>
 ### Дек
 _double ended queue, dequeue_
 
@@ -128,6 +139,7 @@ _double ended queue, dequeue_
 
 <img src="https://github.com/sashakid/ios-guide/blob/master/Images/dequeue.png">
 
+<a name="куча"></a>
 ## Куча
 _heap_
 
@@ -142,11 +154,13 @@ _heap_
 
 Куча как область памяти – реализация динамически распределяемой памяти, в которой хранятся все объекты (вызов `alloc` в Objective-C выделяет из кучи требуемую область памяти).
 
+<a name="граф"></a>
 ## Граф
 _graph_
 
 Фигура, состоящая из вершин и ребер, соединяющих вершины. Направленный и ненаправленный.
 
+<a name="дерево"></a>
 ## Дерево
 _tree_
 
@@ -154,6 +168,7 @@ _tree_
 
 <img src="https://github.com/sashakid/ios-guide/blob/master/Images/tree.png">
 
+<a name="бинарное-дерево-поиска"></a>
 ### Бинарное дерево поиска
 _binary search tree_
 
@@ -163,6 +178,7 @@ key[left[x]] < key[x] <= key[right[x]]
 ```
 Ключ данных родительского узла больше левого сына и нестрого меньше правого.
 
+<a name="красно-черное-дерево"></a>
 ### Красно-черное дерево
 _red-black tree, rb-tree_
 
