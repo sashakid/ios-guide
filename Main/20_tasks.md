@@ -1,4 +1,47 @@
-# Задачи
+- [Что произойдет если сначала нажать на кнопку 1 а потом на кнопку 2?](#string-autorelease)
+- [Что произойдет при исполнении следующего кода?](#что-произойдет)
+- [Реализуйте следующие методы: retain, release, autorelease](#retain-release-autorelease)
+
+<a name="string-autorelease"></a>
+## Что произойдет если сначала нажать на кнопку 1 а потом на кнопку 2?
+```objectivec
+- (IBAction)btn1DidTouch:(id)sender {
+	_string = [[[NSString alloc] initWithFormat:@"v=%i", rand()] autorelease];
+}
+- (IBAction)btn2DidTouch:(id)sender {
+	NSLog(@"_string is equal to ‘%@’", _string);
+}
+```
+Крэш, т.к utoreleasepool создается в начале обработки события и уничтожается в конце. т.е. нажали на первую кнопку — началась обработка события, нажали на вторую — кнопку — закончилась обработка первого события, очистлся autoreleasepool а вместе с ним и объект удалился, а ссылка осталась. Затем началась обработка второго события и мы обращаемся к задеалоченному объекту, результат — крэш.
+
+<a name="что-произойдет"></a>
+## Что произойдет при исполнении следующего кода?
+```objectivec
+Ball *ball = [[[[Ball alloc] init] autorelease] autorelease];
+```
+Впоследствии это вызовет крэш. Потому что объект дважды добавляется в пул автоосвобождения, и `release` вызовется дважды.
+
+<a name="retain-release-autorelease"></a>
+## Реализуйте следующие методы: retain, release, autorelease
+```objectivec
+- (id)retain {
+	NSIncrementExtraRefCount(self);
+	return self;
+}
+
+- (void)release {
+	if (NSDecrementExtraRefCountWasZero(self)) {
+		NSDeallocateObject(self);
+	}
+}
+
+- (id)autorelease {  
+	// Add the object to the autorelease pool
+	[NSAutoreleasePool addObject:self];
+	return self;
+}
+```
+
 ## Задача про банерокрутилку
 Из заданного списка вывести поочередно, рандомно, а главное, без повторений, все его элементы.
 ```java
