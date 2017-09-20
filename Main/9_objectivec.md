@@ -1,6 +1,7 @@
 - [Objective-C](#objective-c)
 	- [Transparent and opaque data types](#transparent-and-opaque-data-types)
 	- [Toll-Free Bridged Types](#toll-free-bridged-types)
+	- [Директивы компилятора](#директивы-компилятора)
 
 <a name="objective-c"></a>
 # Objective-C
@@ -27,3 +28,67 @@ The compiler does not automatically manage the lifetimes of Core Foundation obje
 * `__bridge` transfers a pointer between Objective-C and Core Foundation with no transfer of ownership
 * `__bridge_retained` or `CFBridgingRetain` casts an Objective-C pointer to a Core Foundation pointer and also transfers ownership to you. You are responsible for calling `CFRelease` or a related function to relinquish ownership of the object.
 * `__bridge_transfer` or CFBridgingRelease moves a non-Objective-C pointer to Objective-C and also transfers ownership to ARC. ARC is responsible for relinquishing ownership of the object.
+
+<a name="директивы-компилятора"></a>
+## Директивы компилятора
+`@implementation` Определяет начало определения (реализации) класса или категории.
+
+`@class` Используется для предварительного объявления класса. При использовании этой директивы класс помечается как известный, даже без загрузки заголовочного файла.
+
+`@protocol` Используются для объявления протокола. Кроме того, протокол может адаптировать другие протоколы.
+
+`@required` (по-умолчанию) Определяет методы, которые следуют после директивы как обязательные.
+
+`@optional` Определяет методы, которые следуют после директивы как необязательные. Классы, которые поддерживают протокол, могут сами решать — реализовывать эти методы или нет. Классы, которые используют необязательные методы протокола, должны делать проверку на существование.
+
+`@public` Определяет, что переменные экземпляра, следующие за директивой будут доступны публично. Публичные переменные могут быть прочтены и изменены с помощью следующей конструкции: `someObject->aPublicVariable = 10;`
+
+`@package` Определяет, что переменные экземпляра, следующие за директивой будут публично доступны в библиотеке, которая определяет класс, но закрытыми за пределами этой библиотеки. Важное замечание, это справедливо только для 64-разрядных систем. На 32-разрядных системах имеет то же значение, что и `@public`
+
+`@protected` (по умолчанию) Определяет, что переменные экземпляра, следующие за директивой, будут доступны только для класса и его потомков.
+
+`@private` Определяет, что переменные экземпляра, следующие за директивой, будут доступны только в пределах данного класса
+
+`@property` Определяет свойство, которое может быть использовано с помощью точечной нотации. За директивой `@property` могут следовать необязательные круглые скобки, которые содержат дополнительные ключевые слова (модификаторы), которые определяют поведение свойства.
+
+`@synthesize` Дает указание компилятору, что необходимо автоматически сгенерировать сеттеры и геттеры для данных (разделенных запятой) свойств. Сеттеры и геттеры автоматически создаются согласно указанным в объявлении свойства директивам. Если переменные экземпляра называ-ются не так, как указано после директивы `@property`, вы можете соединить их с помощью знака равенства
+
+`@dynamic` Cообщает компилятору, что требуемые сеттеры и геттеры для данных свойств будут реализованы вручную или динамически во время выполнения. При доступе к таким свойствам, компилятор не будет выдавать предупреждений, даже если требуемые сеттеры и геттеры не реализованы. Вы можете использовать такие свойства, когда хотите, чтобы сеттеры и геттеры выполняли какойто специфичный для вас код.
+
+`@try` Defines a block of code that will be tested to determine if an exception should be thrown.
+
+`@catch()` Defines a block of code for handling a thrown exception. Takes an argument, typically of type `NSException`, but can be of other types.
+
+`@finally` Defines a block of code that gets executed whether an exception is thrown or not. This code will always be executed.
+
+`@throw` Throws an exception. Earlier, we mentioned that you can throw exceptions from objects other than `NSException` instances, but that you should avoid doing so. The reason is that not every Cocoa framework catches exceptions thrown by objects other than `NSException`. To ensure that Cocoa works right with your exceptions, you should throw `NSException` objects only. Think of it like the old saying that you don’t have to floss all your teeth, just the ones you want to keep. You’ll typically use `@try`, `@catch`, and `@finally` together in one structure. It goes a little something like this:
+```objectivec
+@try {
+  // code you want to execute that might throw an exception.
+}
+@catch (NSException *exception)
+{
+  // code to execute that handles exception
+}
+@finally {
+  // code that will always be executed. Typically for cleanup.
+}
+```
+`@synchronized` Заключает блок кода в мьютекс. Обеспечивает гарантию того, что блок кода и объект блокировки будут доступны только из одного потока в момент времени.
+
+`@autoreleasepool` В тех приложения, в которых вы используете автоматический подсчет ссылок (ARC), вы должны использовать `@autoreleasepool` как замену для `NSAutoreleasePool`. И вообще, `@autoreleasepool` примерно в 6 раз быстрее, чем `NSAutoreleasePool`, поэтому Apple рекомендует использовать его даже для не-ARC приложений. Кроме того, вы не должны определять переменную внутри блока `@autoreleasepool` и затем продолжать использовать ее после. Подобный код должен быть исключен.
+
+`@selector` Возвращает специальный тип селекторов SEL выбранного метода Objective-C. Генерирует предупреждение компилятора, если метода не объявлен или не существует. Это имя метода закодированное специальным образом, используемым Objective-C для быстрого поиска. Указание компилятору на селектор происходит при помощи директивы `@selector(methodName)`
+
+`@encode` Возвращает кодировку типа.
+
+`@compatibility_alias` Позволяет вам задать псевдоним для существующего класса. Первый параметр — имя псевдонима для имени класса, класса с таким именем не должно существовать. Второй параметр — имя существующего класса, для которого создается псевдоним.
+
+`@"some text";` Объявляет константный объект класса NSString. Для таких строк не требуется вызывать `retain` или `release`.
+
+`@import` Модуль прекомпилированных заголовков, позволяющий экономить время по сравнению с компиляцией заголовков при `#import`. Не надо линковать фреймворк.
+
+```objectivec
+#import <Cocoa/Cocoa.h> //is the same as
+@import Cocoa;
+```

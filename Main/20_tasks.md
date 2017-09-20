@@ -1,6 +1,8 @@
 - [Что произойдет если сначала нажать на кнопку 1 а потом на кнопку 2?](#string-autorelease)
 - [Что произойдет при исполнении следующего кода?](#что-произойдет)
 - [Реализуйте следующие методы: retain, release, autorelease](#retain-release-autorelease)
+- [Выведется ли в дебагер «Hello world»? Почему?](#hello-world)
+- [Что выведется в консоль?](#что-выведется-в-консоль)
 
 <a name="string-autorelease"></a>
 ## Что произойдет если сначала нажать на кнопку 1 а потом на кнопку 2?
@@ -40,6 +42,38 @@ Ball *ball = [[[[Ball alloc] init] autorelease] autorelease];
 	[NSAutoreleasePool addObject:self];
 	return self;
 }
+```
+
+<a name="hello-world"></a>
+### Выведется ли в дебагер Hello world? Почему?
+```objectivec
+- (BOOL)application:(UIApplication *)application didFinishLaunchingWithOptions:(NSDictionary *)launchOptions {
+  dispatch_sync(dispatch_get_main_queue(), ^{
+    NSLog(@"Hello world");
+  });
+  /* Another implementation */
+  return YES;
+}
+```
+Нет. deadlock
+
+### Что выведется в консоль?
+```objectivec
+NSObject *object = [NSObject new];
+dispatch_async(dispatch_get_main_queue(), ^ {
+  NSLog(@"A %d", [object retainCount]);
+  dispatch_async(dispatch_get_main_queue(), ^ {
+    NSLog(@"B %d", [object retainCount]);
+  });
+  NSLog(@"C %d", [object retainCount]);
+});
+NSLog(@"D %d", [object retainCount]);
+```
+```
+D 2
+A 2
+C 3
+B 2
 ```
 
 ## Задача про банерокрутилку
