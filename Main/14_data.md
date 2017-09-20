@@ -1,17 +1,17 @@
 - [Data](#data)
-	- [Что такое Core Data?](#что-такое-core-data?)
-	- [Опишите стек Core Data](#опишите-стек-core-data)
-	- [В каких случаях лучше использовать SQLite, а в каких Core Data?](#в-каких-случаях-лучше-использовать-sqlite,-а-в-каких-core-data?)
-	- [Какие есть нюансы при использовании Core Data в разных потоках? Как синхронизировать данные между потоками?](#какие-есть-нюансы-при-использовании-core-data-в-разных-потоках?-как-синхронизировать-данные-между-потоками?)
-	- [Какие типы хранилищ поддерживает CoreData?](#какие-типы-хранилищ-поддерживает-core-data?)
-	- [Что такое ленивая загрузка? Что ее связывает с Core Data? Опишите ситуация когда она может быть полезной? Что такое faulting?](#что-такое-ленивая-загрузка?-что-ее-связывает-с-core-data?-опишите-ситуация-когда-она-может-быть-полезной?-что-такое-faulting?)
-	- [Что такое fetch result controller?](#что-такое-fetch-result-controller?)
+	- [Что такое Core Data?](#core-data)
+	- [В каких случаях лучше использовать SQLite, а в каких Core Data?](#sqlite-core-data)
+	- [Целесообразность использования Core Data](#целесообразность-использования-core-data)
+	- [Какие есть нюансы при использовании Core Data в разных потоках? Как синхронизировать данные между потоками?](#core-data-в-разных-потоках)
+	- [Какие типы хранилищ поддерживает CoreData?](#типы-хранилищ)
+	- [Что такое ленивая загрузка? Что ее связывает с Core Data? Опишите ситуация когда она может быть полезной? Что такое faulting?](#ленивая-загрузка-core-data)
+	- [Что такое fetch result controller?](#fetch-result-controller)
 
+<a name="data"></a>
 # Data
+<a name="core-data"></a>
 ## Что такое Core Data?
 Apple предоставляет гибкий фреймворк для работы с хранимыми на устройстве данными — Core Data. Большинство деталей по работе с хранилищем данных Core Data скрывает, позволяя вам сконцентрироваться на том, что действительно делает ваше приложение веселым, уникальным и удобным в использовании. Не смотря на то, что Core Data может хранить данные в реляционной базе данных вроде SQLite, Core Data не является СУБД (системой управления БД). По-правде, Core Data в качестве хранилища может вообще не использовать реляционные базы данных. Core Data скорее является оболочкой для работы с данными, которая позволяет работать с сущностями и их связями (отношениями к другим объектами), атрибутами, в том виде, который напоминает работы с объектным графом в обычном объектно-ориентированном программировании.
-
-## Опишите стек Core Data
 
 <img src="https://github.com/sashakid/ios-guide/blob/master/Images/nsmanagedobjectcontext.png">
 
@@ -37,6 +37,7 @@ If you choose to save the changes you have made, the context ensures that your o
 
 Without Core Data, you have to write methods to support archiving and unarchiving of data, to keep track of model objects, and to interact with an undo manager to support undo. In the Core Data framework, most of this functionality is provided for you automatically, primarily through the managed object context.
 
+<a name="sqlite-core-data"></a>
 ## В каких случаях лучше использовать SQLite, а в каких Core Data?
 _Реляционная база данных_ — база данных, основанная на реляционной модели данных. Слово «реляционный» происходит от англ. relation (отношение). Для работы с реляционными БД применяют реляционные СУБД.
 
@@ -109,6 +110,7 @@ ID | CITY | STATE
 44 | Denver | CO
 66 | Caribou | ME
 
+<a name="целесообразность-использования-core-data"></a>
 ## Целесообразность использования Core Data
 Core Data уменьшает количество кода, написанного для поддержки модели слоя приложения, как правило, на 50% - 70%, измеряемое в строках кода. Core Data имеет зрелый код, качество которого обеспечивается путем юнит-тестов, и используется ежедневно миллионами клиентов в широком спектре приложений. Структура была оптимизирована в течение нескольких версий. Она использует информацию, содержащуюся в модели и выполненяет функции, как правило, не работающие на уровне приложений в коде. Кроме того, в дополнение к отличной безопасности и обработке ошибок, она предлагает лучшую масштабируемость при работе с памятью, относительно любого конкурирующего решения. Другими словами: вы могли бы потратить долгое время тщательно обрабатывая Ваши собственные решения оптимизации для конкретной предметной области, вместо того, чтобы получить преимущество в производительности, которую Core Data предоставляет бесплатно для любого приложения.
 
@@ -171,10 +173,12 @@ __Пример SQLite__
 }
 ```
 
+<a name="core-data-в-разных-потоках"></a>
 ## Какие есть нюансы при использовании Core Data в разных потоках? Как синхронизировать данные между потоками?
 1. Create a separate managed object context for each thread and share a single persistent store coordinator. This is the typically-recommended approach.
 2. Create a separate managed object context and persistent store coordinator for each thread. This approach provides for greater concurrency at the expense of greater complexity (particularly if you need to communicate changes between different contexts) and increased memory usage.
 
+<a name="типы-хранилищ"></a>
 # Какие типы хранилищ поддерживает CoreData?
 Persistent Store
 
@@ -186,12 +190,14 @@ Atomic Store
 
 * custom type
 
+<a name="ленивая-загрузка-core-data"></a>
 ## Что такое ленивая загрузка? Что ее связывает с Core Data? Опишите ситуация когда она может быть полезной? Что такое faulting?
 Для загрузки данных из БД в память приложения удобно пользоваться загрузкой не только данных об объекте, но и о сопряжённых с ним объектах. Это делает загрузку данных проще для разработчика: он просто использует объект, который, тем не менее вынужден загружать все данные в явном виде. Но это ведёт к случаям, когда будет загружаться огромное количество сопряжённых объектов, что плохо скажется на производительности в случаях, когда эти данные реально не нужны. Паттерн Lazy Loading (Ленивая Загрузка) подразумевает отказ от загрузки дополнительных данных, когда в этом нет необходимости. Вместо этого ставится маркер о том, что данные не загружены и их надо загрузить в случае, если они понадобятся. Как известно, если Вы ленивы, то вы выигрываете в том случае, если дело, которое вы не делали на самом деле и не надо было делать.
 Faulting isn't unique to Core Data. A similar technique is used in many other frameworks, such as Ember and Ruby on Rails. Faulting is a mechanism Core Data employs to reduce your application’s memory usage, only load data when it's needed. A fault is a placeholder object that represents a managed object that has not yet been fully realized, or a collection object that represents a relationship. To make faulting work, Core Data does a bit of magic under the hood by creating custom subclasses at compile time that represent the faults.
 
 <img src="https://github.com/sashakid/ios-guide/blob/master/Images/core_data_faulting.png">
 
+<a name="fetch-result-controller"></a>
 ## Что такое fetch result controller?
 Данные сами по себе может быть и представляют какую-либо ценность, но, обычно их нужно использовать. Одним из элементов представления данных в iOS служат таблицы (объекты класса `UITableView`), которые через объект класса `NSFetchedResultsController` можно привязать к CoreData. После этого при изменении данных в CoreData будет актуализироваться информация в таблице. Так же, с помощью таблицы можно управлять данными в хранилище.
 `NSFetchedResultsController` — контроллер результатов выборки. Создается, обычно один экземпляр на `ViewController`, но вполне может работать и без оного, внутрь которого помещается исключительно для того, что бы было проще привязать данные к виду.

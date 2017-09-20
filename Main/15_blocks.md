@@ -1,7 +1,8 @@
 - [Блоки](#блоки)
-	- [When and why block captures self and when they don't?](#when-and-why-block-captures-self-and-when-they-don't?)
-	- [Примеры объявления и использования блоков](#примеры-объявления-и-использования-блоков)
-	- [В чем отличие блока от лямбды и замыкания](#в-чем-отличие-блока-от-лямбды-и-замыкания)
+	- [Типы блоков](#типы-блоков)
+	- [When and why block captures self and when they don't?](#block-captures-self)
+	- [Примеры объявления и использования блоков](#примеры)
+	- [В чем отличие блока от лямбды и замыкания](#блок-лямбда-замыкание)
 	- [Обратный вызов](#обратный-вызов)
 	- [Когда использовать блоки, делегаты, KVO и уведомления?](#когда-использовать-блоки,-делегаты,-kvo-и-уведомления?)
 	- [Swift closures and functions](#swift-closures-and-functions)
@@ -9,6 +10,7 @@
 	- [How Do I Declare a Closure in Swift?](#how-do-i-declare-a-closure-in-swift?)
 	- [Чем отличаются лямбда, замыкание и блок?](#чем-отличаются-лямбда,-замыкание-и-блок?)
 
+<a name="блоки"></a>
 # Блоки
 
 <img src="https://github.com/sashakid/ios-guide/blob/master/Images/blocks.png">
@@ -43,6 +45,33 @@ Any reference to `self` is a reference to a local object variable, causing `self
 <img src="https://github.com/sashakid/ios-guide/blob/master/Images/block_capturing.png">
 
 <img src="https://github.com/sashakid/ios-guide/blob/master/Images/blocks_structure.png">
+
+```c
+struct Block_literal_1 {
+    void *isa; // initialized to &_NSConcreteStackBlock or &_NSConcreteGlobalBlock
+    int flags;
+    int reserved;
+    void (*invoke)(void *, ...);
+    struct Block_descriptor_1 {
+    unsigned long int reserved;         // NULL
+        unsigned long int size;         // sizeof(struct Block_literal_1)
+        // optional helper functions
+        void (*copy_helper)(void *dst, void *src);     // IFF (1<<25)
+        void (*dispose_helper)(void *src);             // IFF (1<<25)
+        // required ABI.2010.3.16
+        const char *signature;                         // IFF (1<<30)
+    } *descriptor;
+    // imported variables
+};
+
+enum {
+    BLOCK_HAS_COPY_DISPOSE =  (1 << 25),
+    BLOCK_HAS_CTOR =          (1 << 26), // helpers have C++ code
+    BLOCK_IS_GLOBAL =         (1 << 28),
+    BLOCK_HAS_STRET =         (1 << 29), // IFF BLOCK_HAS_SIGNATURE
+    BLOCK_HAS_SIGNATURE =     (1 << 30),
+};
+```
 
 Objective-C blocks are objects which contain an embedded function pointer. A block call translates to a call to that function pointer, passing the block as an implicit parameter:
 ```objectivec
@@ -82,6 +111,47 @@ struct __block_literal_1 __block_literal_1 = {
 ```
 Then, inside the invoke function, references to the captured variables are made like any other member of a struct, `the_block->numBalloons`.
 
+<a name="типы-блоков"></a>
+## Типы блоков
+
+* Global block (_NSConcreteGlobalBlock, NSGlobalBlock)
+
+Normally, the `Block_literal` data appears on the stack (like a regular struct would in its surrounding function). With no references to the surrounding scope, clang configures the `Block_literal` as a global block instead. This causes the block to appear in a fixed global location instead of on the stack (the flags value has the `BLOCK_IS_GLOBAL` flag set to indicate this at runtime but it's not immediately clear to me if this is ever used).
+The implication of this is that global blocks are never actually copied or disposed, even if you invoke the functions to do so. This optimisation is possible because without any references to the surrounding scope, no part of the block (neither its code nor its `Block_literal`) will ever change — it becomes a shared constant value.
+```objectivec
+Class class = [^{
+} class];
+NSLog(@"%@", NSStringFromClass(class));
+//__NSGlobalBlock__
+```
+
+* Stack block (_NSConcreteStackBlock, NSStackBlock)
+
+It is a stack allocated Objective-C object. If you have ever tried to allocate an Objective-C object on the stack (not as a pointer but statically allocated) you'll know that the compiler normally forbids this.
+```objectivec
+int foo = 3;
+Class class = [^{
+		int foo1 = foo + 1;
+} class];
+NSLog(@"%@", NSStringFromClass(class));
+//__NSStackBlock__
+```
+
+* Malloc block (NSMallocBlock)
+
+Copying a block doesn't really give you a copy of the block — if the block is already an `NSMallocBlock`, a copy simply increases the retain count of the block (this retain count is an internal reserved field — the retainCount returned from the object will remain at 1). This is perfectly appropriate since the scope of the block cannot change after it is created (therefore the block is constant) but it does mean that invoking copy on a block is not the same thing as recreating it.
+```objectivec
+int foo = 3;
+Class class = [[^{
+		int foo1 = foo + 1;
+} copy] class];
+NSLog(@"%@", NSStringFromClass(class));
+//__NSMallocBlock__
+```
+
+Как видно, если блок не захватывает внешние переменные, то мы получаем `__NSGlobalBlock__`. Если же блок захватывает внешние переменные, то блок `__NSStackBlock__` (на стеке). Однако если же послать блоку `copy`, то блок будет скопирован в кучу (`__NSMallocBlock__`).
+
+<a name="block-captures-self"></a>
 ## When and why block captures `self` and when they don't?
 
 _Example:_
@@ -147,16 +217,7 @@ _Case 2 should be used when the block is assigned to a property and self is refe
 
 _Case 3 should be used when the block is assigned to a property and self is referenced more the once and the block has more than a statement._
 
-http://albertodebortoli.com/blog/2013/04/21/objective-c-blocks-under-the-hood/
-
-http://albertodebortoli.com/blog/2013/08/03/objective-c-blocks-caveat/
-
-https://www.mikeash.com/pyblog/friday-qa-2009-08-14-practical-blocks.html
-
-http://rypress.com/tutorials/objective-c/blocks
-
-http://clang.llvm.org/docs/Block-ABI-Apple.html#imported-variables
-
+<a name="примеры"></a>
 ## Примеры объявления и использования блоков
 ```objectivec
 #import "NSArray+Map.h"
@@ -214,6 +275,8 @@ As a typedef:
 typedef returnType (^TypeName)(parameterTypes);
 TypeName blockName = ^returnType(parameters) {...};
 ```
+
+<a name="блок-лямбда-замыкание"></a>
 ## В чем отличие блока от лямбды и замыкания
 Замыкание (англ. closure) в программировании — функция, в теле которой присутствуют ссылки на переменные, объявленные вне тела этой функции и не в качестве её параметров (а в окружающем коде). Говоря другим языком, замыкание — функция, которая ссылается на свободные переменные в своём контексте. Замыкание, так же как и экземпляр объекта, есть способ представления функциональности и данных, связанных и упакованных вместе.
 
@@ -538,3 +601,13 @@ _As a function parameter with explicit capture semantics and inferred parameters
 ```swift
 array.sort({ [unowned self] in return item1 < item2 })
 ```
+
+http://albertodebortoli.com/blog/2013/04/21/objective-c-blocks-under-the-hood/
+
+http://albertodebortoli.com/blog/2013/08/03/objective-c-blocks-caveat/
+
+https://www.mikeash.com/pyblog/friday-qa-2009-08-14-practical-blocks.html
+
+http://rypress.com/tutorials/objective-c/blocks
+
+https://clang.llvm.org/docs/Block-ABI-Apple.html
