@@ -353,9 +353,11 @@ __Rule 1__
 A designated initializer must call a designated initializer from its immediate superclass.
 
 __Rule 2__
+
 A convenience initializer must call another initializer from the same class.
 
 __Rule 3__
+
 A convenience initializer must ultimately call a designated initializer.
 
 A simple way to remember this is:
@@ -379,13 +381,13 @@ __Failable Initializers__
 It is sometimes useful to define a class, structure, or enumeration for which initialization can fail. This failure might be triggered by invalid initialization parameter values, the absence of a required external resource, or some other condition that prevents initialization from succeeding.
 ```swift
 class Product {
-    let name: String
-    init?(name: String) {
-        if name.isEmpty {
-					return nil
-				}
-        self.name = name
-    }
+	let name: String
+	init?(name: String) {
+		if name.isEmpty {
+			return nil
+		}
+		self.name = name
+	}
 }
 ```
 
