@@ -3,6 +3,14 @@
 - [Реализуйте следующие методы: retain, release, autorelease](#retain-release-autorelease)
 - [Выведется ли в дебагер «Hello world»? Почему?](#hello-world)
 - [Что выведется в консоль?](#что-выведется-в-консоль)
+- [Задача про банерокрутилку](#задача-про-банерокрутилку)
+- [Задача на регулярное выражение](#задача-на-регулярное-выражение)
+- [Метод, возвращающий N наиболее часто встречающихся слов во входной строке](#наиболее-часто-встречающиеся-слова)
+- [Перечислите все проблемы, которые вы видите в приведенном ниже коде. Предложите, как их исправить](#проблемы-в-коде)
+- [Заполнить строку буквами А, чтобы не делать миллионы итераций](#заполнить-строку-буквами-a)
+- [Написать процедуру, инвертирующую массив символов](#инвертировать-массив-символов)
+- [Что не так с этим кодом?](#что-не-так-с-этим-кодом)
+- [Какой метод вызовется: класса A или класса B?](#какой-метод-вызовется)
 
 <a name="string-autorelease"></a>
 ## Что произойдет если сначала нажать на кнопку 1 а потом на кнопку 2?
@@ -45,7 +53,7 @@ Ball *ball = [[[[Ball alloc] init] autorelease] autorelease];
 ```
 
 <a name="hello-world"></a>
-### Выведется ли в дебагер Hello world? Почему?
+## Выведется ли в дебагер Hello world? Почему?
 ```objectivec
 - (BOOL)application:(UIApplication *)application didFinishLaunchingWithOptions:(NSDictionary *)launchOptions {
   dispatch_sync(dispatch_get_main_queue(), ^{
@@ -57,7 +65,7 @@ Ball *ball = [[[[Ball alloc] init] autorelease] autorelease];
 ```
 Нет. deadlock
 
-### Что выведется в консоль?
+## Что выведется в консоль?
 ```objectivec
 NSObject *object = [NSObject new];
 dispatch_async(dispatch_get_main_queue(), ^ {
@@ -76,6 +84,7 @@ C 3
 B 2
 ```
 
+<a name="задача-про-банерокрутилку"></a>
 ## Задача про банерокрутилку
 Из заданного списка вывести поочередно, рандомно, а главное, без повторений, все его элементы.
 ```java
@@ -105,6 +114,7 @@ class Banner
 ```
 Теперь кратко и по сути, что здесь происходит. Пока в списке есть элементы, мы берем случайное число в пространстве длины массива, выводим его, потом последний элемент ставим на место только что выведенного, а индекс длины уменьшаем на единицу, пока не останется ничего.
 
+<a name="задача-на-регулярное-выражение"></a>
 ## Задача на регулярное выражение
 В системе авторизации есть следующее ограничение на формат логина: он должен начинаться с латинской буквы, может состоять из латинских букв, цифр, точки и минуса и должен закан-чиваться латинской буквой или цифрой. Минимальная длина логина — 1 символ. Максимальная — 20 символов.
 ```objectivec
@@ -118,6 +128,7 @@ BOOL loginTester(NSString* login) {
 }
 ```
 
+<a name="наиболее-часто-встречающиеся-слова"></a>
 ## Метод, возвращающий N наиболее часто встречающихся слов во входной строке
 ```objectivec
 - (NSArray *)mostFrequentWordsInString:(NSString *)string count:(NSUInteger)count {
@@ -166,21 +177,7 @@ BOOL loginTester(NSString* login) {
 ```
 Я бы именно такой подход и использовал, если бы мне нужно было решить эту задачу в реальном iOS приложении, при условии, что я понимаю, откуда будут браться входные данные для поиска и предполагаю, что размеры входной строки не будут больше нескольких мегабайт. Вполне разумное допущение для iOS приложения, на мой взгляд. Иначе на входе не было бы строки, а был бы файл. При реально больших входных данных прийдется попотеть над регулярным выражением для перебора слов, чтоб избавиться от одного промежуточного массива. Такое регулярное выражение очень зависит от языка — то что сработает для русского не проканает для китайского. А вот что делать со словами дальше — кроме прямолинейного алгоритма в голову ничего не приходит. Если бы нужно было выбрать одно наиболее часто встречающееся слово — это Fast Majority Voting. Но вся красота этого алгоритма в том, что он работает для выбора одного значения. Модификаций алгоритма для выбора N значений мне не известны. Самому модифицировать не получилось.
 
-## Используя NSURLConnection, напишите метод для асинхронной загрузки текстового документа по HTTP. Приведите пример его использования
-```objectivec
-- (void)pullTextFromURLString:(NSString *)urlString completion:(void(^)(NSString *text))callBack {
-  NSURLRequest *request = [NSURLRequest requestWithURL: [NSURL URLWithString:urlString] cachePolicy:NSURLRequestUseProtocolCachePolicy timeoutInterval:60.0];
-  [NSURLConnection sendAsynchronousRequest:request queue:[NSOperationQueue mainQueue] completionHandler:^(NSURLResponse *response, NSData *data, NSError *error) {
-    if (error) {
-      NSLog(@"Error %@", error.localizedDescription);
-      } else {
-        // вообще, не мешало бы определить кодировку, чтоб не было неприятностей
-        callBack( [[NSString alloc]initWithData:data encoding:NSUTF8StringEncoding] );
-      }
-      }];
-    }
-    ```
-
+<a name="проблемы-в-коде"></a>
 ## Перечислите все проблемы, которые вы видите в приведенном ниже коде. Предложите, как их исправить
 ```objectivec
 NSOperation *operation = [NSBlockOperation blockOperationWithBlock:^{
@@ -229,3 +226,89 @@ __weak NSBlockOperation *weakOperation = operation;
   }
 }];
 ```
+
+<a name="заполнить-строку-буквами-a"></a>
+## Заполнить строку буквами А, чтобы не делать миллионы итераций
+```objectivec
+NSString *str = @"a";
+for (int i = 0; i< 5000000; i++) {
+  str = [str stringByAppendingString:@"a"];
+}
+```
+_Ответ_
+```objectivec
+str =[@"" stringByPaddingToLength:5000000 withString:@"a" startingAtIndex:0];
+```
+
+<a name="инвертировать-массив-символов"></a>
+## Написать процедуру, инвертирующую массив символов
+__Способ 1__
+```objectivec
+// myString is "hi"
+NSMutableString *reversedString = [NSMutableString string];
+NSInteger charIndex = [myString length];
+while (charIndex > 0) {
+  charIndex--;
+  NSRange subStrRange = NSMakeRange(charIndex, 1);
+  [reversedString appendString:[myString substringWithRange:subStrRange]];
+}
+NSLog(@"%@", reversedString); // outputs "ih"
+```
+__Способ 2__
+```objectivec
+array.reverseObjectEnumerator.allObjects;
+```
+__Способ 3__
+```c++
+#include <string.h>
+/* reverse: переворачивает строку s (результат в s) */
+void reverse(char s[]) {
+  int c, i, j;
+  for (i = 0, j = strlen(s) - 1; i < j; i++, j--) {
+    с = s[i];
+    s[i] = s[j];
+    s[j] = c;
+  } 	
+}
+```
+
+<a name="что-не-так-с-этим-кодом"></a>
+## Что не так с этим кодом?
+```objectivec
+[[[SomeClass alloc] init] init];
+```
+Пример: есть класс `A`, который имеет поле `NSString *b` и в ините ты делаешь `_b = @"somestring";` Стринг `b` не хранится в памяти выделенной под `A` – в этой памяти хранится лишь ссылка на `b`, а сам объект создается вовне. При повторном ините стринг просто пересоздастся, не стерев старый, и мы получаем утекший стринг. Вообще, такая ситуация есть далеко не везде, и далеко не всегда вызовет проблемы. Но кастомные повторные инициализации реально могут вызывать утечки памяти — зависит от конкретного типа объекта. Двойной инит может вызвать утечку. А может не вызвать. Каждый конкретный класс - отдельный вопрос.
+
+<a name="какой-метод-вызовется"></a>
+## Какой метод вызовется: класса A или класса B?
+```objectivec
+@interface A : NSObject
+- (void)someMethod;
+@end
+
+@implementation A
+- (void)someMethod {
+  NSLog(@"This is class A");
+}
+@end
+
+@interface B : A
+@end
+
+@implementation B
+- (void)someMethod {
+  NSLog(@"This is class B");
+}
+@end
+
+@interface C : NSObject
+@end
+
+@implementation C
+- (void)method {
+  A *a = [B new];
+  [a someMethod];
+}
+@end
+```
+Вызовется метод класса B.

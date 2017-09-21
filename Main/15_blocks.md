@@ -4,11 +4,7 @@
 	- [Примеры объявления и использования блоков](#примеры)
 	- [В чем отличие блока от лямбды и замыкания](#блок-лямбда-замыкание)
 	- [Обратный вызов](#обратный-вызов)
-	- [Когда использовать блоки, делегаты, KVO и уведомления?](#когда-использовать-блоки,-делегаты,-kvo-и-уведомления?)
-	- [Swift closures and functions](#swift-closures-and-functions)
-	- [Closures](#closures)
-	- [How Do I Declare a Closure in Swift?](#how-do-i-declare-a-closure-in-swift?)
-	- [Чем отличаются лямбда, замыкание и блок?](#чем-отличаются-лямбда,-замыкание-и-блок?)
+	- [Когда использовать блоки, делегаты, KVO и уведомления?](#блоки-делегаты-kvo-уведомления)
 
 <a name="блоки"></a>
 # Блоки
@@ -276,7 +272,6 @@ typedef returnType (^TypeName)(parameterTypes);
 TypeName blockName = ^returnType(parameters) {...};
 ```
 
-<a name="блок-лямбда-замыкание"></a>
 ## В чем отличие блока от лямбды и замыкания
 Замыкание (англ. closure) в программировании — функция, в теле которой присутствуют ссылки на переменные, объявленные вне тела этой функции и не в качестве её параметров (а в окружающем коде). Говоря другим языком, замыкание — функция, которая ссылается на свободные переменные в своём контексте. Замыкание, так же как и экземпляр объекта, есть способ представления функциональности и данных, связанных и упакованных вместе.
 
@@ -350,6 +345,7 @@ var newArray = oldArray.Select(x=>x * y); // замыкание использу
 Таким образом, лямбда-функция это жаргонное название анонимной функции, то есть функции у которой нет имени.
 Замыкание, строго говоря, никак не связано с анонимностью. Замыкание - это по сути вложенная функция, которая может обращаться к переменным в функции, в которую она вложена. Поэтому можно говорить, что замыкание - это функция, у которой есть состояние. При этом замыкающаяся функция может быть анонимной (то есть лямбдой), а может и не быть. Лямбда-функция, аналогично, может быть замыканием, а может и не быть (если она не обращается к переменным, объявленным вне её).
 
+<a name="обратный-вызов"></a>
 ## Обратный вызов
 Ситуация, в которой код ожидает внешних событий, называется обратным вызовом. Для программистов Objective-C существуют три основных формы обратного вызова.
 
@@ -416,6 +412,7 @@ struct event_cb *callback;
 callback->cb(event, callback->data);
 ```
 
+<a name="блоки-делегаты-kvo-уведомления"></a>
 ## Когда использовать блоки, делегаты, KVO и уведомления?
 __Block__
 
@@ -438,169 +435,6 @@ __Notifications__
 
 * Multiple observers
 * Observer 'far away' from observee
-
-##Swift closures and functions
-```swift
-()->()
-```
-Closures in Swift are similar to blocks in C and Objective-C.
-Closures are first-class objects, so that they can be nested and passed around (as do blocks in Objective-C). In Swift, functions are just a special case of closures.
-
-_Defining a function:_
-
-You define a function with the `func` keyword. Functions can take and return none, one or multiple parameters (tuples).
-Return values follow the `->` sign.
-```swift
-func jediGreet(name: String, ability: String) -> (farewell: String, mayTheForceBeWithYou: String) {
-	return ("Good bye, \(name).", " May the \(ability) be with you.")
-}
-```
-_Calling a function:_
-```swift
-let retValue = jediGreet("old friend", "Force")
-println(retValue)
-println(retValue.farewell)
-println(retValue.mayTheForceBeWithYou)
-```
-_Function types_
-
-Every function has its own function type, made up of the parameter types and the return type of the function itself.
-For example the following function:
-```swift
-func sum(x: Int, y: Int) -> (result: Int) { return x + y }
-```
-has a function type of:
-```swift
-(Int, Int) -> (Int)
-```
-Function types can thus be used as parameters types or as return types for nesting functions.
-
-_Passing and returning functions_
-
-The following function is returning another function as its result which can be later assigned to a variable and called.
-```swift
-func jediTrainer() -> ((String, Int) -> String) {
-	func train(name: String, times: Int) -> (String) {
-		return "\(name) has been trained in the Force \(times) times"
-  	}
-  	return train
-}
-let train = jediTrainer()
-train("Obi Wan", 3)
-```
-_Variadic functions_
-
-Variadic functions are functions that have a variable number of arguments (indicated by `...` after the argument's type) that can be accessed into their body as an array.
-```swift
-func jediBladeColor(colors: String...) -> () {
-	for color in colors {
-		println("\(color)")
-  	}
-}
-jediBladeColor("red","green")
-```
-
-__Closures__
-```swift
-{()->() in}
-```
-_Defining a closure:_
-
-Closures are typically enclosed in curly braces `{ }` and are defined by a function type `() -> ()`, where `->` separates the arguments and the return type, followed by the `in` keyword which separates the closure header from its body.
-```swift
-{ (params) -> returnType in
-  statements
-}
-```
-An example could be the map function applied to an Array:
-```swift
-let padawans = ["Knox", "Avitla", "Mennaus"]
-padawans.map({(padawan: String) -> String in
-	"\(padawan) has been trained!"
-})
-```
-
-_Closures with known types:_
-When the type of the closure's arguments are known, you can do as follows:
-```swift
-func applyMutliplication(value: Int, multFunction: Int -> Int) -> Int {
-	return multFunction(value)
-}
-
-applyMutliplication(2, {value in
-	value * 3
-})
-```
-
-_Closures shorthand argument names:_
-
-Closure arguments can be references by position `($0, $1, ...)` rather than by name
-```swift
-applyMutliplication(2, {$0 * 3})
-```
-Furthermore, when a closure is the last argument of a function, parenthesis can be omitted as such:
-```swift
-applyMutliplication(2) {$0 * 3}
-```
-##How Do I Declare a Closure in Swift?
-_As a variable:_
-```swift
-var closureName: (parameterTypes) -> (returnType)
-```
-_As an optional variable:_
-```swift
-var closureName: ((parameterTypes) -> (returnType))?
-```
-_As a type alias:_
-```swift
-typealias closureType = (parameterTypes) -> (returnType)
-```
-_As a constant:_
-```swift
-let closureName: closureType = { ... }
-```
-_As an argument to a function call:_
-```swift
-func({(parameterTypes) -> (returnType) in statements})
-```
-_As a function parameter:_
-```swift
-array.sort({ (item1: Int, item2: Int) -> Bool in return item1 < item2 })
-```
-_As a function parameter with implied types:_
-```swift
-array.sort({ (item1, item2) -> Bool in return item1 < item2 })
-```
-_As a function parameter with implied return type:_
-```swift
-array.sort({ (item1, item2) in return item1 < item2 })
-```
-_As the last function parameter:_
-```swift
-array.sort { (item1, item2) in return item1 < item2 }
-```
-_As the last parameter, using shorthand argument names:_
-```swift
-array.sort { return $0 < $1 }
-```
-_As the last parameter, with an implied return value:_
-```swift
-array.sort { $0 < $1 }
-```
-_As the last parameter, as a reference to an existing function:_
-```swift
-array.sort(<)
-```
-_As a function parameter with explicit capture semantics:_
-```swift
-array.sort({ [unowned self] (item1: Int, item2: Int) -> Bool in
-	return item1 < item2
-})
-```
-_As a function parameter with explicit capture semantics and inferred parameters / return type:_
-```swift
-array.sort({ [unowned self] in return item1 < item2 })
-```
 
 http://albertodebortoli.com/blog/2013/04/21/objective-c-blocks-under-the-hood/
 
