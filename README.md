@@ -20,4 +20,4 @@
 * [Swift](Main/18_swift.md)
 * [Общие вопросы](Main/19_general_questions.md)
 * [Задачи](Main/20_tasks.md)
-* [Неотвеченные вопросы](21_to_do.md)
+* [Неотвеченные вопросы](Main/21_to_do.md)
