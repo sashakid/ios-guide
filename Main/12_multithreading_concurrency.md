@@ -1,26 +1,60 @@
-- [Multithreading](#multithreading)
-	- [POSIX Threads](#posix-threads)
-	- [NSThread](#nsthread)
-	- [Run Loops](#run-loops)
-- [Concurrency](#сoncurrency)
-	- [GCD](#gcd)
-	- [NSOperationQueue](#nsoperationqueue)
-	- [NSObject instance methods](#nsobject-instance-methods)
-		- [Что такое мьютекс?](#мьютекс)
-		- [Что такое deadlock?](#deadlock)
-		- [Что такое livelock?](#livelock)
-		- [Что такое семафор?](#семафор)
-		- [Чем отличается dispatch_async от dispatch_sync?](#dispatch_sync-dispatch_async)
-		- [Как многопоточность работает с UIKit?](#многопоточность-uikit)
-	  - [Atomic vs nonatomic. Чем отличаются? Как вручную переопределить atomic/nonatomic сеттер в не ARC коде?](#atomic-vs-nonatomic)
+- [Multithreading and concurrency](#multithreading-and-concurrency)
+	- [Основные понятия многопоточности](#основные-понятия-многопоточности)
+	- [API для работы с многопоточностью и их альтернативы](#multithreading-api-alternatives)
+		- [POSIX Threads](#posix-threads)
+		- [NSThread](#nsthread)
+		- [Run Loops](#run-loops)
+		- [NSObject instance methods](#nsobject-instance-methods)
+		- [GCD](#gcd)
+		- [NSOperationQueue](#nsoperationqueue)
+		- [Idle-time notifications](#idle-time-notifications)
+		- [Asynchronous functions](#asynchronous-functions)
+		- [Timers]((#timers)
+		- [Separate processes](#separate-processes)
+	- [Что такое мьютекс?](#мьютекс)
+	- [Что такое deadlock?](#deadlock)
+	- [Что такое livelock?](#livelock)
+	- [Что такое семафор?](#семафор)
+	- [Чем отличается dispatch_async от dispatch_sync?](#dispatch_sync-dispatch_async)
+	- [Как многопоточность работает с UIKit?](#многопоточность-uikit)
+	- [Atomic vs nonatomic. Чем отличаются? Как вручную переопределить atomic/nonatomic сеттер в не ARC коде?](#atomic-vs-nonatomic)
+	- [Что такое гонка условий?](#race-condition)
 
-<a name="multithreading"></a>
-# Multithreading
-Although operation queues and dispatch queues are the preferred way to perform tasks concurrently, they are not a panacea. Depending on your application, there may still be times when you need to create custom threads. If you do create custom threads, you should strive to create as few threads as possible yourself and you should use those threads only for specific tasks that cannot be implemented any other way.
+<a name="multithreading-and-concurrency"></a>
+# Multithreading and concurrency
+__Multithreading__
+
+Depending on your application, there may still be times when you need to create custom threads. If you do create custom threads, you should strive to create as few threads as possible yourself and you should use those threads only for specific tasks that cannot be implemented any other way.
 Threads are still a good way to implement code that must run in real time. Dispatch queues make every attempt to run their tasks as fast as possible but they do not address real time constraints. If you need more predictable behavior from code running in the background, threads may still offer a better alternative.
 
+__Concurrency__
+
+Concurrency is the notion of multiple things happening at the same time. Threads are subunits of processes, which can be scheduled independently by the operating system scheduler. Virtually all concurrency APIs are built on top of threads under the hood – that’s true for both Grand Central Dispatch and operation queues. You can either use the POSIX thread API, or the Objective-C wrapper around this API, `NSThread`, to create your own threads.
+
+
+
+<a name="основные-понятия-многопоточности"></a>
+## Основные понятия многопоточности
+
+
+__thread__
+
+Is used to refer to a separate path of execution for code. Inside each program, however, exists one or more threads of execution, which can be used to perform different tasks simultaneously or in a nearly simultaneous manner. The system itself actually manages these threads of execution, scheduling them to run on the available cores and preemptively interrupting them as needed to allow other threads to run. The threads we’ve been talking about so far have been software threads. They’re (generally) independent units of computation. The hardware threads are based on the number of cores on the computer.
+At the application level, all threads behave in essentially the same way as on other platforms. After starting a thread, the thread runs in one of three main states: running, ready, or blocked. If a thread is not currently running, it is either blocked and waiting for input or it is ready to run but not scheduled to do so yet. The thread continues moving back and forth among these states until it finally exits and moves to the terminated state. When you create a new thread, you must specify an entry-point function (or an entry-point method in the case of Cocoa threads) for that thread. This entry-point function constitutes the code you want to run on the thread. When the function returns, or when you terminate the thread explicitly, the thread stops permanently and is reclaimed by the system. Because threads are relatively expensive to create in terms of memory and time, it is therefore recommended that your entry point function do a significant amount of work or set up a run loop to allow for recurring work to be performed.
+
+__process__
+
+Is used to refer to a running executable, which can encompass multiple threads. It keeps track of what needs to be done and delegates the tasks to the threads. A process can have one or multiple threads. The process is like a project manager and the thread is like a worker.
+
+__task__
+
+Is used to refer to the abstract concept of work that needs to be performed
+
+<a name="multithreading-api-alternatives"></a>
+## API для работы с многопоточностью и их альтернативы
+
 <a name="posix-threads"></a>
-## POSIX Threads
+### POSIX Threads
 Usually referred to as Pthreads, is a POSIX standard for threads defines an API for creating and manipulating threads. Pthreads defines a set of C programming language types, functions and constants. It is implemented with a pthread.h header and a thread library. There are around 100 Pthreads procedures, all prefixed `pthread_` and they can be categorized into four groups:
 
 * Thread management - creating, joining threads etc.
@@ -33,7 +67,12 @@ Use POSIX calls if cross-platform portability is required. If you are writing ne
 
 <a name="nsthread"></a>
 ## NSThread
-is a simple Objective-C wrapper around pthreads. This makes the code look more familiar in a Cocoa environment. For example, you can define a thread as a subclass of `NSThread`, which encapsulates the code you want to run in the background.
+A simple Objective-C wrapper around pthreads. This makes the code look more familiar in a Cocoa environment. It is a relatively lightweight way to implement multiple paths of execution inside of an application. For example, you can define a thread as a subclass of `NSThread`, which encapsulates the code you want to run in the background.
+
+Though Operation queues is the preferred way to perform tasks concurrently, depending on application there may still be times when you need to create custom threads.
+Threads are still a good way to implement code that must run in real time.
+Use threads for specific tasks that cannot be implemented in any other way.
+If you need more predictable behavior from code running in the background, threads may still offer a better alternative.
 
 <a name="run-loops"></a>
 ## Run Loops
@@ -44,12 +83,6 @@ Run loops are not technically a concurrency mechanism like GCD or operation queu
 A run loop is always bound to one particular thread. The main run loop associated with the main thread has a central role in each Cocoa and CocoaTouch application, because it handles UI events, timers, and other kernel events. Whenever you schedule a timer, use a `NSURLConnection` or call `performSelector:withObject:afterDelay`:, the run loop is used behind the scenes in order to perform these asynchronous tasks. Whenever you use a method which relies on the run loop, it is important to remember that run loops can be run in different modes. Each mode defines a set of events the run loop is going to react to. This is a clever way to temporarily prioritize certain tasks over others in the main run loop. A typical example of this is scrolling on iOS. While you’re scrolling, the run loop is not running in its default mode, and therefore, it’s not going to react to, for example, a timer you have scheduled before. Once scrolling stops, the run loop returns to the default mode and the events which have been queued up are executed. If you want a timer to fire during scrolling, you need to add it to the run loop in the `NSRunLoopCommonModes` mode. The main thread always has the main run loop set up and running. Other threads though don’t have a run loop configured by default. You can set up a run loop for other threads too, but you will rarely need to do this. Most of the time it is much easier to use the main run loop. If you need to do heavier work that you don’t want to execute on the main thread, you can still dispatch it onto another queue after your code is called from the main run loop.
 You can think of a Run Loop to be an event processing for-loop associated to a thread. This is provided by the system for every thread, but it's only run automatically for the main thread. Note that _running run loops and executing a thread are two distinct concepts_. You can execute a thread without running a run loop, when you're just performing long calculations and you don't have to respond to various events. If you want to respond to various events from a secondary thread, you retrieve the run loop associated to the thread by `[NSRunLoop currentRunLoop];` and run it. The events run loops can handle is called input sources. You can add input sources to a run loop.
 
-<a name="сoncurrency"></a>
-# Concurrency
-Concurrency is the notion of multiple things happening at the same time. Threads are subunits of processes, which can be scheduled independently by the operating system scheduler. Virtually all concurrency APIs are built on top of threads under the hood – that’s true for both Grand Central Dispatch and operation queues. You can either use the POSIX thread API, or the Objective-C wrapper around this API, `NSThread`, to create your own threads.
-
-<img src="https://github.com/sashakid/ios-guide/blob/master/Images/objc_threading.png">
-<img src="https://github.com/sashakid/ios-guide/blob/master/Images/objc_threading_apis.png">
 
 <a name="gcd"></a>
 ## GCD
@@ -117,6 +150,10 @@ __Минусы__
 * Нужно упаковывать все параметры для передачи, и бедные возможности по управлению очередностью, количеством одновременных задач, их приоритетом. На каждый вызов `performSelectorInBackground` будет создаваться отдельный поток. При быстром скролле большой таблицы можно довести число потоков до очень большой величины.
 
 In general, you should use the highest level of abstraction that suits your needs. This means that you should usually use `NSOperationQueue` instead of GCD, unless you need to do something that `NSOperationQueue` doesn't support.
+
+Use NSOperationQueue when you have more complex operations you want to run concurrently.
+NSOperation allows for subclassing, dependencies, priorities, cancellation and a supports a number of other higher-level features.
+NSOperation actually uses GCD under the hood so it is as multi-core, multi-thread capable as GCD.
 
 <a name="мьютекс"></a>
 ### Что такое мьютекс?
@@ -186,3 +223,6 @@ Atomic – thread safe.
 }
 ```
 Таким образом используя `@synchronized` мы лочим по ключу `self` доступ к `foo`, однако у такого метода есть очевидный недостаток, если в классе будет две переменные (или 100500) к которым нужен одновременный доступ с разных потоков, то они будут лочиться и друг относительно друга, т.к `self` для них один и тот же, в таких случаях нужно использовать другие методы лока, как `NSLock`, `NSRecursiveLock`,...
+
+<a name="race-condition"></a>
+## Что такое гонка условий?
