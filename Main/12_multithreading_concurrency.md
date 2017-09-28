@@ -9,7 +9,7 @@
 			- [Swift 3 API](#swift-3-api)
 		- [NSOperationQueue](#nsoperationqueue)
 		- [Idle-time notifications](#idle-time-notifications)
-		- [Timers]((#timers)
+		- [Timers](#timers)
 	- [Synchronization](#synchronization)
 		- [Semaphore](#semaphore)
 		- [Lock](#lock)
