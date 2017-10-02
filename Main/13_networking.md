@@ -5,6 +5,7 @@
 	- [Что такое REST архитектура?](#rest-архитектура)
 	- [Как загрузить что-то из интернета? NSURL, NSURLSession, NSURLConnection, NSURLRequest](#загрузить-из-интернета)
 	- [Парсинг JSON, HTML, XML](#парсинг)
+	- [Сокет, TCP, UDP, NSStream - когда что применять?](#socket-tcp-udp-nsstream)
 
 <a name="networking"></a>
 # Networking
@@ -12,12 +13,36 @@
 ## Преимущества и недостатки синхронного и асинхронного соединения?
 `NSURLConnection` поддерживает синхронное и асинхронное выполнение запросов. Для выполнения синхронных запросов используется `sendSynchronousRequest:returningResponse:error:`
 Использование такого запроса не рекомендуется. Работа приложения остановится, пока данные не будут получены полностью, не произойдёт ошибка или истечет таймаут соединения. При использовании синхронного запроса есть и другие ограничения.
-Для асинхронных запросов используется `- (id)initWithRequest:(NSURLRequest *)request delegate:(id <NSURLConnectionDelegate>)delegate` либо `initWithRequest:delegate:startImmediately:``
+Для асинхронных запросов используется `- (id)initWithRequest:(NSURLRequest *)request delegate:(id <NSURLConnectionDelegate>)delegate` либо `initWithRequest:delegate:startImmediately:`
 
 <a name="протоколы-передачи-данных"></a>
 ## Протоколы передачи данных
-Transmission Control Protocol (TCP) (протокол управления передачей) — один из основных протоколов передачи данных Интернета, предназначенный для управления передачей данных в сетях и подсетях TCP/IP.
-HTTP (англ. HyperText Transfer Protocol — «протокол передачи гипертекста») — протокол прикладного уровня передачи данных (изначально — в виде гипертекстовых документов). Основой HTTP является технология «клиент-сервер», то есть предполагается существование потребителей (клиентов), которые инициируют соединение и посылают запрос, и поставщиков (серверов), которые ожидают соединения для получения запроса, производят необходимые действия и возвращают обратно сообщение с результатом. Этот протокол описывает взаимодействие между двумя компьютерами (клиентом и сервером), построенное на базе сообщений, называемых запрос (Request) и ответ (Response). Каждое сообщение состоит из трех частей: стартовая строка, заголовки и тело. При этом обязательной является только стартовая строка.
+
+Протокол передачи данных — набор соглашений интерфейса логического уровня, которые определяют обмен данными между различными программами. Эти соглашения задают единообразный способ передачи сообщений и обработки ошибок при взаимодействии программного обеспечения разнесённой в пространстве аппаратуры, соединённой тем или иным интерфейсом.
+
+__IP__
+
+Internet Protocol, межсетевой протокол - маршрутизируемый протокол сетевого уровня стека TCP/IP. Именно IP стал тем протоколом, который объединил отдельные компьютерные сети во всемирную сеть Интернет. Неотъемлемой частью протокола является адресация сети.
+
+__TCP__
+
+Transmission Control Protocol, протокол управления передачей — один из основных протоколов передачи данных Интернета, предназначенный для управления передачей данных в сетях и подсетях TCP/IP.
+
+__UDP__
+
+User Datagram Protocol, протокол пользовательских датаграмм. С UDP компьютерные приложения могут посылать сообщения (в данном случае называемые датаграммами) другим хостам по IP-сети без необходимости предварительного сообщения для установки специальных каналов передачи или путей данных. Природа UDP как протокола без сохранения состояния также полезна для серверов, отвечающих на небольшие запросы от огромного числа клиентов, например DNS и потоковые мультимедийные приложения вроде IPTV, Voice over IP, протоколы туннелирования IP и многие онлайн-игры.
+
+__HTTP__
+
+HyperText Transfer Protocol, протокол передачи гипертекста — протокол прикладного уровня передачи данных (изначально — в виде гипертекстовых документов). Основой HTTP является технология «клиент-сервер», то есть предполагается существование потребителей (клиентов), которые инициируют соединение и посылают запрос, и поставщиков (серверов), которые ожидают соединения для получения запроса, производят необходимые действия и возвращают обратно сообщение с результатом. Этот протокол описывает взаимодействие между двумя компьютерами (клиентом и сервером), построенное на базе сообщений, называемых запрос (Request) и ответ (Response). Каждое сообщение состоит из трех частей: стартовая строка, заголовки и тело. При этом обязательной является только стартовая строка.
+
+__FTP__
+
+File Transfer Protocol — это протокол передачи файлов со специального файлового сервера на компьютер пользователя. FTP дает возможность абоненту обмениваться двоичными и текстовыми файлами с любым компьютером сети. Установив связь с удаленным компьютером, пользователь может скопировать файл с удаленного компьютера на свой или скопировать файл со своего компьютера на удаленный.
+
+__SIP__
+
+Session Initiation Protocol, протокол установления сеанса — протокол передачи данных, описывающий способ установления и завершения пользовательского интернет-сеанса, включающего обмен мультимедийным содержимым (IP-телефония, видео- и аудиоконференции, мгновенные сообщения, онлайн-игры). Протокол описывает, каким образом клиентское приложение может запросить начало соединения у другого, возможно, физически удалённого клиента, находящегося в той же сети, используя его уникальное имя. Протокол определяет способ согласования между клиентами об открытии каналов обмена на основе других протоколов, которые могут использоваться для непосредственной передачи информации (например, RTP). Допускается добавление или удаление таких каналов в течение установленного сеанса, а также подключение и отключение дополнительных клиентов (то есть допускается участие в обмене более двух сторон — конференц-связь). Протокол также определяет порядок завершения сеанса.
 
 <a name="head-get-post-put"></a>
 ## Какие различия между HEAD, GET, POST, PUT?
@@ -96,21 +121,29 @@ __Архитектура REST__
 
 <a name="загрузить-из-интернета"></a>
 ## Как загрузить что-то из интернета? NSURL, NSURLSession, NSURLConnection, NSURLRequest
-The iOS SDK allows us to connect to the Internet and retrieve and send data using the `NSURLConnection` class. JSON serialization and deserialization will all be done using the `NSJSONSerialization` class. XML parsing will be done using `NSXMLParser`, and the Twitter connectivity will be done using the Twitter framework.
-The iOS 7 SDK brings along new classes that we can take advantage of in this chapter. One of these classes is the `NSURLSession`, which manages the connectivity to web services in a more thorough way than the `NSURLConnection` class does.
+
+__NSURLConnection__
+
+Is a much older API, introduced in OS X 10.2. It's an abstraction on top of the Core Foundation / CFNetwork APIs. If we have an open connection with NSURLConnection and the system interrupt our App, when our App goes to background mode, everything we have received or sent were lost.
+
+<img src="https://github.com/sashakid/ios-guide/blob/master/Images/nsurlconnection.png">
+
+__NSURLSession__
+
+Is designed around the assumption that you'll have a lot of requests that need similar configuration (standard sets of headers, etc.), and makes life much easier if you do. `NSURLSession` also provides support for background downloads, which make it possible to continue downloading resources while your app isn't running (or when it is in the background on iOS). `NSURLSession` also provides grouping of related requests, making it easy to cancel all of the requests associated with a particular work unit, such as canceling all loads associated with loading a web page when the user closes the window or tab. `NSURLSession` also provides nicer interfaces for requesting data using blocks, in that it allows you to combine them with delegate methods for doing custom authentication handling, redirect handling. The most immediate improvement `NSURLSession` provides over `NSURLConnection` is the ability to configure per-session cache, protocol, cookie, and credential policies, rather than sharing them across the app. This allows the networking infrastructure of frameworks and parts of the app to operate independently, without interfering with one another. Each `NSURLSession` object is initialized with an `NSURLSessionConfiguration`, which specifies these policies, as well a number of new options specifically added to improve performance on mobile devices. The other big part of `NSURLSession` is session tasks, which handle the loading of data, as well as uploading and downloading files and data between the client and server. `NSURLSessionTask` is most analogous to `NSURLConnection` in that it is responsible for loading data, with the main difference being that tasks share the common delegate of their parent NSURLSession. Solves background mode problem and also give us out of process downloads. It manage the connection process even when we don't have access. You will need to use `application:handleEventsForBackgroundURLSession:completionHandler` in your AppDelegate
+
+<img src="https://github.com/sashakid/ios-guide/blob/master/Images/nsurlsession.png">
+
 ```objectivec
-- (void)getImageFromURL:(NSString *)url {
-  dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0), ^{
-    NSURL *myUrl = [NSURL URLWithString:url];
-    NSData *data = [NSData dataWithContentsOfURL:myUrl];
-    dispatch_sync(dispatch_get_main_queue(), ^{
-      self.cityPicture = [UIImage imageWithData:data];
-    });
-  });
-}
+NSURL *URL = [NSURL URLWithString:@"http://example.com"];
+NSURLRequest *request = [NSURLRequest requestWithURL:URL];
+NSURLSession *session = [NSURLSession sharedSession];
+NSURLSessionDataTask *task = [session dataTaskWithRequest:request completionHandler: ^(NSData *data, NSURLResponse *response, NSError *error) {
+	// ...
+}];
+[task resume];
 ```
 
-<a name="парсинг"></a>
 ## Парсинг JSON, HTML, XML
 Парсинг – обработка данных, разбор входной последовательности с целью получения токенов.
 Токен – лексема, минимальная единица языка, имеющая самостоятельный смысл (имя, знак операции, ключевое слово)
@@ -161,3 +194,57 @@ JSON (JavaScript Object Notation) is a lightweight data-interchange format. It i
   </popup>
 </menu>
 ```
+
+<a name="socket-tcp-udp-nsstream"></a>
+# Сокет, TCP, UDP, NSStream - когда что применять?
+
+__Socket__
+
+Название программного интерфейса для обеспечения обмена данными между процессами,  абстрактный объект, представляющий конечную точку соединения. Для взаимодействия между машинами с помощью стека протоколов TCP/IP используются адреса и порты. Первое на текущий момент представляет собой 32-битный адрес, наиболее часто его представляют в символьной форме mmm.nnn.ppp.qqq. Второе — это номер порта в диапазоне от 0 до 65535. Эта пара и есть сокет. В процессе обмена, как правило, используется два сокета — сокет отправителя и сокет получателя. Каждый процесс может создать «слушающий» сокет (серверный сокет) и привязать его к какому-нибудь порту операционной системы. Слушающий процесс обычно находится в цикле ожидания, то есть просыпается при появлении нового соединения. При этом сохраняется возможность проверить наличие соединений на данный момент, установить тайм-аут для операции и т. д.
+
+__WebSocket__
+
+Протокол полнодуплексной связи (может передавать и принимать одновременно) поверх TCP-соединения, предназначенный для обмена сообщениями между браузером и веб-сервером в режиме реального времени. WebSocket разработан для воплощения в web-браузерах и web-серверах, но он может быть использован для любого клиентского или серверного приложения. Протокол WebSocket — это независимый протокол, основанный на протоколе TCP. Unlike traditional TCP sockets, WebSockets do at least maintain a relationship with HTTP and can be useful to achieve the same real-time communication goals as traditional sockets, all from the comfort and safety of the browser.
+
+__TCP Stream Socket__
+
+Is much more commonly used, as it provides the framework for a complete, structured "conversation" to occur between the two endpoints. TCP connections provide a means to ensure the message was received, and guarantees that packets are received in order. TCP is used by protocols including HTTP, FTP, and others where data must be reliably sent and received in order. To keep track of the ordering of packets, TCP employs a sequence number, which identifies the sequence of each packet. This not only keeps your conversation in order, but also adds a basic level of protection against some forms of spoofing (data forgery by a malicious party).
+
+* Dedicated & point-to-point channel between server and client.
+* Reliable and Lossless.
+* Data sent/received in the similar order.
+* Long time for recovering lost/mistaken data
+* Web, SSH, FTP, TELNET, SMTP, IMAP/POP
+
+__UDP Datagram Socket__
+
+Is used for sending short messages called datagrams to the recipient. Datagrams are single packets of data that are sent and received without any "return postage." There is no guarantee that the recipient will receive a particular packet, and multiple packets may be received out of order. Datagrams are generally thought of as unreliable, in the same way that a carrier pigeon can be unreliable. This form of communication is used for sending short query/response-type messages that do not require authentication, such as DNS (name resolution) lookups, as well as by some protocols where lost packets are irrelevant; such as live video streams and online multiplayer games, where an interruption can be ignored.
+
+* No dedicated & point-to-point channel between server and client.
+* Not 100% reliable and may lose data.
+* Data sent/received order might not be the same
+* Don't care or rapid recovering lost/mistaken data
+* Tunneling/VPN (lost packets are ok - the tunneled protocol takes care of it)
+* Media streaming
+* Games that don't care if you get every update
+* Local broadcast mechanisms (same application running on different machines "discovering" each other)
+
+```c
+CFSocketRef CFSocketCreate (
+    CFAllocatorRef allocator,
+    SInt32 protocolFamily,
+    SInt32 socketType,
+    SInt32 protocol,
+    CFOptionFlags callBackTypes,
+    CFSocketCallBack callout,
+    const CFSocketContext *context
+);
+```
+
+__CFStream__
+
+Socket streams provide an easy interface for reading and writing data to or from a socket. Each socket can be bound to a read and write stream, allowing for synchronous or asynchronous communication. Streams encapsulate most of the work needed for reading and writing byte streams, and replace the traditional `send()` and `recv()` functions used in C. Two different stream objects are used with sockets: `CFReadStream` and `CFWriteStream`
+
+__NSStream__
+
+`NSStream` is an abstract class that defines the fundamental interface and properties for all stream objects. `NSInputStream` and `NSOutputStream` are subclasses of `NSStream` and implement default input-stream and output-stream behavior. `NSStream` is built on the `CFStream` layer of Core Foundation. This close relationship means that the concrete subclasses of `NSStream`, `NSOutputStream` and `NSInputStream`, are toll-free bridged with their Core Foundation counterparts `CFWriteStream` and `CFReadStream`. Although there are strong similarities between the Cocoa and Core Foundation stream APIs, their implementations are not exactly coincident. The Cocoa stream classes use the delegation model for asynchronous behavior (assuming run-loop scheduling) while Core Foundation uses client callbacks. Despite their strong similarities, __`NSStream` does give you a major advantage over `CFStream`. Because of its Objective-C underpinnings, it is extensible.__ You can subclass NSStream, `NSInputStream`, or `NSOutputStream` to customize stream attributes and behavior. For example, you could create an input stream that maintains statistics on the bytes it reads; or you could make a `NSStream` subclass whose instances can seek through their stream, putting back bytes that have been read. `NSStream` has its own set of required overrides, as do `NSInputStream` and `NSOutputStream`.
