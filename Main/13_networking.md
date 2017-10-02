@@ -61,16 +61,26 @@ GET /path/resource?param1=value1&param2=value2 HTTP/1.1
 `POST`
 
 Применяется для передачи пользовательских данных заданному ресурсу. Например, в блогах посетители обычно могут вводить свои комментарии к записям в HTML-форму, после чего они передаются серверу методом `POST` и он помещает их на страницу. При этом передаваемые данные (в примере с блогами — текст комментария) включаются в тело запроса. Аналогично с помощью метода `POST` обычно загружаются файлы на сервер. В отличие от метода `GET`, метод `POST` не считается идемпотентным, то есть многократное повторение одних и тех же запросов `POST` может возвращать разные результаты (например, после каждой отправки комментария будет появляться одна копия этого комментария).
-Отправить `POST`-запрос не так тяжело как кажется. Достаточно подготовить «правильный» `NSURLRequest`.
-```objectivec
-NSString *params = @"param=value&number=1"; // задаем параметры POST запроса
-NSURL *url = [NSURL URLWithString:@"http://server.com"]; // куда отправлять
-NSMutableURLRequest *request = [NSMutableURLRequest requestWithURL:url];
-request.HTTPMethod = @"POST";
-request.HTTPBody = [params dataUsingEncoding:NSUTF8StringEncoding];
-// следует обратить внимание на кодировку
-// теперь можно отправить запрос синхронно или асинхронно
-[NSURLConnection sendSynchronousRequest:request returningResponse:nil error:nil];
+```swift
+var request = URLRequest(url: URL(string: "http://www.thisismylink.com/postName.php")!)
+request.httpMethod = "POST"
+let postString = "id=13&name=Jack"
+request.httpBody = postString.data(using: .utf8)
+let task = URLSession.shared.dataTask(with: request) { data, response, error in
+  guard let data = data, error == nil else {                                                 
+		// check for fundamental networking error
+    print("error=\(error)")
+    return
+  }
+  if let httpStatus = response as? HTTPURLResponse, httpStatus.statusCode != 200 {           
+		// check for http errors
+    print("statusCode should be 200, but is \(httpStatus.statusCode)")
+    print("response = \(response)")
+  }
+  let responseString = String(data: data, encoding: .utf8)
+  print("responseString = \(responseString)")
+}
+task.resume()
 ```
 `PUT`
 
@@ -228,7 +238,7 @@ Is used for sending short messages called datagrams to the recipient. Datagrams 
 * Media streaming
 * Games that don't care if you get every update
 * Local broadcast mechanisms (same application running on different machines "discovering" each other)
-
+***
 ```c
 CFSocketRef CFSocketCreate (
     CFAllocatorRef allocator,
@@ -240,11 +250,11 @@ CFSocketRef CFSocketCreate (
     const CFSocketContext *context
 );
 ```
-
+***
 __CFStream__
 
 Socket streams provide an easy interface for reading and writing data to or from a socket. Each socket can be bound to a read and write stream, allowing for synchronous or asynchronous communication. Streams encapsulate most of the work needed for reading and writing byte streams, and replace the traditional `send()` and `recv()` functions used in C. Two different stream objects are used with sockets: `CFReadStream` and `CFWriteStream`
 
 __NSStream__
 
-`NSStream` is an abstract class that defines the fundamental interface and properties for all stream objects. `NSInputStream` and `NSOutputStream` are subclasses of `NSStream` and implement default input-stream and output-stream behavior. `NSStream` is built on the `CFStream` layer of Core Foundation. This close relationship means that the concrete subclasses of `NSStream`, `NSOutputStream` and `NSInputStream`, are toll-free bridged with their Core Foundation counterparts `CFWriteStream` and `CFReadStream`. Although there are strong similarities between the Cocoa and Core Foundation stream APIs, their implementations are not exactly coincident. The Cocoa stream classes use the delegation model for asynchronous behavior (assuming run-loop scheduling) while Core Foundation uses client callbacks. Despite their strong similarities, __`NSStream` does give you a major advantage over `CFStream`. Because of its Objective-C underpinnings, it is extensible.__ You can subclass NSStream, `NSInputStream`, or `NSOutputStream` to customize stream attributes and behavior. For example, you could create an input stream that maintains statistics on the bytes it reads; or you could make a `NSStream` subclass whose instances can seek through their stream, putting back bytes that have been read. `NSStream` has its own set of required overrides, as do `NSInputStream` and `NSOutputStream`.
+`NSStream` is an abstract class that defines the fundamental interface and properties for all stream objects. `NSInputStream` and `NSOutputStream` are subclasses of `NSStream` and implement default input-stream and output-stream behavior. `NSStream` is built on the `CFStream` layer of Core Foundation. This close relationship means that the concrete subclasses of `NSStream`, `NSOutputStream` and `NSInputStream`, are toll-free bridged with their Core Foundation counterparts `CFWriteStream` and `CFReadStream`. Although there are strong similarities between the Cocoa and Core Foundation stream APIs, their implementations are not exactly coincident. The Cocoa stream classes use the delegation model for asynchronous behavior (assuming run-loop scheduling) while Core Foundation uses client callbacks. Despite their strong similarities, __`NSStream` does give you a major advantage over `CFStream`. Because of its Objective-C underpinnings, it is extensible.__ You can subclass `NSStream`, `NSInputStream`, or `NSOutputStream` to customize stream attributes and behavior. For example, you could create an input stream that maintains statistics on the bytes it reads; or you could make a `NSStream` subclass whose instances can seek through their stream, putting back bytes that have been read. `NSStream` has its own set of required overrides, as do `NSInputStream` and `NSOutputStream`.
