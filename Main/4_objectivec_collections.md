@@ -92,11 +92,13 @@ The pointer collection classes allow you to further customize the collection to 
 
 * `NSPointerArray`
 
-Mutable collection modeled after `NSArray` but it can also hold `NULL` values, which can be inserted or extracted (and which contribute to the object’s count). Moreover, unlike traditional arrays, you can set the count of the array directly. You can use an NSPointerArray object when you want an ordered collection that uses weak references. For example, suppose you have a global array that contains some objects. Because global objects are never collected, none of its contents can be deallocated unless they are held weakly. Pointer arrays configured to hold objects weakly do not own their contents. If there are no strong references to objects within such a pointer array, those objects can be deallocated.
+Mutable collection modeled after `NSArray` but it can also hold `NULL` values, which can be inserted or extracted (and which contribute to the object’s count). Moreover, unlike traditional arrays, you can set the count of the array directly. You can use an `NSPointerArray` object when you want an ordered collection that uses weak references. For example, suppose you have a global array that contains some objects. Because global objects are never collected, none of its contents can be deallocated unless they are held weakly. Pointer arrays configured to hold objects weakly do not own their contents. If there are no strong references to objects within such a pointer array, those objects can be deallocated.
 
 <img src="https://github.com/sashakid/ios-guide/blob/master/Images/pointerarray.png">
 
-* `NSMapTable` – is a general-purpose analogue of `NSDictionary`. Contrasted with the behavior of `NSDictionary / NSMutableDictionary`, `NSMapTable` has the following characteristics:
+* `NSMapTable`
+
+Is a general-purpose analogue of `NSDictionary`. Contrasted with the behavior of `NSDictionary / NSMutableDictionary`, `NSMapTable` has the following characteristics:
 - `NSDictionary` / `NSMutableDictionary` copies keys, and holds strong references to values.
 - `NSMapTable` is mutable, without an immutable counterpart.
 - `NSMapTable` can hold keys and values with weak references, in such a way that entries are removed when either the key or value is deallocated.

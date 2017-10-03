@@ -5,6 +5,7 @@
 	- [Как загрузить что-то из интернета? NSURL, NSURLSession, NSURLConnection, NSURLRequest](#загрузить-из-интернета)
 	- [Парсинг JSON, HTML, XML](#парсинг)
 	- [Сокет, TCP, UDP, NSStream - когда что применять?](#socket-tcp-udp-nsstream)
+	- [Как написать синхронную обертку для асинхронного метода?](#async-inside-sync)
 
 <a name="networking"></a>
 # Networking
@@ -282,3 +283,31 @@ Socket streams provide an easy interface for reading and writing data to or from
 __NSStream__
 
 `NSStream` is an abstract class that defines the fundamental interface and properties for all stream objects. `NSInputStream` and `NSOutputStream` are subclasses of `NSStream` and implement default input-stream and output-stream behavior. `NSStream` is built on the `CFStream` layer of Core Foundation. This close relationship means that the concrete subclasses of `NSStream`, `NSOutputStream` and `NSInputStream`, are toll-free bridged with their Core Foundation counterparts `CFWriteStream` and `CFReadStream`. Although there are strong similarities between the Cocoa and Core Foundation stream APIs, their implementations are not exactly coincident. The Cocoa stream classes use the delegation model for asynchronous behavior (assuming run-loop scheduling) while Core Foundation uses client callbacks. Despite their strong similarities, __`NSStream` does give you a major advantage over `CFStream`. Because of its Objective-C underpinnings, it is extensible.__ You can subclass `NSStream`, `NSInputStream`, or `NSOutputStream` to customize stream attributes and behavior. For example, you could create an input stream that maintains statistics on the bytes it reads; or you could make a `NSStream` subclass whose instances can seek through their stream, putting back bytes that have been read. `NSStream` has its own set of required overrides, as do `NSInputStream` and `NSOutputStream`.
+
+<a name="async-inside-sync"></a>
+## Как написать синхронную обертку для асинхронного метода?
+```objectivec
+//Original asynchronous method
+- (void)executeInBackgroundWithCompletion:(void(^)(void))completion {
+  NSOperationQueue* callbackQueue = [NSOperationQueue currentQueue];
+  [[[NSOperationQueue alloc] init] addOperationWithBlock:^{
+    //do something that takes a long time
+    [callbackQueue addOperationWithBlock:^{
+      if (completion) {
+        completion();
+      }
+    }];
+  }];
+}
+
+//Synchronous version
+- (void)executeInBackgroundAndWait {
+  dispatch_semaphore_t semaphore = dispatch_semaphore_create(0);
+  [self executeInBackgroundWithCompletion:^{
+    dispatch_semaphore_signal(semaphore);
+  }];
+  while (dispatch_semaphore_wait(semaphore, DISPATCH_TIME_NOW)) {
+    [[NSRunLoop currentRunLoop] runMode:NSDefaultRunLoopMode beforeDate:[NSDate dateWithTimeIntervalSinceNow:0]];
+  };
+}
+```
