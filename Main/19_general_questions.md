@@ -767,9 +767,9 @@ The KVC runtime uses the Objective-C runtime to first look for a method called `
 
 <a name="kvo"></a>
 ## Как работает KVO и какие могут быть с ним проблемы?
-```
-The key-value observing `addObserver:forKeyPath:options:context:` method does not maintain strong references to the observing object, the observed objects, or the context. You should ensure that you maintain strong references to the observing, and observed, objects, and the context as necessary.
-```
+
+> The key-value observing `addObserver:forKeyPath:options:context:` method does not maintain strong references to the observing object, the observed objects, or the context. You should ensure that you maintain strong references to the observing, and observed, objects, and the context as necessary.
+
 Наблюдение не создает сильных ссылок ни на наблюдателя, ни на наблюдаемый объект, ни на контекст. Однако документация умалчивает о том, что же произойдет, когда один из этих объектов будет удален.
 
 So how does that work, not needing any code in the observed object? Well it all happens through the power of the Objective-C runtime. When you observe an object of a particular class for the first time, the KVO infrastructure creates a brand new class at runtime that subclasses your class. In that new class, it overrides the set methods for any observed keys. It then switches out the `isa` pointer of your object (the pointer that tells the Objective-C runtime what kind of object a particular blob of memory actually is) so that your object magically becomes an instance of this new class. The overridden methods are how it does the real work of notifying observers. The logic goes that changes to a key have to go through that key's set method. It overrides that set method so that it can intercept it and post notifications to observers whenever it gets called. (Of course it's possible to make a modification without going through the set method if you modify the instance variable directly. KVO requires that compliant classes must either not do this, or must wrap direct ivar access in manual notification calls.) It gets trickier though: Apple really doesn't want this machinery to be exposed. In addition to setters, the dynamic subclass also overrides the -class method to lie to you and return the original class! If you don't look too closely, the KVO-mutated objects look just like their non-observed counterparts.
@@ -777,15 +777,14 @@ So how does that work, not needing any code in the observed object? Well it all 
 <a name="rotate-view"></a>
 ## Как изменятся свойства, если применить поворот на 45º?
 
-<img src="https://github.com/sashakid/ios-guide/blob/master/Images/rotate-view.png">
+<img src="https://github.com/sashakid/ios-guide/blob/master/Images/rotate-view.jpg">
 
 It is important to note that if you transform a view, then the frame becomes undefined. So actually, the yellow frame that I drew around the rotated green bounds in the image above never actually exists. That means if you rotate, scale or do some other transformation then you shouldn't use the frame values any more. You can still use the bounds values, though. The Apple docs warn:
-```
-Important: If a view’s transform property does not contain the identity transform, the frame of that view is undefined and so are the results of its autoresizing behaviors.
-```
-```
-When modifying the transform property of your view, all transformations are performed relative to the center point of the view.
-```
+
+> Important: If a view’s transform property does not contain the identity transform, the frame of that view is undefined and so are the results of its autoresizing behaviors.
+
+> When modifying the transform property of your view, all transformations are performed relative to the center point of the view.
+
 So if you do need to move a view around in the parent after a transformation has been done, you can do it by changing the view.center coordinates. Like frame, center uses the coordinate system of the parent view.
 
 __When to use frame and when to use bounds?__
