@@ -28,6 +28,11 @@
 	- [Что такое volatile?](#volatile)
 	- [Что такое inline функция?](#inline)
 	- [Добавление объектов в коллекции](#objects-in-collections)
+	- [Как использовать свой класс как ключ?](#class-as-key)
+	- [Как работает KVC?](#kvc)
+	- [Как работает KVO и какие могут быть с ним проблемы?](#kvo)
+	- [Как изменятся свойства, если применить поворот на 45º?](#rotate-view)
+	- [Отличие view от layer?](#view-layer-difference)
 
 <a name="общие-вопросы-и-задачи"></a>
 # Общие вопросы и задачи
@@ -741,3 +746,68 @@ let myArray: Array<WeakContainer<MyClass>> = [myObject1, myObject2]
 - Mожно ли узнать, какой объект сколько раз был добавлен в set?
 
 `NSCountedSet`
+
+<a name="class-as-key"></a>
+## Как использовать свой класс как ключ?
+
+You're using `setValue:forKey:` which only takes `NSString` as keys. You should be using `setObject:forKey:` instead. A class object (pointers to class objects can be passed as type Class) is a full-fledged Objective-C object (a class object is an instance of its meta-class, and you can use all the `NSObject` methods on a class object; so they can be used anywhere objects are used.
+
+<a name="kvc"></a>
+## Как работает KVC?
+
+Essentially, each class maintains a mapping of method names to their actual implementations (which are just C functions). This is akin to the dictionary you talk about, although it is managed by the Objective-C runtime itself. This mapping is used every time a method is called. For example, let's say you have this bit of code:
+```objectivec
+[obj doSomething];
+```
+What really happens is that, at runtime, the Objective-C runtime searches obj's method mapping for an entry called `doSomething`. This returns a function that the runtime then calls, passing in `obj` as the first parameter to that function. Because methods are dispatched at runtime, Objective-C provides a number of ways to call functions using strings. The Objective-C runtime itself also tracks the names of instance variables and where they are actually located in memory, relative to an object. This is how KVC is able to do its thing. When you call:
+```objectivec
+[obj setValue:@"value" forKey:@"property"];
+```
+The KVC runtime uses the Objective-C runtime to first look for a method called `setProperty`. The runtime fetches the function corresponding to that method, and the KVC machinery can then call that method, passing `obj` and `@"value"` as the parameters to that function. What if a method can't be found? Well, then the KVC machinery looks for an instance variable with the same name, using a function from the Objective-C runtime like `ivar_getOffset` or the like. Probably at some point it uses a function like `object_setIvar` to set the instance variable. If KVC fails to find both a method and an instance variable, it calls `setValue:forUndefinedKey:` or `valueForUndefinedKey:`, which can optionally be defined on a class to dynamically handle properties.
+
+<a name="kvo"></a>
+## Как работает KVO и какие могут быть с ним проблемы?
+```
+The key-value observing `addObserver:forKeyPath:options:context:` method does not maintain strong references to the observing object, the observed objects, or the context. You should ensure that you maintain strong references to the observing, and observed, objects, and the context as necessary.
+```
+Наблюдение не создает сильных ссылок ни на наблюдателя, ни на наблюдаемый объект, ни на контекст. Однако документация умалчивает о том, что же произойдет, когда один из этих объектов будет удален.
+
+So how does that work, not needing any code in the observed object? Well it all happens through the power of the Objective-C runtime. When you observe an object of a particular class for the first time, the KVO infrastructure creates a brand new class at runtime that subclasses your class. In that new class, it overrides the set methods for any observed keys. It then switches out the `isa` pointer of your object (the pointer that tells the Objective-C runtime what kind of object a particular blob of memory actually is) so that your object magically becomes an instance of this new class. The overridden methods are how it does the real work of notifying observers. The logic goes that changes to a key have to go through that key's set method. It overrides that set method so that it can intercept it and post notifications to observers whenever it gets called. (Of course it's possible to make a modification without going through the set method if you modify the instance variable directly. KVO requires that compliant classes must either not do this, or must wrap direct ivar access in manual notification calls.) It gets trickier though: Apple really doesn't want this machinery to be exposed. In addition to setters, the dynamic subclass also overrides the -class method to lie to you and return the original class! If you don't look too closely, the KVO-mutated objects look just like their non-observed counterparts.
+
+<a name="rotate-view"></a>
+## Как изменятся свойства, если применить поворот на 45º?
+
+<img src="https://github.com/sashakid/ios-guide/blob/master/Images/rotate-view.png">
+
+It is important to note that if you transform a view, then the frame becomes undefined. So actually, the yellow frame that I drew around the rotated green bounds in the image above never actually exists. That means if you rotate, scale or do some other transformation then you shouldn't use the frame values any more. You can still use the bounds values, though. The Apple docs warn:
+```
+Important: If a view’s transform property does not contain the identity transform, the frame of that view is undefined and so are the results of its autoresizing behaviors.
+```
+```
+When modifying the transform property of your view, all transformations are performed relative to the center point of the view.
+```
+So if you do need to move a view around in the parent after a transformation has been done, you can do it by changing the view.center coordinates. Like frame, center uses the coordinate system of the parent view.
+
+__When to use frame and when to use bounds?__
+
+Since __frame__ relates a view's location in its parent view, you use it when you are making __outward changes__, like changing its width or finding the distance between the view and the top of its parent view.
+
+Use the __bounds__ when you are making __inward changes__, like drawing things or arranging subviews within the view. Also use the bounds to get the size of the view if you have done some transfomation on it.
+
+<a name="view-layer-difference"></a>
+## Отличие view от layer?
+
+On iOS, every `UIView` is backed by a Core Animation `CALayer`, so you are dealing with `CALayer`s when using a UIView, even though you may not realize it. There is a very strong relationship between the view and its layer, and the view derives most of its data from the layer object directly. There are also standalone layers – for example, `AVCaptureVideoPreviewLayer` and `CAShapeLayer` – that present content on the screen without being attached to a view. In either case, there is a layer involved. Still, the layers that are attached to views and the standalone layers behave slightly differently. Working directly with `CALayer`s doesn't give you significant performance advantages over `UIView`s. When you’re working with a programmatically created Layer any changes to the Layer’s properties is automatically animated. All you have to do is set the property and the animation happens. However, the Layers of layer-backed Views will not animate property changes. You must wrap those changes in an animation block. By default, almost every standard property of `CALayer` and its subclasses can be animated, either by adding a `CAAnimation` to the layer (explicit animation), or by specifying an action for the property and then modifying it (implicit animation).
+
+Layers
+
+- Represent position, shape and anchor point
+- Do not receive touch events
+- Light-weight
+- Implicit animations
+
+Views
+
+- Can receive touch events
+- Are always backed by a Layer on iOS
+- No implicit animations
