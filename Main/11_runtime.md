@@ -147,9 +147,40 @@ struct point {
 
 <a name="тип-id"></a>
 ## Тип id
-1. Что случится во время компиляции если мы посылаем сообщение объекту типа id?
-2. Что случится во время выполнения если этот метод существует?
-3. Что произойдет здесь?
+
+__id__
+
+```c
+typedef struct objc_class *Class;
+typedef struct objc_object {
+    Class isa;
+} *id;
+```
+`id` is a pointer to any Objective-C object (`objc_object`). It is not just a `void` pointer and you should not treat it as so. It references an object that should have a valid `isa` pointer. The values that can be stored in `id` are also not just limited to `NSObject` and its descendants, which starts to make sense of the existence of the `NSObject` protocol as well as the `NSProxy` class which does not even inherit from `NSObject`. The compiler will allow you to assign an object referenced by type `id` to any object type, assign any object type to `id`, as well as send it any message (that the compiler has seen) without warning.
+
+Thus “id” type is polymorphic. This is very powerful as it doesn’t require a cast to use such a value:
+```objectivec
+id data = ...;
+NSString *host = [data host]; // assume NSURL
+```
+Sure enough `id` usage can lead to bugs, because the availability of the method is determined at runtime. This is called “dynamic (or late) binding”. Nevertheless if used carefully it is very useful and lets you write parts of the code faster as if using a scripting language.
+
+Unfortunately this doesn’t work with property syntax:
+```objectivec
+id data = ...;
+NSString *host = data.host; // error: "Property 'host' not found"
+data.host = @"dobegin.com"; // same error
+```
+
+__instancetype__
+
+> Use the `instancetype` keyword as the return type of methods that return an instance of the class they are called on (or a subclass of that class). These methods include `alloc`, `init`, and class factory methods. Using `instancetype` instead of `id` in appropriate places improves type safety in your Objective-C code.
+
+* Что случится во время компиляции если мы посылаем сообщение объекту типа id?
+
+With a variable typed `id`, you can send it any known message and the compiler will not complain. With a variable typed `NSObject *`, you can only send it messages declared by `NSObject` (not methods of any subclass) or else it will generate a warning.
+
+* Что произойдет здесь?
 ```objectivec
 NSString *s = [NSNumber numberWithInt:3];
 int i = [s intValue];
@@ -159,3 +190,27 @@ int i = [s intValue];
 MyArray *array = [MyArray arrayWithObjects:@(1), @(2), nil];
 ```
 Теперь вы видите, почему возвращаемый тип `arrayWithObjects:` должен быть `id`. Если бы это был `(NSArray *)`, то подклассы потребует, чтобы они были приведены к необходимому классу.
+
+* В чем разница между `void` и `void *`?
+
+The `void` type, in several programming languages derived from C and Algol68, is the type for the result of a function that returns normally, but does not provide a result value to its caller. Usually such functions are called for their side effects, such as performing some task or writing to their output parameters.
+C and C++ also support the pointer to `void` type (specified as `void *`), but this is an unrelated notion. Variables of this type are pointers to data of an unspecified type, so in this context (but not the others) `void *` acts roughly like a universal or top type. A program can probably convert a pointer to any type of data (except a function pointer) to a pointer to `void` and back to the original type without losing information, which makes these pointers useful for polymorphic functions. The C language standard does not guarantee that the different pointer types have the same size.
+
+In C and C++
+
+A function with `void` result type ends either by reaching the end of the function or by executing a return statement with no returned value. The `void` type may also appear as the sole argument of a function prototype to indicate that the function takes no arguments. Note that despite the name, in all of these situations, the `void` type serves as a unit type, not as a zero or bottom type (which is sometimes confusingly is also called the "void type"), even though unlike a real unit type which is a singleton, the `void` type lacks a way to represent it's a value and the language does not provide any way to declare an object or represent a value with type `void`.
+
+* Можно ли создать структуру и привести к id?
+
+`NSValue`
+
+> A simple container for a single C or Objective-C data item. An `NSValue` object can hold any of the scalar types such as `int`, `float`, and `char`, as well as pointers, structures, and object `id` references. Use this class to work with such data types in collections (such as `NSArray` and `NSSet`), Key-value coding, and other APIs that require Objective-C objects. `NSValue` objects are always immutable.
+
+```objectivec
+[NSValue valueWithBytes:&struct objCType:@encode(MyStruct)];
+```
+And to get the value back out:
+```objectivec
+MyStruct struct;
+[value getValue:&struct];
+```

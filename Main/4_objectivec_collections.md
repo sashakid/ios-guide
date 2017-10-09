@@ -4,6 +4,7 @@
 	- [Enumeration](#enumeration)
 	- [Filtering](#filtering)
 	- [Sorting](#sorting)
+	- [Зачем нужен NSCache? В чем от реализации кэша на NSDictionary?](#nscache-vs-nsdictionary)
 
 <a name="коллекции-в-objective-c"></a>
 # Коллекции в Objective-C
@@ -375,3 +376,14 @@ selector: 4947.90[ms]
 function: 5618.93[ms]
 block: 5082.98[ms]
 ```
+
+<a name="nscache-vs-nsdictionary"></a>
+## Зачем нужен NSCache? В чем от реализации кэша на NSDictionary?
+
+`NSCache` objects differ from other mutable collections in a few ways:
+
+* The NSCache class incorporates various auto-removal policies, which ensure that it does not use too much of the system’s memory. The system automatically carries out these policies if memory is needed by other applications. When invoked, these policies remove some items from the cache, minimizing its memory footprint.
+* You can add, remove, and query items in the cache from different threads without having to lock the cache yourself.
+* Retrieving something from an `NSCache` object returns an autoreleased result.
+* Unlike an `NSMutableDictionary` object, a cache does not copy the key objects that are put into it.
+* These features are necessary for the `NSCache` class, as the cache may decide to automatically mutate itself asynchronously behind the scenes if it is called to free up memory.

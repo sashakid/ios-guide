@@ -455,9 +455,17 @@ NSNotificationCenter *notificationCenter = [NSNotificationCenter defaultCenter];
 ### Chain of responsibility
 Responder (ответчик) – объект, который может реагировать на события и обрабатывать их.
 `responderObject : UIResponder; // or NSResponder in MacOS`
+
+<img src="https://github.com/sashakid/ios-guide/blob/master/Images/responder_chain.png">
+
 Цепочка ответственности позволяет вам передавать объекте по цепочке объектов-обработчиков, пока не будет найден необходимый объект обработчик.
+```
 First responder -> next responder -> …
+```
 Первый ответчик – ответчик, получивший события первым (например view).
+
+<img src="https://github.com/sashakid/ios-guide/blob/master/Images/responder_chain_in_action.png">
+
 Когда использовать этот паттерн:
 
 * У вас более чем один объект-обработчик.
@@ -469,8 +477,6 @@ First responder -> next responder -> …
 [foo resignFirstResponder];
 [foo respondsToSelector:@selector(methodName:)];
 ```
-
-<img src="https://github.com/sashakid/ios-guide/blob/master/Images/responder_chain.png">
 
 <a name="the-target-action-mechanism"></a>
 ### The Target-Action Mechanism

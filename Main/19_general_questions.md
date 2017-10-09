@@ -33,6 +33,8 @@
 	- [Как работает KVO и какие могут быть с ним проблемы?](#kvo)
 	- [Как изменятся свойства, если применить поворот на 45º?](#rotate-view)
 	- [Отличие view от layer?](#view-layer-difference)
+	- [Как передвинуть все subviews?](#moving-subviews)
+	- [Swift optionals, Objective-C new modifiers (`nullable`, etc.). что это и как реализовано?](#optionals-swift-objc)
 
 <a name="общие-вопросы-и-задачи"></a>
 # Общие вопросы и задачи
@@ -810,3 +812,89 @@ Views
 - Can receive touch events
 - Are always backed by a Layer on iOS
 - No implicit animations
+
+<a name="moving-subviews"></a>
+## Как передвинуть все subviews?
+
+You're talking about two different coordinate systems. `mainView.center` is expressed in the coordinate system of the view that contains `mainView`, whereas `firstView.center` and `secondView.center` are in terms of the coordinate system of `mainView`. You can certainly move `firstView` and `secondView` together by moving the view that contains them, but you need to translate between those two coordinate systems if you want to get the same result that you get by moving the two views themselves.
+
+<a name="optionals-swift-objc"></a>
+## Swift optionals, Objective-C new modifiers (`nullable`, etc.). что это и как реализовано?
+
+__Optional in Swift__
+
+> A type that represents either a wrapped value or `nil`, the absence of a value. You use the `Optional` type whenever you use optional values, even if you never type the word `Optional`. Swift's type system usually shows the wrapped type's name with a trailing question mark (`?`) instead of showing the full type name. For example, if a variable has the type `Int?`, that's just another way of writing `Optional<Int>`. The shortened form is preferred for ease of reading and writing code. The types of `shortForm` and `longForm` in the following code sample are the same:
+```swift
+let shortForm: Int? = Int("42")
+let longForm: Optional<Int> = Int("42")
+```
+The `Optional` type is an enumeration with two cases. `Optional.none` is equivalent to the `nil` literal. `Optional.some(Wrapped)` stores a wrapped value. For example:
+```swift
+let number: Int? = Optional.some(42)
+let noNumber: Int? = Optional.none
+print(noNumber == nil)
+// Prints "true"
+```
+
+```swift
+public enum Optional<Wrapped> : ExpressibleByNilLiteral {
+	/// The absence of a value.
+  /// In code, the absence of a value is typically written using the `nil`
+  /// literal rather than the explicit `.none` enumeration case.
+  case none
+
+  /// The presence of a value, stored as `Wrapped`.
+  case some(Wrapped)
+	..................
+}
+```
+
+__Nullability (type) qualifiers in Objective-C__
+
+> The nullability (type) qualifiers express whether a value of a given pointer type can be null (the `_Nullable` qualifier), doesn’t have a defined meaning for null (the `_Nonnull` qualifier), or for which the purpose of null is unclear (the `_Null_unspecified` qualifier). Because nullability qualifiers are expressed within the type system, they are more general than the `nonnull` and `returns_nonnull` attributes, allowing one to express (for example) a `nullable` pointer to an array of `nonnull` pointers. Nullability qualifiers are written to the right of the pointer to which they apply.
+
+> In Objective-C, there is an alternate spelling for the nullability qualifiers that can be used in Objective-C methods and properties using context-sensitive, non-underscored keywords
+
+- `null_unspecified`: bridges to a Swift implicitly-unwrapped optional. This is the default.
+- `nonnull`: the value won’t be nil; bridges to a regular reference.
+- `nullable`: the value can be nil; bridges to an optional.
+- `null_resettable`: the value can never be nil when read, but you can set it to nil to reset it. Applies to properties only.
+
+So for method returns and parameters you can use the double-underscored versions `__nonnull`/`__nullable`/`__null_unspecified` instead of either the single-underscored ones, or instead of the non-underscored ones. The difference is that the single and double underscored ones need to be placed after the type definition, while the non-underscored ones need to be placed before the type definition. Thus, the following declarations are equivalent and are correct:
+```objectivec
+- (nullable NSNumber *)result
+- (NSNumber * __nullable)result
+- (NSNumber * _Nullable)result
+```
+For parameters:
+```objectivec
+- (void)doSomethingWithString:(nullable NSString *)str
+- (void)doSomethingWithString:(NSString * _Nullable)str
+- (void)doSomethingWithString:(NSString * __nullable)str
+```
+For properties:
+```objectivec
+@property(nullable) NSNumber *status
+@property NSNumber *__nullable status
+@property NSNumber * _Nullable status
+```
+Things however complicate when double pointers or blocks returning something different than `void` are involved, as the non-underscore ones are not allowed here:
+```objectivec
+- (void)compute:(NSError *  _Nullable * _Nullable)error
+- (void)compute:(NSError *  __nullable * _Null_unspecified)error;
+// and all other combinations
+```
+Similar with methods that accept blocks as parameters, please note that the `nonnull`/`nullable` qualifier applies to the block, and not its return type, thus the following are equivalent:
+```objectivec
+- (void)executeWithCompletion:(nullable void (^)())handler
+- (void)executeWithCompletion:(void (^ _Nullable)())handler
+- (void)executeWithCompletion:(void (^ __nullable)())handler
+```
+If the block has a return value, then you're forced into one of the underscore versions:
+```objectivec
+- (void)convertObject:(nullable id __nonnull (^)(nullable id obj))handler
+- (void)convertObject:(id __nonnull (^ _Nullable)())handler
+- (void)convertObject:(id _Nonnull (^ __nullable)())handler
+// the method accepts a nullable block that returns a nonnull value
+// there are some more combinations here, you get the idea
+```
