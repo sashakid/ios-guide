@@ -5,6 +5,7 @@
 	- [Чем объект Objective-c отличается от структуры С, что такое структура в C?](#объект)
 	- [Вопрос о методах isKindOfClass, isMemberOfClass](#вisKindOfClass)
 	- [Тип id](#тип-id)
+	- [Dynamic method resolution](#dynamic-method-resolution)
 
 <a name="runtime"></a>
 # Runtime
@@ -36,7 +37,7 @@ typedef struct objc_object {
 
 _Форвардинг_
 
-If you send a message to an object that does not handle that message, before announcing an error the runtime sends the object a forwardInvocation: message with an NSInvocation object as its sole argument—the NSInvocation object encapsulates the original message and the arguments that were passed with it. You can implement a forwardInvocation: method to give a default response to the message, or to avoid the error in some other way. As its name implies, forwardInvocation: is commonly used to forward the message to another object.
+If you send a message to an object that does not handle that message, before announcing an error the runtime sends the object a forwardInvocation: message with an `NSInvocation` object as its sole argument — the `NSInvocation` object encapsulates the original message and the arguments that were passed with it. You can implement a forwardInvocation: method to give a default response to the message, or to avoid the error in some other way. As its name implies, `forwardInvocation:` is commonly used to forward the message to another object.
 
 <a name="классы"></a>
 ## Что такое классы в Objective-C, структура классов?
@@ -214,3 +215,32 @@ And to get the value back out:
 MyStruct struct;
 [value getValue:&struct];
 ```
+
+<a name="dynamic-method-resolution"></a>
+## Dynamic method resolution
+
+There are situations where you might want to provide an implementation of a method dynamically. For example, the Objective-C declared properties feature includes the `@dynamic` directive, which tells the compiler that the methods associated with the property will be provided dynamically. You can implement the methods `resolveInstanceMethod:` and `resolveClassMethod:` to dynamically provide an implementation for a given selector for an instance and class method respectively.
+
+An Objective-C method is simply a C function that take at least two arguments — `self` and `_cmd`. You can add a function to a class as a method using the function `class_addMethod`. Therefore, given the following function:
+```c
+void dynamicMethodIMP(id self, SEL _cmd) {
+  // implementation ....
+}
+```
+you can dynamically add it to a class as a method (called `resolveThisMethodDynamically`) using `resolveInstanceMethod:` like this:
+```objectivec
+@implementation MyClass
++ (BOOL)resolveInstanceMethod:(SEL)aSEL {
+  if (aSEL == @selector(resolveThisMethodDynamically)) {
+    class_addMethod([self class], aSEL, (IMP) dynamicMethodIMP, "v@:");
+      return YES;
+    }
+  return [super resolveInstanceMethod:aSEL];
+}
+@end
+```
+A class has the opportunity to dynamically resolve a method before the forwarding mechanism kicks in. If `respondsToSelector:` or `instancesRespondToSelector:` is invoked, the dynamic method resolver is given the opportunity to provide an `IMP` for the selector first. If you implement `resolveInstanceMethod:` but want particular selectors to actually be forwarded via the forwarding mechanism, you return `NO` for those selectors.
+
+__Dynamic Loading__
+
+An Objective-C program can load and link new classes and categories while it’s running. The new code is incorporated into the program and treated identically to classes and categories loaded at the start. Dynamic loading can be used to do a lot of different things. For example, the various modules in the System Preferences application are dynamically loaded. In the Cocoa environment, dynamic loading is commonly used to allow applications to be customized. Others can write modules that your program loads at runtime—much as Interface Builder loads custom palettes and the OS X System Preferences application loads custom preference modules. The loadable modules extend what your application can do. They contribute to it in ways that you permit but could not have anticipated or defined yourself. You provide the framework, but others provide the code.

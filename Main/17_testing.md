@@ -5,6 +5,7 @@
     - [Functional Tests](#functional-tests)
     - [Acceptance Tests](#acceptance-tests)
   - [Как тестировать асинхронные методы?](#async-testing)
+  - [Dependency injection](#dependency-injection)
 
 <a name="тестирование"></a>
 # Тестирование
@@ -112,3 +113,39 @@ func onPostExecute(transferItem:WmTransferItem) {
   delegate?.onDone("finished")// call callback        
 }
 ```
+
+<a name="dependency-injection"></a>
+## Dependency injection
+
+Dependency injection (DI) is a popular design pattern in many languages, such as Java and C#, but it hasn’t seen wide adoption in Objective-C. The concept of dependency injection is very simple: __an object should require you to pass in any dependencies rather than creating them itself.__ Dependencies can be passed to an object via the initializer (or “constructor”), or via properties (or “setters”). These are commonly referred to as “constructor injection” and “setter injection.”
+
+Constructor Injection:
+```objectivec
+- (instancetype)initWithDependency1:(Dependency1 *)d1 dependency2:(Dependency2 *)d2;
+```
+Setter Injection:
+```objectivec
+@property (nonatomic, retain) Dependency1 *dependency1;
+@property (nonatomic, retain) Dependency2 *dependency2;
+```
+
+Constructor injection is preferred, and as a general rule you should only fall back to setter injection if constructor injection is not possible. With constructor injection, you’ll likely still have `@property` definitions for these dependencies, but you can make them read only to simplify your object’s API.
+
+Benefits:
+
+* Clear declaration of dependencies
+
+It becomes obvious what an object needs in order to operate, and dangerous hidden dependencies — like globals — disappear.
+
+* Composition
+
+DI encourages composition over inheritance, which improves the reusability of your code.
+
+* Easy customization
+
+When creating an object, it’s easy to customize parts of the object for specific scenarios.
+
+* Clear ownership
+
+Particularly when using constructor injection, the object ownership rules are strictly enforced — helping to build a directed acyclic object graph.
+Testability More than anything else, dependency injection improves the testability of your objects. Because they can be created simply by filling in the initializer, no hidden dependencies need to be managed. Furthermore, it becomes simple to mock out the dependencies to focus your tests on the object being tested.

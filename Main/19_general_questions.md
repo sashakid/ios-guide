@@ -35,6 +35,7 @@
 	- [Отличие view от layer?](#view-layer-difference)
 	- [Как передвинуть все subviews?](#moving-subviews)
 	- [Swift optionals, Objective-C new modifiers (`nullable`, etc.). что это и как реализовано?](#optionals-swift-objc)
+	- [Можно ли скачать что-нибудь, пока приложение выполняется в фоне?](#download-in-background)
 
 <a name="общие-вопросы-и-задачи"></a>
 # Общие вопросы и задачи
@@ -898,3 +899,18 @@ If the block has a return value, then you're forced into one of the underscore v
 // the method accepts a nullable block that returns a nonnull value
 // there are some more combinations here, you get the idea
 ```
+
+<a name="download-in-background"></a>
+## Можно ли скачать что-нибудь, пока приложение выполняется в фоне?
+
+When downloading files, apps should use an `NSURLSession` object to start the downloads so that the system can take control of the download process in case the app is suspended or terminated. When you configure an `NSURLSession` object for background transfers, the system manages those transfers in a separate process and reports status back to your app in the usual way. If your app is terminated while transfers are ongoing, the system continues the transfers in the background and launches your app (as appropriate) when the transfers finish or when one or more tasks need your app’s attention. To support background transfers, you must configure your `NSURLSession` object appropriately. To configure the session, you must first create a `NSURLSessionConfiguration` object and set several properties to appropriate values. You then pass that configuration object to the appropriate initialization method of `NSURLSession` when creating your session. The process for creating a configuration object that supports background downloads is as follows:
+
+1. Create the configuration object using the `backgroundSessionConfigurationWithIdentifier:` method of `NSURLSessionConfiguration`.
+2. Set the value of the configuration object’s `sessionSendsLaunchEvents` property to `YES`.
+3. If your app starts transfers while it is in the foreground, it is recommend that you also set the discretionary property of the configuration object to `YES`.
+4. Configure any other properties of the configuration object as appropriate.
+5. Use the configuration object to create your `NSURLSession` object.
+
+Once configured, your `NSURLSession` object seamlessly hands off upload and download tasks to the system at appropriate times. If tasks finish while your app is still running (either in the foreground or the background), the session object notifies its delegate in the usual way. If tasks have not yet finished and the system terminates your app, the system automatically continues managing the tasks in the background. If the user terminates your app, the system cancels any pending tasks.
+
+When all of the tasks associated with a background session are complete, the system relaunches a terminated app (assuming that the `sessionSendsLaunchEvents` property was set to `YES` and that the user did not force quit the app) and calls the app delegate’s `application:handleEventsForBackgroundURLSession:completionHandler:` method. (The system may also relaunch the app to handle authentication challenges or other task-related events that require your app’s attention.) In your implementation of that delegate method, use the provided identifier to create a new `NSURLSessionConfiguration` and `NSURLSession` object with the same configuration as before. The system reconnects your new session object to the previous tasks and reports their status to the session object’s delegate.

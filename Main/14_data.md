@@ -6,6 +6,7 @@
 	- [Какие типы хранилищ поддерживает CoreData?](#типы-хранилищ)
 	- [Что такое ленивая загрузка? Что ее связывает с Core Data? Опишите ситуация когда она может быть полезной? Что такое faulting?](#ленивая-загрузка-core-data)
 	- [Что такое fetch result controller?](#fetch-result-controller)
+	- [Как сделать миграцию БД?](#db-migration)
 
 <a name="data"></a>
 # Data
@@ -175,8 +176,13 @@ __Пример SQLite__
 
 <a name="core-data-в-разных-потоках"></a>
 ## Какие есть нюансы при использовании Core Data в разных потоках? Как синхронизировать данные между потоками?
-1. Create a separate managed object context for each thread and share a single persistent store coordinator. This is the typically-recommended approach.
-2. Create a separate managed object context and persistent store coordinator for each thread. This approach provides for greater concurrency at the expense of greater complexity (particularly if you need to communicate changes between different contexts) and increased memory usage.
+In Core Data, the managed object context can be used with two concurrency patterns, defined by `NSMainQueueConcurrencyType` and `NSPrivateQueueConcurrencyType`.
+
+* `NSMainQueueConcurrencyType` is specifically for use with your application interface and can only be used on the main queue of an application.
+
+* The `NSPrivateQueueConcurrencyType` configuration creates its own queue upon initialization and can be used only on that queue. Because the queue is private and internal to the `NSManagedObjectContext` instance, it can only be accessed through the `performBlock:` and the `performBlockAndWait:` methods.
+
+`NSManagedObject` instances are not intended to be passed between queues. Doing so can result in corruption of the data and termination of the application. When it is necessary to hand off a managed object reference from one queue to another, it must be done through `NSManagedObjectID` instances. You retrieve the managed object ID of a managed object by calling the `objectID` method on the `NSManagedObject` instance.
 
 <a name="типы-хранилищ"></a>
 # Какие типы хранилищ поддерживает CoreData?
@@ -201,3 +207,36 @@ Faulting isn't unique to Core Data. A similar technique is used in many other fr
 ## Что такое fetch result controller?
 Данные сами по себе может быть и представляют какую-либо ценность, но, обычно их нужно использовать. Одним из элементов представления данных в iOS служат таблицы (объекты класса `UITableView`), которые через объект класса `NSFetchedResultsController` можно привязать к CoreData. После этого при изменении данных в CoreData будет актуализироваться информация в таблице. Так же, с помощью таблицы можно управлять данными в хранилище.
 `NSFetchedResultsController` — контроллер результатов выборки. Создается, обычно один экземпляр на `ViewController`, но вполне может работать и без оного, внутрь которого помещается исключительно для того, что бы было проще привязать данные к виду.
+
+<a name="db-migration"></a>
+## Как сделать миграцию БД?
+
+You can only open a Core Data store using the managed object model used to create it. Changing a model will therefore make it incompatible with (and so unable to open) the stores it previously created. If you change your model, you therefore need to change the data in existing stores to new version—changing the store format is known as migration. To migrate a store, you need both the version of the model used to create it, and the current version of the model you want to migrate to. You can create a versioned model that contains more than one version of a managed object model. Within the versioned model you mark one version as being the current version. Core Data can then use this model to open persistent stores created using any of the model versions, and migrate the stores to the current version. To help Core Data perform the migration, though, you may have to provide information about how to map from one version of the model to another. This information may be in the form of hints within the versioned model itself, or in a separate mapping model file that you create.
+
+The migration process itself is in three stages. It uses a copy of the source and destination models in which the validation rules are disabled and the class of all entities is changed to `NSManagedObject`.
+
+To perform the migration, Core Data sets up two stacks, one for the source store and one for the destination store. Core Data then processes each entity mapping in the mapping model in turn. It fetches objects of the current entity into the source stack, creates the corresponding objects in the destination stack, then recreates relationships between destination objects in a second stage, before finally applying validation constraints in the final stage.
+
+Before a cycle starts, the entity migration policy responsible for the current entity is sent a `beginEntityMapping:manager:error:` message. You can override this method to perform any initialization the policy requires. The process then proceeds as follows:
+
+1. Create destination instances based on source instances.
+
+At the beginning of this phase, the entity migration policy is sent a `createDestinationInstancesForSourceInstance:entityMapping:manager:error:` message; at the end it is sent a `endInstanceCreationForEntityMapping:manager:error:` message. In this stage, only attributes (not relationships) are set in the destination objects. Instances of the source entity are fetched. For each instance, appropriate instances of the destination entity are created (typically there is only one) and their attributes populated (for trivial cases, `name = $source.name`). A record is kept of the instances per entity mapping since this may be useful in the second stage.
+
+2. Recreate relationships.
+
+At the beginning of this phase, the entity migration policy is sent a `createRelationshipsForDestinationInstance:entityMapping:manager:error:` message; at the end it is sent a `endRelationshipCreationForEntityMapping:manager:error:` message. For each entity mapping (in order), for each destination instance created in the first step any relationships are recreated.
+
+3. Validate and save.
+
+In this phase, the entity migration policy is sent a `performCustomValidationForEntityMapping:manager:error:` message. Validation rules in the destination model are applied to ensure data integrity and consistency, and then the store is saved.
+
+At the end of the cycle, the entity migration policy is sent an endEntityMapping:manager:error: message. You can override this method to perform any clean-up the policy needs to do. Note that Core Data cannot simply fetch objects into the source stack and insert them into the destination stack, the objects must be re-created in the new stack. Core Data maintains “association tables” which tell it which object in the destination store is the migrated version of which object in the source store, and vice-versa. Moreover, because it doesn't have a means to flush the contexts it is working with, you may accumulate many objects in the migration manager as the migration progresses. If this presents a significant memory overhead and hence gives rise to performance problems, you can customize the process as described in Multiple Passes—Dealing With Large Datasets.
+
+__Lightweight Migration__
+
+If you just make simple changes to your model (such as adding a new attribute to an entity), Core Data can perform automatic data migration, referred to as lightweight migration. Lightweight migration is fundamentally the same as ordinary migration, except that instead of you providing a mapping model (as described in Mapping Overview), Core Data infers one from differences between the source and destination managed object models.
+
+Lightweight migration is especially convenient during early stages of application development, when you may be changing your managed object model frequently, but you don’t want to have to keep regenerating test data. You can migrate existing data without having to create a custom mapping model for every model version used to create a store that would need to be migrated.
+
+A further advantage of using lightweight migration—beyond the fact that you don’t need to create the mapping model yourself—is that if you use an inferred model and you use the SQLite store, then Core Data can perform the migration in situ (solely by issuing SQL statements). This can represent a significant performance benefit as Core Data doesn’t have to load any of your data. Because of this, you are encouraged to use inferred migration where possible, even if the mapping model you might create yourself would be trivial.

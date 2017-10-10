@@ -1,4 +1,3 @@
-* dynamic method resolution
 * dependency injection
 * как сделать миграцию БД
 * можно ли скачать что-нибудь, пока приложение выполняется в фоне?
