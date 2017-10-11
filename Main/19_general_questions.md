@@ -36,6 +36,7 @@
 	- [Как передвинуть все subviews?](#moving-subviews)
 	- [Swift optionals, Objective-C new modifiers (`nullable`, etc.). что это и как реализовано?](#optionals-swift-objc)
 	- [Можно ли скачать что-нибудь, пока приложение выполняется в фоне?](#download-in-background)
+	- [Как реализовать хеш-таблицу? Как избежать коллизий?](#custom-hash-table)
 
 <a name="общие-вопросы-и-задачи"></a>
 # Общие вопросы и задачи
@@ -914,3 +915,8 @@ When downloading files, apps should use an `NSURLSession` object to start the do
 Once configured, your `NSURLSession` object seamlessly hands off upload and download tasks to the system at appropriate times. If tasks finish while your app is still running (either in the foreground or the background), the session object notifies its delegate in the usual way. If tasks have not yet finished and the system terminates your app, the system automatically continues managing the tasks in the background. If the user terminates your app, the system cancels any pending tasks.
 
 When all of the tasks associated with a background session are complete, the system relaunches a terminated app (assuming that the `sessionSendsLaunchEvents` property was set to `YES` and that the user did not force quit the app) and calls the app delegate’s `application:handleEventsForBackgroundURLSession:completionHandler:` method. (The system may also relaunch the app to handle authentication challenges or other task-related events that require your app’s attention.) In your implementation of that delegate method, use the provided identifier to create a new `NSURLSessionConfiguration` and `NSURLSession` object with the same configuration as before. The system reconnects your new session object to the previous tasks and reports their status to the session object’s delegate.
+
+<a name="custom-hash-table"></a>
+## Как реализовать хеш-таблицу? Как избежать коллизий?
+
+https://github.com/raywenderlich/swift-algorithm-club/tree/master/Hash%20Table

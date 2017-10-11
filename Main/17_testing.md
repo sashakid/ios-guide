@@ -148,4 +148,7 @@ When creating an object, it’s easy to customize parts of the object for specif
 * Clear ownership
 
 Particularly when using constructor injection, the object ownership rules are strictly enforced — helping to build a directed acyclic object graph.
-Testability More than anything else, dependency injection improves the testability of your objects. Because they can be created simply by filling in the initializer, no hidden dependencies need to be managed. Furthermore, it becomes simple to mock out the dependencies to focus your tests on the object being tested.
+
+* Testability
+
+More than anything else, dependency injection improves the testability of your objects. Because they can be created simply by filling in the initializer, no hidden dependencies need to be managed. Furthermore, it becomes simple to mock out the dependencies to focus your tests on the object being tested.

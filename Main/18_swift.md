@@ -2,6 +2,7 @@
 - [Swift](#swift)
 	- [Сlosures and functions](#closures-and-functions)
 	- [How Do I Declare a Closure in Swift?](#how-do-i-declare-a-closure-in-swift)
+	- [Что такое протокол-ориентированное программирование? Как оно связано со Swift? Чем протоколы Swift отличаются от протоколов Objective-C?](#protocols)
 
 <a name="swift"></a>
 # Swift
@@ -204,3 +205,20 @@ _As a function parameter with explicit capture semantics and inferred parameters
 ```swift
 array.sort({ [unowned self] in return item1 < item2 })
 ```
+
+<a name="protocols"></a>
+## Что такое протокол-ориентированное программирование? Как оно связано со Swift? Чем протоколы Swift отличаются от протоколов Objective-C?
+
+Protocol-Oriented Programming is a new programming paradigm ushered in by Swift 2.0. In the Protocol-Oriented approach, we start designing our system by defining protocols. We rely on new concepts: protocol extensions, protocol inheritance, and protocol compositions. The paradigm also changes how we view semantics. In Swift, value types are preferred over classes. However, object-oriented concepts don’t work well with structs and enums: a struct cannot inherit from another struct, neither can an enum inherit from another enum. So inheritancefa - one of the fundamental object-oriented concepts - cannot be applied to value types. On the other hand, value types can inherit from protocols, even multiple protocols. Thus, with POP, value types have become first class citizens in Swift.
+
+__Protocol Extensions__
+
+You can extend a protocol and provide default implementation for methods, computed properties, subscripts and convenience initializers.
+
+__Protocol Inheritance__
+
+A protocol can inherit from other protocols and then add further requirements on top of the requirements it inherits.
+
+__Protocol Composition__
+
+Swift types can adopt multiple protocols.
