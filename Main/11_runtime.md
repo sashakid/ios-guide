@@ -37,7 +37,20 @@ typedef struct objc_object {
 
 _Форвардинг_
 
-If you send a message to an object that does not handle that message, before announcing an error the runtime sends the object a forwardInvocation: message with an `NSInvocation` object as its sole argument — the `NSInvocation` object encapsulates the original message and the arguments that were passed with it. You can implement a forwardInvocation: method to give a default response to the message, or to avoid the error in some other way. As its name implies, `forwardInvocation:` is commonly used to forward the message to another object.
+So if you pass a `doSomething` message to an object `[object doSomething]`
+1. It will first check whether it has a `doSomething` method
+2. Then it will check its superclasses
+3. It'll try dynamic method resolution (`resolveInstanceMethod` for instance)
+
+- [Dynamic method resolution](#dynamic-method-resolution)
+
+4. It'll look for a forwarding target (`forwardingTargetForSelector:`)
+
+> This method gives an object a chance to redirect an unknown message sent to it before the much more expensive forwardInvocation: machinery takes over. This is useful when you simply want to redirect messages to another object and can be an order of magnitude faster than regular forwarding. It is not useful where the goal of the forwarding is to capture the NSInvocation, or manipulate the arguments or return value during the forwarding.
+
+5. It'll finally, if everything else fails, it'll create an invocation (using `methodSignatureForSelector:` and put to `forwardInvocation:`. By default, `forwardInvocation:` just calls doesNotRecognizeSelector: which crashes you on iOS (or terminates the current thread on OS X). But you can override it to do something else (like they have here).
+
+The `NSInvocation` object encapsulates the original message and the arguments that were passed with it. You can implement a `forwardInvocation:` method to give a default response to the message, or to avoid the error in some other way. As its name implies, `forwardInvocation:` is commonly used to forward the message to another object.
 
 <a name="классы"></a>
 ## Что такое классы в Objective-C, структура классов?
