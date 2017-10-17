@@ -38,6 +38,7 @@
 	- [Можно ли скачать что-нибудь, пока приложение выполняется в фоне?](#download-in-background)
 	- [Как реализовать хеш-таблицу? Как избежать коллизий?](#custom-hash-table)
 	- [Что такое реактивное программирование?](#reactive-programming)
+	- [Что такое функциональное программирование? Какие фичи есть для этого в Swift / Objective-C?](#functional-programming)
 
 <a name="общие-вопросы-и-задачи"></a>
 # Общие вопросы и задачи
@@ -925,4 +926,52 @@ https://github.com/raywenderlich/swift-algorithm-club/tree/master/Hash%20Table
 <a name="reactive-programming"></a>
 ## Что такое реактивное программирование?
 
-Реактивное программирование — парадигма программирования, ориентированная на потоки данных и распространение изменений. Это означает, что должна существовать возможность легко выражать статические и динамические потоки данных, а также то, что нижележащая модель исполнения должна автоматически распространять изменения благодаря потоку данных. К примеру, в императивном программировании присваивание `a := b + c` будет означать, что переменной a будет присвоен результат выполнения операции `b + c`, используя текущие (на момент вычисления) значения переменных. Позже значения переменных `b` и `c` могут быть изменены без какого-либо влияния на значение переменной `a`. В реактивном же программировании значение `a` будет автоматически пересчитано, основываясь на новых значениях.
+Парадигма программирования, ориентированная на потоки данных и распространение изменений. Это означает, что должна существовать возможность легко выражать статические и динамические потоки данных, а также то, что нижележащая модель исполнения должна автоматически распространять изменения благодаря потоку данных. К примеру, в императивном программировании присваивание `a := b + c` будет означать, что переменной a будет присвоен результат выполнения операции `b + c`, используя текущие (на момент вычисления) значения переменных. Позже значения переменных `b` и `c` могут быть изменены без какого-либо влияния на значение переменной `a`. В реактивном же программировании значение `a` будет автоматически пересчитано, основываясь на новых значениях.
+
+<a name="functional-programming"></a>
+## Что такое функциональное программирование? Какие фичи есть для этого в Swift / Objective-C?
+
+Парадигма программирования, в которой процесс вычисления трактуется как вычисление значений функций в математическом понимании последних (в отличие от функций как подпрограмм в процедурном программировании). Противопоставляется парадигме императивного программирования, которая описывает процесс вычислений как последовательное изменение состояний. При необходимости, в функциональном программировании вся совокупность последовательных состояний вычислительного процесса представляется явным образом, например, как список. Функциональное программирование предполагает обходиться вычислением результатов функций от исходных данных и результатов других функций, и не предполагает явного хранения состояния программы. Соответственно, не предполагает оно и изменяемость этого состояния (в отличие от императивного, где одной из базовых концепций является переменная, хранящая своё значение и позволяющая менять его по мере выполнения алгоритма). На практике отличие математической функции от понятия «функции» в императивном программировании заключается в том, что императивные функции могут опираться не только на аргументы, но и на состояние внешних по отношению к функции переменных, а также иметь побочные эффекты и менять состояние внешних переменных. Таким образом, в императивном программировании при вызове одной и той же функции с одинаковыми параметрами, но на разных этапах выполнения алгоритма, можно получить разные данные на выходе из-за влияния на функцию состояния переменных. А в функциональном языке при вызове функции с одними и теми же аргументами мы всегда получим одинаковый результат: выходные данные зависят только от входных. Это позволяет средам выполнения программ на функциональных языках кешировать результаты функций и вызывать их в порядке, не определяемом алгоритмом и распараллеливать их без каких-либо дополнительных действий со стороны программиста (что обеспечивают функции без побочных эффектов — чистые функции).
+***
+__Swift__
+
+_First-Class and Higher-Order Functions_
+
+In FP languages functions are first-class citizens, meaning that functions are treated just like other objects, and can be assigned to variables. Because of this, functions can also accept other functions as parameters, or return other functions. Functions that accept or return other functions are called higher order functions.
+
+__Filter__
+
+`filter(_:)` is a method on Collection types, such as Swift arrays. It accepts another function a parameter. This other function accepts as input a single value from the array, and returns a `Bool`. `filter(_:)` applies the input function to each element of the calling array and returns another array that has only the array elements for which the parameter function returns true.
+
+__Map__
+
+The Collection method `map(_:)` also accepts a single function as a parameter, and in turn, it produces an array of the same length after being applied to each element of the collection. The return type of the mapped function does not have to be the same type as the collection elements.
+
+__Reduce__
+
+The Collection method `reduce(_:_:)` takes two parameters. The first is a starting value of a generic type `Element`, and the second is a function that combines a value of type `Element` with an element in the collection to produce another value of type `Element`.
+The input function applies to each element of the calling collection, one-by-one, until it reaches the end of the collection and produces a final accumulated value of type `Element`.
+
+__Pure Functions__
+
+One of the primary concepts in FP that leads to the ability to reason consistently about program structure, as well as confidently test program results, is the idea of a pure function. A function can be considered pure if it meets two criteria:
+* The function always produces the same output when given the same input, e.g., the output only depends on its input.
+* The function creates zero side effects outside of it.
+
+Pure functions are closely related to the concept of __referential transparency__. An element of a program is referentially transparent if you can replace it with its definition and always produce the same result. It makes for predictable code and allows the compiler to perform optimizations. Pure functions satisfy this condition.
+
+***
+__Objective-C__
+
+The concept of a lambda in Objective-C is now encapsulated with the idea of Blocks which are the equivalent of pass-by-reference functions. Of course, arguably one had that already in C with the idea of function pointers; blocks are just a way of also capturing local state (i.e. can be closures). Here's an example of defining a lambda to multiply two numbers together:
+```objectivec
+int (^mult)(int, int) = ^(int a, int b) { return a * b; };
+```
+The first part declares a variable, of type `^int(int, int)` and then assigns it to the lambda expression (aka block) which returns the multiple of its two arguments. You can then pass that function around, define it in other places etc; you can even use it in other functions.
+
+Here's an example of defining a function, which when invoked, returns another function:
+```objectivec
+multiplyBy = ^(int a) { return ^(int b) { return b * a; }; };
+triple = multiplyBy(3);
+```
+Note that you can intermix blocks with object types (usually using `id` as the object type) and many of the new Objective-C object data structures have some kind of block-level operation. GCD also uses blocks in order to pass in arbitrary events; however, note that GCD can also be used with function pointers as well.

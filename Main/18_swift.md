@@ -3,6 +3,9 @@
 	- [Сlosures and functions](#closures-and-functions)
 	- [How Do I Declare a Closure in Swift?](#how-do-i-declare-a-closure-in-swift)
 	- [Что такое протокол-ориентированное программирование? Как оно связано со Swift? Чем протоколы Swift отличаются от протоколов Objective-C?](#protocols)
+	- [Difference between Array VS NSArray VS |AnyObject|](#array-nsarray-anyobject)
+	- [Objective-C id is Swift Any or AnyObject](#id-any-anyobject)
+	- [ValueType vs. ReferenceType](#valuetype-vs-referencetype)
 
 <a name="swift"></a>
 # Swift
@@ -222,3 +225,52 @@ A protocol can inherit from other protocols and then add further requirements on
 __Protocol Composition__
 
 Swift types can adopt multiple protocols.
+
+<a name="array-nsarray-anyobject"></a>
+## Difference between Array VS NSArray VS [AnyObject]
+
+`Array` is a struct, therefore it is a value type in Swift.
+
+`NSArray` is an immutable Objective C class, therefore it is a reference type in Swift and it is bridged to `Array<AnyObject>`. `NSMutableArray` is the mutable subclass of `NSArray`.
+
+`[AnyObject]` is the same as `Array<AnyObject>`
+
+<a name="id-any"></a>
+## Objective-C id is Swift Any or AnyObject
+
+`Any` can represent an instance of any type at all, including function types and optional types.
+
+`AnyObject` can represent an instance of any class type.
+
+> As part of its interoperability with Objective-C, Swift offers convenient and efficient ways of working with Cocoa frameworks. Swift automatically converts some Objective-C types to Swift types, and some Swift types to Objective-C types. Types that can be converted between Objective-C and Swift are referred to as bridged types. Anywhere you can use a bridged Objective-C reference type, you can use the Swift value type instead. This lets you take advantage of the functionality available on the reference type’s implementation in a way that is natural in Swift code. For this reason, you should almost never need to use a bridged reference type directly in your own code. In fact, when Swift code imports Objective-C APIs, the importer replaces Objective-C reference types with their corresponding value types. Likewise, when Objective-C code imports Swift APIs, the importer also replaces Swift value types with their corresponding Objective-C reference types.
+
+<a name="valuetype-vs-referencetype"></a>
+## ValueType vs. ReferenceType
+
+> __Reference type__: a type that once initialized, when assigned to a variable or constant, or when passed to a function, returns a reference to the same existing instance.
+
+A typical example of a reference type is an object. Once instantiated, when we either assign it or pass it as a value, we are actually assigning or passing around the reference to the original instance (i.e. its location in memory). Reference types assignment is said to have shallow copy semantics.
+
+Mutable: The reference can be changed (mutable): you can mutate the instance itself and also change the instance reference.
+
+Immutable: The reference remains constant (immutable): you can’t change the instance reference, but you can mutate the instance itself.
+
+When to use:
+
+* Subclasses of NSObject must be class types
+* Comparing instance identity with === makes sense
+* You want to create shared, mutable state
+
+> __Value type__: a type that creates a new instance (copy) when assigned to a variable or constant, or when passed to a function.
+
+A typical example of a value type is a primitive type. Common primitive types, that are also values types, are: `Int`, `Double`, `String`, `Array`, `Dictionary`, `Set`. Once instantiated, when we either assign it or pass it as a value, we are actually getting a copy of the original instance. The most common value types in Swift are structs, enums and tuples can be value types. Value types assignment is said to have deep copy semantics.
+
+Mutable: The instance can be changed (mutable): you can change the properties of the instance.
+
+Immutable: The instance remains constant (immutable): you can’t change the properties of the instance, regardless whether a property is declared with let or var.
+
+When to use:
+
+* Comparing instance data with == makes sense (Equatable protocol)
+* You want copies to have independent state
+* The data will be used in code across multiple threads (avoid explicit synchronization)
