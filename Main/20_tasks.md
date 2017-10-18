@@ -340,4 +340,4 @@ struct StructB {
 sizeof(StructA) == 8
 sizeof(StructB) == 12
 ```
-[Как происходит выравнивание указателей на объекты в Objective-C?](#19_general_questions.md/data-structure-alignment)
+[Как происходит выравнивание указателей на объекты в Objective-C?](../19_general_questions.md#data-structure-alignment)
