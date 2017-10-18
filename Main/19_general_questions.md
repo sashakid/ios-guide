@@ -1,4 +1,4 @@
-- [Общие вопросы и задачи](#общие-вопросы-и-задачи)
+- [Общие вопросы](#общие-вопросы)
 	- [Inout parameters, pass by value, pass by reference](#inout-parameters)
 	- [Поверхностное и глубокое копирование](#поверхностное-и-глубокое-копирование)
 	- [Отличие while от for](#while-for)
@@ -39,9 +39,12 @@
 	- [Как реализовать хеш-таблицу? Как избежать коллизий?](#custom-hash-table)
 	- [Что такое реактивное программирование?](#reactive-programming)
 	- [Что такое функциональное программирование? Какие фичи есть для этого в Swift / Objective-C?](#functional-programming)
+	- [Можно ли создать свой root класс?](#custom-root-class)
+	- [Как происходит выравнивание указателей на объекты в Objective-C?](#data-structure-alignment)
+	- [Что такое union?](#union)
 
-<a name="общие-вопросы-и-задачи"></a>
-# Общие вопросы и задачи
+<a name="общие-вопросы"></a>
+# Общие вопросы
 <a name="inout-parameters"></a>
 ## Inout parameters, pass by value, pass by reference
 __Explanation 1__
@@ -975,3 +978,57 @@ multiplyBy = ^(int a) { return ^(int b) { return b * a; }; };
 triple = multiplyBy(3);
 ```
 Note that you can intermix blocks with object types (usually using `id` as the object type) and many of the new Objective-C object data structures have some kind of block-level operation. GCD also uses blocks in order to pass in arbitrary events; however, note that GCD can also be used with function pointers as well.
+
+<a name="custom-root-class"></a>
+## Можно ли создать свой root класс?
+
+It is true that on the Apple Objective-C 2.0 runtime, you must implement certain methods in order for your code to work. There is actually only one method that you need to implement: the class method `initialize`.
+```objectivec
+@interface MyBase
++ (void)test;
+@end
+
+@implementation MyBase
++ (void)initialize {
+
+}
+
++ (void)test {
+	// whatever
+}
+@end
+```
+The runtime will automatically call initialize when you first use your class (as explained in Apple's documentation). Not implementing this method is the reason for the message forwarding error. Making object allocation work is a different story. At the very least, you'll need an `isa` pointer on your base class if you're using instance variables. The runtime expects this to be there.
+
+<a name="data-structure-alignment"></a>
+## Как происходит выравнивание указателей на объекты в Objective-C?
+
+На современных процессорах ваш компилятор располагает базовые типы в памяти так, чтобы обеспечить наиболее быстрый доступ к ним. На процессорах x86 и ARM примитивные типы не могут находиться в произвольной ячейке памяти. Каждый тип, кроме `char`, требует выравнивания. `char` может начинаться с любого адреса, однако двухбайтовый `short` должен начинаться только с четного адреса, четырехбайтный `int` или `float` — с адреса, кратного 4, восьмибайтные `long` или `double` — с адреса, кратного 8. Наличие или отсутствие знака значения не имеет. Указатели — 32-битные (4 байта) или 64-битные (8 байт) — также выравниваются. Выравнивание ускоряет доступ к памяти за счет генерации кода, в котором на чтение и запись ячейки памяти требуется по одной инструкции. Без выравнивания мы можем столкнуться с ситуацией, когда процессору придется использовать две и более инструкции для доступа к данным, расположенным между адресами, кратными размеру машинного слова. `char` — особый случай, они занимают ровно одно машинное слово и всегда требуют одинакового количества инструкций для доступа. Поэтому для них нет предпочтительного выравнивания.
+
+https://tproger.ru/translations/art-of-structure-packing/
+
+<a name="union"></a>
+## Что такое union?
+
+With a __union__, you're only supposed to use one of the elements, because they're all stored at the same spot. This makes it useful when you want to store something that could be one of several types.
+
+A __struct___, on the other hand, has a separate memory location for each of its elements and they all can be used at once.
+```c
+union foo {
+  int a; // can't use both a and b at once
+  char b;
+} foo;
+
+struct bar {
+  int a; // can use both a and b simultaneously
+  char b;
+} bar;
+
+union foo x;
+x.a = 3; // OK
+x.b = 'c'; // NO! this affects the value of x.a!
+
+struct bar y;
+y.a = 3; // OK
+y.b = 'c'; // OK
+```
