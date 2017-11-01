@@ -4,7 +4,7 @@
 * [Структуры данных](Main/2_data_structures.md)
 * [Алгоритмы](Main/3_algorithms.md)
 * [Коллекции в Objective-C](Main/4_objectivec_collections.md)
-* [Язык СИ](Main/5_c_language.md.md)
+* [Язык СИ](Main/5_c_language.md)
 * [ООП](Main/6_oop.md)
 * [Паттерны проектирования](Main/7_design_patterns.md)
 * [iOS](Main/8_ios.md)
