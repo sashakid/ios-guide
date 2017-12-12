@@ -96,7 +96,7 @@ A Core Data stack is composed of the following objects: one or more managed obje
 4. A managed object model that describes the entities in the stores.
 5. A managed object context that provides a scratch pad for managed objects.
 
-<img src="https://github.com/sashakid/ios-guide/blob/master/Images/core_data_stack.png">
+<img src="https://github.com/sashakid/ios-guide/blob/master/Images/core_data_stack.jpg">
 
 1. Persistent store
 
