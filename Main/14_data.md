@@ -1,6 +1,6 @@
 - [Data](#data)
-	- [Что такое Core Data?](#core-data)
-	- [В каких случаях лучше использовать SQLite, а в каких Core Data?](#sqlite-core-data)
+	- [Общие-понятия](#общие-понятия)
+	- [Что такое Core Data? Опишите стек core data](#core-data)
 	- [Целесообразность использования Core Data](#целесообразность-использования-core-data)
 	- [Какие есть нюансы при использовании Core Data в разных потоках? Как синхронизировать данные между потоками?](#core-data-в-разных-потоках)
 	- [Какие типы хранилищ поддерживает CoreData?](#типы-хранилищ)
@@ -10,36 +10,9 @@
 
 <a name="data"></a>
 # Data
-<a name="core-data"></a>
-## Что такое Core Data?
-Apple предоставляет гибкий фреймворк для работы с хранимыми на устройстве данными — Core Data. Большинство деталей по работе с хранилищем данных Core Data скрывает, позволяя вам сконцентрироваться на том, что действительно делает ваше приложение веселым, уникальным и удобным в использовании. Не смотря на то, что Core Data может хранить данные в реляционной базе данных вроде SQLite, Core Data не является СУБД (системой управления БД). По-правде, Core Data в качестве хранилища может вообще не использовать реляционные базы данных. Core Data скорее является оболочкой для работы с данными, которая позволяет работать с сущностями и их связями (отношениями к другим объектами), атрибутами, в том виде, который напоминает работы с объектным графом в обычном объектно-ориентированном программировании.
 
-<img src="https://github.com/sashakid/ios-guide/blob/master/Images/nsmanagedobjectcontext.png">
-
-_NSManagedObjectModel_
-
-The `NSManagedObjectModel` instance describes the data that is going to be accessed by the Core Data stack. During the creation of the Core Data stack, the `NSManagedObjectModel` (often referred to as the “mom”) is loaded into memory as the first step in the creation of the stack. The example code above resolves an `NSURL` from the main application bundle using a known filename (in this example `DataModel.momd`) for the `NSManagedObjectModel`. Once the `NSManagedObjectModel` object is initialized, the `NSPersistentStoreCoordinator` object is constructed.
-
-_NSPersistentStoreCoordinator_
-
-The `NSPersistentStoreCoordinator` sits in the middle of the Core Data stack. The coordinator is responsible for realizing instances of entities that are defined inside of the model. It creates new instances of the entities in the model, and it retrieves existing instances from a persistent store (`NSPersistentStore`). The persistent store can be on disk or in memory. Depending on the structure of the application, it is possible, although uncommon, to have more than one persistent store being coordinated by the `NSPersistentStoreCoordinator`.
-
-Whereas the `NSManagedObjectModel` defines the structure of the data, the `NSPersistentStoreCoordinator` realizes objects from the data in the persistent store and passes those objects off to the requesting `NSManagedObjectContext`. The `NSPersistentStoreCoordinator` also verifies that the data is in a consistent state that matches the definitions in the `NSManagedObjectModel`.
-
-Координатор предназначен для представления фасада для управляемого контекстом объекта, так что группа постоянных хранилищ выглядит как единое совокупное хранилище. Управляемый объект контекста может создать граф объектов на основе объединения всех хранилищ данных координатора. Координатор может быть связан только с одной управляемой объектной моделью. Если Вы хотите положить различные субъекты в различные хранилища, вы должны разделить вашу модель, определяя конфигурацию в управляемой модели объекта.
-
-_NSManagedObjectContext_
-
-The managed object context (`NSManagedObjectContext`) is the object that your application will be interacting with the most, and therefore it is the one that is exposed to the rest of your application. Think of the managed object context as an intelligent scratch pad. When you fetch objects from a persistent store, you bring temporary copies onto the scratch pad where they form an object graph (or a collection of object graphs). You can then modify those objects however you like. Unless you actually save those changes, however, the persistent store remains unaltered.
-
-All managed objects must be registered with a managed object context. You use the context to add objects to the object graph and remove objects from the object graph. The context tracks the changes you make, both to individual objects’ attributes and to the relationships between objects. By tracking changes, the context is able to provide undo and redo support for you. It also ensures that if you change relationships between objects, the integrity of the object graph is maintained.
-
-If you choose to save the changes you have made, the context ensures that your objects are in a valid state. If they are, the changes are written to the persistent store (or stores), new records are added for objects you created, and records are removed for objects you deleted.
-
-Without Core Data, you have to write methods to support archiving and unarchiving of data, to keep track of model objects, and to interact with an undo manager to support undo. In the Core Data framework, most of this functionality is provided for you automatically, primarily through the managed object context.
-
-<a name="sqlite-core-data"></a>
-## В каких случаях лучше использовать SQLite, а в каких Core Data?
+<a name="общие-понятия"></a>
+## Общие понятия
 _Реляционная база данных_ — база данных, основанная на реляционной модели данных. Слово «реляционный» происходит от англ. relation (отношение). Для работы с реляционными БД применяют реляционные СУБД.
 
 _Реляционная модель данных (РМД)_ — логическая модель данных, прикладная теория построения баз данных, которая является приложением к задачам обработки данных таких разделов математики как теории множеств и логика первого порядка. Термин «реляционный» означает, что теория основана на математическом понятии отношение (relation). В качестве неформального синонима термину «отношение» часто встречается слово таблица. Необходимо помнить, что «таблица» есть понятие нестрогое и неформальное и часто означает не «отношение» как абстрактное понятие, а визуальное представление отношения на бумаге или экране. Некорректное и нестрогое использование термина «таблица» вместо термина «отношение» нередко приводит к недопониманию. Наиболее частая ошибка состоит в рассуждениях о том, что РМД имеет дело с «плоскими», или «двумерными» таблицами, тогда как таковыми могут быть только визуальные представления таблиц. Отношения же являются абстракциями, и не могут быть ни «плоскими», ни «неплоскими».
@@ -110,6 +83,40 @@ ID | CITY | STATE
 ---|------|------
 44 | Denver | CO
 66 | Caribou | ME
+
+<a name="core-data"></a>
+## Что такое Core Data? Опишите стек core data
+Apple предоставляет гибкий фреймворк для работы с хранимыми на устройстве данными — Core Data. Большинство деталей по работе с хранилищем данных Core Data скрывает, позволяя вам сконцентрироваться на том, что действительно делает ваше приложение веселым, уникальным и удобным в использовании. Не смотря на то, что Core Data может хранить данные в реляционной базе данных вроде SQLite, Core Data не является СУБД (системой управления БД). По-правде, Core Data в качестве хранилища может вообще не использовать реляционные базы данных. Core Data скорее является оболочкой для работы с данными, которая позволяет работать с сущностями и их связями (отношениями к другим объектами), атрибутами, в том виде, который напоминает работы с объектным графом в обычном объектно-ориентированном программировании.
+
+A Core Data stack is composed of the following objects: one or more managed object contexts connected to a single persistent store coordinator which is in turn connected to one or more persistent stores. A stack contains all the Core Data components you need to fetch, create, and manipulate managed objects. Minimally it contains:
+
+1. An external persistent store that contains saved records.
+2. A persistent object store that maps between records in the store and objects in your application.
+3. A persistent store coordinator that aggregates all the stores.
+4. A managed object model that describes the entities in the stores.
+5. A managed object context that provides a scratch pad for managed objects.
+
+<img src="https://github.com/sashakid/ios-guide/blob/master/Images/core_data_stack.png">
+
+1. Persistent store
+
+A persistent store is a repository in which managed objects may be stored. You can think of a persistent store as a database data file where individual records each hold the last-saved values of a managed object. Core Data offers three native file types for a persistent store: binary, XML, and SQLite. You can implement your own store type if you want Core Data to interoperate with a custom file format or server. Core Data also provides an in-memory store that lasts no longer than the lifetime of a process. The entities in a store are defined by the managed object model used to create it.
+
+2. Persistent object store
+
+A persistent object store maps between objects in your application and records in a persistent store. There are different classes of persistent object store for the different file types that Core Data supports. You can also implement your own if you want to support a custom file type. You don’t create a persistent object store directly. Instead, Core Data creates a store of the appropriate type for you when you send an `addPersistentStoreWithType:configuration:URL:options:error:` message to a persistent store coordinator.
+
+3. Persistent store coordinator
+
+A persistent store coordinator associates persistent object stores and a managed object model, and presents a facade to managed object contexts such that a group of persistent stores appears as a single aggregate store. A persistent store coordinator is an instance of `NSPersistentStoreCoordinator`. It has a reference to a managed object model that describes the entities in the store or stores it manages. The coordinator is the central object in a Core Data stack. In many applications you just have a single store, but in complex applications there may be several, each potentially containing different entities. The persistent store coordinator’s role is __to manage these stores and present to its managed object contexts the facade of a single unified store__. When you fetch records, Core Data retrieves results from all of them, unless you specify which store you’re interested in.
+
+4. Managed object model
+
+A managed object model is a set of objects that together form a blueprint describing the managed objects you use in your application. A model allows Core Data to map from records in a persistent store to managed objects that you use in your application. It is a collection of entity description objects (instances of `NSEntityDescription`). An entity description describes an entity (which you can think of as a table in a database) in terms of its name, the name of the class used to represent the entity in your application, and what properties (attributes and relationships) it has. During the creation of the Core Data stack, the `NSManagedObjectModel` (often referred to as the “mom”) is loaded into memory as the first step in the creation of the stack. Once the `NSManagedObjectModel` object is initialized, the `NSPersistentStoreCoordinator` object is constructed.
+
+5. Managed object context
+
+A managed object context represents a single object space, or scratch pad, in a Core Data application. A managed object context is an instance of `NSManagedObjectContext`. Its primary responsibility is to manage a collection of managed objects. These managed objects represent an internally consistent view of one or more persistent stores. The context is a powerful object with a central role in the life-cycle of managed objects, with responsibilities from life-cycle management (including faulting) to validation, inverse relationship handling, and undo/redo. From your perspective, the context is the central object in the Core Data stack. It’s the object you use to create and fetch managed objects, and to manage undo and redo operations. Within a given context, there is at most one managed object to represent any given record in a persistent store. __When you fetch objects, the context asks its parent object store to return those objects that match the fetch request__. Changes that you make to managed objects are not committed to the parent store until you save the context.
 
 <a name="целесообразность-использования-core-data"></a>
 ## Целесообразность использования Core Data
@@ -183,18 +190,6 @@ In Core Data, the managed object context can be used with two concurrency patter
 * The `NSPrivateQueueConcurrencyType` configuration creates its own queue upon initialization and can be used only on that queue. Because the queue is private and internal to the `NSManagedObjectContext` instance, it can only be accessed through the `performBlock:` and the `performBlockAndWait:` methods.
 
 `NSManagedObject` instances are not intended to be passed between queues. Doing so can result in corruption of the data and termination of the application. When it is necessary to hand off a managed object reference from one queue to another, it must be done through `NSManagedObjectID` instances. You retrieve the managed object ID of a managed object by calling the `objectID` method on the `NSManagedObject` instance.
-
-<a name="типы-хранилищ"></a>
-# Какие типы хранилищ поддерживает CoreData?
-Persistent Store
-
-* SQLite
-* Binary
-* XML
-
-Atomic Store
-
-* custom type
 
 <a name="ленивая-загрузка-core-data"></a>
 ## Что такое ленивая загрузка? Что ее связывает с Core Data? Опишите ситуация когда она может быть полезной? Что такое faulting?
