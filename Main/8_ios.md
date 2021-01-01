@@ -87,15 +87,15 @@ UIView *view = [[UIView alloc]initWithFrame: appFrame];
 
 <a name="фреймворки"></a>
 # Фреймворки
-Cocoa (в пер. с англ. - какао) — родная объектно-ориентированная среда разработки приложений для операционной системы Mac OS X производства компании Apple. Это один из пяти основных API, доступных в Mac OS X, — Cocoa, Carbon, Toolbox (для работы старых приложений Mac OS 9), POSIX и Java. Такие языки, как Perl, Python и Ruby не считаются основными, так как на них пока что пишется не так много серьёзных приложений для Mac OS X.
-Приложения, использующие Cocoa, обычно разрабатываются с помощью среды разработки Apple Xcode (в прошлом называвшегося Project Builder) и Interface Builder с использованием языка Objective-C. Однако, среда Cocoa также доступна и при разработке на других языках, таких как Ruby, Python и Perl с помощью связующих библиотек (MacRuby, PyObjC и CamelBones соответственно). Также можно писать Cocoa-программы на Objective-C в обычном текстовом редакторе и вручную компилировать их с помощью GCC или make-сценариев для GNUstep.
+Cocoa — объектно-ориентированный фреймворк для операционной системы macOS производства компании Apple.
+Приложения, использующие Cocoa, обычно разрабатываются с помощью среды разработки Xcode (в прошлом называвшегося Project Builder) и Interface Builder с использованием языка Objective-C или Swift. Однако, среда Cocoa также доступна и при разработке на других языках, таких как Ruby, Python и Perl с помощью связующих библиотек (MacRuby, PyObjC и CamelBones соответственно). Также можно писать Cocoa-программы на Objective-C в обычном текстовом редакторе и вручную компилировать их с помощью GCC или make-сценариев для GNUstep.
 Cocoa Touch — это фреймворк для создания приложений под iPhone, iPod touch, и iPad.
-Библиотека Cocoa Touch предоставляет уровень абстракции для iOS (операционной системы iPhone, iPad и iPod touch). Cocoa Touch основана на классах фреймворка Cocoa, используемого в Mac OS X, и, аналогично ей, использует язык Objective-C. Cocoa Touch следует шаблону проектирования Model-View-Controller.
-Инструменты для разработки приложений с использованием Cocoa Touch включены в iOS SDK. iOS-технологии можно рассматривать как набор слоев, где Cocoa Touch находится на самом высоком уровне, а Core OS и ядро Mac OS X — на более низких. Это позволяет реализовывать многие сложные задачи, сокращая объём работы, которую пришлось бы проделывать разработчикам, работай они на более низком уровне. Тем не менее, некоторые низкие слои абстрагирования могут быть доступны разработчикам по мере необходимости. Расположение слоев абстрагирования можно представить в следующем виде (от высшего к низшему):
+Библиотека Cocoa Touch предоставляет уровень абстракции для iOS (операционной системы iPhone, iPad и iPod touch). Cocoa Touch основана на классах фреймворка Cocoa, используемого в macOS, и, аналогично ей, использует язык Objective-C. Cocoa Touch следует шаблону проектирования Model-View-Controller.
+Инструменты для разработки приложений с использованием Cocoa Touch включены в iOS SDK. iOS-технологии можно рассматривать как набор слоев, где Cocoa Touch находится на самом высоком уровне, а Core OS и ядро macOS — на более низких. Это позволяет реализовывать многие сложные задачи, сокращая объём работы, которую пришлось бы проделывать разработчикам, работай они на более низком уровне. Тем не менее, некоторые низкие слои абстрагирования могут быть доступны разработчикам по мере необходимости. Расположение слоев абстрагирования можно представить в следующем виде (от высшего к низшему):
 * Cocoa Touch
 * Media / Application Services
 * Core Services
-* Core OS / ядро Mac OS X
+* Core OS / ядро macOS
 
 Аудио и Видео
 * Core Audio
@@ -144,7 +144,7 @@ The Core Text font API provides fonts, font collections, font descriptors, and e
 <a name="core-foundation"></a>
 ## Core Foundation
 
-Core Foundation (also called CF) is a C application programming interface (API) in Mac OS X & iOS, and is a mix of low-level routines and wrapper functions. Some types in Core Foundation are "toll-free bridged", or interchangeable with a simple cast, with those of their Foundation Kit counterparts. For example, one could create a CFDictionaryRef Core Foundation type, and then later simply use a standard C cast to convert it to its Objective-C counterpart, `(NSDictionary *)`, and then use the desired Objective-C methods on that object as one normally would.
+Core Foundation (also called CF) is a C application programming interface (API) in macOS & iOS, and is a mix of low-level routines and wrapper functions. Some types in Core Foundation are "toll-free bridged", or interchangeable with a simple cast, with those of their Foundation Kit counterparts. For example, one could create a CFDictionaryRef Core Foundation type, and then later simply use a standard C cast to convert it to its Objective-C counterpart, `(NSDictionary *)`, and then use the desired Objective-C methods on that object as one normally would.
 Is a library with a set of programming interfaces conceptually derived from the Objective-C-based Foundation framework but implemented in the C language. To do this, Core Foundation implements a limited object model in C. Core Foundation defines opaque types that encapsulate data and functions, hereafter referred to as “objects.” The programming interfaces of Core Foundation objects have been designed for ease of use and reuse. At a general level, Core Foundation:
 * Enables sharing of code and data among various frameworks and libraries
 * Makes some degree of operating-system independence possible
@@ -181,7 +181,7 @@ Core Foundation is a set of foundational APIs for some very well used and basic 
 
 History: The Foundation dates to ~1993/1994 and the APIs therein were a part of the OpenStep APIs published by NeXT.
 What is the purpose of CoreFoundation framework?
-CF was created during the transition of Mac OS to Mac OS X to help support that transition. Initially, it was done both for speed and to allow purely non-Objective-C programs to be written. Over time, that has proven to be a non-issue and CF has more and more bits that are implemented in Objective-C (have a look at the CoreFoundation binary using something like otool).
+CF was created during the transition of Mac OS to macOS to help support that transition. Initially, it was done both for speed and to allow purely non-Objective-C programs to be written. Over time, that has proven to be a non-issue and CF has more and more bits that are implemented in Objective-C (have a look at the CoreFoundation binary using something like otool).
 CFLite is a light-weight, portable, pure-C (IIRC) variant.
 Doesn't the Cocoa Framework provide every thing that's needed already?
 More or less. And, certainly moreso for building GUI applications on either iOS or OS X.
