@@ -24,6 +24,7 @@
 - [ ] Как работает code signing?
 - [ ] В чем отличие refernce type от value type?
 - [ ] Что такое copy on write?
+- [ ] Что такое DRY, KISS, YAGNI, ...?
 
 # Улучшения
 
