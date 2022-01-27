@@ -1,43 +1,43 @@
-- [Паттерны проектирования](#паттерны-проектирования)
+- [Архитектура](#architecture)
 	- [Что такое SOLID?](#что-такое-solid)
-	- [Архитектурные паттерны](#архитектурные-паттерны)
-		- [MVC](#mvc)
-		- [MVP](#mvp)
-		- [MVVM](#mvvm)
-			- [What is the difference between MVC, MVP, MVVM?](#difference)
-		- [VIPER](#viper)
-	- [Порождающие шаблоны](#порождающие-паттерны)
-		- [Abstract factory](#abstract-factory)
-		- [Factory method](#factory-method)
-		- [Lazy initialization](#lazy-initialization)
-		- [Singleton](#singleton)
-	- [Структурные шаблоны](#структурные-паттерны)
-		- [Adapter](#adapter)
-		- [Decorator](#decorator)
-		- [Proxy](#proxy)
-		- [Facade](#facade)
-		- [Кластеры](#кластеры)
-		- [Composite](#composite)
-	- [Communication Patterns](#communication-patterns)
-		- [Observer](#observer)
-		- [Делегирование](#делегирование)
-		- [KVC](#kvc)
-		- [KVO](#kvo)
-		- [Notification](#notification)
-	- [Поведенческие шаблоны](#поведенческие-шаблоны)
-		- [Chain of responsibility](#chain-of-responsibility)			
-		- [The Target-Action Mechanism](#the-target-action-mechanism)
-		- [Command](#command)
-		- [Iterator](#iterator)
-		- [Mediator](#mediator)
-		- [Memento](#memento)
-		- [State](#state)
-	- [Анти-паттерны в объектно-ориентированном программировании](#анти-паттерны-в-объектно-ориентированном-программировании)
+	- [Паттерны проектирования](#паттерны-проектирования)
+		- [UI паттерны](#ui-паттерны)
+			- [MVC](#mvc)
+			- [MVP](#mvp)
+			- [MVVM](#mvvm)
+				- [What is the difference between MVC, MVP, MVVM?](#difference)
+			- [VIPER](#viper)
+		- [Порождающие шаблоны](#порождающие-паттерны)
+			- [Abstract factory](#abstract-factory)
+			- [Factory method](#factory-method)
+			- [Lazy initialization](#lazy-initialization)
+			- [Singleton](#singleton)
+		- [Структурные шаблоны](#структурные-паттерны)
+			- [Adapter](#adapter)
+			- [Decorator](#decorator)
+			- [Proxy](#proxy)
+			- [Facade](#facade)
+			- [Кластеры](#кластеры)
+			- [Composite](#composite)
+		- [Communication Patterns](#communication-patterns)
+			- [Observer](#observer)
+			- [Делегирование](#делегирование)
+			- [KVC](#kvc)
+			- [KVO](#kvo)
+			- [Notification](#notification)
+		- [Поведенческие шаблоны](#поведенческие-шаблоны)
+			- [Chain of responsibility](#chain-of-responsibility)			
+			- [The Target-Action Mechanism](#the-target-action-mechanism)
+			- [Command](#command)
+			- [Iterator](#iterator)
+			- [Mediator](#mediator)
+			- [Memento](#memento)
+			- [State](#state)
+		- [Анти-паттерны в объектно-ориентированном программировании](#анти-паттерны-в-объектно-ориентированном-программировании)
 	- [Какая разница между использованием делагатов и нотификейшенов?](#какая-разница-между-использованием-делагатов-и-нотификейшенов?)
 
-<a name="паттерны-проектирования"></a>
-# Паттерны проектирования
-Повторимая архитектурная конструкция, представляющая собой решение проблемы проектирования в рамках некоторого часто возникающего контекста.
+<a name="architecture"></a>
+# Архитектура
 
 __How Cocoa Adapts Design Patterns__
 
@@ -74,8 +74,13 @@ SOLID (сокр. от англ. Single responsibility, Open-closed, Liskov subst
 * Модули верхних уровней не должны зависеть от модулей нижних уровней. Оба типа модулей должны зависеть от абстракций.
 * Абстракции не должны зависеть от деталей. Детали должны зависеть от абстракций.
 
-<a name="архитектурные-паттерны"></a>
-## Архитектурные паттерны
+<a name="паттерны-проектирования"></a>
+## Паттерны проектирования
+Паттерн проектирования — это повторимая архитектурная конструкция, представляющая собой решение проблемы проектирования в рамках некоторого часто возникающего контекста.
+
+<a name="ui-паттерны"></a>
+## UI паттерны
+
 <a name="mvc"></a>
 ### MVC
 Модель состоит из классов, в которых хранятся данные приложения.
