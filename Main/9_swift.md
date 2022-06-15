@@ -2,46 +2,25 @@
 - [Swift](#swift)
 	- [Сlosures and functions](#closures-and-functions)
 	- [How Do I Declare a Closure in Swift?](#how-do-i-declare-a-closure-in-swift)
+	- [Generics](#generics)
 	- [Что такое протокол-ориентированное программирование? Как оно связано со Swift? Чем протоколы Swift отличаются от протоколов Objective-C?](#protocols)
 	- [Difference between Array VS NSArray VS |AnyObject|](#array-nsarray-anyobject)
 	- [Objective-C id is Swift Any or AnyObject](#id-any-anyobject)
 	- [ValueType vs. ReferenceType](#valuetype-vs-referencetype)
+	- [What is copy on write mechanism](#copy-on-write)
 
 <a name="swift"></a>
 # Swift
 * Multi-paradigm: protocol-oriented, object-oriented, functional, imperative, block structured
 * Designed by	Chris Lattner and Apple Inc.
 * First appeared:	June 2, 2014
-* Stable release:	3.1.1 / April 21, 2017
+* Stable release:	5.6.1 / April 8, 2022
 * Typing discipline:	Static, strong, inferred
 * OS: Darwin, Linux, FreeBSD
 * Influenced by C#, CLU, D, Haskell, Objective-C, Python, Ruby, Rust
 
 Swift is a multi-paradigm, compiled programming language created by Apple Inc. for iOS, OS X, watchOS and tvOS development. Swift is designed to work with Apple's Cocoa and Cocoa Touch frameworks and the large body of existing Objective-C code written for Apple products. Swift is in-tended to be more resilient to erroneous code ("safer") than Objective-C and also more concise. It is built with the LLVM compiler framework included in Xcode 6 and later and uses the Objective-C runtime, allowing C, Objective-C, C++ and Swift code to run within a single program.
 Swift supports the core concepts that made Objective-C flexible, notably dynamic dispatch, wide-spread late binding, extensible programming, and similar features. These features also have well known performance and safety trade-offs, which Swift was designed to address. For safety, Swift introduced a system that helps address common programming errors like null pointers, as well as introducing syntactic sugar to avoid the pyramid of doom that can result. For performance issues, Apple has invested considerable effort in aggressive optimization that can flatten out method calls and accessors to eliminate this overhead. More fundamentally, Swift has added the concept of protocol extensibility, an extensibility system that can be applied to types, structs and classes, Apple promotes this as a real change in programming paradigms they refer to as "protocol-oriented programming".
-Swift was introduced at Apple's 2014 Worldwide Developers Conference (WWDC). It underwent an upgrade to version 1.2 during 2014, and a more major upgrade to Swift 2 at WWDC 2015. Initially a proprietary language, it was announced that Swift 2 would become open source later that year, sup-porting iOS, OS X and Linux.
-
-__History__
-
-Development on Swift began in 2010 by Chris Lattner, with the eventual collaboration of many other programmers at Apple. Swift took language ideas "from Objective-C, Rust, Haskell, Ruby, Python, C#, CLU, and far too many others to list". On June 2, 2014, the Worldwide Developers Conference (WWDC) application became the first publicly released app written in Swift. A beta version of the programming language was released to registered Apple developers at the conference, but the company did not promise that the final version of Swift would be source-compatible with the test version. Apple planned to make source code converters available if needed for the full release.
-The Swift Programming Language, a free 500-page manual, was also released at WWDC, and is available on the iBooks Store.
-
-__Features__
-
-Swift is an alternative for the Objective-C language that employs contemporary programming language theory concepts and strives to present a simpler syntax. During its introduction, it was described simply as "Objective-C without the C".
-By default, Swift does not expose pointers and other unsafe accessors, contrary to Objective-C, which uses pointers pervasively to refer to object instances. Additionally, Objective-C's use of a Smalltalk-like syntax for making method calls has been replaced with a dot-notation style and namespace system more familiar to programmers from other common object-oriented (OO) languages like Java or C#. Swift introduces true named parameters and retains key Objective-C concepts, including protocols, closures and categories, often replacing former syntax with cleaner versions and allowing these concepts to be applied to other language structures, like enums.
-
-_Generics_
-
-Generic code enables you to write flexible, reusable functions and types that can work with any type, subject to requirements that you define. You can write code that avoids duplication and expresses its intent in a clear, abstracted manner.
-Generics are one of the most powerful features of Swift, and much of the Swift standard library is built with generic code. In fact, you’ve been using generics throughout the Language Guide, even if you didn’t realize it. For example, Swift’s Array and Dictionary types are both generic collections. You can create an array that holds Int values, or an array that holds String values, or indeed an array for any other type that can be created in Swift. Similarly, you can create a dictionary to store values of any specified type, and there are no limitations on what that type can be.
-```swift
-func swapTwoValues<T>(inout a: T, inout _ b: T) {
-	let temporaryA = a
-	a = b
-	b = temporaryA
-}
-```
 
 <a name="closures-and-functions"></a>
 ## Сlosures and functions
@@ -209,6 +188,19 @@ _As a function parameter with explicit capture semantics and inferred parameters
 array.sort({ [unowned self] in return item1 < item2 })
 ```
 
+<a name="generics"></a>
+## Generics
+
+Generic code enables you to write flexible, reusable functions and types that can work with any type, subject to requirements that you define. You can write code that avoids duplication and expresses its intent in a clear, abstracted manner.
+Generics are one of the most powerful features of Swift, and much of the Swift standard library is built with generic code. In fact, you’ve been using generics throughout the Language Guide, even if you didn’t realize it. For example, Swift’s Array and Dictionary types are both generic collections. You can create an array that holds Int values, or an array that holds String values, or indeed an array for any other type that can be created in Swift. Similarly, you can create a dictionary to store values of any specified type, and there are no limitations on what that type can be.
+```swift
+func swapTwoValues<T>(inout a: T, inout _ b: T) {
+	let temporaryA = a
+	a = b
+	b = temporaryA
+}
+```
+
 <a name="protocols"></a>
 ## Что такое протокол-ориентированное программирование? Как оно связано со Swift? Чем протоколы Swift отличаются от протоколов Objective-C?
 
@@ -251,10 +243,6 @@ Swift types can adopt multiple protocols.
 
 A typical example of a reference type is an object. Once instantiated, when we either assign it or pass it as a value, we are actually assigning or passing around the reference to the original instance (i.e. its location in memory). Reference types assignment is said to have shallow copy semantics.
 
-Mutable: The reference can be changed (mutable): you can mutate the instance itself and also change the instance reference.
-
-Immutable: The reference remains constant (immutable): you can’t change the instance reference, but you can mutate the instance itself.
-
 When to use:
 
 * Subclasses of NSObject must be class types
@@ -265,12 +253,62 @@ When to use:
 
 A typical example of a value type is a primitive type. Common primitive types, that are also values types, are: `Int`, `Double`, `String`, `Array`, `Dictionary`, `Set`. Once instantiated, when we either assign it or pass it as a value, we are actually getting a copy of the original instance. The most common value types in Swift are structs, enums and tuples can be value types. Value types assignment is said to have deep copy semantics.
 
-Mutable: The instance can be changed (mutable): you can change the properties of the instance.
-
-Immutable: The instance remains constant (immutable): you can’t change the properties of the instance, regardless whether a property is declared with let or var.
-
 When to use:
 
 * Comparing instance data with == makes sense (Equatable protocol)
 * You want copies to have independent state
 * The data will be used in code across multiple threads (avoid explicit synchronization)
+
+<a name="copy-on-write"></a>
+## What is copy on write mechanism
+
+A fully stack allocated value type will not need reference counting, but a value type with inner references will unfortunately inherit this ability.
+```swift
+final class ExampleClass {
+  let exampleString = "Ex value"
+}
+struct ExampleStruct {
+  let ref1 = ExampleClass()
+  let ref2 = ExampleClass()
+  let ref3 = ExampleClass()
+  let ref4 = ExampleClass()
+}
+```
+This way of having inner reference types is an expensive operation that requires many calls to `malloc/free` and a significant reference counting overhead each time you copy. `COW` enables value types to be referenced when they are copied just like reference types. The real copy only happens when you have an already existing strong reference and you are trying to modify that copy.
+```swift
+let array = [1,2,3] //address A
+var notACopy = array //still address A
+notACopy += [4,5,6] //now address B
+```
+__Manually implementing Copy On Write__
+
+Swift standard library has already implemented `COW` for Dictionary, Array etc. The easiest way to implement copy-on-write is to compose existing copy-on-write data structures, such as Array. Swift arrays are values, but the content of the array is not copied around every time the array is passed as an argument because it features copy-on-write traits.There are two obvious disadvantages of using Array for `COW` semantics. The first problem is that Array exposes methods like `append` and `count` that don’t make any sense in the context of a value wrapper. These methods can make the use of the reference wrapper awkward. It is possible to work around this problem by creating a wrapper struct that will hide the unused APIs and the optimizer will remove this overhead, but this wrapper will not solve the second problem. The Second problem is that Array has code for ensuring program safety and interaction with Objective-C. Swift checks if indexed accesses fall within the array bounds and when storing a value if the array storage needs to be extended. These runtime checks can slow things down. An alternative to using Array is to implement a dedicated copy-on-write data structure to replace Array as the value wrapper.
+
+Let’s consider a struct Car in which we want to use Copy on Write:
+```swift
+struct Car {
+  let model = "M3"
+}
+```
+We can create a `Ref` class which will wrap our `Car` value type.
+```swift
+final class Ref<T> {
+  var val : T
+  init(_ v : T) {val = v}
+}
+struct Box<T> {
+    var ref : Ref<T>
+    init(_ x : T) { ref = Ref(x) }
+    var value: T {
+        get { return ref.val }
+        set {
+          if (!isKnownUniquelyReferenced(&ref)) {
+            ref = Ref(newValue)
+            return
+          }
+          ref.val = newValue
+        }
+    }
+}
+```
+The `Box` struct has a reference to `Ref` class and will return the value of our `Car` struct . When you try to set the value, it checks if there are any existing strong references and creates a new `Ref` if needed thereby limiting the copies to be made only while writing to it. `isKnownUniquelyReferenced` returns a boolean indicating whether the given object is known to have a single strong reference.

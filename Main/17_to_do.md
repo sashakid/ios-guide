@@ -22,9 +22,7 @@
 - [ ] Разница между singleton и shared instance. Какие плюсы и минусы у них? https://www.alainschlesser.com/singletons-shared-instances/
 - [ ] Что такое type erasure?
 - [ ] Как работает code signing?
-- [ ] В чем отличие refernce type от value type?
-- [ ] Что такое copy on write?
-- [ ] Что такое DRY, KISS, YAGNI, ...?
+- [ ] Что такое DRY, KISS, YAGNI, GRASP,...?
 
 # Улучшения
 
