@@ -5,7 +5,10 @@
     - [Functional Tests](#functional-tests)
     - [Acceptance Tests](#acceptance-tests)
   - [Как тестировать асинхронные методы?](#async-testing)
+  - [Как протестировать метод, не объявленный в публичном интерфейсе?](#private-testing)
   - [Dependency injection](#dependency-injection)
+  - [Что такое assert и когда использовать?](#assert)
+  - [Что такое BDD и TDD?](#bdd-tdd)
 
 <a name="тестирование"></a>
 # Тестирование
@@ -117,7 +120,7 @@ func onPostExecute(transferItem:WmTransferItem) {
 <a name="dependency-injection"></a>
 ## Dependency injection
 
-Dependency injection (DI) is a popular design pattern in many languages, such as Java and C#, but it hasn’t seen wide adoption in Objective-C. The concept of dependency injection is very simple: __an object should require you to pass in any dependencies rather than creating them itself.__ Dependencies can be passed to an object via the initializer (or “constructor”), or via properties (or “setters”). These are commonly referred to as “constructor injection” and “setter injection.”
+Внедрение зависимостей — это стиль настройки объекта, при котором поля объекта задаются внешней сущностью. Другими словами, объекты настраиваются внешними объектами. DI — это альтернатива самонастройке объектов. Зависимости можно передать объекту через конструктор или свойства.
 
 Constructor Injection:
 ```objectivec
@@ -152,3 +155,25 @@ Particularly when using constructor injection, the object ownership rules are st
 * Testability
 
 More than anything else, dependency injection improves the testability of your objects. Because they can be created simply by filling in the initializer, no hidden dependencies need to be managed. Furthermore, it becomes simple to mock out the dependencies to focus your tests on the object being tested.
+
+<a name="private-testing"></a>
+## Как протестировать метод, не объявленный в публичном интерфейсе?
+
+Варианты ответов:
+1. To test private methods, you just need to test the public methods that call them. Call your public method and make assertions about the result or the state of the object. If the tests pass, you know your private methods are working correctly.
+2. You don't need it. From Martin Fowler's article:
+`If you ever find yourself in a situation where you really really need to test a private method you should take a step back and ask yourself why.
+I'm pretty sure this is more of a design problem than a scoping problem. Most likely you feel the need to test a private method because it's complex and testing this method through the public interface of the class requires a lot of awkward setup.
+Whenever I find myself in this situation I usually come to the conclusion that the class I'm testing is already too complex. It's doing too much and violates the single responsibility principle - the S of the five SOLID 4 principles.
+The solution that often works for me is to split the original class into two classes. It often only takes one or two minutes of thinking to find a good way to cut the one big class into two smaller classes with individual responsibility. I move the private method (that I urgently want to test) to the new class and let the old class call the new method. Voilà, my awkward-to-test private method is now public and can be tested easily. On top of that I have improved the structure of my code by adhering to the single responsibility principle.`
+
+<a name="assert"></a>
+## Что такое assert и когда использовать?
+
+Assert provides a way for your code to reflect your assumptions explicitly, and check them when your code is running. Ideally, they are never triggered. In an unlikely situation when an assertion is triggered, the message lets you know that your code has been modified in a way that breaks your assumption. This is very valuable, because it shrinks the area in which you search for newly introduced errors.
+
+<a name="bdd-tdd"></a>
+## Что такое BDD и TDD?
+
+TDD, Test Driven Development - это методология разработки ПО, которая основывается на повторении коротких циклов разработки: изначально пишется тест, покрывающий желаемое изменение, затем пишется программный код, который реализует желаемое поведение системы и позволит пройти написанный тест. Затем проводится рефакторинг написанного кода с постоянной проверкой прохождения тестов.
+BDD, Behaviour Driven Development - Из-за некоторого методологического сходства TDD (Test Driven Development) и BDD (Behaviour Driven Development) часто путают даже профессионалы. В чем же отличие? Концепции обоих подходов похожи, сначала идут тесты и только потом начинается разработка, но предназначение у них совершенно разное. TDD — это больше о программировании и тестировании на уровне технической реализации продукта, когда тесты создают сами разработчики. BDD предполагает описание тестировщиком или аналитиком пользовательских сценариев на естественном языке — если можно так выразиться, на языке бизнеса.
