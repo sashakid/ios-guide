@@ -324,13 +324,17 @@ In RxSwift an `Event` is just an Enumeration Type with 3 possible states:
 2. `.error(error: Error)` — If an Error is encountered, a sequence will emit an error event. This will also terminate the sequence.
 3. `.completed` — If a sequence ends normally it sends a completed event to its subscribers
 If you want to cancel a subscription you can do that by calling dispose on it. You can also add the subscription to a `DisposeBag` which will cancel the subscription for you automatically on `deinit` of the `DisposeBag` Instance.
+
 __Subjects__
+
 A `Subject` is a special form of an Observable Sequence, you can subscribe and dynamically add elements to it. There are currently 4 different kinds of Subjects in RxSwift
 1. `PublishSubject`: If you subscribe to it you will get all the events that will happen after you subscribed.
 2. `BehaviourSubject`: A behavior subject will give any subscriber the most recent element and everything that is emitted by that sequence after the subscription happened.
 3. `ReplaySubject`: If you want to replay more than the most recent element to new subscribers on the initial subscription you need to use a `ReplaySubject`. With a `ReplaySubject`, you can define how many recent items you want to emit to new subscribers.
 4. `Variable`: A `Variable` is just a `BehaviourSubject` wrapper that feels more natural to a none reactive programmers. It can be used like a normal `Variable`
+
 __Schedulers__
+
 Operators will work on the same thread as where the subscription is created. In RxSwift you use schedulers to force operators do their work on a specific queue. You can also force that the subscription should happen on a specifc Queue. You use `subscribeOn` and `observeOn` for those tasks. If you are familiar with the concept of operation-queues or dispatch-queues this should be nothing special for you. A scheduler can be serial or concurrent similar to `GCD` or `OperationQueue`. There are 5 Types of Schedulers in RxSwift:
 1. `MainScheduler` — “Abstracts work that needs to be performed on MainThread. In case schedule methods are called from the main thread, it will perform the action immediately without scheduling.This scheduler is usually used to perform UI work.”
 2. `CurrentThreadScheduler` — “Schedules units of work on the current thread. This is the default scheduler for operators that generate elements.”
@@ -339,6 +343,7 @@ Operators will work on the same thread as where the subscription is created. In 
 5. `OperationQueueScheduler` — “Abstracts the work that needs to be performed on a specific NSOperationQueue. This scheduler is suitable for cases when there is some bigger chunk of work that needs to be performed in the background and you want to fine tune concurrent processing using maxConcurrentOperationCount.”
 
 __Difference between `.drive()` and `.bind(to:)`__
+
 Driver ensures that observe occurs only on main thread. Thumb rule is are you trying to drive a UI component use `drive` else use `bindTo`. Generally if you want your subscribe to occur only on main thread and don't want your subscription to error out (like driving UI components) use `driver` else stick with `bindTo` or `subscribe`
 
 __What's the difference between `bind` and `subscribe`?__
@@ -349,6 +354,7 @@ By using `bind(onNext)` you can express that stream should never emit `error` an
 ## SwiftUI
 
 SwiftUI предполагает, что описание структуры вашего View целиком находится в коде. Причем, Apple предлагает нам декларативный стиль написания этого кода. То есть, примерно так:
+
 `Это View. Она состоит из двух текстовых полей и одного рисунка. Текстовые поля расположены друг за другом горизонтально. Картинка находится под ними и ее края обрезаны в форме круга.`
 ```swift
 struct ContentView: View {
@@ -371,7 +377,9 @@ struct ContentView: View {
 - Другие View, т.е. Каждая `View` содержит в себе одну или несколько других `View`. Те, в свою очередь могут так же содержать как предопределенные системные `View` вроде `Text()`, так и кастомные, сложные, написанные самим разработчиком.
 - Модификаторы - благодаря им, мы коротко и внятно сообщаем SwiftUI, какой мы хотим видеть данную `View`
 - Контейнеры - `HStack`, `VStack`, `ZStack`, `Group`, `Section` и прочие. Фактически, контейнеры — это те же `View`, но у них есть особенность. Вы передаете в них некий контент, который нужно отобразить. Вся фишка контейнера в том, что он должны как-то сгруппировать и отобразить элементы этого контента. В этом смысле, контейнеры похожи на модификаторы, с той лишь разницей, что модификаторы предназначены изменять одну уже готовую `View`, а контейнеры выстраивают эти View (элементы контента, или блоки декларативного синтаксиса) в определенном порядке, например вертикально или горизонтально.
+
 __state параметры__
+
 Прежде всего, это переменные состояния — хранимые параметры нашей структуры, изменение которых должно быть отражено на экране. Их оборачивают в специальные обертки `@State` — для примитивных типов, и `@ObservedObject` — для классов. Класс должен удовлетворять протоколу `ObservableObject` — это значит, что данный класс должен уметь оповещать подписчиков (`View`, которые используют данное значение с оберткой `@ObservedObject`) об изменении своих свойств. Для этого достаточно обернуть требуемые свойства в `@Published`.
 ```swift
 struct ContentView: View {
@@ -385,8 +393,11 @@ struct ContentView: View {
 }
 ```
 `@Binding` - это еще один Property Wrapper, с помощью которой мы объявляем параметры структуры, которые будут не просто меняться, а и возвращаться в родительскую `View`.
+
 `@EnvironmentObject` — это как `Binding`, только сразу для всех `View` в иерархии, без необходимости их передавать в явном виде.
+
 `ForEach` — это набор subView, сгенерированных для каждого элемента коллекции исходя из переданного контента.
+
 Роль navigation controller берет на себя специальный `NavigationView`. Достаточно обернуть ваш код в `NavigationView{...}`. А само действие перехода можно добавить в специальную кнопку `NavigationLink`, которая пушит условный экран `DetailView`.
 ```swift
 var body: some View {
