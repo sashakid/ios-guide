@@ -7,10 +7,10 @@
 - [x] BDD, TDD
 - [x] RxSwift
 - [x] SwiftUI
-- [ ] Combine
-- [ ] Когда можно не объявлять self с weak?
-- [ ] Что такое clean architecture?
-- [ ] Какие плюсы и минусы у Realm? Чем отличается от Core Data?
+- [x] Combine
+- [x] Когда можно не объявлять self с weak?
+- [x] Что такое clean architecture?
+- [x] Какие плюсы и минусы у Realm? Чем отличается от Core Data?
 - [ ] Difference between dependency injection and dependency inversion https://stackoverflow.com/questions/46709170/difference-between-dependency-injection-and-dependency-inversion
 - [ ] Что происходит, когда юзер нажимает на UIButton на экране?
 - [ ] Metod Dispatching

@@ -10,6 +10,7 @@
 	- [What is copy on write mechanism](#copy-on-write)
 	- [RxSwift](#rxswift)
 	- [SwiftUI](#swiftui)
+	- [Combine](#combine)
 
 <a name="swift"></a>
 # Swift
@@ -408,4 +409,59 @@ var body: some View {
           }
      }
 }
+```
+
+<a name="combine"></a>
+## Combine
+
+На WWDC 2019 был представлен фреймворк Combine от Apple. Он позволяет моделировать все виды асинхронных событий и операций типа “значения, изменяющиеся во времени”. Не смотря на то, что данное понятие, часто используется в мире реактивного программирования как концепция и способ организации логики, поначалу бывает сложно сразу во всем разобраться.
+
+__Publisher__
+
+Declares that a type can transmit a sequence of values over time.
+
+__Subject__
+
+A publisher that exposes a method for outside callers to publish elements.
+
+__Subscriber__
+
+A Subscriber instance receives a stream of elements from a Publisher, along with life cycle events describing changes to their relationship. A given subscriber’s Input and Failure associated types must match the Output and Failure of its corresponding publisher.
+
+__Scheduler__
+Defines when and how to execute a closure.
+
+`Publishers` могут быть бесконечно активны либо завершены по итогу какого-либо события, а также `Publishers` могут быть опционально не выполнены, если произошла какая-то ошибка. Чтобы внедрить `Combine`, Apple доработали некоторые из своих основных библиотек, чтобы они так же могли поддерживаться `Combine`. Например, вот так может использоваться тип `URLSession` для создания `Publisher`, выполняющего сетевой запрос по заданному URL-адресу:
+```swift
+let url = URL(string: "https://api.github.com/repos/johnsundell/publish")!
+let publisher = URLSession.shared.dataTaskPublisher(for: url)
+```
+После того, как мы создали `Publisher`, мы можем привязать к нему подписки, например, с помощью `sink` API, который позволяет передавать замыкание, срабатывающее каждый раз, когда было получено новое значение, а так же другое замыкание, которое отрабатывает когда `publisher` завершает свою работу:
+```swift
+let cancellable = publisher.sink(
+    receiveCompletion: { completion in
+        switch completion {
+        case .failure(let error):
+            print(error)
+        case .finished:
+            print("Success")
+        }
+    },
+    receiveValue: { value in
+        print(value)
+    }
+)
+```
+Обратите внимание на то, как описанный выше метод `sink` возвращает значение, которое мы храним как `cancellable`. При присоединении нового подписчика, `Publisher` всегда возвращает объект, соответствующий протоколу `Cancellable`, действующему как токен для новой подписки. Затем, нам нужно сохранить этот токен до тех пор, пока мы хотим оставить нашу подписку активной, иначе как только она будет освобождена (deallocated), наша подписка будет автоматически отменена (кстати, подписку можно отменить вручную при помощи вызова метода `cancel()` у токена). Операторы используются для построения реактивных цепочек или пайплайнов (конвейеров), по которым могут проходить наши данные, где каждый оператор применяет некоторую форму преобразования к данным, которые были ему отправлены.
+`cancellable` используется для отслеживания подписки (subscription) на `Publisher` и должен сохраняться до тех пор, пока мы хотим, чтобы эта подписка (`subscription`) оставалась активной.
+
+Пример с операторами:
+```swift
+let sub = NotificationCenter.default
+    .publisher(for: NSControl.textDidChangeNotification, object: filterField)
+    .map( { ($0.object as! NSTextField).stringValue } )
+    .filter( { $0.unicodeScalars.allSatisfy({CharacterSet.alphanumerics.contains($0)}) } )
+    .debounce(for: .milliseconds(500), scheduler: RunLoop.main)
+    .receive(on: RunLoop.main)
+    .assign(to:\MyViewModel.filterString, on: myViewModel)
 ```

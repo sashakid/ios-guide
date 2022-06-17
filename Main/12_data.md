@@ -7,6 +7,7 @@
 	- [Что такое ленивая загрузка? Что ее связывает с Core Data? Опишите ситуация когда она может быть полезной? Что такое faulting?](#ленивая-загрузка-core-data)
 	- [Что такое fetch result controller?](#fetch-result-controller)
 	- [Как сделать миграцию БД?](#db-migration)
+	- [Какие плюсы и минусы у Realm? Чем отличается от Core Data?](#realm-vs-coredata)
 
 <a name="data"></a>
 # Data
@@ -235,3 +236,54 @@ If you just make simple changes to your model (such as adding a new attribute to
 Lightweight migration is especially convenient during early stages of application development, when you may be changing your managed object model frequently, but you don’t want to have to keep regenerating test data. You can migrate existing data without having to create a custom mapping model for every model version used to create a store that would need to be migrated.
 
 A further advantage of using lightweight migration—beyond the fact that you don’t need to create the mapping model yourself—is that if you use an inferred model and you use the SQLite store, then Core Data can perform the migration in situ (solely by issuing SQL statements). This can represent a significant performance benefit as Core Data doesn’t have to load any of your data. Because of this, you are encouraged to use inferred migration where possible, even if the mapping model you might create yourself would be trivial.
+
+<a name="realm-vs-coredata"></a>
+## Какие плюсы и минусы у Realm? Чем отличается от Core Data?
+
+Realm - это no-sql база данных для Android (Java, Kotlin), iOS (Objective-C, Swift), Xamarin (C#) и JavaScript (React Native, Node.js). Так же есть backend, который позволяет синхронизировать данные из всех источников. Из ключевых особенностей стоит отметить zero copy, MVCC и ACID. Встроенного механизма устаревания и очистки данных нет.
+
+There currently isn't a clear winner. Much depends on the needs of your project. Realm is still young, but it evolves at an astounding pace. If your project requires encryption or speed, then Realm is an obvious choice. If your project has a complex data model that changes frequently, then Core Data might be a better choice.
+
+__Set Up__
+
+CoreData: `NSPersistentContainer` simplifies the creation and management of the Core Data stack by handling the creation of the managed object model (`NSManagedObjectModel`), persistent store coordinator (`NSPersistentStoreCoordinator`), and the managed object context (`NSManagedObjectContext`).
+Realm: No set up needed
+
+__Threads__
+
+An important advantage Realm has over Core Data is consistency across threads. An important downside of Core Data is that managed object contexts can get out of sync. This isn't true for Realm and that is a key advantage it has over Core Data.
+
+__Syntax__
+
+The recent introduction of the `NSFetchedResultsType` protocol makes working with Core Data elegant and concise. Creating a managed object for an entity no longer requires multiple lines of code.
+```swift
+let note = Note(context: managedObjectContext)
+```
+
+__Migrations__
+
+Realm is still very young while Core Data has been around for more than a decade. The result is that Core Data has a few bells and whistles Realm lacks. Xcode's data model editor, for example, is a feature that is often overlooked. For complex applications, it is an incredibly useful tool to have. Another powerful feature of Core Data is data model versioning and the framework's support for migrations. Versioning the data model is easy and lightweight migrations are handled by the framework. Even though Realm also supports migrations, the developer needs to do the heavy lifting. I am sure this will improve over time.
+
+__Speed__
+
+Core Data is incredibly fast if you consider what it does under the hood to do its magic. But Realm is faster, much faster.
+
+__Cross-Platform Support__
+
+Realm is available on multiple platforms and this can be a compelling reason for choosing Realm over Core Data. I agree that it is nice to use the same persistence solution on multiple platforms. But keep in mind that you still need to write an implementation for each platform. You cannot share code between platforms, unless you use Xamarin, which is another discussion. Another compelling feature is the recently announced Realm Mobile Platform. Not only does it look amazing, it offers a valid alternative to, for example, iCloud and Firebase.
+
+__Evolution__
+
+Realm is a third party solution while Core Data isn't. This has pros and cons. Realm can evolve at a rapid pace. Developers can take advantage of new features by upgrading the version of Realm they ship with their application. This isn't true for Core Data. As a developer, you can't decide which version of the framework your application uses. This means that adopting new features of the framework isn't trivial. Apple is in charge.
+
+__App volume__
+
+Realm takes ~13MB of app
+
+# Минусы realm
+
+- Хранит только сырые данные. Enum надо перекладывать в String или Int, Optional в RealmOptional, массивы в List, обратные ссылки в LinkedList. Чтобы превращать это в нормальные объекты надо писать какие-то конвертеры.
+- По всему коду размазано обращение к Realm: он импортируется в файл, передается в качестве параметра, из базы тянутся объекты. Мы активно заворачивали всё в репозитории, чтобы скрыть работу с базой, а интерфейсом выходил доменный объект. Но это дополнительный код и слой в архитектуру.
+- Работа с базой превратилась в целый слой, который надо поддерживать: писать маперы, обертки. Добавить новую сущность — это слишком много ручной работы: создать Entity, переложить из DTO в нее, потом из Entity в доменную модель. Это всё ещё и протестировать надо, а мы даже на UI выводить ничего не начали.
+- Realm-объект должен быть классом. Все его свойства надо пометить как динамичные, при этом нельзя их сделать немутабельными, а конструктор Entity не имеет смысла, он всегда пустой. В итоге легко добавить свойство, но забыть поставить его из всех нужных мест.
+- Realm — большая и очень тяжелая зависимость

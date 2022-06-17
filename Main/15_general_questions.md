@@ -44,6 +44,7 @@
 	- [Что такое union?](#union)
 	- [Что такое метакласс?](#metaclass)
 	- [Что такое рефлексия и интроспекция?](#рефлексия-интроспекция)
+	- [Когда можно не объявлять self с weak?](#self-no-weak)
 
 <a name="общие-вопросы"></a>
 # Общие вопросы
@@ -1048,3 +1049,12 @@ y.b = 'c'; // OK
 
 Интроспекция — это способность программы исследовать тип или свойства объекта во время работы программы. Вы можете поинтересоваться, каков тип объекта, является ли он экземпляром класса.
 Рефлексия — это способность компьютерной программы изучать и модифицировать свою структуру и поведение (значения, мета-данные, свойства и функции) во время выполнения. Простым языком: она позволяет вам вызывать методы объектов, создавать новые объекты, модифицировать их, даже не зная имён интерфейсов, полей, методов во время компиляции. Из-за такой природы рефлексии её труднее реализовать в статически типизированных языках, поскольку ошибки типизации возникают во время компиляции, а не исполнения программы
+
+<a name="self-no-weak"></a>
+## Когда можно не объявлять self с weak?
+
+There are two kinds of closures, non-escaping and escaping. Non-escaping closures are executed in scope — they execute their code immediately, and cannot be stored or run later. Escaping closures, on the other hand, can be stored, they can be passed around to other closures, and they can be executed at some point in the future. Non-escaping closures (such as higher-order functions like `compactMap`) do not pose a risk of introducing strong reference cycles, and thus do not require the use of `weak` or `unowned`. Escaping closures can introduce reference cycles when you don’t use `weak` or `unowned`, but only if both of these conditions are met:
+- The closure is either saved in a property or passed to another closure
+- An object inside the closure (such as `self`) maintains a strong reference to the closure (or to another closure that it was passed to)
+
+<img src="https://github.com/sashakid/ios-guide/blob/master/Images/when-to-use-weak-self.png">
