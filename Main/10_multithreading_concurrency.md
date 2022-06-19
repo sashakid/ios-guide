@@ -43,8 +43,10 @@ Concurrency is the notion of multiple things happening at the same time. Threads
 
 __thread__
 
-Is used to refer to a separate path of execution for code. Inside each program, however, exists one or more threads of execution, which can be used to perform different tasks simultaneously or in a nearly simultaneous manner. The system itself actually manages these threads of execution, scheduling them to run on the available cores and preemptively interrupting them as needed to allow other threads to run. The threads we’ve been talking about so far have been software threads. They’re (generally) independent units of computation. The hardware threads are based on the number of cores on the computer.
-At the application level, all threads behave in essentially the same way as on other platforms. After starting a thread, the thread runs in one of three main states: running, ready, or blocked. If a thread is not currently running, it is either blocked and waiting for input or it is ready to run but not scheduled to do so yet. The thread continues moving back and forth among these states until it finally exits and moves to the terminated state. When you create a new thread, you must specify an entry-point function (or an entry-point method in the case of Cocoa threads) for that thread. This entry-point function constitutes the code you want to run on the thread. When the function returns, or when you terminate the thread explicitly, the thread stops permanently and is reclaimed by the system. Because threads are relatively expensive to create in terms of memory and time, it is therefore recommended that your entry point function do a significant amount of work or set up a run loop to allow for recurring work to be performed.
+Is used to refer to a separate path of execution of tasks.
+
+Inside each program, however, exists always one (Main Thread) or more threads of execution, which can be used to perform different tasks simultaneously or in a nearly simultaneous manner. The system itself actually manages these threads of execution, scheduling them to run on the available cores and preemptively interrupting them as needed to allow other threads to run. The threads we’ve been talking about so far have been `software threads`. They’re (generally) independent units of computation. The `hardware threads` are based on the number of cores on the computer. A `hardware thread` is a physical CPU or core. So, a 4 core CPU can genuinely support 4 `hardware threads` at once - the CPU really is doing 4 things at the same time.
+After starting a thread, the thread runs in one of three main states: `running`, `ready`, or `blocked`. If a thread is `not currently running`, it is either `blocked` and waiting for input or it is `ready` to run but not scheduled to do so yet. The thread continues moving back and forth among these states until it finally exits and moves to the terminated state. When you create a new thread, you must specify an entry-point function for that thread. This entry-point function constitutes the code you want to run on the thread. When the function returns, or when you terminate the thread explicitly, the thread stops permanently and is reclaimed by the system. Because threads are relatively expensive to create in terms of memory and time, it is therefore recommended that your entry point function do a significant amount of work or set up a `run loop` to allow for recurring work to be performed.
 
 __process__
 
@@ -53,6 +55,23 @@ Is used to refer to a running executable, which can encompass multiple threads. 
 __task__
 
 Is used to refer to the abstract concept of work that needs to be performed
+
+__Difference between `queue` and `thread`__
+
+A message queue is a data structure for holding messages from the time they're sent until the time the receiver retrieves and acts on them. Generally queues are used as a way to 'connect' producers (of data) & consumers (of data).
+A thread pool is a pool of threads that do some sort of processing. A thread pool will normally have some sort of thread-safe queue (refer message queue) attached to allow you to queue up jobs to be done. Here the queue would usually be termed 'task-queue'.
+So in a way thread pool could exist at your producer end (generating data) or consumer end (processing the data). And the way to 'pass' that data would be through queues. Why the need for this "middleman" - It decouples the systems. Producers do not know about consumers & vice versa.
+The Consumers are not bombarded with data if there is a spike in Producer data. The queue length would increase but the consumers are safe.
+
+Example:
+
+_In iOS the main thread, also called the UI thread, is very important because it is in charge of dispatching the events to the appropriate widget and this includes the drawing events, basically the UI that the user sees & interacts. If you touch a button on screen, the UI thread dispatches the touch event to the app, which in turn sets its pressed state and posts an request to the event queue. The UI thread dequeues the request and notifies the widget to redraw itself._
+
+Queues are cheaper. They reduce the memory cost for storing thread stacks in the application’s memory space. Tappings into the kernel are done when absolutely necessary. They eliminate the code needed to create and configure the threads. They eliminate the code needed to manage and schedule work on threads. They simplify the code we have to write. We focus on the work to be performed without having to worry about thread creation and management including thread communication. And so the underlying queueing software handles all of the thread creation and management for us and the benefit is that it manages threads much more efficiently than the corresponding threaded code.
+
+__Difference between `main queue` and `main thread`__
+
+The main thread is the one that starts our program, and it’s also the one where all our UI work must happen. However, there is also a main queue, and although sometimes we use the terms `main thread` and `main queue` interchangeably, they aren’t quite the same thing. It’s a subtle distinction, but it can sometimes matter: although your `main queue` will always execute on the `main thread` (and is therefore where you’ll be doing your UI work!), it’s also possible that other queues might sometimes run on the `main thread` – the system is free to move things around in whatever way is most efficient. So, if you’re on the `main queue` then you’re definitely on the `main thread`, but being on the `main thread` doesn’t automatically mean you’re on the `main queue` – a different queue could temporarily be running on the `main thread`.
 
 <a name="multithreading-api-alternatives"></a>
 ## API для работы с многопоточностью и их альтернативы
