@@ -13,7 +13,7 @@
 - [x] Какие плюсы и минусы у Realm? Чем отличается от Core Data?
 - [x] Difference between dependency injection and dependency inversion https://stackoverflow.com/questions/46709170/difference-between-dependency-injection-and-dependency-inversion
 - [x] Что происходит, когда юзер нажимает на UIButton на экране?
-- [ ] Metod Dispatching
+- [x] Metod Dispatching
 - [ ] Чем отличается Generic от Protocol https://fromjuniortosenior.com/the-difference-between-generics-and-protocols/
 - [ ] Как работает UIScrollView?
 - [ ] https://suelan.github.io/2021/02/13/20210213-dive-into-runloop-ios/

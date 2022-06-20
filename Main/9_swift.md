@@ -11,6 +11,7 @@
 	- [RxSwift](#rxswift)
 	- [SwiftUI](#swiftui)
 	- [Combine](#combine)
+	- [Metod Dispatching](#method-dispatching)
 
 <a name="swift"></a>
 # Swift
@@ -465,3 +466,201 @@ let sub = NotificationCenter.default
     .receive(on: RunLoop.main)
     .assign(to:\MyViewModel.filterString, on: myViewModel)
 ```
+
+<a name="method-dispatching"></a>
+## Metod Dispatching
+
+ Method Dispatch is how a program selects which instructions to execute when invoking a method. It’s something that happens every time a method is called, and not something that you tend to think a lot about.
+
+1. Static or direct dispatch
+2. Table or dynamic dispatch
+3. Message dispatch
+
+__Static or Direct Dispatch__
+
+`Direct dispatch` is the fastest style of method dispatch. Not only does it result in the fewest number of assembly instructions, but the compiler can perform all sorts of smart tricks, like inlining code, and many more things. However, direct dispatch is also the most restrictive from a programming point of view, and it is not dynamic enough to support subclassing.
+
+- Structs (Value type Data type)
+- `static` and `final` (Reference type with this keyword
+
+__Table or Dynamic Dispatch__
+
+`Table dispatch` is the most common implementation of dynamic behaviour in compiled languages. The compiler does not know which executable code should be used for a particular method call. This decision is taken at runtime.
+
+_Virtual table_
+
+Classes have tables, called `Virtual Tables`. Each table has an array of function pointers to methods of the corresponding class. Every subclass has its own copy of `Virtual Table` with different function pointers to those methods, which are overridden. As a subclass adds a new method to its definition, the method is appended to the end of the corresponding table. The compiler builds the tables, and at runtime, the tables are used to determine which method should be called
+```swift
+class ParentClass {
+    func method1() { }
+    func method2() { }
+}
+
+class ChildClass: ParentClass {
+    override func method2() { }
+    func method3() { }
+}
+```
+
+<img src="https://github.com/sashakid/ios-guide/blob/master/Images/v-table.png">
+
+```swift
+let obj = ChildClass()
+obj.method2()
+```
+Each class instance has a property type (or `isa` in Objective-C, each NSObject has this property). The tables are stored in some static memory region and can be taken by this property. When `method2` is called, the process will:
+
+1. take `Virtual Table` for the object of 0xB00 (ChildClass) by its property type
+2. take the function pointer of `method2` from the table (the pointer is taken by index 1). Thus, the function pointer is `0x222`
+3. jump to the address `0x222`, that contains the executable code
+
+Each method in such tables isn’t aware of self (obj). At runtime self (obj) is passed as a parameter when calling the method
+
+```swift
+// ... kind of runtime
+method2(obj)
+```
+
+`Table Dispatch` is still good but less efficient than the previous one because it takes three additional steps (take the table, take the function address, jump to that address to get executable code). And also, it is less efficient because the compiler applies no optimizations
+
+_Protocol Witness Tables_
+
+`Virtual Tables` are used when using classes and inheritance, and `Protocol Witness Tables` — when conforming to protocols. The problem is that structures don’t support inheritance because they don’t have `Virtual Tables`. But conforming to protocols allows them to use `Table Dispatch` and polymorphism. However, instead of `Virtual Tables`, they get Protocol `Witness Tables`
+```swift
+// Polymorphism without classes and inheritance
+protocol Noisable {
+    func makeNoise()
+}
+
+struct Cat: Noisable {
+    func makeNoise() { print("meow") }
+
+
+struct Fox: Noisable {
+    func makeNoise() { print(".. what does the fox say?") }
+}
+
+let noisers: [Noisable] = [Cat(), Cat(), Fox(), Fox(), Cat()]
+for noiser in noisers { noiser.makeNoise() } // polymorphism
+```
+Each type (value and reference) that conforms to a protocol has its own `Protocol Witness Table`. The table has pointers to those methods of the type that are required by the protocol. Structures and classes that conform to a protocol can have different sizes. To store them in the same array (like noisers) or in the same type property, or to pass them as an argument to the same function, and also to find corresponding `Protocol Witness Table` for each of them, Swift uses `existential containers` - is a structure, that always has a fixed size (in x64, it is 5 * 64 = 320 bit or five machine words), and consists of three parts:
+1. reference to `Value Witness Table` (VWT),
+2. a reference to `Protocol Witness Table` (PWT)
+3. a value buffer to store an instance itself
+
+The buffer stores an initial instance. It takes three machine words. If the instance doesn’t fit the buffer size (takes more than three machine words or more than 3 * 64 bit), it gets placed on the heap via VWT (see below), and the buffer contains a reference to that instance. But if it does, the buffer stores the value directly (the value is placed on the stack). However, it is only about value types. For reference types, the buffer stores a reference anyway. `Value Witness Table` is an abstract representation of instance life cycle manipulations. Since different types (value and reference) have different mechanisms of copying, moving, and destroying their values, VWT is used to abstract from the implementation of the current instance and do those manipulations through a single interface. It has the following properties and methods: `size` (initial instance size), `copy`, `move`, `destroy`
+
+<img src="https://github.com/sashakid/ios-guide/blob/master/Images/vwt.png">
+
+__Message Dispatch__
+
+Message Dispatch is the most dynamic style of the method dispatch. It’s a cornerstone of Cocoa development. It’s used by KVO, CoreData, UIAppearance…
+
+The compiler, in this case, also does not know which executable code should be used for a particular method call
+
+A key point of Message Dispatch is modifying the dispatch behavior at runtime, applying method swizzling (exchanging method invocations at runtime) or isa-swizzling (exchanging an object type at runtime)
+
+Method Swizzling allows exchanging the implementation of two class methods at runtime. This will affect every instance of a modified class, which was or will be created. If you have methodA and methodB, method swizzling allows you to call the implementation of methodB when calling methodA, and vice versa. It could be helpful for setting some default behavior to a class, avoiding inheritance. But Swift can use protocols for these purposes (Objective-C cannot)
+
+Isa-Swizzling allows exchanging the type of a given single object with another type at runtime. If you have two classes: ClassA and ClassB, you can create an instance of ClassA, then at runtime change its type to ClassB (change property isa), then call some method of ClassB, and then switch the type back to ClassA
+```swift
+class ParentClass {
+    dynamic func method1() { }
+    dynamic func method2() { }
+}
+
+class ChildClass: ParentClass {
+    override func method2() { }
+    dynamic func method3() { }
+}
+```
+<img src="https://github.com/sashakid/ios-guide/blob/master/Images/method-dispatch.png">
+
+Swift builds this hierarchy as a tree structure and puts it into some static memory region. When a message is dispatched (method2 is called), the process will:
+
+- take the hierarchy tree
+- try to find the function pointer of method2 in ChildClass table
+- if the function pointer is found, jump to the address to get executable code
+- else go to ParentClass (super of ChildClass) and repeat 2–4
+- do this until the function pointer is found or the root class of the hierarchy is reached
+
+For the first method call, it’s slower than Table Dispatch because it goes through the tree to find the corresponding function pointer. But after that, Swift caches the found table, and the second method call will take Table Dispatch time
+
+Swift uses the Swift runtime whenever it’s possible. It allows making optimizations when preparing code for runtime. Thus, at runtime, the code is more efficient. Swift only opts for a dynamic dispatch and Objective-C runtime if it has no other choice
+
+Objective-C uses Message Dispatch in most cases, but developers sometimes can use Direct Dispatch there
+
+Where a method is declared determines what the method dispatch is used
+
+<img src="https://github.com/sashakid/ios-guide/blob/master/Images/methods-dispatch.png">
+
+Inheritance from NSObject makes a class “dynamic message dispatchable”, but methods in initial declarations are called via Table Dispatch
+
+Object type determines which type of dispatch will be used on a method call. If the type is a protocol, then look at the protocol row in the table. If it casts the object to its class type or structure type, then look at the class or value type rows in the table
+```swift
+class A {
+    func doAction() { }                      // table dispatch
+}
+class B: A {
+    final override func doAction() { }       // static dispatch
+}
+let a: A = A()
+a.doAction()     // will be called via table dispatch
+let b1: A = B()
+b1.doAction()    // will be called via table dispatch
+let b2: B = B()
+b2.doAction()    // will be called via static dispatch
+```
+
+__final__
+
+The final keyword enables Static Dispatch on a method defined in a class. This keyword removes the possibility of any dynamic behavior and also hides the method from Objective-C runtime. It doesn’t generate a selector. Applying final to a class denies inheritance from the class and also makes class methods to be called via `Static Dispatch`. Using this keyword allows the compiler to make some optimizations for increasing performance. It can be applied to classes only
+
+```swift
+// denies any inheritance from the class
+final class Animal {
+    // makes the method called via static dispatch
+    final func move() { }
+}
+```
+
+__dynamic__
+
+The dynamic keyword enables Message Dispatch on a method defined in a class. This keyword implicitly marks the method as `@objc`, which means the method is visible for Objective-C runtime. Swift doesn’t say that dynamic is available for classes only, but structures and enumerations don’t support inheritance. The runtime doesn’t have to figure out which implementation it needs to use. Thus, at runtime for structures and enums dynamic doesn’t work. Using this keyword can make your code less performant
+```swift
+class Animal {
+    // message dispatch at Objective-C runtime
+    dynamic func move() { }
+}
+```
+
+__@objc__
+
+The `@objc` keyword does not alter the method dispatch. It just makes the method visible for Objective-C runtime. The most common use of @objc is making selectors. And also, using `@objc` allows overriding methods declared in class extensions (by default, it is impossible because of Static Dispatch)
+```swift
+class Animal {
+    @objc func move() { } // is visible at Objective-C runtime
+}
+class Animal { }
+extension Animal {
+    @objc func move() { }
+}
+class Lion: Animal {
+    override func move() { }
+}
+```
+
+__@nonobjc__
+
+The @nonobjc keyword does alter the method dispatch. It can be used to disable `Message Dispatc`h and to make the method invisible for Objective-C runtime. It seems there is no difference between `@nonobjc` and `final`, so using final makes code more clear
+
+__@objc final__
+
+Keyword `@objc final` enables Direct Dispatch on a method and registers the method selector at Objective-C runtime. The keyword allows the method to respond when performing a selector or other Objective-C features, along with giving the performance of `Direct Dispatch`
+```swift
+class Animal {
+    // direct dispatch, visible for Objective-C runtime
+    @objc final func move() { }
+}
+```
+If a property is observed with KVO and that property is upgraded to Direct Dispatch, the code will still compile, but the dynamically generated KVO method won’t be triggered
