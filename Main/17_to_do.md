@@ -11,7 +11,7 @@
 - [x] Когда можно не объявлять self с weak?
 - [x] Что такое clean architecture?
 - [x] Какие плюсы и минусы у Realm? Чем отличается от Core Data?
-- [ ] Difference between dependency injection and dependency inversion https://stackoverflow.com/questions/46709170/difference-between-dependency-injection-and-dependency-inversion
+- [x] Difference between dependency injection and dependency inversion https://stackoverflow.com/questions/46709170/difference-between-dependency-injection-and-dependency-inversion
 - [x] Что происходит, когда юзер нажимает на UIButton на экране?
 - [ ] Metod Dispatching
 - [ ] Чем отличается Generic от Protocol https://fromjuniortosenior.com/the-difference-between-generics-and-protocols/
