@@ -17,20 +17,19 @@
 - [x] Чем отличается Generic от Protocol https://fromjuniortosenior.com/the-difference-between-generics-and-protocols/
 - [x] Как работает UIScrollView?
 - [x] https://suelan.github.io/2021/02/13/20210213-dive-into-runloop-ios/
-- [ ] AsyncKit
-- [ ] Какие бывают анимации? https://developer.apple.com/library/archive/documentation/Cocoa/Conceptual/CoreAnimation_guide/Introduction/Introduction.html#//apple_ref/doc/uid/TP40004514
-- [ ] Разница между singleton и shared instance. Какие плюсы и минусы у них? https://www.alainschlesser.com/singletons-shared-instances/
-- [ ] Что такое type erasure?
-- [ ] Как работает code signing?
+- [x] Какие бывают анимации? https://developer.apple.com/library/archive/documentation/Cocoa/Conceptual/CoreAnimation_guide/Introduction/Introduction.html#//apple_ref/doc/uid/TP40004514
+- [x] Разница между singleton и shared instance. Какие плюсы и минусы у них? https://www.alainschlesser.com/singletons-shared-instances/
+- [x] Что такое type erasure?
+- [x] Как работает code signing?
 - [x] В чем отличие refernce type от value type?
 - [x] Что такое copy on write?
 - [x] Что такое DRY, KISS, YAGNI, ...?
-- [ ] Разница между map, compactMap и flatMap
-- [ ] Как проводить код ревью?
+- [x] Разница между map, compactMap и flatMap
+- [x] Как проводить код ревью?
 - [x] Зачем использовать Dependency injection?
-- [ ] Что такое fastlane и как он работает?
-- [ ] Что такое CI и зачем он нужен?
-- [ ] Как реализовать потоко-безопасный массив?
+- [x] Что такое fastlane и как он работает?
+- [x] Что такое CI/CD и зачем он нужен?
+- [x] Как реализовать потоко-безопасный массив?
 - [ ] Что такое opaque type? Какие еще бывают типы?
 - [ ] Какие ты знаешь стайл-гайды? Зачем они нужны?
 - [ ] Архитектуры redux vip soap ...

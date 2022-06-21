@@ -13,6 +13,9 @@
 	- [Combine](#combine)
 	- [Metod Dispatching](#method-dispatching)
 	- [Чем отличается Generic от Protocol?](#generic-vs-protocol)
+	- [Какие бывают анимации?](#animations)
+	- [Что такое type erasure?](#type-erasure)
+	- [Разница между map, compactMap и flatMap?](#map-functions)
 
 <a name="swift"></a>
 # Swift
@@ -676,3 +679,103 @@ The problem is that the same can be applied almost exactly to a `Protocol` :-(
 Protocols hide away the underlying type. If a `Generic` is an `incomplete Type`, then a `Protocol` is a `masked Type`. When we have a function that returns a `Protocol`, the compiler cannot tell you what concrete type is actually implementing the `Protocol`! Of course you could check what type it is by doing something like if lastElement `is String` but then you’re trying to fit a round peg in a square hole.
 
 Once a Generic becomes complete (e.g. `Array<String>`) it is a fully concrete type. It can be compared to other types. Constants or variables declared as Protocols can never be compared to concrete types. That’s the difference between a `Generic` and a `Protocol`. Protocols are meant to mask types at the cost of losing concreteness and Generics are meant to become complete types by finding their other half.
+
+<a name="#animations"></a>
+## Какие бывают анимации?
+
+- UIKit
+- Core Animation
+- UIViewPropertyAnimator
+
+When to use and what to use?
+
+At the end of the day, all UIKit-style animations are converted to Core Animation-style animations. That is, everything is actually animated using Core Animation. While UIKit and Core Animation both provide animation support, they give access to different parts of the view hierarchy.
+
+- UIKit: animations are performed using UIView objects. View supports a basic set of animations that cover many common tasks such as view transitions. It can accept events from the user like touch, click and tap and it works in the main thread.
+
+- Core Animation: Use Core animations when animating of the underlying layer’s properties. It renders, composes, and animate visual elements which provides high frame rates and smooth animations without burdening the CPU and slowing down the app.
+
+- UIViewPropertyAnimator: allows complex and dynamic animation of UIView properties.
+
+With UIKit, animations are performed using UIView objects. The properties available for animation using UIKit are:
+
+- frame
+- bounds
+- center
+- transform
+- alpha
+- backgroundColor
+- contentStretch
+
+While Core Animation gives access to the view's underlying layer, exposing a different set of properties as outlined below (it's worth noting that because views and layers are intricately linked together, changes to a view's layer affect the view itself):
+
+- The size and position of the layer
+- The center point used when performing transformations
+- Transformations to the layer or its sublayers in 3D space
+- The addition or removal of a layer from the layer hierarchy
+- The layer’s Z-order relative to other sibling layers
+- The layer’s shadow
+- The layer’s border (including whether the layer’s corners are rounded)
+- The portion of the layer that stretches during resizing operations
+- The layer’s opacity
+- The clipping behavior for sublayers that lie outside the layer’s bounds
+- The current contents of the layer
+- The rasterization behavior of the layer
+
+__UIView's animation methods__
+
+These are still the easiest to use in my opinion. Very straight forward API without making too big of a code footprint. I use this either for simple fire-and-forget animations (such as making a button pop when selected), or when I want to make a complex keyframe animation since its keyframe support is great.
+```swift
+UIView.animate(withDuration: 0.5, delay: 0.0, options: .curveEaseOut, animations: {
+    button.transform = .init(scaleX: 1.1, y: 1.1)
+}
+```
+
+__Core Animation__
+
+Perhaps a bit less straight-forward to use, but you need it whenever you want to animate layer properties instead of view properties, as mentioned above. Examples of these are corner radius, shadow, and border.
+
+```swift
+CATransaction.begin()
+CATransaction.setAnimationDuration(0.5)
+CATransaction.timingFunction = .init(name: .easeOut)
+let cornerAnimation = CABasicAnimation(keyPath: #keyPath(CALayer.cornerRadius))
+cornerAnimation.fromValue = 0.0
+cornerAnimation.toValue = 10.0
+button.layer.add(cornerAnimation, forKey: #keyPath(CALayer.cornerRadius))
+CATransaction.commit()
+```
+
+__UIViewPropertyAnimator__
+
+Added in iOS 10, as the name suggests this is another view-based animation API. There are a few things that make it different from UIView's animation methods, the main ones being that it supports interactive animations and allows modifying animations dynamically. You can pause, rewind, or scrub an animation, as well as adding more animation blocks on the go or reversing the animation while it's playing, which makes it quite powerful. I use this when I want an animation to be controlled by the user. The scrubbing works by setting a fractionComplete property on the animator object, which can easily be hooked up to a pan gesture recognizer or a force touch recognizer (or even a key using KVO).
+
+As mentioned, you can also store a reference to a UIViewPropertyAnimator and change its animations or completion blocks during the animation.
+```swift
+// Create an animation object with an initual color change animation
+let animator = UIViewPropertyAnimator(duration: duration, curve: .linear) {
+    button.backgroundColor = .blue
+}
+
+// At any point during the runtime, we can amend the list of animations like so
+animator.addAnimations {
+    button.transform = .init(scaleX: 1.1, y: 1.1)
+}
+
+animator.startAnimation()
+```
+Worth noting is that you can actually use UIView.animate and UIView.animateKeyframes from within your UIViewPropertyAnimator animations blocks, should you feel the need to use both.
+
+<a name="type-erasure"></a>
+## Что такое type erasure?
+
+Type-erasure simply means "erasing" a specific type to a more abstract type in order to do something with the abstract type (like having an array of that abstract type). And this happens in Swift all the time, pretty much whenever you see the word `Any`. The most straightforward way to think of type erasure is to consider it a way to hide an object's "real" type. В стандартной библиотеке Swift много примеров такого подхода: `AnyHashable`, `AnyIterator`, `AnySequence`, `AnyCollection` и т.д.
+
+<a name="map-functions"></a>
+## Разница между map, compactMap и flatMap?
+
+The word all three methods share is “map”, which in this context means “transform from one thing to another.”
+
+`compactMap()`: transform then unwrap
+
+`flatMap()`: transform then flatten

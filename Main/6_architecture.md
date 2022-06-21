@@ -39,6 +39,7 @@
 		- [Признаки плохого кода (Code smells)](#code-smells)
 	- [Какая разница между использованием делагатов и нотификейшенов?](#какая-разница-между-использованием-делагатов-и-нотификейшенов?)
 	- [Difference between dependency injection and dependency inversion?](#inversion-vs-injection)
+	- [Разница между singleton и shared instance. Какие плюсы и минусы у них?](#singleton-vs-shared)
 
 <a name="architecture"></a>
 # Архитектура
@@ -1044,3 +1045,61 @@ A --> B --> C --> D --> Config
 Когда A вызывает B, ему не нужно передавать объект Config в B. D уже знает об объекте Config.
 
 Однако, все еще могут быть ситуации, когда нельзя избежать переноса зависимостей. Например, если ваше приложение обрабатывает запросы (это веб-приложение или веб-сервис), и компоненты, обрабатывающие запросы это — синглтоны. Тогда объект запроса может быть необходимо передавать вниз по цепочке вызовов каждый раз, когда доступ к нему понадобится компоненту более низкоуровневого слоя.
+
+<a name="singleton-vs-shared"></a>
+## Разница между singleton и shared instance. Какие плюсы и минусы у них?
+
+The singleton pattern involves restricting a type to only ever having a single instance. In Swift, this generally looks like a static variable and a private initializer.
+```swift
+class BluetoothManager {
+    static let singleton = BluetoothManager()
+
+    private init() {}
+
+    func doSomething() {
+       // The best kind of thing
+    }
+}
+```
+Then, from another place in your code you can access this object through the static member.
+```swift
+BluetoothManager.singleton.doSomething()
+```
+Also, no outside code will be able to create its own instance.
+```swift
+let other = BluetoothManager() // Error
+```
+This produces the following error: `'BluetoothManager' initializer is inaccessible due to 'private' protection level`. That is exactly our goal with this pattern. We are not allowing any other instances to be created.
+
+What Singeleton is Good For
+
+I used the name `BluetoothManager` for a reason. This is an example of someplace we will probably want to use a singleton. That's because it is a type that represents a finite physical resource. It would be confusing and problematic to allow multiple instances to manage the bluetooth at the same time. The same would apply in any situation where you need to control the access to a limited resource. There even exists a pattern called Multiton that is very similar to Singleton except it's used when there's more than one resource but they're still limited.
+
+What Singleton is NOT Good For
+
+The controversy comes in when people use a singleton poorly. Most often, this is done to provide easy (lazy) access to an instance. However, this is where people start confusing Singleton with Shared Instances, so let's take a look at what a Shared Instance is.
+
+What is a Shared Instance
+
+A Shared Instance is very similar to a Singleton (hence the common confusion/generalization) with one important difference: we don't restrict the creation of other instances. However, we still provide one or more instances for access by other objects. In swift, this generally looks like the static variable without making the initializer private.
+```swift
+class ImageCache {
+    static let shared = ImageCache()
+
+    func doSomething() {
+        // The best kind of thing
+    }
+}
+```
+Now, we can access that shared instance or we can create our own if we want.
+```swift
+ImageCache.shared.doSomething()
+let other = ImageCache()
+```
+What is Shared Instance Good For
+
+Shared instances are great when it's computationally or memory intensive to have lots of instances created and/or used. A great example of that is Apple's `URLSession`. They do a lot of optimizations with caching) responses and much more for each session instance. It is an anti-pattern to create a new session for each request because those optimizations cannot take effect. However, they don't make it a singleton because there are times when a developer may want customize the session differently for different groups of web requests. This is also why I called my shared instance type ”ImageCache.” Most images are probably well suited to be saved in one large cache. However, you may want to separate out certain important images in a separate and smaller cache that makes it less likely any of the images will be purged (removed to make room for newer images).
+
+What is Shared Instance NOT Good For
+
+Even more so than Singleton, Share Instances are very often used in a lazy and poor fashion. Instead of passing instances to other objects through Dependency Injection, people will use static instances to gain access to a required dependency. This leads to “spaghetti” code where there's no clear distinction of roles within our code making it hard to understand, debug, and maintain. It also opens up our code to conflicts when multiple objects are interacting with the shared instance at the same time. Even in many cases where a shared instance might make sense, it is still better to pass around the instance (usually through initializers) that you want to share as opposed to creating a static variable. For example, if you've got a class to manage the persisted data in your app. One might try to use a shared instance but this is still problematic because you won't want any object anywhere to start making modifications. Instead, you want to be more careful about who can make changes and you can manage that much better by requiring that you pass that to the relevant objects. That extra layer of “pain” actually helps you write better code. Something like image caches and url sessions are so universal and generic that it makes sense to use it from anywhere. It's rare that's the case.
