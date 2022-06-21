@@ -3,6 +3,8 @@
 	- [Файловая система iOS](#файловая-система-ios)
 	- [Жизненный цикл приложения](#жизненный-цикл-приложения)
 	- [Жизненный цикл UIViewController](#жизненный-цикл-uiviewController)
+	- [Как работает UIScrollView?](#uiscrollview)
+	- [Как работает UITableView?](#как-работает-uitableview)
 	- [UIView](#uiview)
   - [Фреймворки](#фреймворки)
     - [Core Foundation](#core-foundation)
@@ -43,6 +45,35 @@ _Возможные состояния программы_
 <a name="жизненный-цикл-uiviewController"></a>
 ## Жизненный цикл UIViewController
 <img src="https://github.com/sashakid/ios-guide/blob/master/Images/uiviewcontroller.png">
+
+<a name="uiscrollview"></a>
+## Как работает UIScrollView?
+
+`UIScrollView` is the superclass of several `UIKit` classes, including `UITableView` and `UITextView`. A scroll view is a view with an origin that’s adjustable over the content view. It clips the content to its frame, which generally (but not necessarily) coincides with that of the application’s main window. A scroll view tracks the movements of fingers, and adjusts the origin accordingly. The view that shows its content through the scroll view draws that portion of itself according to the new origin, which is pinned to an offset in the content view. The scroll view itself does no drawing except for displaying vertical and horizontal scroll indicators. The scroll view must know the size of the content view so it knows when to stop scrolling. By default, it bounces back when scrolling exceeds the bounds of the content. The object that manages the drawing of content that displays in a scroll view needs to tile the content’s subviews so that no view exceeds the size of the screen. As users scroll in the scroll view, this object adds and removes subviews as necessary. Because a scroll view has no scroll bars, it must know whether a touch signals an intent to scroll versus an intent to track a subview in the content. To make this determination, it temporarily intercepts a touch-down event by starting a timer and, before the timer fires, seeing if the touching finger makes any movement. If the timer fires without a significant change in position, the scroll view sends tracking events to the touched subview of the content view. If the user then drags their finger far enough before the timer elapses, the scroll view cancels any tracking in the subview and performs the scrolling itself. Subclasses can override the `touchesShouldBegin(_:with:in:)`, `isPagingEnabled`, and `touchesShouldCancel(in:)` methods (which the scroll view calls) to affect how the scroll view handles scrolling gestures. A scroll view also handles zooming and panning of content. As the user makes a pinch-in or pinch-out gesture, the scroll view adjusts the offset and the scale of the content. When the gesture ends, the object managing the content view updates subviews of the content as necessary. (Note that the gesture can end and a finger might still be down.) While the gesture is in progress, the scroll view doesn’t send any tracking calls to the subview. The `UIScrollView` class can have a delegate that must adopt the `UIScrollViewDelegate` protocol. For zooming and panning to work, the delegate must implement both `viewForZooming(in:)` and `scrollViewDidEndZooming(_:with:atScale:)`. In addition, the `maximumZoomScale` and `minimumZoomScale` zoom scales must be different. If you assign a value to this view’s restorationIdentifier property, it attempts to preserve its scrolling-related information between app launches. Specifically, the values of the `zoomScale`, `contentInset`, and `contentOffset` properties are preserved. During restoration, the scroll view restores these values so that the content appears scrolled to the same position as before.
+
+`UIScrollView` has 3 main properties, known as `contentSize`, `contentOffset`, and `contentInset`.
+
+<img src="https://github.com/sashakid/ios-guide/blob/master/Images/content-size.jpeg">
+
+<img src="https://github.com/sashakid/ios-guide/blob/master/Images/content-offset.jpeg">
+
+<img src="https://github.com/sashakid/ios-guide/blob/master/Images/content-inset.png">
+
+<a name="как-работает-uitableview"></a>
+## Как работает UITableView?
+```
+UITableView : UIScrollView <NSCoding> : UIView <NSCoding>
+
+UITableViewController : UIViewController <UITableViewDelegate, UITableViewDataSource> : UIResponder <NSCoding, UIAppearanceContainer> : NSObject
+```
+
+<img src="https://github.com/sashakid/ios-guide/blob/master/Images/tableview1.png">
+<img src="https://github.com/sashakid/ios-guide/blob/master/Images/tableview2.png">
+
+Ячейки table view, которые больше не отображаются на экране, не выкидываются. Их можно адаптировать под повторное использование, указав идентификатор в процессе инициализации. Когда ячейка table view, отмеченная для повторного использования, пропадает с экрана, table view помещает ее в очередь для повторного использования в дальнейшем. Когда объект table view dataSource запрашивает у table view новую ячейку и указывает идентификатор, table view сначала проверяет очередь ячеек для повторного использования на предмет наличия необходимой ячейки. Если ячейка table view не была обнаружена, то table view создает новую, передавая ее затем объекту dataSource.
+```objectivec
+UITableViewCell *cell = [tableView dequeueReusableCellWithIdentifier:CellIdentifier forIndexPath:indexPath];
+```
 
 <a name="uiview"></a>
 ## UIView

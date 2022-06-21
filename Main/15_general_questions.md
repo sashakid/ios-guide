@@ -16,7 +16,6 @@
 	- [Какой контент лучше хранить в Documents, а какой в Cache?](#как-лучше-хранить)
 	- [Как из строки вытащить подстроку?](#как-из-строки-вытащить-подстроку)
 	- [NSCoding, archiving?](#nscoding,-archiving)
-	- [Как работает UITableView?](#как-работает-uitableview)
 	- [Константы, typedef, enum, #define](#константы-typedef-enum-define)
 	- [Что такое awakeFromNib?](#чтo-такое-awakefromnib)
 	- [Что происходит когда мы пытаемся вызвать метод у nil указателя? Разница между nil и Nil](#nil-указателя-разница)
@@ -514,21 +513,6 @@ myMapView = [NSKeyedUnarchiver unarchiveObjectWithFile:@"/tmp/MapArchive"];
 ```
 Второй метод предполагает создание экземпляра объекта `NSKeyedUnarchiver`.
 
-<a name="как-работает-uitableview"></a>
-## Как работает UITableView?
-```
-UITableView : UIScrollView <NSCoding> : UIView <NSCoding>
-
-UITableViewController : UIViewController <UITableViewDelegate, UITableViewDataSource> : UIResponder <NSCoding, UIAppearanceContainer> : NSObject
-```
-
-<img src="https://github.com/sashakid/ios-guide/blob/master/Images/tableview1.png">
-<img src="https://github.com/sashakid/ios-guide/blob/master/Images/tableview2.png">
-
-Ячейки table view, которые больше не отображаются на экране, не выкидываются. Их можно адаптировать под повторное использование, указав идентификатор в процессе инициализации. Когда ячейка table view, отмеченная для повторного использования, пропадает с экрана, table view помещает ее в очередь для повторного использования в дальнейшем. Когда объект table view dataSource запрашивает у table view новую ячейку и указывает идентификатор, table view сначала проверяет очередь ячеек для повторного использования на предмет наличия необходимой ячейки. Если ячейка table view не была обнаружена, то table view создает новую, передавая ее затем объекту dataSource.
-```objectivec
-UITableViewCell *cell = [tableView dequeueReusableCellWithIdentifier:CellIdentifier forIndexPath:indexPath];
-```
 <a name="константы-typedef-enum-define"></a>
 ## Константы, typedef, enum, #define
 `typedef` используется для объявления нового типа данных – это команда компилятору и предполагает символьный тип данных.

@@ -12,6 +12,7 @@
 	- [SwiftUI](#swiftui)
 	- [Combine](#combine)
 	- [Metod Dispatching](#method-dispatching)
+	- [Чем отличается Generic от Protocol?](#generic-vs-protocol)
 
 <a name="swift"></a>
 # Swift
@@ -664,3 +665,14 @@ class Animal {
 }
 ```
 If a property is observed with KVO and that property is upgraded to Direct Dispatch, the code will still compile, but the dynamically generated KVO method won’t be triggered
+
+<a name="#generic-vs-protocol"></a>
+## Чем отличается Generic от Protocol?
+
+`Generic` is an `incomplete Type`. Generic code enables you to write flexible, reusable functions and types that can work with any type, subject to requirements that you define. You can write code that avoids duplication and expresses its intent in a clear, abstracted manner.
+
+The problem is that the same can be applied almost exactly to a `Protocol` :-(
+
+Protocols hide away the underlying type. If a `Generic` is an `incomplete Type`, then a `Protocol` is a `masked Type`. When we have a function that returns a `Protocol`, the compiler cannot tell you what concrete type is actually implementing the `Protocol`! Of course you could check what type it is by doing something like if lastElement `is String` but then you’re trying to fit a round peg in a square hole.
+
+Once a Generic becomes complete (e.g. `Array<String>`) it is a fully concrete type. It can be compared to other types. Constants or variables declared as Protocols can never be compared to concrete types. That’s the difference between a `Generic` and a `Protocol`. Protocols are meant to mask types at the cost of losing concreteness and Generics are meant to become complete types by finding their other half.

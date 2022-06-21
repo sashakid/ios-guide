@@ -118,6 +118,8 @@ A run loop receives events from two different types of sources. Input sources de
 
 <img src="https://github.com/sashakid/ios-guide/blob/master/Images/runloop.jpg">
 
+https://suelan.github.io/2021/02/13/20210213-dive-into-runloop-ios/
+
 <a name="nsobject-instance-methods"></a>
 ## NSObject instance methods
 

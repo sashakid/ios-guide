@@ -14,9 +14,9 @@
 - [x] Difference between dependency injection and dependency inversion https://stackoverflow.com/questions/46709170/difference-between-dependency-injection-and-dependency-inversion
 - [x] Что происходит, когда юзер нажимает на UIButton на экране?
 - [x] Metod Dispatching
-- [ ] Чем отличается Generic от Protocol https://fromjuniortosenior.com/the-difference-between-generics-and-protocols/
-- [ ] Как работает UIScrollView?
-- [ ] https://suelan.github.io/2021/02/13/20210213-dive-into-runloop-ios/
+- [x] Чем отличается Generic от Protocol https://fromjuniortosenior.com/the-difference-between-generics-and-protocols/
+- [x] Как работает UIScrollView?
+- [x] https://suelan.github.io/2021/02/13/20210213-dive-into-runloop-ios/
 - [ ] AsyncKit
 - [ ] Какие бывают анимации? https://developer.apple.com/library/archive/documentation/Cocoa/Conceptual/CoreAnimation_guide/Introduction/Introduction.html#//apple_ref/doc/uid/TP40004514
 - [ ] Разница между singleton и shared instance. Какие плюсы и минусы у них? https://www.alainschlesser.com/singletons-shared-instances/
