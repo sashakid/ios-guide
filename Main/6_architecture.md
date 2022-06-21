@@ -9,6 +9,9 @@
 			- [MVVM](#mvvm)
 				- [What is the difference between MVC, MVP, MVVM?](#difference)
 			- [VIPER](#viper)
+			- [Redux](#redux)
+			- [VIP](#vip)
+			- [SOAP](#soap)
 		- [Порождающие шаблоны](#порождающие-паттерны)
 			- [Abstract factory](#abstract-factory)
 			- [Factory method](#factory-method)
@@ -200,23 +203,7 @@ __Repository (Gateway)__
 
 инкапсулирует набор сохраненных объектов в более объектно-ориентированном виде. В нем собран код, создающий запросы, который помогает минимизировать дублирование запросов. Но в Android-сообществе куда более распространено определение Repository как объекта, предоставляющего доступ к данным с возможностью выбора источника данных в зависимости от условий. В идеале использовать Repository нужно только через Interactor.
 
-Для iOS-разработки чистая архитектура реализована в модели VIP или VIPER, которая позиционируется как замена шаблону MVC. Модель VIP (View — Interactor — Presenter) выглядит следующим образом:
-
-<img src="https://github.com/sashakid/ios-guide/blob/master/Images/vip.png">
-
-Подробнее о каждом компоненте:
-
-Models — класс, содержащий структуры Request, Response, ViewModel;
-
-Router — простой компонент, передающий данные между viewControllers;
-
-Worker — компонент для управления запросами и ответами API/CoreData, а также передачи информации об успехе или неудаче к Interactor.
-
-Interactor — посредник между Worker и Presenter. Сначала он связывается с ViewController, который передает все параметры запроса, необходимые для Worker. До передачи данных к Worker, выполняется проверка, и если все в порядке, Worker возвращает ответ, и Interactor передает ответ на Presenter.
-
-Presenter —  Response от Interactor форматируется в ViewModel и передается на ViewController. Presenter отвечает за логику отображения и решает, как данные будут представлены пользователю.
-
-Configurator — “суперкласс”, который инициализирует все упомянутые выше компоненты.
+Для iOS-разработки чистая архитектура реализована в модели VIP или VIPER, которая позиционируется как замена шаблону MVC.
 
 <a name="что-такое-solid"></a>
 ## Что такое SOLID?
@@ -295,6 +282,83 @@ In MVVM there is no Presenter. Instead the View binds directly to a Presentation
 * "__E__", Entity: contains basic model objects used by the Interactor.
 * "__R__", Routing: contains navigation logic for describing which screens are shown in which order.
 <img src="https://github.com/sashakid/ios-guide/blob/master/Images/viper.png">
+
+<a name="redux"></a>
+### Redux
+
+As mentioned above Redux is a JS library for managing application state and making the application UI responsive based on the state. It follows a central principle that data binding should flow in one direction and should be stored as a single source of truth. The Redux architecture consists of building blocks that can be implemented in Swift using observation protocols in a very simple and straightforward fashion.
+
+<img src="https://github.com/sashakid/ios-guide/blob/master/Images/redux.png">
+
+1. State: Based on your state you render your UI or respond in any form. So basically state refers to the source of truth.
+2. Action: Actions are payloads or simply objects of information, that captures from the application via any kind of events such as touch events, network API responses etc,.
+3. Reducer: A Reducer is a function that takes the current state from the store, and the action. It combines the action and current state together and returns the new state.
+4. Store: Store holds the state. Store receives the action and passes on to the reducer and gets the updated state and passes on to the subscribers. It is important to note that you will only have a single store in an application. If you want to split your data handling logic, you will use reducer composition i.e using many reducers instead of many stores.
+5. View: View subscribes to the state changes from the store.
+
+__Advantages of Redux pattern__
+
+So the main reason I was self-forced to explore the redux pattern is due to the simplicity and predictability the pattern offers.
+Once very important use case is when building SOLID UI components, transferring the control actions like button click, table row selection to the root object using delegates or closures is very cumbersome making the code base complicated and heavy when communication is happening over many layers. Using Notifications is also not a good idea for larger apps as they are not very traceable causing to debug issues related to application flow and control can be very difficult. So redux pattern fits best in this use case.
+Redux pattern also allows for data binding as it follows observer design pattern, so we do data binding also using this pattern. However in the example that I am going to show I’ll be showing the control transfer of user events from the low level child UI object to the parent root object.
+
+https://github.com/ReSwift/ReSwift
+
+<a name="vip"></a>
+### VIP
+
+Модель VIP (View — Interactor — Presenter) выглядит следующим образом:
+
+<img src="https://github.com/sashakid/ios-guide/blob/master/Images/vip.png">
+
+Подробнее о каждом компоненте:
+
+Models — класс, содержащий структуры Request, Response, ViewModel;
+
+Router — простой компонент, передающий данные между viewControllers;
+
+Worker — компонент для управления запросами и ответами API/CoreData, а также передачи информации об успехе или неудаче к Interactor.
+
+Interactor — посредник между Worker и Presenter. Сначала он связывается с ViewController, который передает все параметры запроса, необходимые для Worker. До передачи данных к Worker, выполняется проверка, и если все в порядке, Worker возвращает ответ, и Interactor передает ответ на Presenter.
+
+Presenter —  Response от Interactor форматируется в ViewModel и передается на ViewController. Presenter отвечает за логику отображения и решает, как данные будут представлены пользователю.
+
+Configurator — “суперкласс”, который инициализирует все упомянутые выше компоненты.
+
+https://clean-swift.com/clean-swift-ios-architecture/
+
+<a name="soap"></a>
+### SOAP
+
+SOA is a style of software design where services are provided to the other components by application components, through a communication protocol over a network. The basic principles of service-oriented architecture are independent of vendors, products and technologies.
+
+A service is a unit of logic that runs in the network with the following characteristics:
+
+- It handles a business processes
+- It can access another service
+- It’s relatively independent of the software
+- It has only one responsibility
+- You should perceive services as tools. We will import them in other classes, and with them, we are going to build features. This structure will give us the benefits mentioned earlier. These tools will help us handling API, Core data, location, any third party code or business process.
+
+Two types of services
+
+In our implementation of SOA, we use two types of services: managers and regular services. Structurally they are the same, but managers have these attributes:
+
+- It is a service built around some framework - Core data
+- Generic and straightforward - Knows only to fetch, save, update and delete data, doesn’t work with specific data
+- Easy to replace - If we want to replace Core data with Realm we only need to change a manager
+- Managers are imported only by regular services and not by low-level objects such as view controllers or view models
+- Should reuse in another project - Because of these benefits we can easily reuse these tools in other projects
+
+<img src="https://github.com/sashakid/ios-guide/blob/master/Images/soa.png">
+
+On the other hand, regular services have the following characteristics:
+
+- Code is not generic - Fetching particular objects from Core data
+- They should be imported in low level objects and other regular services
+- Can’t reuse in other projects - Have specific tasks
+
+Example: https://github.com/pakisha/Medium6
 
 <a name="порождающие-шаблоны"></a>
 ## Порождающие шаблоны

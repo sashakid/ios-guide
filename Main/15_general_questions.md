@@ -50,6 +50,9 @@
 	- [Что такое fastlane и как он работает?](#fastlane)
 	- [Что такое CI/CD и зачем он нужен?](#ci-cd)
 	- [Как реализовать потоко-безопасный массив?](#thread-safe-array)
+	- [Какие ты знаешь стайл-гайды? Зачем они нужны?](#code-style)
+	- [Какие ты знаешь менеджеры зависимостей? В чем между ними разница?](#dependencies-managers)
+	- [Чем отличается статическая библиотека от динамической?](#dynamic-vs-static-library)
 
 <a name="общие-вопросы"></a>
 # Общие вопросы
@@ -1346,3 +1349,148 @@ The `sync` has nothing to do with whether the destination queue is serial or con
 (b) you are willing to have the calling thread blocked until the sync task runs.
 
 So, with very few exceptions, one should use `async`. And, perhaps needless to say, we never block the main thread for more than a few milliseconds. While using `sync` on a concurrent dispatch queue is generally avoided, one example you might encounter is the “reader-writer” synchronization pattern. In this case, “reads” happen synchronously (because you need to wait the result), but “writes” happen asynchronously with a barrier (because you do not need to wait, but you do not want it to happen concurrently with respect to anything else on that queue).
+
+<a name="code-style"></a>
+## Какие ты знаешь стайл-гайды? Зачем они нужны?
+
+1. Обеспечивает линейное развитие проекта и не влияет на объем кодовой базы. Если вы обеспечили историческое написание понятного кода, то, сколько бы не приходило и не уходило разработчиков, вы всегда имеете равное качество кода, что позволяет проекту динамично расти вне зависимости от его объема.
+
+2. Значительно ускоряет процесс адаптации новых программистов. Если ваш код написан понятно, новый специалист очень быстро обучит свою нейросеть на определение блоков и начнет приносить пользу. Есть такое понятие, как точка самоокупаемости сотрудника. Это точка, с которой сотрудник начинает приносить только пользу. А если код написан понятно, новым сотрудникам не нужно разбираться в бизнес-логике, ему достаточно научится читать ваш код. И чем быстрее он это сделает, тем быстрее перестанет задавать тонны вопросов остальным специалистам, отнимая у них время. А время специалистов, которые прошли точку самоокупаемости, значительно дороже для команды и компании с точки зрения потенциальной ценности приносимой продукту.
+
+3. Убирает зависимость от частностей. Не нужно будет постоянно спотыкаться о чью-то оригинальность и специфическое оформление.
+
+4. Минимизирует эффект ментального блокера при изучении нового кода. Ваш мозг меньше сопротивляется, т.к. не нужно вникать в чужую стилистику. Ментальных ресурсов на чтение понятного кода нужно намного меньше.
+
+5. Минимизирует репутационные потери. Очень скоро, после прибытия в новую компанию, программист начнет делиться впечатлениями с бывшими коллегами и друзьями. И он либо скажет, что тут все круто, либо выделит негативные моменты в работе с кодом. В каком-то смысле тут получается HR-бонус: если вы хотите, чтобы с вами работали крутые программисты, делайте хороший проект. Хоть это не всегда важно, и в ряде компаний на качество кода не смотрят в принципе, а смотрят лишь на доставку фич до прода, это приятный бонус. Не секрет, что частой причиной ухода становится усталость от постоянного перепиливания некачественной кодовой базы.
+
+6. Формирует и воспитывает культуру разработки. Задача программиста лежит на более низком уровне, чем будущее всей компании, но важно донести понимание, что понятность и читаемость кода сейчас влияет на динамику дальнейшей разработки. Если код трудночитаем и не стандартизирован, с болью и страданиями поддается рефакторингу и масштабированию, то с ростом кодовой базы проекта, будет падать скорость разработки. Чем больше некачественного кода, тем сложнее писать новый, тем медленнее развивается продукт, тем сложнее компании наращивать обороты и тем сложнее ей платить вам больше денюжек, потому что много денюжек уходит на то, чтобы обеспечивать жизненный цикл проекта все новыми и новыми сотрудниками, который основное время онбоардинга тратят не на то, чтобы приносить пользу компании, а на классификацию наркотиков, под которыми этот код был написан.
+
+Примеры:
+
+https://www.swift.org/documentation/api-design-guidelines/
+
+https://github.com/raywenderlich/swift-style-guide
+
+https://google.github.io/swift/
+
+https://github.com/tutu-ru/swift-style-guide
+
+https://github.com/linkedin/swift-style-guide
+
+https://github.com/airbnb/swift
+
+https://github.com/spotify/ios-style
+
+<a name="dependencies-managers"></a>
+## Какие ты знаешь менеджеры зависимостей? В чем между ними разница?
+
+A package manager is a tool that automates the process of installing, upgrading, configuring, and removing a software, or in this case, inside our app.
+
+__CocoaPods__
+
+CocoaPods is a centralized dependency manager for Swift and Objective-C Cocoa projects. It is open-source and was built with Ruby by many volunteers and the open-source community. CocoaPods is based on a main repository called Specs that hosts all the framework specifications. In order to make it available to others, package developers have to push new versions to this repository by using the pod command line.
+
+Advantages
+
+- CocoaPods make managing dependencies in your code easier
+- Adding and removing dependencies is just a matter of defining them in a file and running a command to install them
+- CocoaPods reads the file, determines the dependencies that the listed libraries have, and whether there are any shared dependencies or not
+- We can search any kind of dependency in CocoaPods official website
+- CocoaPods supports both dynamic and static libraries
+- We can easily tell anyone what dependencies we are using in the app
+- It's easy to check if a new version of a dependency is available by using the ‘pod outdated’ command
+- Lots of contributors with well-grown community
+
+Disadvantages
+
+- Installation process will take more time to install CocoaPods
+- With CocoaPods built on RUBY, it is paramount to have its knowledge, if one wants to understand CocoaPods internal implementation.
+- Every time you build your project, all your dependencies will also be built, which leads to slower build times
+- CocoaPods creates new workspace directory, which has xcworkspace extension. We have to use Xcode workspace in order to make CocoaPods work
+- CocoaPods added some scripts in the build phases of our target
+- Linked the Pods Frameworks to “Link Binaries with Libraries
+- CocoaPods takes controls of entire Xcode project and if something fails, entire project stops building
+- Breakpoints doesn’t work properly on the added libraries source code
+- As CocoaPods has a centralised repository for all packages and in case of its service being down, a project cannot be built without committing the codes along the pods.
+- CI/CD integration with server is hard as we have to install and manage Ruby libraries
+
+__Carthage__
+
+Carthage is a decentralized dependency manager for Swift and Objective-C Cocoa projects. It is open-source and built with Swift by the open-source community. Unlike CocoaPods, you don't have a main Specs repository. This reduces maintenance work and avoids any central points of failure, but project discovery is more difficult. For example, this means that checking for outdated dependencies means checking every dependency repository instead of a single centralized one.
+
+Advantages
+
+- Carthage is purely written in Swift so that iOS developers can understand the technology behind Carthage
+- Supports both Dynamic Frameworks and Static Libraries
+- Carthage won’t touch your Xcode settings or project files. It downloads and builds dependencies
+- Carthage can be easily integrated with Continuous Integration server
+
+Disadvantages
+
+- Not every framework supports Carthage
+- Carthage has too many manual steps that need to be performed during setup
+
+__Swift Package Manager__
+
+Advantages
+
+- SPM works on both Mac and Linux platforms
+- SPM is built by Apple
+- We can easily say what dependencies we are using in the app
+- SPM will not compile all the dependencies every time. Hence, compile time will reduce.
+- If a package is depending on another package, SPM automatically handles it
+
+Disadvantages
+
+- Currently doesn't support all the platforms like iOS, watchOS, or tvOS.
+- You have to follow a specific folder structure.
+- Some features on the Foundation corelib are unimplemented. You can find the current status here.
+- Creating Unit Tests on Linux is not easy as on macOS. You also have to do additional turnaround.
+
+__Зачем мигрировать с Cocoapods на SPM?__
+
+- Нативность и интеграция в экосистему. Уже сейчас Xcode предлагает создать или добавить SPM Package.
+- В отличие от Cocoapods, больше не обязательно иметь workspace для работы над проектом с зависимостями.
+- Добавив новую зависимость, не нужно делать pod install и пересобирать весь проект.
+- Удобно использовать локальные зависимости: не меняется структура папок, быстрее пересобирается.
+- SPM не меняет структуру файла проекта, как это делает Cocoapods, не требует зависимости от Ruby и даже может сгенерировать файл проекта сам (пока недоступно для iOS-проектов).
+- Cocoapods не успевает справляться с нововведениями в Xcode и компилятор Swift.
+- Не нужно создавать проект Example для каждого репозитория: Xcode умеет открывать Package.swift файл как проект.
+- Не нужно оптимизировать дерево зависимостей при помощи abstract_target: SPM из коробки умеет не перекомпилировать код для разных таргетов с общими зависимостями.
+- Можно смотреть blame в зависимостях, а не только в основном проекте.
+- Не нужно писать скрипты на Ruby, чтобы починить конфигурацию проекта.
+
+<a name="dynamic-vs-static-library"></a>
+## Чем отличается статическая библиотека от динамической?
+
+Библиотека представляет собой набор программных кодов, объединяющих N файлов, это способ обмена программными кодами.
+
+- Библиотека с открытым исходным кодом: исходный код является общедоступным, и вы можете увидеть реализацию каждого файла реализации .m, например, широко используемых библиотек с открытым исходным кодом AFNetworking, SDWebImage и т. Д. На Github.
+- Закрытая исходная библиотека: исходный код не открыт, это скомпилированный двоичный файл, и никакой конкретной реализации не видно. Закрытая исходная библиотека делится на статическую библиотеку и динамическую библиотеку.
+
+Что такое статические библиотеки?
+- .a
+- .framework
+
+Какая форма динамической библиотеки?
+- .dylib
+- .framework
+
+В чем разница между статической библиотекой и динамической библиотекой?
+
+- Файлы `.a` должны быть статическими библиотеками
+- `.dylib` должны быть динамическими библиотеками
+- `.framework` может быть статическими библиотеками или динамическими библиотеками.
+
+Когда статическая библиотека связана, она будет полностью назначена исполняемому файлу. Если несколько приложений используют одну и ту же статическую библиотеку, каждое приложение будет копировать копию. Недостатком является то, что это тратит впустую память, что аналогично определению базовой переменной. Использование этой базовой переменной - это новая копия данных, а не исходное определение.
+Динамическая библиотека не будет скопирована, только одна копия. Программа динамически загружается в память во время работы программы. Система будет загружена только один раз. Несколько программ совместно используют одну копию, что экономит память. Это похоже на использование адрес памяти переменной. переменная
+Однако, если динамическая библиотека, определенная сама по себе, используется в проекте, Apple не позволит ей быть в списке. После iOS8 Apple открыла интерфейс для динамической загрузки `.dylib` для монтирования.
+
+Каковы сценарии применения статических библиотек?
+
+1. Защитите свой собственный основной код. Например, результаты, которые кто-то исследовал в течение многих лет, должны быть сохранены, и они раскрывают, как компания выживает.
+2. Упакуйте проект MRC в статическую библиотеку, которую можно использовать непосредственно в `ARC` без преобразования. Например, если кто-то другой использует библиотеку с открытым исходным кодом, написанную `MRC`, и помещает ее в ваш собственный проект `ARC`, вам необходимо добавить параметр компиляции в каждый файл-`fno-objc-arc` Это относительно хлопотно: упакуйте весь проект в статическую библиотеку и поместите его прямо в проект, не добавляя параметры компиляции к каждому файлу.
+
+Что такое архитектура?
+
+Архитектура ЦП - это спецификация, установленная производителями ЦП для продуктов ЦП, принадлежащих к той же серии. Основная цель - различать важные инструкции для разных типов ЦП. Архитектура симулятора не является такая же, как архитектура на реальной машине. Точно так же архитектура между имитатором и имитатором, реальное устройство и реальное устройство также различаются. Если структура статической библиотеки и соответствующего имитатора тестового проекта или структуры на реальное устройство не соответствует, будет выдана ошибка `Undefined symbols for ... architecture arm64 / i386`

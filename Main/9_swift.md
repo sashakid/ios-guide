@@ -16,6 +16,8 @@
 	- [Какие бывают анимации?](#animations)
 	- [Что такое type erasure?](#type-erasure)
 	- [Разница между map, compactMap и flatMap?](#map-functions)
+	- [Что такое opaque type? Какие еще бывают типы?](#opaque-type)
+	- [Что такое async / await?](#async-await)
 
 <a name="swift"></a>
 # Swift
@@ -779,3 +781,128 @@ The word all three methods share is “map”, which in this context means “tr
 `compactMap()`: transform then unwrap
 
 `flatMap()`: transform then flatten
+
+<a name="opaque-type"></a>
+## Что такое opaque type?
+
+Opaque return types is a new language feature that is introduced in Swift 5.1 by Apple. It can be used to return some value for function/method, and property without revealing the concrete type of the value to client that calls the API. The return type will be some type that implement a protocol. Using this solution, the module API doesn’t have to publicly leak the underlying internal return type of the method, it just need to return the opaque type of the protocol using the some keyword. The Swift compiler also will be able to preserve the underlying identity of the return type unlike using protocol as the return type. SwiftUI uses opaque return types inside its View protocol that returns some View in the body property.
+
+Here are some of the essential things that opaque return types provides to keep in our toolbox and leverage whenever we want to create API using Swift:
+
+- Provide a specific type of a protocol without exposing the concrete type to the API caller for better encapsulation.
+- Because the API doesn’t expose the private concrete return type to it’s caller, the client doesn’t have to worry if in the future the underlying types gets changed as long as it implements the base protocol.
+- Provides strong guarantees of underlying identity by returning a specific type in runtime. The trade off is losing flexibility of returning multiple type of value offered by using protocol as return type.
+- Because of the strong guarantee of returning a specific protocol type. The function can return opaque protocol type that has Self or associated type requirement.
+- While the protocol leaves the decision to return the type to its caller of the function. In reverse for opaque return types, the function itself have the decision for the specific type of the return value as long as it implements the protocol.
+```swift
+protocol MobileOS {
+    associatedtype Version
+    var version: Version { get }
+    init(version: Version)
+}
+
+struct iOS: MobileOS {
+    var version: Float
+}
+
+struct Android: MobileOS {
+    var version: String
+}
+
+func buildPreferredOS() -> MobileOS {
+    return iOS(version: 13.1)
+} // Compiler ERROR 😭
+Protocol 'MobileOS' can only be used as a generic constraint because it has Self or associated type requirements
+```
+Solution:
+```swift
+func buildPreferredOS() -> some MobileOS {
+    return iOS(version: 13.1)
+}
+```
+Using the opaque return type, we finally can return MobileOS as the return type of the function. The compiler maintains the identity of the underlying specific return type here and the caller doesn’t have to know the internal type of the return type as long as it implements the MobileOS protocol
+
+<a name="async-await"></a>
+## Что такое async / await?
+
+Плюсы
+
+- визуальная эстетичность кода. Читать код стало на порядок легче, отчасти от того, что мы избегаем callback hell’ов. Это, в свою очередь, снижает вероятность допустить ошибку - забыть вызвать completionHandler, из-за нарушить логику работы программы, теперь нельзя. Да и что тут говорить, код, с закосом под синхронный, стал намного элегантнее. Вот это:
+```swift
+func obtainFirstCarsharing(completionHandler: @escaping (CarsharingCarDetail?) -> Void) {
+   fetchCars { [weak self] cars in
+       guard let self = self, let firstCar = cars.first else {
+           completionHandler(nil)
+           return
+       }
+       self.fetchCarDetail(withId: firstCar.id) { detail in
+           completionHandler(detail)
+       }
+   }
+}
+```
+Теперь может выглядеть так:
+```swift
+func obtainFirstCarsharing() async throws -> CarsharingCarDetail {
+   let allCars = try await fetchCars()
+   guard let firstCarId = allCars.first?.id else { throw NSError() }
+   return try await fetchCarDetail(with: firstCarId)
+}
+```
+Замечу, что асинхронная функция, помимо результирующей модели, может вернуть ошибку - это нормальное поведение, которое разработчик может закладывать. В таком случае у нас есть возможность обрабатывать ошибки посредством try/catch.
+
+- async/await является неблокирующим механизмом. Сразу отмечу, что неблокирующий тут не равно непрерывный / синхронный. На это слово надо взглянуть под другим ракурсом - неблокирующим механизм является для потока. Что это значит?
+
+Взглянем на примеры:
+```swift
+let queue = DispatchQueue(label: "citymobil.queue.com")
+queue.sync { /* Execute WorkItem */ }
+// ----------------------------
+let semaphore = DispatchSemaphore(value: 0)
+semaphore.wait()
+// ----------------------------
+let _ = try await service.fetchCars()
+```
+Рассмотрим поведение потока с очередью, которая вызывает sync-метод — синхронно выполняет какую-нибудь WorkItem-задачу. В месте вызова sync поток блокируется и доступ к нему возвращается только после исполнения sync-замыкания. С семафорами ситуация схожа, если не хуже: они, очевидно, находятся вне философии очередей - могут заблокировать какой-либо поток, в котором выполняется WorkItem, отданный очереди.
+В случае с async/await синхронное выполнение метода приостанавливается: точкой приостановки является await, при этом сам поток не простаивает в ожидании.
+
+Тут стоит держать в голове пару моментов:
+
+- Поток, в котором выполнялся код до await, и который подхватил дальнейшее выполнение после, не обязательно будет одним и тем же.
+- Несмотря на то, что в сниппете кода нет коллбеков, глобальное состояние приложения во время приостановки (там, где await), может кардинально поменяться - это обязательно нужно держать в голове.
+
+Хочется дополнить механизм работы еще одним примером и сравнить разницу в поведении между новым и старых механизмом.
+
+```swift
+let syncQueue = DispatchQueue(
+	label: "queue.sync.com",
+  attributes: .concurrent
+)
+for i in 1...32 {
+	DispatchQueue.global().async {
+		syncQueue.sync { /* do some work */ }
+	}
+}
+```
+Здесь включаются в работу большое количество потоков. При этом каждое переключение между ними (context switch) становится все более ресурсоемким для системы при большом его количестве. Несмотря на то, что чего-то критичного в этих переключениях нет - context switch внутри одного процесса в общем то происходит достаточно быстро, и в большинстве случаев мы можем себе позволить не задумываться о нем - заблокированный поток, де факто, держит свой стек и занимает память. В довесок, мы можем легко воспроизвести ситуацию, где исчерпаем рабочие потоки, тем самым воссоздав thread explosion (взрыв потоков). Мы можем избежать такой ситуации, грамотно спроектировав работу с многопоточным кодом - например, использовать здесь concurrentPerform или ненулевые семафоры. Но Apple, кажется, "встроил" подобные оптимизации в систему:
+
+<img src="https://github.com/sashakid/ios-guide/blob/master/Images/continuation.png">
+
+Аналогичный код, переписанный с async/await, на условном двухъядерном устройстве будет гонять по одному потоку, которые не станут простаивать в ожидании, а стало быть и переключения между ними не будет. Вместо этого, переключение будет происходить преимущественно внутри одного потока между continuation — объектами (чуть ниже вернемся к ним), и будет сводиться к переключению между методами. Apple заявляет, что это на порядок легче для системы.
+
+__Актор (actor)__
+
+предназначен для предотвращения состояний гонки (race conditions) в состояниях асинхронных классов. Хотя это не новая концепция, акторы являются частью гораздо более крупного замысла. Да, теоретически вы можете реализовать все, что делает актор, просто добавив NSLocks в свойства/методы ваших классов, но на практике у них есть несколько важных бонусов. Во-первых, механизм синхронизации, используемый акторами, — это не известные нам блокировки, а новая Cooperative Threading Model (модель кооперативной потоковой обработки ) async/await в которой потоки могут плавно «изменять» контексты для выполнения других фрагментов кода, чтобы избежать простаивающих потоков, а во-вторых, наличие акторов позволяет компилятору проверить многие проблемы параллелизма прямо во время компиляции, давая вам сразу знать если есть какая-либо потенциальная опасность.
+
+__AsyncSequence__
+
+A type that provides asynchronous, sequential, iterated access to its elements.
+
+__Executors__
+
+- The compiler splits async code into jobs. A job roughly corresponds to the code from one await (= potential suspension point) to the next.
+- The runtime submits each job to an executor. The executor is the object that decides in which order and in which context (i.e. which thread or dispatch queue) to run the jobs.
+
+Swift ships with two built-in executors: the default concurrent executor, used for “normal”, non-actor-isolated async functions, and a default serial executor. Every actor instance has its own instance of this default serial executor and runs its code on it. Since the serial executor, like a serial dispatch queue, only runs a single job at a time, this prevents concurrent accesses to the actor’s state.
+
+https://docs.swift.org/swift-book/LanguageGuide/Concurrency.html
