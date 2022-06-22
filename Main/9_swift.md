@@ -676,11 +676,75 @@ If a property is observed with KVO and that property is upgraded to Direct Dispa
 
 `Generic` is an `incomplete Type`. Generic code enables you to write flexible, reusable functions and types that can work with any type, subject to requirements that you define. You can write code that avoids duplication and expresses its intent in a clear, abstracted manner.
 
-The problem is that the same can be applied almost exactly to a `Protocol` :-(
+The problem is that the same can be applied almost exactly to a `Protocol` :-( Where’s the misunderstanding? Let’s expand the official Stack example by adding a simple check to see if the last element added is “cuatro”.
+```swift
+struct Stack<Element> {
+	var items = [Element]()
+	mutating func push(_ item: Element) {
+		items.append(item)
+	}
+
+	mutating func pop() -> Element {
+		return items.removeLast()
+	}
+}
+
+var stackOfStrings = Stack<String> ()
+stackOfStrings.push("uno")
+stackOfStrings.push("dos")
+stackOfStrings.push("tres")
+stackOfStrings.push("cuatro")
+
+let lastElement = stackOfStrings.pop()
+if lastElement == "cuatro" {
+	print("That's a bingo!")
+}
+```
+This code will compile and actually print “That’s a bingo!”.
+
+Let’s try the same thing with our Protocol example.
+```swift
+struct Stack {
+	var items = [StackElement]()
+	mutating func push(_ item: StackElement) {
+		items.append(item)
+	}
+
+	mutating func pop() -> StackElement {
+		return items.removeLast()
+	}
+}
+
+protocol StackElement {}
+
+extension String : StackElement { }
+
+var stackOfStrings = Stack()
+stackOfStrings.push("uno")
+stackOfStrings.push("dos")
+stackOfStrings.push("tres")
+stackOfStrings.push("cuatro")
+
+let lastElement = stackOfStrings.pop()
+if lastElement == "cuatro" {
+	print("That's a bingo!")
+}
+
+❌ Value of protocol type 'StackElement' cannot conform to 'StringProtocol'; only struct/enum/class types can conform to protocols
+```
+This code doesn’t even compile!
+
+In the Protocol stack, what type is our pop function returning?
+```swift
+mutating func pop() -> StackElement {
+	return items.removeLast()
+}
+```
+If you answered StackElement, you’re wrong. The correct answer is, again, “I don’t know“.
 
 Protocols hide away the underlying type. If a `Generic` is an `incomplete Type`, then a `Protocol` is a `masked Type`. When we have a function that returns a `Protocol`, the compiler cannot tell you what concrete type is actually implementing the `Protocol`! Of course you could check what type it is by doing something like if lastElement `is String` but then you’re trying to fit a round peg in a square hole.
 
-Once a Generic becomes complete (e.g. `Array<String>`) it is a fully concrete type. It can be compared to other types. Constants or variables declared as Protocols can never be compared to concrete types. That’s the difference between a `Generic` and a `Protocol`. Protocols are meant to mask types at the cost of losing concreteness and Generics are meant to become complete types by finding their other half.
+Once a Generic becomes complete (e.g. `Array<String>`) it is a fully concrete type. It can be compared to other types. Constants or variables declared as `Protocols` can never be compared to concrete types. That’s the difference between a `Generic` and a `Protocol`. `Protocols` are meant to mask types at the cost of losing concreteness and `Generics` are meant to become complete types by finding their other half.
 
 <a name="#animations"></a>
 ## Какие бывают анимации?
