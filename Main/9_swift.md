@@ -214,7 +214,9 @@ func swapTwoValues<T>(inout a: T, inout _ b: T) {
 <a name="protocols"></a>
 ## Что такое протокол-ориентированное программирование? Как оно связано со Swift? Чем протоколы Swift отличаются от протоколов Objective-C?
 
-Protocol-Oriented Programming is a new programming paradigm ushered in by Swift 2.0. In the Protocol-Oriented approach, we start designing our system by defining protocols. We rely on new concepts: protocol extensions, protocol inheritance, and protocol compositions. The paradigm also changes how we view semantics. In Swift, value types are preferred over classes. However, object-oriented concepts don’t work well with structs and enums: a struct cannot inherit from another struct, neither can an enum inherit from another enum. So inheritancefa - one of the fundamental object-oriented concepts - cannot be applied to value types. On the other hand, value types can inherit from protocols, even multiple protocols. Thus, with POP, value types have become first class citizens in Swift.
+Protocol-Oriented Programming is a new programming paradigm ushered in by Swift 2.0. In the Protocol-Oriented approach, we start designing our system by defining protocols. We rely on new concepts: protocol extensions, protocol inheritance, and protocol compositions. The paradigm also changes how we view semantics. In Swift, value types are preferred over classes. However, object-oriented concepts don’t work well with structs and enums: a struct cannot inherit from another struct, neither can an enum inherit from another enum. So inheritance - one of the fundamental object-oriented concepts - cannot be applied to value types. On the other hand, value types can inherit from protocols, even multiple protocols. Thus, with POP, value types have become first class citizens in Swift.
+
+Protocol-Oriented Programming опирается на Generic Programming и концепцию Traits. Использование POP повышает переиспользование кода, лучше структурирует код, уменьшает дублирование кода, избегает сложности с иерархией наследования классов, делает код более связным.
 
 __Protocol Extensions__
 
@@ -227,6 +229,55 @@ A protocol can inherit from other protocols and then add further requirements on
 __Protocol Composition__
 
 Swift types can adopt multiple protocols.
+
+Использование протокола можно разделить на несколько сценариев:
+
+- Протокол как тип
+- Протокол как шаблон типа
+- Протокол как Trait
+- Протокол как маркер
+- Retroactive modeling (extensions)
+- Протокол как констрейнт
+
+__Отличия POP от OOP__
+
+_Абстракция_
+
+В ООП роль абстрактного типа данных играет класс.
+
+В POP — протокол. Преимущества протокола как абстракции:
+
+- Поддержка value-типов (и классов)
+- Поддержка статических отношений типов (и dynamic dispatch)
+- Немонолитный
+- Поддержка retroactive modeling
+- Не навязывает данные объекта (поля базового класса)
+- Не обременяет инициализацией (базового класса)
+- Даёт понять, что реализовывать
+
+_Инкапсуляция_
+
+Свойство системы, позволяющее объединить данные и методы, работающие с ними, в классе. Протокол не может содержать сами данные, он может содержать только требования на свойства, которые эти данные бы предоставляли. Как и в ООП, необходимые данные должны быть включены в класс/структуру, но функции могут быть определены как в классе, так и в extensions.
+
+_Полиморфизм_
+
+POP поддерживает 2 вида полиморфизма:
+
+- полиморфизм подтипов. Он же используется в ООП:
+```swift
+func process(service: ServiceType) { ... }
+```
+- параметрический полиморфизм. Используется в обобщенном программировании.
+```swift
+func process<Service: ServiceType>(service: Service) { ... }
+```
+В случае с полиморфизмом подтипов, нам неизвестен конкретный тип, который передаётся в функцию — нахождение реализации методов этого типа будет осуществляться во время выполнения (Dynamic dispatch). При использовании параметрического полиморфизма — тип параметра известен во время компиляции, соответственно и его методы (Static dispatch). За счёт того, что на этапе сборки известны используемые типы, компилятор имеет возможность лучше оптимизировать код — в первую очередь, за счёт использования подстановки (inline) функций.
+
+_Наследование_
+
+Наследование в ООП служит для заимствования функциональности от родительского класса.
+
+В POP получение нужной функциональности происходит за счёт добавления соответствий протоколам, которые предоставляют функции через extensions. При этом мы не ограничены классами, имеем возможность расширять за счёт протоколов структуры и enum-ы. Протоколы могут наследоваться от других протоколов — это означает добавление к собственным требованиям требований от родительских протоколов.
 
 <a name="array-nsarray-anyobject"></a>
 ## Difference between Array VS NSArray VS [AnyObject]
