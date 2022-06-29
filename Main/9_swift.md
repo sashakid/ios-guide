@@ -100,6 +100,8 @@ During their life cycle, the objects maintain following invariants:
 - The `unowned` reference count adds +1 to the `strong` one, which is decremented after object’s `deinit` completes.
 - The `weak` reference count adds +1 to the `unowned` reference count. It is decremented after the object is freed from memory.
 
+https://github.com/apple/swift/blob/main/stdlib/public/SwiftShims/RefCount.h
+
 <a name="closures-and-functions"></a>
 ## Сlosures and functions
 ```swift

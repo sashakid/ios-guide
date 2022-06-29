@@ -41,6 +41,7 @@
 		- [Анти-паттерны в объектно-ориентированном программировании](#анти-паттерны-в-объектно-ориентированном-программировании)
 		- [Признаки плохого кода (Code smells)](#code-smells)
 	- [Какая разница между использованием делагатов и нотификейшенов?](#какая-разница-между-использованием-делагатов-и-нотификейшенов?)
+	- [Dependency injection](#dependency-injection)
 	- [Difference between dependency injection and dependency inversion?](#inversion-vs-injection)
 	- [Разница между singleton и shared instance. Какие плюсы и минусы у них?](#singleton-vs-shared)
 
@@ -1015,6 +1016,37 @@ _Минусы_
 * Refactoring of properties can leave our observation code no longer working.
 * Complex “IF” statements required if an object is observing multiple values. This is because all observation code is directed through a single method.
 * Need to remove the observer when it is deallocated.
+
+<a name="dependency-injection"></a>
+## Dependency injection
+
+Внедрение зависимостей — это стиль настройки объекта, при котором поля объекта задаются внешней сущностью. Другими словами, объекты настраиваются внешними объектами. DI — это альтернатива самонастройке объектов. Зависимости можно передать объекту через конструктор или свойства.
+
+Constructor Injection:
+```objectivec
+- (instancetype)initWithDependency1:(Dependency1 *)d1 dependency2:(Dependency2 *)d2;
+```
+Setter Injection:
+```objectivec
+@property (nonatomic, retain) Dependency1 *dependency1;
+@property (nonatomic, retain) Dependency2 *dependency2;
+```
+
+Constructor injection is preferred, and as a general rule you should only fall back to setter injection if constructor injection is not possible. With constructor injection, you’ll likely still have `@property` definitions for these dependencies, but you can make them read only to simplify your object’s API.
+
+__Плюсы__
+
+1. DI делает зависимости объекта явными (четко прописанными в интерфейсе объекта) — это позволяет лучше контролировать его сложность.
+2. DI делает зависимости объекта внешними (передаются в объект извне, а не создаются внутри) — это позволяет отделять код создания объектов от бизнес-логики, улучшая разделение ответственности.
+3. DI дает возможность сделать зависимости гибкими. Mожно подменить объект другим — например, если закрыть его протоколом, скрыв реализацию. Код классов теперь зависит только от интерфейсов, а не от конкретных классов, скрывая детали реализации и уменьшая связанность кода. Как следствие — объекты становятся легко тестируемыми.
+4. DI уменьшает связанность(coupling) объектов.
+5. DI упрощает переиспользование объектов.
+6. DI улучшает декомпозицию за счет выноса порождающей логики наружу.
+
+__Минусы__
+
+1. Увеличивается количество сущностей в проекте. Добавляются дополнительные классы с порождающей логикой и протоколы, скрывающие детали реализации зависимостей.
+2. Возрастает время написания кода.
 
 <a name="inversion-vs-injection"></a>
 ## Difference between dependency injection and dependency inversion?

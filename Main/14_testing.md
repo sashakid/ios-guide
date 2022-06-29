@@ -6,7 +6,6 @@
     - [Acceptance Tests](#acceptance-tests)
   - [Как тестировать асинхронные методы?](#async-testing)
   - [Как протестировать метод, не объявленный в публичном интерфейсе?](#private-testing)
-  - [Dependency injection](#dependency-injection)
   - [Что такое assert и когда использовать?](#assert)
   - [Что такое BDD и TDD?](#bdd-tdd)
 
@@ -116,45 +115,6 @@ func onPostExecute(transferItem:WmTransferItem) {
   delegate?.onDone("finished")// call callback        
 }
 ```
-
-<a name="dependency-injection"></a>
-## Dependency injection
-
-Внедрение зависимостей — это стиль настройки объекта, при котором поля объекта задаются внешней сущностью. Другими словами, объекты настраиваются внешними объектами. DI — это альтернатива самонастройке объектов. Зависимости можно передать объекту через конструктор или свойства.
-
-Constructor Injection:
-```objectivec
-- (instancetype)initWithDependency1:(Dependency1 *)d1 dependency2:(Dependency2 *)d2;
-```
-Setter Injection:
-```objectivec
-@property (nonatomic, retain) Dependency1 *dependency1;
-@property (nonatomic, retain) Dependency2 *dependency2;
-```
-
-Constructor injection is preferred, and as a general rule you should only fall back to setter injection if constructor injection is not possible. With constructor injection, you’ll likely still have `@property` definitions for these dependencies, but you can make them read only to simplify your object’s API.
-
-Benefits:
-
-* Clear declaration of dependencies
-
-It becomes obvious what an object needs in order to operate, and dangerous hidden dependencies — like globals — disappear.
-
-* Composition
-
-DI encourages composition over inheritance, which improves the reusability of your code.
-
-* Easy customization
-
-When creating an object, it’s easy to customize parts of the object for specific scenarios.
-
-* Clear ownership
-
-Particularly when using constructor injection, the object ownership rules are strictly enforced — helping to build a directed acyclic object graph.
-
-* Testability
-
-More than anything else, dependency injection improves the testability of your objects. Because they can be created simply by filling in the initializer, no hidden dependencies need to be managed. Furthermore, it becomes simple to mock out the dependencies to focus your tests on the object being tested.
 
 <a name="private-testing"></a>
 ## Как протестировать метод, не объявленный в публичном интерфейсе?
