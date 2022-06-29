@@ -37,68 +37,68 @@ Swift supports the core concepts that made Objective-C flexible, notably dynamic
 <a name="memory-management"></a>
 ## Memory management
 
-Defining Memory Management
 At hardware level, memory is just a long list of bytes. We treat it as if it were organized into three virtual parts:
 
-Stack, where all local variables go.
-Global data, where static variables, constants and type metadata go.
-Heap, where all dynamically allocated objects go. Basically, everything that has a lifetime is stored here.
-We’ll continue saying ‘objects’ and ‘dynamically allocated objects’ interchangeably. These are Swift reference types and some special cases of value types.
+- Stack, where all local variables go.
+- Global data, where static variables, constants and type metadata go.
+- Heap, where all dynamically allocated objects go. Basically, everything that has a lifetime is stored here.
 
-Memory management is the process of controlling program’s memory. It is critical to understand how it works, otherwise you are likely to run across random crashes and subtle bugs.
-
-Defining Automatic Reference Counting (ARC)
-Memory management is tightly connected with the concept of Ownership. Ownership is the responsibility of some piece of code to eventually cause an object to be destroyed [1].
-
-Automatic reference counting (ARC) is Swift ownership system, which implicitly imposes a set of conventions for managing and transferring ownership.
-
-The name by which an object can be pointed is called a reference. Swift references have two levels of strength: strong and weak. Additionally, weak references have a flavor, called unowned.
+Memory management is the process of controlling program’s memory. Memory management is tightly connected with the concept of Ownership. Ownership is the responsibility of some piece of code to eventually cause an object to be destroyed. `Automatic reference counting (ARC)` is Swift ownership system, which implicitly imposes a set of conventions for managing and transferring ownership. The name by which an object can be pointed is called a `reference`. Swift references have two levels of strength: `strong` and `weak`. Additionally, `weak` references have a flavor, called `unowned`.
 
 The essence of Swift memory management is: Swift preserves an object if it is strongly referenced and deallocates it otherwise. The rest is just an implementation detail.
 
-Understanding Strong, Weak and Unowned
-The purpose of a strong reference is to keep an object alive. Strong referencing might result in several non-trivial problems [2]:
+__Understanding Strong, Weak and Unowned__
 
-Retain cycles. Considering that Swift language is not cycle-collecting, a reference R to an object which holds a strong reference to the object R (possibly indirectly), results in a reference cycle. We must write lots of boilerplate code to explicitly break the cycle.
-It is not always possible to make strong references valid immediately on object construction, e.g. with delegates.
-Weak references address the problem of back references. An object can be destroyed if there are weak references pointing to it. A weak reference returns nil, when an object it points to is no longer alive. This is called zeroing.
+The purpose of a strong reference is to keep an object alive. Strong referencing might result in several non-trivial problems:
 
-Unowned references are different flavor of weak, designed for tight validity invariants. Unowned references are non-zeroing. When trying to read a non-existent object by an unowned reference, a program will crash with assertion error. They are useful to track down and fix consistency bugs.
+- Retain cycles. Considering that Swift language is not cycle-collecting, a reference R to an object which holds a strong reference to the object R (possibly indirectly), results in a reference cycle. We must write lots of boilerplate code to explicitly break the cycle.
+- It is not always possible to make strong references valid immediately on object construction, e.g. with delegates.
 
-Our further discussion of Swift memory management is bound to be at a lower level of abstraction. We will dive into how ARC is implemented on the compiler level and which steps every Swift object undergoes before being destroyed.
+Weak references address the problem of back references. An object can be destroyed if there are weak references pointing to it. A weak reference returns nil, when an object it points to is no longer alive. This is called `zeroing`.
 
-Defining Swift Runtime
-The mechanism of ARC is implemented in a library called Swift Runtime. It implements such core features as the runtime type system, including dynamic casting, generics, and protocol conformance registration [3].
+Unowned references are different flavor of weak, designed for tight validity invariants. Unowned references are `non-zeroing`. When trying to read a non-existent object by an unowned reference, a program will crash with assertion error. They are useful to track down and fix consistency bugs.
 
-Swift Runtime represents every dynamically allocated object with HeapObject struct. It contains all the pieces of data which make up an object in Swift: reference counts and type metadata.
+__Defining Swift Runtime__
 
-Internally every Swift object has three reference counts: one for each kind of reference. At the SIL generation phase, swiftc compiler inserts calls to the methods swift_retain() and swift_release(), wherever it’s appropriate. This is done by intercepting initialization and destruction of HeapObjects.
+The mechanism of ARC is implemented in a library called Swift Runtime. It implements such core features as the runtime type system, including dynamic casting, generics, and protocol conformance registration. Swift Runtime represents every dynamically allocated object with `HeapObject` struct. It contains all the pieces of data which make up an object in Swift: reference counts and type metadata. Internally every Swift object has three reference counts: one for each kind of reference. At the SIL generation phase, swift compiler inserts calls to the methods `swift_retain()` and `swift_release()`, wherever it’s appropriate. This is done by intercepting initialization and destruction of HeapObjects. Compilation is one of the steps of Xcode Build System. If you are an old school Objective-C programmer and wonder where is autorelease, then I have some news for you: there is no such thing for pure Swift objects. Now let’s move on to the weak references. The way they are implemented is closely connected with the concept of side tables.
 
-Compilation is one of the steps of Xcode Build System.
+__Introducing Side Tables__
 
-If you are an old school Objective-C programmer and wonder where is autorelease, then I have some news for you: there is no such thing for pure Swift objects.
-
-Now let’s move on to the weak references. The way they are implemented is closely connected with the concept of side tables.
-
-Introducing Side Tables
-Side tables are mechanism for implementing Swift weak references.
-
-Typically objects don’t have any weak references, hence it is wasteful to reserve space for weak reference count in every object. This information is stored externally in side tables, so that it can be allocated only when it’s really needed.
-
-Instead of directly pointing to an object, weak reference points to the side table, which in its turn points to the object. This solves two problems: saves memory for weak reference count, until an object really needs it; allows to safely zero out weak reference, since it does not directly point to an object, and no longer a subject to race conditions.
-
-Side table is just a reference count + a pointer to an object. They are declared in Swift Runtime as follows (C++ code) [5]:
-
+Side tables are mechanism for implementing Swift weak references. Typically objects don’t have any weak references, hence it is wasteful to reserve space for weak reference count in every object. This information is stored externally in side tables, so that it can be allocated only when it’s really needed. Instead of directly pointing to an object, weak reference points to the side table, which in its turn points to the object. This solves two problems: saves memory for weak reference count, until an object really needs it; allows to safely zero out weak reference, since it does not directly point to an object, and no longer a subject to race conditions. Side table is just a reference count + a pointer to an object. They are declared in Swift Runtime as follows (C++ code):
+```c++
 class HeapObjectSideTableEntry {
   std::atomic<HeapObject*> object;
   SideTableRefCounts refCounts;
   // Operations to increment and decrement reference counts
 }
-Swift Object Life Cycle
-Swift objects have their own life cycle, represented by a finite state machine on the figure below. Square brackets indicate a condition that triggers transition from state to state [6].
+```
+__Swift Object Life Cycle__
+
+Swift objects have their own life cycle, represented by a finite state machine on the figure below. Square brackets indicate a condition that triggers transition from state to state.
 
 <img src="https://github.com/sashakid/ios-guide/blob/master/Images/heap-object-lifecycle.svg">
 
+In `live` state an object is alive. Its reference counts are initialized to 1 `strong`, 1 `unowned` and 1 `weak` (side table starts at +1). `Strong` and `unowned` reference access work normally. Once there is a `weak` reference to the object, the side table is created. The `weak` reference points to the side table instead of the object.
+
+From the `live` state, the object moves into the `deiniting` state once `strong` reference count reaches zero. The `deiniting` state means that `deinit()` is in progress. At this point `strong` ref operations have no effect. `Weak` reference reads return `nil`, if there is an associated side table (otherwise there are no `weak` refs). `Unowned` reads trigger assertion failure. New `unowned` references can still be stored. From this state, the object can take two routes:
+
+- A shortcut in case there no `weak`, `unowned` references and the side table. The object transitions to the dead state and is removed from memory immediately.
+- Otherwise, the object moves to `deinited` state.
+
+In the `deinited` state `deinit()` has been completed and the object has outstanding `unowned` references (at least the initial +1). `Strong` and `weak` stores and reads cannot happen at this point. `Unowned` stores also cannot happen. `Unowned` reads trigger assertion error. The object can take two routes from here:
+
+- In case there are no `weak` references, the object can be deallocated immediately. It transitions into the `dead` state.
+- Otherwise, there is still a side table to be removed and the object moves into the freed state.
+
+In the `freed` state the object is fully deallocated, but its side table is still alive. During this phase the `weak` reference count reaches zero and the side table is destroyed. The object transitions into its final state. In the dead state there is nothing left from the object, except for the pointer to it. The pointer to the `HeapObject` is freed from the Heap, leaving no traces of the object in memory.
+
+__Reference Count Invariants__
+
+During their life cycle, the objects maintain following invariants:
+
+- When the `strong` reference count becomes zero, the object is `deinited`. Unowned reference reads raise assertion errors, `weak` reference reads become `nil`.
+- The `unowned` reference count adds +1 to the `strong` one, which is decremented after object’s `deinit` completes.
+- The `weak` reference count adds +1 to the `unowned` reference count. It is decremented after the object is freed from memory.
 
 <a name="closures-and-functions"></a>
 ## Сlosures and functions
