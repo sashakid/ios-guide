@@ -53,6 +53,7 @@
 	- [Какие ты знаешь стайл-гайды? Зачем они нужны?](#code-style)
 	- [Какие ты знаешь менеджеры зависимостей? В чем между ними разница?](#dependencies-managers)
 	- [Чем отличается статическая библиотека от динамической?](#dynamic-vs-static-library)
+	- [Как положить в массив weak объекты?](#array-with-weak)
 
 <a name="общие-вопросы"></a>
 # Общие вопросы
@@ -1494,3 +1495,36 @@ __Зачем мигрировать с Cocoapods на SPM?__
 Что такое архитектура?
 
 Архитектура ЦП - это спецификация, установленная производителями ЦП для продуктов ЦП, принадлежащих к той же серии. Основная цель - различать важные инструкции для разных типов ЦП. Архитектура симулятора не является такая же, как архитектура на реальной машине. Точно так же архитектура между имитатором и имитатором, реальное устройство и реальное устройство также различаются. Если структура статической библиотеки и соответствующего имитатора тестового проекта или структуры на реальное устройство не соответствует, будет выдана ошибка `Undefined symbols for ... architecture arm64 / i386`
+
+<a name="array-with-weak"></a>
+## Как положить в массив weak объекты?
+
+1. Using `NSPointerArray` or `NSHashTable`
+
+> `NSPointerArray` - A collection similar to an array, but with a broader range of available memory semantics.
+
+> `NSHashTable` - A collection similar to a set, but with broader range of available memory semantics.
+
+2. Custom container
+```swift
+class Weak<T: AnyObject> {
+  weak var value : T?
+  init (value: T) {
+    self.value = value
+  }
+}
+
+class Stuff {}
+var weakly : [Weak<Stuff>] = [Weak(value: Stuff()), Weak(value: Stuff())]
+```
+
+3. Functional Solution
+
+```swift
+let foo = Foo()
+
+var foos = [() -> Foo?]()
+foos.append({ [weak foo] in return foo })
+
+foos.forEach { $0()?.doSomething() }
+```

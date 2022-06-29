@@ -325,7 +325,10 @@ _Реализация `dealloc` для отказа от права владен
 
 <a name="automatic-reference-counting"></a>
 ## Automatic Reference Counting
-Автоматический подсчет ссылок является компиляторной функцией, которая обеспечивает автоматическое управление памятью в Objective-C объектах. Вместо того, чтобы думать о сохранении и освобождении объектов, ARC позволяет сосредоточиться на непосредственном ко-де Вашего приложения. ARC работает путем добавления кода во время компиляции, чтобы время жизни объекта было ровно столько, сколько необходимо, но не более того. Концептуально, это то же управление памятью, что и ручной подсчет ссылок (описанное в практическом управлении памятью) путем добавления соответствующего кода управления памятью, за вас. ARC поддерживается начиная с Xcode 4.2 для Mac OS X v10.6 и v10.7 (64-bit applications), а также iOS 4 и iOS 5. Слабые (`weak`) ссылки не поддерживаются в Mac OS X v10.6 и iOS 4 и более ранних.
+`Automatic Reference Counting (ARC)` is a memory management feature of the Clang compiler providing automatic reference counting for the Objective-C and Swift programming languages. At compile time, it inserts into the object code messages retain and release which increase and decrease the reference count at run time, marking for deallocation those objects when the number of references to them reaches zero.
+
+ARC differs from tracing garbage collection in that there is no background process that deallocates the objects asynchronously at runtime. Unlike tracing garbage collection, ARC does not handle reference cycles automatically. This means that as long as there are `strong` references to an object, it will not be deallocated. Strong cross-references can accordingly create deadlocks and memory leaks. It is up to the developer to break cycles by using weak references.
+
 Существует несколько ограничений на использование механизма ARC.
 * Нельзя использовать свойство, имя которого начинается со слова `new`. Например, не допускается объявление
 ```objectivec

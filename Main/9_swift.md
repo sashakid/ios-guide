@@ -1,5 +1,6 @@
 
 - [Swift](#swift)
+	- [Memory management](#memory-management)
 	- [Сlosures and functions](#closures-and-functions)
 	- [How Do I Declare a Closure in Swift?](#how-do-i-declare-a-closure-in-swift)
 	- [Generics](#generics)
@@ -29,8 +30,75 @@
 * OS: Darwin, Linux, FreeBSD
 * Influenced by C#, CLU, D, Haskell, Objective-C, Python, Ruby, Rust
 
-Swift is a multi-paradigm, compiled programming language created by Apple Inc. for iOS, OS X, watchOS and tvOS development. Swift is designed to work with Apple's Cocoa and Cocoa Touch frameworks and the large body of existing Objective-C code written for Apple products. Swift is in-tended to be more resilient to erroneous code ("safer") than Objective-C and also more concise. It is built with the LLVM compiler framework included in Xcode 6 and later and uses the Objective-C runtime, allowing C, Objective-C, C++ and Swift code to run within a single program.
+Swift is a multi-paradigm, compiled programming language created by Apple Inc. for iOS, OS X, watchOS and tvOS development. Swift is designed to work with Apple's Cocoa and Cocoa Touch frameworks and the large body of existing Objective-C code written for Apple products. Swift is in-tended to be more resilient to erroneous code ("safer") than Objective-C and also more concise. It is built with the LLVM compiler and later and uses the Objective-C runtime, allowing C, Objective-C, C++ and Swift code to run within a single program.
+
 Swift supports the core concepts that made Objective-C flexible, notably dynamic dispatch, wide-spread late binding, extensible programming, and similar features. These features also have well known performance and safety trade-offs, which Swift was designed to address. For safety, Swift introduced a system that helps address common programming errors like null pointers, as well as introducing syntactic sugar to avoid the pyramid of doom that can result. For performance issues, Apple has invested considerable effort in aggressive optimization that can flatten out method calls and accessors to eliminate this overhead. More fundamentally, Swift has added the concept of protocol extensibility, an extensibility system that can be applied to types, structs and classes, Apple promotes this as a real change in programming paradigms they refer to as "protocol-oriented programming".
+
+<a name="memory-management"></a>
+## Memory management
+
+Defining Memory Management
+At hardware level, memory is just a long list of bytes. We treat it as if it were organized into three virtual parts:
+
+Stack, where all local variables go.
+Global data, where static variables, constants and type metadata go.
+Heap, where all dynamically allocated objects go. Basically, everything that has a lifetime is stored here.
+We’ll continue saying ‘objects’ and ‘dynamically allocated objects’ interchangeably. These are Swift reference types and some special cases of value types.
+
+Memory management is the process of controlling program’s memory. It is critical to understand how it works, otherwise you are likely to run across random crashes and subtle bugs.
+
+Defining Automatic Reference Counting (ARC)
+Memory management is tightly connected with the concept of Ownership. Ownership is the responsibility of some piece of code to eventually cause an object to be destroyed [1].
+
+Automatic reference counting (ARC) is Swift ownership system, which implicitly imposes a set of conventions for managing and transferring ownership.
+
+The name by which an object can be pointed is called a reference. Swift references have two levels of strength: strong and weak. Additionally, weak references have a flavor, called unowned.
+
+The essence of Swift memory management is: Swift preserves an object if it is strongly referenced and deallocates it otherwise. The rest is just an implementation detail.
+
+Understanding Strong, Weak and Unowned
+The purpose of a strong reference is to keep an object alive. Strong referencing might result in several non-trivial problems [2]:
+
+Retain cycles. Considering that Swift language is not cycle-collecting, a reference R to an object which holds a strong reference to the object R (possibly indirectly), results in a reference cycle. We must write lots of boilerplate code to explicitly break the cycle.
+It is not always possible to make strong references valid immediately on object construction, e.g. with delegates.
+Weak references address the problem of back references. An object can be destroyed if there are weak references pointing to it. A weak reference returns nil, when an object it points to is no longer alive. This is called zeroing.
+
+Unowned references are different flavor of weak, designed for tight validity invariants. Unowned references are non-zeroing. When trying to read a non-existent object by an unowned reference, a program will crash with assertion error. They are useful to track down and fix consistency bugs.
+
+Our further discussion of Swift memory management is bound to be at a lower level of abstraction. We will dive into how ARC is implemented on the compiler level and which steps every Swift object undergoes before being destroyed.
+
+Defining Swift Runtime
+The mechanism of ARC is implemented in a library called Swift Runtime. It implements such core features as the runtime type system, including dynamic casting, generics, and protocol conformance registration [3].
+
+Swift Runtime represents every dynamically allocated object with HeapObject struct. It contains all the pieces of data which make up an object in Swift: reference counts and type metadata.
+
+Internally every Swift object has three reference counts: one for each kind of reference. At the SIL generation phase, swiftc compiler inserts calls to the methods swift_retain() and swift_release(), wherever it’s appropriate. This is done by intercepting initialization and destruction of HeapObjects.
+
+Compilation is one of the steps of Xcode Build System.
+
+If you are an old school Objective-C programmer and wonder where is autorelease, then I have some news for you: there is no such thing for pure Swift objects.
+
+Now let’s move on to the weak references. The way they are implemented is closely connected with the concept of side tables.
+
+Introducing Side Tables
+Side tables are mechanism for implementing Swift weak references.
+
+Typically objects don’t have any weak references, hence it is wasteful to reserve space for weak reference count in every object. This information is stored externally in side tables, so that it can be allocated only when it’s really needed.
+
+Instead of directly pointing to an object, weak reference points to the side table, which in its turn points to the object. This solves two problems: saves memory for weak reference count, until an object really needs it; allows to safely zero out weak reference, since it does not directly point to an object, and no longer a subject to race conditions.
+
+Side table is just a reference count + a pointer to an object. They are declared in Swift Runtime as follows (C++ code) [5]:
+
+class HeapObjectSideTableEntry {
+  std::atomic<HeapObject*> object;
+  SideTableRefCounts refCounts;
+  // Operations to increment and decrement reference counts
+}
+Swift Object Life Cycle
+Swift objects have their own life cycle, represented by a finite state machine on the figure below. Square brackets indicate a condition that triggers transition from state to state [6].
+
+<img src="https://github.com/sashakid/ios-guide/blob/master/Images/heap-object-lifecycle.svg">
+
 
 <a name="closures-and-functions"></a>
 ## Сlosures and functions
