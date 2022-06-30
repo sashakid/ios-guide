@@ -34,6 +34,23 @@ Swift is a multi-paradigm, compiled programming language created by Apple Inc. f
 
 Swift supports the core concepts that made Objective-C flexible, notably dynamic dispatch, wide-spread late binding, extensible programming, and similar features. These features also have well known performance and safety trade-offs, which Swift was designed to address. For safety, Swift introduced a system that helps address common programming errors like null pointers, as well as introducing syntactic sugar to avoid the pyramid of doom that can result. For performance issues, Apple has invested considerable effort in aggressive optimization that can flatten out method calls and accessors to eliminate this overhead. More fundamentally, Swift has added the concept of protocol extensibility, an extensibility system that can be applied to types, structs and classes, Apple promotes this as a real change in programming paradigms they refer to as "protocol-oriented programming".
 
+__Плюсы__
+
+- It has less overhead and syntax requirements, and you can often achieve the same line of code using less characters.
+- Swift is a functional programming language, which means you can do neat tricks like passing functions as variables. This means you can write highly generic code that can do a lot of different things, reducing repetition.
+- Swift is 'safer' - there's less memory management to worry about (basically none, compared to C).
+- API Swift легко читать и поддерживать. Предполагаемые типы делают ваш код более чистым и менее подверженным ошибкам. Модули удаляют заголовки и предоставляют пространства имен.
+- Swift поддерживает все платформы Apple, Linux, Windows и Ubuntu.
+- Динамические библиотеки существуют вне вашего кода и загружаются при необходимости. Библиотеки интегрированы в каждую версию устройства.
+- Swift имеет одно из самых активных и богатых сообществ с открытым исходным кодом. Кроме того, есть много ресурсов, которые помогут вам выучить язык.
+
+__Минусы__
+
+- Относительно новый язык: Swift все еще молодой язык. Это означает, что некоторые из его возможностей и ресурсов не так надежны, как другие языки программирования.
+- Слабая кроссплатформенная поддержка: хотя Swift поддерживает все платформы Apple, Linux и Windows, он лучше всего подходит для разработки под iOS.
+- Частые обновления: Swift — более новый язык, и у него частые обновления. Это может затруднить поиск подходящих инструментов для решения определенных задач.
+- Поддержка IDE: Xcode, официальная среда разработки Apple, не соответствует требованиям в некоторых областях поддержки, включая выделение синтаксиса, автозаполнение, рефакторинг и компиляцию.
+
 <a name="memory-management"></a>
 ## Memory management
 
