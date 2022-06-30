@@ -32,6 +32,8 @@ When calculating solutions, Auto Layout attempts to satisfy all the constraints 
 
 Some views have a natural size given their current content. This is referred to as their _intrinsic content size_.
 
+__Explanation 1__
+
 __The content hugging__ pulls the view inward so that it fits snugly around the content.
 
 __The compression resistance__ pushes the view outward so that it does not clip the content.
@@ -47,6 +49,40 @@ View.width >= 0.0 * NotAnAttribute + IntrinsicWidth
 View.height <= 0.0 * NotAnAttribute + IntrinsicHeight
 View.width <= 0.0 * NotAnAttribute + IntrinsicWidth
 ```
+
+__Explanation 2__
+
+Hugging => content does not want to grow
+Compression Resistance => content does not want to shrink
+
+Say you've got a button like this:
+```
+[       Click Me      ]
+```
+and you've pinned the edges to a larger superview with priority 500.
+
+Then, if Hugging priority > 500 it'll look like this:
+```
+[Click Me]
+```
+If Hugging priority < 500 it'll look like this:
+```
+[       Click Me      ]
+```
+If the superview now shrinks then, if the Compression Resistance priority > 500, it'll look like this
+```
+[Click Me]
+```
+Else if Compression Resistance priority < 500, it could look like this:
+```
+[Cli..]
+```
+If it doesn't work like this then you've probably got some other constraints going on that are messing up your good work!
+
+E.g. you could have it pinned to the superview with priority 1000. Or you could have a width priority. If so, this can be helpful:
+
+`Editor > Size to Fit Content`
+
 These properties only take effect for views which define an intrinsic content size, otherwise there is no content size defined that could resist compression or be hugged.
 The top and bottom layout guides represent the upper and lower edge of the visible content area for the currently active view controller.
 
