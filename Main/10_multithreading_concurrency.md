@@ -418,9 +418,100 @@ Two or more competing tasks are each waiting on the other to finish. You can obs
 
 <img src="https://github.com/sashakid/ios-guide/blob/master/Images/deadlock.png">
 
+```swift
+let queue = DispatchQueue(label: "my-queue")
+queue.sync {
+  print("print this")
+
+  queue.sync {
+    print("deadlocked")
+  }
+}
+```
+
+Putting this code anywhere in your app will immediately result in a crash before the second print statement runs. The queue is running code synchronously. The second closure can't run until the first one completes. The first closure can't complete until the second closure is run since its dispatched synchronously.
+
 <a name="livelock"></a>
 ### Livelock
 Система не застревает, но занимается бесполезной работой. A livelock occurs when a request for an exclusive lock is repeatedly denied because a series of overlapping shared locks keep interfering. It is an endless loop in program execution. This could be a case when two threads exit allowing each other to write to or update record(s) in a database.
+
+Here's a very simple Java example of livelock where a husband and wife are trying to eat soup, but only have one spoon between them. Each spouse is too polite, and will pass the spoon if the other has not yet eaten.
+```java
+public class Livelock {
+    static class Spoon {
+        private Diner owner;
+        public Spoon(Diner d) { owner = d; }
+        public Diner getOwner() { return owner; }
+        public synchronized void setOwner(Diner d) { owner = d; }
+        public synchronized void use() {
+            System.out.printf("%s has eaten!", owner.name);
+        }
+    }
+
+    static class Diner {
+        private String name;
+        private boolean isHungry;
+
+        public Diner(String n) { name = n; isHungry = true; }       
+        public String getName() { return name; }
+        public boolean isHungry() { return isHungry; }
+
+        public void eatWith(Spoon spoon, Diner spouse) {
+            while (isHungry) {
+                // Don't have the spoon, so wait patiently for spouse.
+                if (spoon.owner != this) {
+                    try { Thread.sleep(1); }
+                    catch(InterruptedException e) { continue; }
+                    continue;
+                }                       
+
+                // If spouse is hungry, insist upon passing the spoon.
+                if (spouse.isHungry()) {                    
+                    System.out.printf(
+                        "%s: You eat first my darling %s!%n",
+                        name, spouse.getName());
+                    spoon.setOwner(spouse);
+                    continue;
+                }
+
+                // Spouse wasn't hungry, so finally eat
+                spoon.use();
+                isHungry = false;               
+                System.out.printf(
+                    "%s: I am stuffed, my darling %s!%n",
+                    name, spouse.getName());                
+                spoon.setOwner(spouse);
+            }
+        }
+    }
+
+    public static void main(String[] args) {
+        final Diner husband = new Diner("Bob");
+        final Diner wife = new Diner("Alice");
+
+        final Spoon s = new Spoon(husband);
+
+        new Thread(new Runnable() {
+            public void run() { husband.eatWith(s, wife); }   
+        }).start();
+
+        new Thread(new Runnable() {
+            public void run() { wife.eatWith(s, husband); }
+        }).start();
+    }
+}
+```
+Run the program and you'll get:
+```
+Bob: You eat first my darling Alice!
+Alice: You eat first my darling Bob!
+Bob: You eat first my darling Alice!
+Alice: You eat first my darling Bob!
+Bob: You eat first my darling Alice!
+Alice: You eat first my darling Bob!
+...
+```
+This will go on forever if uninterrupted. This is a livelock because both Alice and Bob are repeatedly asking each other to go first in an infinite loop (hence live). In a deadlock situation, both Alice and Bob would simply be frozen waiting on each other to go first — they won't be doing anything except wait (hence dead).
 
 <a name="starvation"></a>
 ### Starvation
