@@ -802,20 +802,25 @@ Use the __bounds__ when you are making __inward changes__, like drawing things o
 <a name="view-layer-difference"></a>
 ## Отличие view от layer?
 
-On iOS, every `UIView` is backed by a Core Animation `CALayer`, so you are dealing with `CALayer`s when using a UIView, even though you may not realize it. There is a very strong relationship between the view and its layer, and the view derives most of its data from the layer object directly. There are also standalone layers – for example, `AVCaptureVideoPreviewLayer` and `CAShapeLayer` – that present content on the screen without being attached to a view. In either case, there is a layer involved. Still, the layers that are attached to views and the standalone layers behave slightly differently. Working directly with `CALayer`s doesn't give you significant performance advantages over `UIView`s. When you’re working with a programmatically created Layer any changes to the Layer’s properties is automatically animated. All you have to do is set the property and the animation happens. However, the Layers of layer-backed Views will not animate property changes. You must wrap those changes in an animation block. By default, almost every standard property of `CALayer` and its subclasses can be animated, either by adding a `CAAnimation` to the layer (explicit animation), or by specifying an action for the property and then modifying it (implicit animation).
+On iOS, every `UIView` is backed by a Core Animation `CALayer`, so you are dealing with `CALayer`s when using a `UIView`, even though you may not realize it. There is a very strong relationship between the view and its layer, and the view derives most of its data from the layer object directly. There are also standalone layers – for example, `AVCaptureVideoPreviewLayer` and `CAShapeLayer` – that present content on the screen without being attached to a view. In either case, there is a layer involved. Still, the layers that are attached to views and the standalone layers behave slightly differently. Working directly with `CALayer`s doesn't give you significant performance advantages over `UIView`s. When you’re working with a programmatically created Layer any changes to the Layer’s properties is automatically animated. All you have to do is set the property and the animation happens. However, the Layers of layer-backed Views will not animate property changes. You must wrap those changes in an animation block. By default, almost every standard property of `CALayer` and its subclasses can be animated, either by adding a `CAAnimation` to the layer (explicit animation), or by specifying an action for the property and then modifying it (implicit animation).
 
 Layers
 
+- Faster to resolve and quicker to draw on the screen
+- There is no responder chain overhead unlike with views
 - Represent position, shape and anchor point
 - Do not receive touch events
 - Light-weight
 - Implicit animations
+- Are drawn directly on the GPU. It happens on a separate thread without burdening the CPU.
 
 Views
 
+- Have more complex hierarchy layouts. To lay them out on the screen we can use Auto Layout
 - Can receive touch events
 - Are always backed by a Layer on iOS
 - No implicit animations
+- Working with UIViews happens on the main thread, it means it is using CPU power.
 
 <a name="moving-subviews"></a>
 ## Как передвинуть все subviews?
@@ -1120,6 +1125,8 @@ The system will send events to the application singleton, these system related e
 The first responder
 
 Any `UIResponder` can opt to become the first responder by receiving or calling the `becomeFirstResponder` method, the first responder will be given the chance to act upon user events when they are received. The touch events however will not be sent to the first responder, these events are sent to the view found by doing a recursive hit-test.
+
+https://habr.com/ru/post/584100/
 
 <a name="code-signing"></a>
 ## Как работает code signing?
