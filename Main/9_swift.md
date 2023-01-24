@@ -526,19 +526,52 @@ struct ContentView: View {
 
 __state параметры__
 
-Прежде всего, это переменные состояния — хранимые параметры нашей структуры, изменение которых должно быть отражено на экране. Их оборачивают в специальные обертки `@State` — для примитивных типов, и `@ObservedObject` — для классов. Класс должен удовлетворять протоколу `ObservableObject` — это значит, что данный класс должен уметь оповещать подписчиков (`View`, которые используют данное значение с оберткой `@ObservedObject`) об изменении своих свойств. Для этого достаточно обернуть требуемые свойства в `@Published`.
+Прежде всего, это переменные состояния — хранимые параметры нашей структуры, изменение которых должно быть отражено на экране. Их оборачивают в специальные обертки:
+
+`@State` — для примитивных типов
+
 ```swift
 struct ContentView: View {
     @State var tapCount = 0
     var body: some View {
         VStack {
-            Button(action: {self.tapCount += 1},
-                   label: {Text("Tap count \(tapCount)")})
+            Button(action: { tapCount += 1 },
+                   label: { Text("Tap count \(tapCount)") })
         }
     }
 }
 ```
-`@Binding` - это еще один Property Wrapper, с помощью которой мы объявляем параметры структуры, которые будут не просто меняться, а и возвращаться в родительскую `View`.
+
+`@ObservedObject` — для классов. Класс должен удовлетворять протоколу `ObservableObject` — это значит, что данный класс должен уметь оповещать подписчиков (`View`, которые используют данное значение с оберткой `@ObservedObject`) об изменении своих свойств. Для этого достаточно обернуть требуемые свойства в `@Published`.
+
+`@Published` is one of the most useful property wrappers in SwiftUI, allowing us to create observable objects that automatically announce when changes occur. SwiftUI will automatically monitor for such changes, and re-invoke the body property of any views that rely on the data.
+
+```swift
+final class CounterViewModel: ObservableObject {
+    @Published var count = 0
+
+    func incrementCounter() {
+        count += 1
+    }
+}
+
+struct CounterView: View {
+    @ObservedObject var viewModel = CounterViewModel()
+
+    var body: some View {
+        VStack {
+            Text("Count is: \(viewModel.count)")
+            Button("Increment Counter") {
+                viewModel.incrementCounter()
+            }
+        }
+    }
+}
+```
+
+`@StateObject` — The same as `@ObservedObject` BUT property wrapper don’t get destroyed and re-instantiated at times their containing view struct redraws.
+
+`@Binding` - это еще один Property Wrapper, с помощью которой мы объявляем параметры структуры, которые будут не просто меняться, а и возвращаться в родительскую `View`. When it changes in one place it also changes in the other.
 
 `@EnvironmentObject` — это как `Binding`, только сразу для всех `View` в иерархии, без необходимости их передавать в явном виде.
 
@@ -547,12 +580,12 @@ struct ContentView: View {
 Роль navigation controller берет на себя специальный `NavigationView`. Достаточно обернуть ваш код в `NavigationView{...}`. А само действие перехода можно добавить в специальную кнопку `NavigationLink`, которая пушит условный экран `DetailView`.
 ```swift
 var body: some View {
-     NavigationView {
-     Text("World Time").font(.system(size: 30))
-          NavigationLink(destination: DetailView() {
-               Text("Go Detail")
-          }
-     }
+    NavigationView {
+    Text("World Time").font(.system(size: 30))
+        NavigationLink(destination: DetailView() {
+            Text("Go Detail")
+        }
+    }
 }
 ```
 
@@ -561,20 +594,87 @@ var body: some View {
 
 На WWDC 2019 был представлен фреймворк Combine от Apple. Он позволяет моделировать все виды асинхронных событий и операций типа “значения, изменяющиеся во времени”. Не смотря на то, что данное понятие, часто используется в мире реактивного программирования как концепция и способ организации логики, поначалу бывает сложно сразу во всем разобраться.
 
-__Publisher__
+## Publishers
+---
+Every publisher can emit multiple events of these three types: 
+1. An output value of the publisher’s generic `Output` type. 
+2. A successful completion.
+3. A completion with an error of the publisher’s `Failure` type. 
 
-Declares that a type can transmit a sequence of values over time.
+Publishers do not emit any values if there are no subscribers to potentially receive the output 
 
-__Subject__
+`Subject` — A publisher that exposes a method for outside callers to publish elements.
 
-A publisher that exposes a method for outside callers to publish elements.
+```swift
+protocol Subject<Output, Failure> : AnyObject, Publisher
+```
 
-__Subscriber__
+`PassthroughSubject` — A subject that broadcasts elements to downstream subscribers. They will happily pass along those values and a completion event. As with any publisher, you must declare the type of values and errors it can emit in advance; subscribers must match those types to its input and failure types in order to subscribe to that passthrough subject. *Unlike `CurrentValueSubject`, a `PassthroughSubject` doesn’t have an initial value or a buffer of the most recently-published element. A `PassthroughSubject` drops values if there are no subscribers, or its current demand is zero.*
 
-A Subscriber instance receives a stream of elements from a Publisher, along with life cycle events describing changes to their relationship. A given subscriber’s Input and Failure associated types must match the Output and Failure of its corresponding publisher.
+`CurrentValueSubject` — A subject that wraps a single value and publishes a new element whenever the value changes.. *Unlike `PassthroughSubject`, `CurrentValueSubject` maintains a buffer of the most recently published element. Calling `send(_:)` on a `CurrentValueSubject` also updates the current value, making it equivalent to updating the value directly.*
 
-__Scheduler__
-Defines when and how to execute a closure.
+**Analogy**
+
+> `PassthroughSubject` = A doorbell push button. When someone rings the door, you are notified only if you are at home (you are the subscriber)
+`PassthroughSubject` doesn't have a state, it emits whatever it receives to its subscribers.
+
+> `CurrentValueSubject` = A light switch Someone turns on the lights in your home when you are outside. You get back home and you know someone has turned them on. `CurrentValueSubject` has an initial state, it retains the data you put in as its state.
+
+**Difference**
+
+`CurrentValueSubject` is a value, a publisher and a subscriber all in one. Sadly it doesn’t fire `objectWillChange.send()` when used inside an `ObservableObject`. You can specify an error type.
+
+`@Published `is a property wrapper, thus:
+- It is not yet supported in top-level code.
+- It is not supported in a protocol declaration.
+- It can only be used within a class.
+
+`@Published` automatically fires `objectWillChange.send()` when used inside an `ObservableObject`. Xcode will emit a warning if your try to publish to `@Published` wrapped property from a background queue. Probably because `objectWillChange.send()` must be called from the main thread.
+The error type of its publisher is `Never`. My biggest beef against `@Published` is that it can’t behave as a subscriber and setting up Combine pipelines requires additional plumbing compared to a `CurrentValueSubject`.
+
+`ConnectablePublisher` — type which doesn’t produce any elements until we call its `connect()` method. We can convert any publisher or subscriber into a ConnectablePublisher by calling the method `makeConnectable()`
+
+**Convenience Publishers**
+
+`Future` — can be used to asynchronously produce a single result and then complete. A Future is a publisher that will eventually produce a single value and finish, or it will fail. It does this by invoking a closure when a value or error is available, and that closure is, in fact, the promise. `Promise` is a type alias to a closure that receives a `Result` containing either a single value published by the `Future`, or an error. A future is greedy, meaning executes as soon as it’s created. It does not require a subscriber like regular publishers that are lazy. 
+
+`Just` — creates a publisher that emits a single value to a subscriber and then complete 
+
+`Deferred` — A publisher that awaits subscription before running the supplied closure to create a publisher for the new subscriber.
+
+`Empty` — A publisher that never publishes any values, and optionally finishes immediately.
+
+`Fail` — A publisher that immediately terminates with the specified error.
+
+`Record` — A publisher that allows for recording a series of inputs and a completion, for later playback to each subscriber.
+
+## Subscribers
+---
+A `Subscriber` instance receives a stream of elements from a `Publisher`, along with life cycle events describing changes to their relationship. A given subscriber’s `Input` and `Failure` associated types must match the `Output` and `Failure` of its corresponding publisher.
+
+`Sink` — The sink subscriber allows you to provide closures with your code that will receive output values and completions. From there, you can do anything your heart desires with the received events.
+
+`Assign` — The assign subscriber allows you to, without the need of custom code, bind the resulting output to some property on your data model or on a UI control to display the data directly on-screen via a key path.
+
+## Operators
+---
+Operators are methods declared on the `Publisher` protocol that return either the same or a new publisher. That’s very useful because you can call a bunch of operators one after the other, effectively chaining them together. As an added bonus, operators always have input and output, commonly referred to as `upstream` and `downstream` — this allows them to avoid shared state. 
+
+`Scheduler` — A protocol that defines when and how to execute a closure.
+
+<img src="https://github.com/sashakid/ios-guide/blob/master/Images/subscription.png">
+
+**Subscription lifecycle**
+
+By meeting these protocols, now we are secure to understand how the relation between publisher and subscriber is established:
+1. A new subscriber requires a subscription from the publisher by calling `receive` method on the publisher by passing the subscriber as a parameter
+2. The publisher creates a custom subscription, an object that is responsible for keeping the subscriber up to date with the publisher and sends it to the subscriber through the `receive(Subscription)` method.
+3. Within the `receive(Subscription)` method, the subscriber calls the request method on the `Subscription` object that was just received establishing the true demand it requires from the publisher.
+4. When receiving the request method, the `Subscription` object has the `Demand` the subscriber requires and knows how many values it must receive from the publisher
+5. As the Subscription has some mechanism for keeping track of publisher's emitted values, it just needs to send them to the subscriber via the `receive(Input)` method.
+6. When some event requires the subscription to complete, the `Subscription` calls the `receive(Completion)` method on the Subscriber and the process finishes.
+
+**Examples**
 
 `Publishers` могут быть бесконечно активны либо завершены по итогу какого-либо события, а также `Publishers` могут быть опционально не выполнены, если произошла какая-то ошибка. Чтобы внедрить `Combine`, Apple доработали некоторые из своих основных библиотек, чтобы они так же могли поддерживаться `Combine`. Например, вот так может использоваться тип `URLSession` для создания `Publisher`, выполняющего сетевой запрос по заданному URL-адресу:
 ```swift
@@ -1032,23 +1132,23 @@ Using the opaque return type, we finally can return MobileOS as the return type 
 - визуальная эстетичность кода. Читать код стало на порядок легче, отчасти от того, что мы избегаем callback hell’ов. Это, в свою очередь, снижает вероятность допустить ошибку - забыть вызвать completionHandler, из-за нарушить логику работы программы, теперь нельзя. Да и что тут говорить, код, с закосом под синхронный, стал намного элегантнее. Вот это:
 ```swift
 func obtainFirstCarsharing(completionHandler: @escaping (CarsharingCarDetail?) -> Void) {
-   fetchCars { [weak self] cars in
-       guard let self = self, let firstCar = cars.first else {
-           completionHandler(nil)
-           return
-       }
-       self.fetchCarDetail(withId: firstCar.id) { detail in
-           completionHandler(detail)
-       }
-   }
+    fetchCars { [weak self] cars in
+        guard let self = self, let firstCar = cars.first else {
+            completionHandler(nil)
+            return
+        }
+        self.fetchCarDetail(withId: firstCar.id) { detail in
+            completionHandler(detail)
+        }
+    }
 }
 ```
 Теперь может выглядеть так:
 ```swift
 func obtainFirstCarsharing() async throws -> CarsharingCarDetail {
-   let allCars = try await fetchCars()
-   guard let firstCarId = allCars.first?.id else { throw NSError() }
-   return try await fetchCarDetail(with: firstCarId)
+    let allCars = try await fetchCars()
+    guard let firstCarId = allCars.first?.id else { throw NSError() }
+    return try await fetchCarDetail(with: firstCarId)
 }
 ```
 Замечу, что асинхронная функция, помимо результирующей модели, может вернуть ошибку - это нормальное поведение, которое разработчик может закладывать. В таком случае у нас есть возможность обрабатывать ошибки посредством try/catch.
@@ -1076,10 +1176,7 @@ let _ = try await service.fetchCars()
 Хочется дополнить механизм работы еще одним примером и сравнить разницу в поведении между новым и старых механизмом.
 
 ```swift
-let syncQueue = DispatchQueue(
-	label: "queue.sync.com",
-  attributes: .concurrent
-)
+let syncQueue = DispatchQueue(label: "queue.sync.com", attributes: .concurrent)
 for i in 1...32 {
 	DispatchQueue.global().async {
 		syncQueue.sync { /* do some work */ }
@@ -1094,7 +1191,7 @@ for i in 1...32 {
 
 __Актор (actor)__
 
-предназначен для предотвращения состояний гонки (race conditions) в состояниях асинхронных классов. Хотя это не новая концепция, акторы являются частью гораздо более крупного замысла. Да, теоретически вы можете реализовать все, что делает актор, просто добавив NSLocks в свойства/методы ваших классов, но на практике у них есть несколько важных бонусов. Во-первых, механизм синхронизации, используемый акторами, — это не известные нам блокировки, а новая Cooperative Threading Model (модель кооперативной потоковой обработки ) async/await в которой потоки могут плавно «изменять» контексты для выполнения других фрагментов кода, чтобы избежать простаивающих потоков, а во-вторых, наличие акторов позволяет компилятору проверить многие проблемы параллелизма прямо во время компиляции, давая вам сразу знать если есть какая-либо потенциальная опасность.
+предназначен для предотвращения состояний гонки (race conditions) в состояниях асинхронных классов. Хотя это не новая концепция, акторы являются частью гораздо более крупного замысла. Да, теоретически вы можете реализовать все, что делает актор, просто добавив `NSLock` в свойства/методы ваших классов, но на практике у них есть несколько важных бонусов. Во-первых, механизм синхронизации, используемый акторами, — это не известные нам блокировки, а новая Cooperative Threading Model (модель кооперативной потоковой обработки ) async/await в которой потоки могут плавно «изменять» контексты для выполнения других фрагментов кода, чтобы избежать простаивающих потоков, а во-вторых, наличие акторов позволяет компилятору проверить многие проблемы параллелизма прямо во время компиляции, давая вам сразу знать если есть какая-либо потенциальная опасность.
 
 __AsyncSequence__
 
@@ -1108,3 +1205,5 @@ __Executors__
 Swift ships with two built-in executors: the default concurrent executor, used for “normal”, non-actor-isolated async functions, and a default serial executor. Every actor instance has its own instance of this default serial executor and runs its code on it. Since the serial executor, like a serial dispatch queue, only runs a single job at a time, this prevents concurrent accesses to the actor’s state.
 
 https://docs.swift.org/swift-book/LanguageGuide/Concurrency.html
+
+https://developer.apple.com/videos/play/wwdc2021/10254/

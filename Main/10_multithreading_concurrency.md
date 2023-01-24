@@ -29,17 +29,46 @@
 
 <a name="multithreading-and-concurrency"></a>
 # Multithreading and concurrency
+
+<a name="основные-понятия-многопоточности"></a>
+## Основные понятия многопоточности
+
 __Multithreading__
+
+The ability of a central processing unit (CPU) (or a single core in a multi-core processor) to provide multiple threads of execution concurrently, supported by the operating system. This approach differs from multiprocessing. 
 
 Depending on your application, there may still be times when you need to create custom threads. If you do create custom threads, you should strive to create as few threads as possible yourself and you should use those threads only for specific tasks that cannot be implemented any other way.
 Threads are still a good way to implement code that must run in real time. Dispatch queues make every attempt to run their tasks as fast as possible but they do not address real time constraints. If you need more predictable behavior from code running in the background, threads may still offer a better alternative.
 
 __Concurrency__
 
-Concurrency is the notion of multiple things happening at the same time. Threads are subunits of processes, which can be scheduled independently by the operating system scheduler. Virtually all concurrency APIs are built on top of threads under the hood – that’s true for both Grand Central Dispatch and operation queues. You can either use the POSIX thread API, or the Objective-C wrapper around this API, `NSThread`, to create your own threads.
+The ability of different parts or units of a program, algorithm, or problem to be executed out-of-order or in partial order, without affecting the outcome. This allows for parallel execution of the concurrent units, which can significantly improve overall speed of the execution in multi-processor and multi-core systems. In more technical terms, concurrency refers to the decomposability of a program, algorithm, or problem into order-independent or partially-ordered components or units of computation.
 
-<a name="основные-понятия-многопоточности"></a>
-## Основные понятия многопоточности
+Concurrency is the notion of multiple things happening at the same time. Threads are subunits of processes, which can be scheduled independently by the operating system scheduler. Virtually all concurrency APIs are built on top of threads under the hood – that’s true for both Grand Central Dispatch and operation queues. You can either use the `POSIX` thread API, or the Objective-C wrapper around this API, `NSThread`, to create your own threads.
+
+__Parallelism__ 
+
+Refers to techniques to make programs faster by performing several computations at the same time. This requires hardware with multiple processing units. 
+
+> Explanation 1:
+Concurrency is the composition of independently executing computations, and concurrency is not parallelism: concurrency is about dealing with lots of things at once but parallelism is about doing lots of things at once. Concurrency is about structure, parallelism is about execution, concurrency provides a way to structure a solution to solve a problem that may (but not necessarily) be parallelizable.
+
+> Explanation 2:
+Say you have a program that has two threads. The program can run in two ways:
+```
+Concurrency                 Concurrency + parallelism
+(Single-Core CPU)           (Multi-Core CPU)
+ ___                         ___ ___
+|th1|                       |th1|th2|
+|   |                       |   |___|
+|___|___                    |   |___
+    |th2|                   |___|th2|
+ ___|___|                    ___|___|
+|th1|                       |th1|
+|___|___                    |   |___
+    |th2|                   |   |th2|
+```
+> In both cases we have concurrency from the mere fact that we have more than one thread running. If we ran this program on a computer with a single CPU core, the OS would be switching between the two threads, allowing one thread to run at a time. If we ran this program on a computer with a multi-core CPU then we would be able to run the two threads in parallel - side by side at the exact same time.
 
 __thread__
 
