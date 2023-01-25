@@ -8,13 +8,17 @@
 		- [GCD](#gcd)
 			- [Swift 3 API](#swift-3-api)
 		- [NSOperationQueue](#nsoperationqueue)
+		- [async / await](#async-await)
 		- [Idle-time notifications](#idle-time-notifications)
 		- [Timers](#timers)
 	- [Synchronization](#synchronization)
-		- [Semaphore](#semaphore)
-		- [Lock](#lock)
-		- [Mutex](#mutex)
-		- [Средства синхронизации в iOS](#synchronization-ios)
+    - [Memory Barriers and Volatile Variables](#memory-barriers)
+    - [Atomic Operations](#atomic)
+  	- [Lock](#lock)
+    - [Semaphore](#semaphore)
+    - [Mutex](#mutex)
+    - [Performance](#performance)
+    - [Differences](#diff)
 	- [Гонка условий](#race-condition)
 		- [Deadlock](#deadlock)
 		- [Livelock](#livelock)
@@ -234,6 +238,143 @@ __Плюсы__
 
 * Можно для каждой очереди настраивать приоритет и количество одновременно выполняющихся операций. `NSOperationQueue` самостоятельно создает и поддерживает пул потоков, в которых исполняются `NSOperation`. Так же `NSOperation` предоставляет возможность отменять операции, приостанавливать всю очередь, запускать ее снова и много чего прочего.
 
+<a name="async-await"></a>
+## async / await
+
+Плюсы
+
+- визуальная эстетичность кода. Читать код стало на порядок легче, отчасти от того, что мы избегаем callback hell’ов. Это, в свою очередь, снижает вероятность допустить ошибку - забыть вызвать completionHandler, из-за нарушить логику работы программы, теперь нельзя. Да и что тут говорить, код, с закосом под синхронный, стал намного элегантнее. Вот это:
+```swift
+func obtainFirstCarsharing(completionHandler: @escaping (CarsharingCarDetail?) -> Void) {
+    fetchCars { [weak self] cars in
+        guard let self = self, let firstCar = cars.first else {
+            completionHandler(nil)
+            return
+        }
+        self.fetchCarDetail(withId: firstCar.id) { detail in
+            completionHandler(detail)
+        }
+    }
+}
+```
+Теперь может выглядеть так:
+```swift
+func obtainFirstCarsharing() async throws -> CarsharingCarDetail {
+    let allCars = try await fetchCars()
+    guard let firstCarId = allCars.first?.id else { throw NSError() }
+    return try await fetchCarDetail(with: firstCarId)
+}
+```
+Замечу, что асинхронная функция, помимо результирующей модели, может вернуть ошибку - это нормальное поведение, которое разработчик может закладывать. В таком случае у нас есть возможность обрабатывать ошибки посредством try/catch.
+
+- async/await является неблокирующим механизмом. Сразу отмечу, что неблокирующий тут не равно непрерывный / синхронный. На это слово надо взглянуть под другим ракурсом - неблокирующим механизм является для потока. Что это значит?
+
+Взглянем на примеры:
+```swift
+let queue = DispatchQueue(label: "citymobil.queue.com")
+queue.sync { /* Execute WorkItem */ }
+// ----------------------------
+let semaphore = DispatchSemaphore(value: 0)
+semaphore.wait()
+// ----------------------------
+let _ = try await service.fetchCars()
+```
+Рассмотрим поведение потока с очередью, которая вызывает sync-метод — синхронно выполняет какую-нибудь WorkItem-задачу. В месте вызова sync поток блокируется и доступ к нему возвращается только после исполнения sync-замыкания. С семафорами ситуация схожа, если не хуже: они, очевидно, находятся вне философии очередей - могут заблокировать какой-либо поток, в котором выполняется WorkItem, отданный очереди.
+В случае с async/await синхронное выполнение метода приостанавливается: точкой приостановки является await, при этом сам поток не простаивает в ожидании.
+
+Тут стоит держать в голове пару моментов:
+
+- Поток, в котором выполнялся код до await, и который подхватил дальнейшее выполнение после, не обязательно будет одним и тем же.
+- Несмотря на то, что в сниппете кода нет коллбеков, глобальное состояние приложения во время приостановки (там, где await), может кардинально поменяться - это обязательно нужно держать в голове.
+
+Хочется дополнить механизм работы еще одним примером и сравнить разницу в поведении между новым и старых механизмом.
+
+```swift
+let syncQueue = DispatchQueue(label: "queue.sync.com", attributes: .concurrent)
+for i in 1...32 {
+	DispatchQueue.global().async {
+		syncQueue.sync { /* do some work */ }
+	}
+}
+```
+Здесь включаются в работу большое количество потоков. При этом каждое переключение между ними (context switch) становится все более ресурсоемким для системы при большом его количестве. Несмотря на то, что чего-то критичного в этих переключениях нет - context switch внутри одного процесса в общем то происходит достаточно быстро, и в большинстве случаев мы можем себе позволить не задумываться о нем - заблокированный поток, де факто, держит свой стек и занимает память. В довесок, мы можем легко воспроизвести ситуацию, где исчерпаем рабочие потоки, тем самым воссоздав thread explosion (взрыв потоков). Мы можем избежать такой ситуации, грамотно спроектировав работу с многопоточным кодом - например, использовать здесь concurrentPerform или ненулевые семафоры. Но Apple, кажется, "встроил" подобные оптимизации в систему:
+
+<img src="https://github.com/sashakid/ios-guide/blob/master/Images/continuation.png">
+
+Аналогичный код, переписанный с async/await, на условном двухъядерном устройстве будет гонять по одному потоку, которые не станут простаивать в ожидании, а стало быть и переключения между ними не будет. Вместо этого, переключение будет происходить преимущественно внутри одного потока между continuation — объектами (чуть ниже вернемся к ним), и будет сводиться к переключению между методами. Apple заявляет, что это на порядок легче для системы.
+
+__Актор (actor)__
+
+Сущность, редназначенная для предотвращения состояний гонки (race conditions) в асинхронных классов. Хотя это не новая концепция, акторы являются частью гораздо более крупного замысла. Да, теоретически вы можете реализовать все, что делает актор, просто добавив `NSLock` в свойства/методы ваших классов, но на практике у них есть несколько важных бонусов. Во-первых, механизм синхронизации, используемый акторами, — это не известные нам блокировки, а новая Cooperative Threading Model (модель кооперативной потоковой обработки) async/await в которой потоки могут плавно «изменять» контексты для выполнения других фрагментов кода, чтобы избежать простаивающих потоков, а во-вторых, наличие акторов позволяет компилятору проверить многие проблемы параллелизма прямо во время компиляции, давая вам сразу знать если есть какая-либо потенциальная опасность.
+
+Actor isolation is how actors protect their mutable state. For actors, the primary mechanism for this protection is by only allowing their stored instance properties to be accessed directly on self. For example, here is a method that attempts to transfer money from one account to another:
+```swift
+actor BankAccount {
+  let accountNumber: Int
+  var balance: Double
+
+  init(accountNumber: Int, initialDeposit: Double) {
+    self.accountNumber = accountNumber
+    self.balance = initialDeposit
+  }
+}
+
+extension BankAccount {
+  enum BankError: Error {
+    case insufficientFunds
+  }
+  
+  func transfer(amount: Double, to other: BankAccount) throws {
+    if amount > balance {
+      throw BankError.insufficientFunds
+    }
+
+    print("Transferring \(amount) from \(accountNumber) to \(other.accountNumber)")
+
+    balance = balance - amount
+    other.balance = other.balance + amount  // error: actor-isolated property 'balance' can only be referenced on 'self'
+  }
+}
+```
+__AsyncSequence__
+
+A type that provides asynchronous, sequential, iterated access to its elements.
+
+__Executors__
+
+- The compiler splits async code into jobs. A job roughly corresponds to the code from one await (= potential suspension point) to the next.
+- The runtime submits each job to an executor. The executor is the object that decides in which order and in which context (i.e. which thread or dispatch queue) to run the jobs.
+
+Swift ships with two built-in executors: the default concurrent executor, used for “normal”, non-actor-isolated async functions, and a default serial executor. Every actor instance has its own instance of this default serial executor and runs its code on it. Since the serial executor, like a serial dispatch queue, only runs a single job at a time, this prevents concurrent accesses to the actor’s state.
+
+---
+
+**Structured concurrency**
+
+is a programming paradigm aimed at improving the clarity, quality, and development time of a computer program by using a structured approach to concurrent programming. The core concept is the encapsulation of concurrent threads of execution (here encompassing kernel and userland threads and processes) by way of control flow constructs that have clear entry and exit points and that ensure all spawned threads have completed before exit. Such encapsulation allows errors in concurrent threads to be propagated to the control structure's parent scope and managed by the native error handling mechanisms of each particular computer language. It allows control flow to remain readily evident by the structure of the source code despite the presence of concurrency. To be effective, this model must be applied consistently throughout all levels of the program – otherwise concurrent threads may leak out, become orphaned, or fail to have runtime errors correctly propagated. Structured concurrency is analogous to structured programming, which introduced control flow constructs that encapsulated sequential statements and subroutines.
+
+```swift
+let x = await calculateFirstNumber()
+let y = await calculateSecondNumber()
+let z = await calculateThirdNumber()
+print(x + y + z)
+```
+
+Каждая строка выполняется после того, как предыдущая строка завершает свою работу. Мы создаем три потенциальные точки приостановки и ждем, пока процессор не получит достаточно мощности для выполнения и завершения каждой задачи. Все это происходит в последовательном порядке. А что если мы хотим выполнить эти задачи параллельно, и нам не важны отдельные результаты, но нам нужны все (x,y,z) так быстро, как мы можем?
+
+```swift
+async let x = calculateFirstNumber()
+async let y = calculateSecondNumber()
+async let z = calculateThirdNumber()
+
+let res = await x + y + z
+print(res)
+```
+
+https://docs.swift.org/swift-book/LanguageGuide/Concurrency.html
+
+https://developer.apple.com/videos/play/wwdc2021/10254/
+
 <a name="idle-time-notifications"></a>
 ### Idle-time notifications
 - [Idle-time notifications](#idle-time-notifications)
@@ -263,64 +404,33 @@ Because the run loop maintains the timer, from the perspective of object lifetim
 <a name="synchronization"></a>
 ## Synchronization
 
-<a name="semaphore"></a>
-### Semaphore
-_Is the number of free identical toilet keys. Example, say we have four toilets with identical locks and keys. The semaphore count - the count of keys - is set to 4 at beginning (all four toilets are free), then the count value is decremented as people are coming in. If all toilets are full, ie. there are no free keys left, the semaphore count is 0. Now, when eq. one person leaves the toilet, semaphore is increased to 1 (one free key), and given to the next person in the queue._
+<a name="memory-barriers"></a>
+### Memory Barriers and Volatile Variables
 
-Variable or abstract data type used to control access to a common resource by multiple processes in a concurrent system. A trivial semaphore is a plain variable that is changed (for example, incremented or decremented, or toggled) depending on programmer-defined conditions. The variable is then used as a condition to control access to some system resource. A useful way to think of a semaphore as used in the real-world systems is as a record of how many units of a particular resource are available, coupled with operations to adjust that record safely (i.e. to avoid race conditions) as units are required or become free, and, if necessary, wait until a unit of the resource becomes available. Semaphores are a useful tool in the prevention of race conditions; however, their use is by no means a guarantee that a program is free from these problems. Semaphores which allow an arbitrary resource count are called __counting semaphores__, while semaphores which are restricted to the values 0 and 1 (or locked/unlocked, unavailable/available) are called __binary semaphores__ and are used to implement locks.
+A memory barrier is a type of nonblocking synchronization tool used to ensure that memory operations occur in the correct order.
 
-Семафор позволяет выполнять какой-либо участок кода одновременно только конкретному количеству потоков. В основе семафора лежит счетчик, который и определяет, можно ли выполнять участок кода текущему потоку или нет. Если счетчик больше нуля — поток выполняет код, в противном случае — нет.
+Volatile variables apply another type of memory constraint to individual variables. The compiler often optimizes code by loading the values for variables into registers. For local variables, this is usually not a problem. If the variable is visible from another thread however, such an optimization might prevent the other thread from noticing any changes to it. Applying the volatile keyword to a variable forces the compiler to load that variable from memory each time it is used. You might declare a variable as volatile if its value could be changed at any time by an external source that the compiler may not be able to detect.
 
-<a name="lock"></a>
-### Lock
-Mechanism for enforcing limits on access to a resource in an environment where there are many threads of execution. A lock is designed to enforce a mutual exclusion concurrency control policy.
-
-<a name="mutex"></a>
-### Mutex
-_Is a key to a toilet. One person can have the key - occupy the toilet - at the time. When finished, the person gives (frees) the key to the next person in the queue._
-
-Мьютекс является одним из видов семафора, который предоставляет доступ одновременно только одному потоку. Если мьютекс используется и другой поток пытается получить его, что поток блокируется до тех пор, пока мьютекс не освободится от своего первоначального владельца. Если несколько потоков соперничают за одни и те же мьютексы, только одному будет разрешен к нему доступ.
-
-<img src="https://github.com/sashakid/ios-guide/blob/master/Images/mutex.png">
-
-__semaphore vs. mutex vs. lock__
-
-__Explanation 1__
-
-A mutex is essentially the same thing as a binary semaphore and sometimes uses the same basic implementation. The differences between them are in how they are used. While a binary semaphore may be used as a mutex, a mutex is a more specific use-case, in that only the thread that locked the mutex is supposed to unlock it.
-A mutex is a synchronization object. You acquire a lock on a mutex at the beginning of a section of code, and release it at the end, in order to ensure that no other thread is accessing the same data at the same time. A mutex typically has a lifetime equal to that of the data it is protecting, and that one mutex is accessed by multiple threads.
-A lock object is an object that encapsulates that lock. When the object is constructed it acquires the lock on the mutex. When it is destructed the lock is released. You typically create a new lock object for every access to the shared data.
-
-__Explanation 2__
-
-A mutex is an object which can be locked. A lock is the object which maintains the lock. To create a lock, you need to pass it a mutex.
-
-<a name="synchronization-ios"></a>
-### Средства синхронизации в iOS
-***
-__Atomic Operations__
+<a name="atomic"></a>
+### Atomic Operations
 
 `/usr/include/libkern/OSAtomic.h`
 
 Atomic operations let you perform simple mathematical and logical operations on 32-bit or 64-bit values. These operations rely on special hardware instructions (and an optional memory barrier) to ensure that the given operation completes before the affected memory is accessed again. In the multithreaded case, you should always use the atomic operations that incorporate a memory barrier to ensure that the memory is synchronized correctly between threads.
 
 Operation types: Add, Increment, Decrement, Logical OR, Logical AND, Logical XOR, Compare and swap, Test and set, Test and clear
-***
-__Memory Barriers and Volatile Variables__
 
-A memory barrier is a type of nonblocking synchronization tool used to ensure that memory operations occur in the correct order.
+<a name="lock"></a>
+### Lock
 
-Volatile variables apply another type of memory constraint to individual variables. The compiler often optimizes code by loading the values for variables into registers. For local variables, this is usually not a problem. If the variable is visible from another thread however, such an optimization might prevent the other thread from noticing any changes to it. Applying the volatile keyword to a variable forces the compiler to load that variable from memory each time it is used. You might declare a variable as volatile if its value could be changed at any time by an external source that the compiler may not be able to detect.
-***
-__Locks__
-
-Замки являются одним из наиболее часто используемых инструментов синхронизации. Вы можете использовать замки для защиты критической секции вашего кода, который является сегментом кода, к которому разрешен доступ только одному потоку одновременно. Взаимоисключающая (или мьютекс) блокировка действует как защитный барьер вокруг ресурса.
-
-- Mutex
+Mechanism for enforcing limits on access to a resource in an environment where there are many threads of execution. A lock is designed to enforce a mutual exclusion concurrency control policy.
 
 A mutually exclusive (or mutex) lock acts as a protective barrier around a resource. A mutex is a type of semaphore that grants access to only one thread at a time. If a mutex is in use and another thread tries to acquire it, that thread blocks until the mutex is released by its original holder. If multiple threads compete for the same mutex, only one at a time is allowed access to it.
 
-1. POSIX Mutex Lock
+---
+
+**POSIX Mutex Lock**
+
 ```c
 pthread_mutex_t mutex;
 void MyInitFunction() {
@@ -334,7 +444,9 @@ void MyLockingFunction() {
 }
 ```
 
-2. `NSLock`
+---
+
+**NSLock**
 ```objectivec
 BOOL moreToDo = YES;
 NSLock *theLock = [[NSLock alloc] init];
@@ -349,17 +461,36 @@ while (moreToDo) {
 }
 ```
 
-3. `@synchronized`
+The `NSLock` class uses `POSIX` threads to implement its locking behavior. When sending an unlock message to an `NSLock` object, you must be sure that message is sent from the same thread that sent the initial lock message. Unlocking a lock from a different thread can result in undefined behavior.
+
+---
+
+**@synchronized**
+
 ```objectivec
-- (void)myMethod:(id)anObj {
-  @synchronized(anObj) {
-    // Everything between the braces is protected by the @synchronized directive.
+- (NSString *)myString {
+  @synchronized(self) {
+    return [[myString retain] autorelease];
   }
+}
+```
+
+is transformed into:
+```objectivec
+- (NSString *)myString {
+  NSString *retval = nil;
+  pthread_mutex_t *self_mutex = LOOK_UP_MUTEX(self);
+  pthread_mutex_lock(self_mutex);
+  retval = [[myString retain] autorelease];
+  pthread_mutex_unlock(self_mutex);
+  return retval;
 }
 ```
 As a precautionary measure, the `@synchronized` block implicitly adds an exception handler to the protected code. This handler automatically releases the mutex in the event that an exception is thrown. This means that in order to use the `@synchronized` directive, you must also enable Objective-C exception handling in your code. If you do not want the additional overhead caused by the implicit exception handler, you should consider using the lock classes.
 
-- Recursive lock
+---
+
+**Recursive lock**
 
 A recursive lock is a variant on the mutex lock. A recursive lock allows a single thread to acquire the lock multiple times before releasing it. Other threads remain blocked until the owner of the lock releases the lock the same number of times it acquired it. Recursive locks are used during recursive iterations primarily but may also be used in cases where multiple methods each need to acquire the lock separately. As its name implies, this type of lock is commonly used inside a recursive function to prevent the recursion from blocking the thread. You could similarly use it in the non-recursive case to call functions whose semantics demand that they also take the lock.
 ```objectivec
@@ -376,18 +507,57 @@ MyRecursiveFunction(5);
 ```
 If you did not use an `NSRecursiveLock` object for this code, the thread would deadlock when the function was called again.
 
-- Read-write lock
+**Read-write lock**
 
 A read-write lock is also referred to as a shared-exclusive lock. This type of lock is typically used in larger-scale operations and can significantly improve performance if the protected data structure is read frequently and modified only occasionally.
 
-1. `pthread_rwlock`
-2. dispatch barrier
+**pthread_rwlock**
 
-- Distributed lock
+```c
+thread_rwlock_rdlock(p);
+newx = ACCESS_ONCE(x);
+thread_rwlock_unlock(p);
+...
+thread_rwlock_wrlock(p);
+ACCESS_ONCE(x)++;
+thread_rwlock_unlock(p);
+```
+
+**GCD dispatch barrier**
+
+Add a `.barrier` flag to mark the added job as a barrier task. It will prevent any other tasks from running in parallel with it, so any tasks added later will wait until this task finishes work. This is useful if you have some tasks that can mostly be run concurrently, but a subset of those tasks requires exclusive access to some resource (e.g. a database for writing) and other tasks can't run until the resource is released.
+
+```c
+dispatchQueue.async(qos: .userInitiated, flags: .barrier) {
+    // do some work
+}
+```
+
+**NSOperationQueue Barrier Task**
+
+Call `addBarrierBlock()` on an `OperationQueue`. It works exactly like the `DispatchQueue` version.
+
+```swift
+operationQueue.addBarrierBlock {
+    // do some work
+}
+```
+
+*Are sync/async the same thing as barrier?*
+
+Sync/async and barriers are two completely different issues. The sync/async dictates the flow or behavior of the calling thread (i.e. does it wait or not). Barriers dictate the behavior of the queue to which it it was dispatched (whether it’s allowed to run concurrently with any other dispatched blocks to that queue). Note, though, that barriers do not work on global queues; they only affect private concurrent queues that you created. As the docs say about barriers:
+
+> The queue you specify should be a concurrent queue that you create yourself... If the queue you pass to this function is a serial queue or one of the global concurrent queues, this function behaves [as if it were dispatched without the barrier].
+
+---
+
+**Distributed lock**
 
 A distributed lock provides mutually exclusive access at the process level. Unlike a true mutex, a distributed lock does not block a process or prevent it from running. It simply reports when the lock is busy and lets the process decide how to proceed.
 
-- Spin lock
+---
+
+**Spin lock**
 
 A spin lock polls its lock condition repeatedly until that condition becomes true. Spin locks are most often used on multiprocessor systems where the expected wait time for a lock is small. In these situations, it is often more efficient to poll than to block the thread, which involves a context switch and the updating of thread data structures.
 
@@ -401,17 +571,54 @@ in some situations.
 
 `OSSpinLockUnlock()` unconditionally unlocks the lock by zeroing it.
 
-- Double-checked lock
+---
+
+**Double-checked lock**
 
 A double-checked lock is an attempt to reduce the overhead of taking a lock by testing the locking criteria prior to taking the lock. Because double-checked locks are potentially unsafe, the system does not provide explicit support for them and their use is discouraged.
 
-- Condition lock
+---
+
+**Condition lock**
 
 An `NSConditionLock` object defines a mutex lock that can be locked and unlocked with specific values. You should not confuse this type of lock with a condition. The behavior is somewhat similar to conditions, but is implemented very differently. Typically, you use an `NSConditionLock` object when threads need to perform tasks in a specific order, such as when one thread produces data that another consumes. While the producer is executing, the consumer acquires the lock using a condition that is specific to your program. (The condition itself is just an integer value that you define.) When the producer finishes, it unlocks the lock and sets the lock condition to the appropriate integer value to wake the consumer thread, which then proceeds to process the data.
 
-- Semaphore
+<a name="semaphore"></a>
+### Semaphore
+_Is the number of free identical toilet keys. Example, say we have four toilets with identical locks and keys. The semaphore count - the count of keys - is set to 4 at beginning (all four toilets are free), then the count value is decremented as people are coming in. If all toilets are full, ie. there are no free keys left, the semaphore count is 0. Now, when eq. one person leaves the toilet, semaphore is increased to 1 (one free key), and given to the next person in the queue._
 
-Семафор в GCD представлен типом `dispatch_semaphore_t`. Для создания семафора существует функция `dispatch_semaphore_create`, которая принимает один аргумент — число потоков, которые могут одновременно выполнять участок кода.
+Variable or abstract data type used to control access to a common resource by multiple processes in a concurrent system. A trivial semaphore is a plain variable that is changed (for example, incremented or decremented, or toggled) depending on programmer-defined conditions. The variable is then used as a condition to control access to some system resource. A useful way to think of a semaphore as used in the real-world systems is as a record of how many units of a particular resource are available, coupled with operations to adjust that record safely (i.e. to avoid race conditions) as units are required or become free, and, if necessary, wait until a unit of the resource becomes available. Semaphores are a useful tool in the prevention of race conditions; however, their use is by no means a guarantee that a program is free from these problems. Semaphores which allow an arbitrary resource count are called __counting semaphores__, while semaphores which are restricted to the values 0 and 1 (or locked/unlocked, unavailable/available) are called __binary semaphores__ and are used to implement locks.
+
+Семафор позволяет выполнять какой-либо участок кода одновременно только конкретному количеству потоков. В основе семафора лежит счетчик, который и определяет, можно ли выполнять участок кода текущему потоку или нет. Если счетчик больше нуля — поток выполняет код, в противном случае — нет.Семафор в GCD представлен типом `dispatch_semaphore_t`. Для создания семафора существует функция `dispatch_semaphore_create`, которая принимает один аргумент — число потоков, которые могут одновременно выполнять участок кода.
+
+**How to implement max concurrent functionality**
+
+```c
+dispatch_semaphore_t concurrencyLimitingSemaphore = dispatch_semaphore_create(limit);
+//do this part once per task, for example in a loop
+dispatch_semaphore_wait(concurrencyLimitingSemaphore, DISPATCH_TIME_FOREVER);
+dispatch_async(someConcurrentQueue, ^{
+    /* work goes here */
+    dispatch_semaphore_signal(concurrencyLimitingSemaphore);
+}
+```
+**Conditions**
+
+A condition is another type of semaphore that allows threads to signal each other when a certain condition is true. Conditions are typically used to indicate the availability of a resource or to ensure that tasks are performed in a specific order. When a thread tests a condition, it blocks unless that condition is already true. It remains blocked until some other thread explicitly changes and signals the condition. The difference between a condition and a mutex lock is that multiple threads may be permitted access to the condition at the same time. The condition is more of a gatekeeper that lets different threads through the gate depending on some specified criteria.
+
+1. POSIX Conditions
+2. NSCondition
+
+<a name="mutex"></a>
+### Mutex
+_Is a key to a toilet. One person can have the key - occupy the toilet - at the time. When finished, the person gives (frees) the key to the next person in the queue._
+
+Мьютекс является одним из видов семафора, который предоставляет доступ одновременно только одному потоку. Если мьютекс используется и другой поток пытается получить его, что поток блокируется до тех пор, пока мьютекс не освободится от своего первоначального владельца. Если несколько потоков соперничают за одни и те же мьютексы, только одному будет разрешен к нему доступ.
+
+<img src="https://github.com/sashakid/ios-guide/blob/master/Images/mutex.png">
+
+<a name="performance"></a>
+### Performance
 
 <img src="https://github.com/sashakid/ios-guide/blob/master/Images/lock_performance.png">
 
@@ -422,18 +629,25 @@ An `NSConditionLock` object defines a mutex lock that can be locked and unlocked
 So, if you’ve got hotly-contested locks, OSSpinLock probably isn’t for you (unless your critical sections are really fast). Pthread mutexes are a tiny bit more expensive, but they avoid the power-wasting effects of `OSSpinLock`.
 
 `NSLock` is a pretty wrapper on pthread mutexes. They don’t provide much else, so there’s not much point in using them over pthread mutexes.
-***
-Conditions
 
-A condition is another type of semaphore that allows threads to signal each other when a certain condition is true. Conditions are typically used to indicate the availability of a resource or to ensure that tasks are performed in a specific order. When a thread tests a condition, it blocks unless that condition is already true. It remains blocked until some other thread explicitly changes and signals the condition. The difference between a condition and a mutex lock is that multiple threads may be permitted access to the condition at the same time. The condition is more of a gatekeeper that lets different threads through the gate depending on some specified criteria.
+<a name="diff"></a>
+### Differences
 
-1. POSIX Conditions
-2. `NSCondition`
-***
-Signals
+__semaphore vs. mutex vs. lock__
 
-Signals are a low-level BSD mechanism that can be used to deliver information to a process or manipulate it in some way.
-***
+__Explanation 1__
+
+A mutex is essentially the same thing as a binary semaphore and sometimes uses the same basic implementation. The differences between them are in how they are used. While a binary semaphore may be used as a mutex, a mutex is a more specific use-case, in that only the thread that locked the mutex is supposed to unlock it.
+A mutex is a synchronization object. You acquire a lock on a mutex at the beginning of a section of code, and release it at the end, in order to ensure that no other thread is accessing the same data at the same time. A mutex typically has a lifetime equal to that of the data it is protecting, and that one mutex is accessed by multiple threads.
+A lock object is an object that encapsulates that lock. When the object is constructed it acquires the lock on the mutex. When it is destructed the lock is released. You typically create a new lock object for every access to the shared data.
+
+__Explanation 2__
+
+A mutex is an object which can be locked. A lock is the object which maintains the lock. To create a lock, you need to pass it a mutex.
+
+__Explanation 3__
+
+A Mutex is different than a semaphore as it is a locking mechanism while a semaphore is a signalling mechanism. A binary semaphore can be used as a Mutex but a Mutex can never be used as a semaphore
 
 <a name="race-condition"></a>
 ## Что такое гонка условий?
