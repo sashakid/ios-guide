@@ -1,45 +1,47 @@
 - [Multithreading and concurrency](#multithreading-and-concurrency)
-	- [Основные понятия многопоточности](#основные-понятия-многопоточности)
-	- [API для работы с многопоточностью и их альтернативы](#multithreading-api-alternatives)
-		- [POSIX Threads](#posix-threads)
-		- [NSThread](#nsthread)
-		- [Run Loops](#run-loops)
-		- [NSObject instance methods](#nsobject-instance-methods)
-		- [GCD](#gcd)
-			- [Swift 3 API](#swift-3-api)
-		- [NSOperationQueue](#nsoperationqueue)
-		- [async / await](#async-await)
-		- [Idle-time notifications](#idle-time-notifications)
-		- [Timers](#timers)
-	- [Synchronization](#synchronization)
-    - [Memory Barriers and Volatile Variables](#memory-barriers)
-    - [Atomic Operations](#atomic)
-  	- [Lock](#lock)
+  - [Основные понятия многопоточности](#основные-понятия-многопоточности)
+  - [API для работы с многопоточностью и их альтернативы](#api-для-работы-с-многопоточностью-и-их-альтернативы)
+    - [POSIX Threads](#posix-threads)
+  - [NSThread](#nsthread)
+  - [Run Loops](#run-loops)
+  - [NSObject instance methods](#nsobject-instance-methods)
+  - [GCD](#gcd)
+      - [Swift 3 API](#swift-3-api)
+  - [NSOperationQueue](#nsoperationqueue)
+  - [async / await](#async--await)
+    - [Idle-time notifications](#idle-time-notifications)
+    - [Timers](#timers)
+  - [Synchronization](#synchronization)
+    - [Memory Barriers and Volatile Variables](#memory-barriers-and-volatile-variables)
+    - [Atomic Operations](#atomic-operations)
+    - [Lock](#lock)
     - [Semaphore](#semaphore)
     - [Mutex](#mutex)
     - [Performance](#performance)
-    - [Differences](#diff)
-	- [Гонка условий](#race-condition)
-		- [Deadlock](#deadlock)
-		- [Livelock](#livelock)
-		- [Starvation](#starvation)
-		- [Priority inversion](#priority-inversion)
-		- [Как избежать гонки условий](#как-избежать-гонки-условий)
-	- [Чем отличается dispatch_async от dispatch_sync?](#dispatch_sync-dispatch_async)
-	- [Как многопоточность работает с UIKit?](#многопоточность-uikit)
-	- [Atomic vs nonatomic. Чем отличаются? Как вручную переопределить atomic/nonatomic сеттер в не ARC коде?](#atomic-vs-nonatomic)
-	- [Можно ли отменить операцию в GCD? А в NSOperationQueue?](#отмена-операций)
-	- [Когда лучше использовать GCD, а когда NSOperationQueue](#gcd-vs-nsoperationqueue)
+    - [Differences](#differences)
+  - [Что такое гонка условий?](#что-такое-гонка-условий)
+    - [Deadlock](#deadlock)
+    - [Livelock](#livelock)
+    - [Starvation](#starvation)
+    - [Priority inversion](#priority-inversion)
+    - [Как избежать гонки условий](#как-избежать-гонки-условий)
+  - [Чем отличается dispatch\_async от dispatch\_sync?](#чем-отличается-dispatch_async-от-dispatch_sync)
+  - [Как многопоточность работает с UIKit?](#как-многопоточность-работает-с-uikit)
+  - [Atomic vs nonatomic. Чем отличаются? Как вручную переопределить atomic/nonatomic сеттер в не ARC коде?](#atomic-vs-nonatomic-чем-отличаются-как-вручную-переопределить-atomicnonatomic-сеттер-в-не-arc-коде)
+- [Можно ли отменить операцию в GCD? А в NSOperationQueue?](#можно-ли-отменить-операцию-в-gcd-а-в-nsoperationqueue)
+- [Когда лучше использовать GCD, а когда NSOperationQueue?](#когда-лучше-использовать-gcd-а-когда-nsoperationqueue)
 
 <a name="multithreading-and-concurrency"></a>
+
 # Multithreading and concurrency
 
 <a name="основные-понятия-многопоточности"></a>
+
 ## Основные понятия многопоточности
 
 __Multithreading__
 
-The ability of a central processing unit (CPU) (or a single core in a multi-core processor) to provide multiple threads of execution concurrently, supported by the operating system. This approach differs from multiprocessing. 
+The ability of a central processing unit (CPU) (or a single core in a multi-core processor) to provide multiple threads of execution concurrently, supported by the operating system. This approach differs from multiprocessing.
 
 Depending on your application, there may still be times when you need to create custom threads. If you do create custom threads, you should strive to create as few threads as possible yourself and you should use those threads only for specific tasks that cannot be implemented any other way.
 Threads are still a good way to implement code that must run in real time. Dispatch queues make every attempt to run their tasks as fast as possible but they do not address real time constraints. If you need more predictable behavior from code running in the background, threads may still offer a better alternative.
@@ -50,15 +52,16 @@ The ability of different parts or units of a program, algorithm, or problem to b
 
 Concurrency is the notion of multiple things happening at the same time. Threads are subunits of processes, which can be scheduled independently by the operating system scheduler. Virtually all concurrency APIs are built on top of threads under the hood – that’s true for both Grand Central Dispatch and operation queues. You can either use the `POSIX` thread API, or the Objective-C wrapper around this API, `NSThread`, to create your own threads.
 
-__Parallelism__ 
+__Parallelism__
 
-Refers to techniques to make programs faster by performing several computations at the same time. This requires hardware with multiple processing units. 
+Refers to techniques to make programs faster by performing several computations at the same time. This requires hardware with multiple processing units.
 
 > Explanation 1:
 Concurrency is the composition of independently executing computations, and concurrency is not parallelism: concurrency is about dealing with lots of things at once but parallelism is about doing lots of things at once. Concurrency is about structure, parallelism is about execution, concurrency provides a way to structure a solution to solve a problem that may (but not necessarily) be parallelizable.
 
 > Explanation 2:
 Say you have a program that has two threads. The program can run in two ways:
+
 ```
 Concurrency                 Concurrency + parallelism
 (Single-Core CPU)           (Multi-Core CPU)
@@ -72,6 +75,7 @@ Concurrency                 Concurrency + parallelism
 |___|___                    |   |___
     |th2|                   |   |th2|
 ```
+
 > In both cases we have concurrency from the mere fact that we have more than one thread running. If we ran this program on a computer with a single CPU core, the OS would be switching between the two threads, allowing one thread to run at a time. If we ran this program on a computer with a multi-core CPU then we would be able to run the two threads in parallel - side by side at the exact same time.
 
 __thread__
@@ -107,22 +111,27 @@ __Difference between `main queue` and `main thread`__
 The main thread is the one that starts our program, and it’s also the one where all our UI work must happen. However, there is also a main queue, and although sometimes we use the terms `main thread` and `main queue` interchangeably, they aren’t quite the same thing. It’s a subtle distinction, but it can sometimes matter: although your `main queue` will always execute on the `main thread` (and is therefore where you’ll be doing your UI work!), it’s also possible that other queues might sometimes run on the `main thread` – the system is free to move things around in whatever way is most efficient. So, if you’re on the `main queue` then you’re definitely on the `main thread`, but being on the `main thread` doesn’t automatically mean you’re on the `main queue` – a different queue could temporarily be running on the `main thread`.
 
 <a name="multithreading-api-alternatives"></a>
+
 ## API для работы с многопоточностью и их альтернативы
 
 <a name="posix-threads"></a>
+
 ### POSIX Threads
+
 Usually referred to as Pthreads, is a POSIX standard for threads defines an API for creating and manipulating threads. Pthreads defines a set of C programming language types, functions and constants. It is implemented with a pthread.h header and a thread library. There are around 100 Pthreads procedures, all prefixed `pthread_` and they can be categorized into four groups:
 
-* Thread management - creating, joining threads etc.
-* Mutexes
-* Condition variables
-* Synchronization between threads using read/write locks and barriers
+- Thread management - creating, joining threads etc.
+- Mutexes
+- Condition variables
+- Synchronization between threads using read/write locks and barriers
 
 Implementations of the API are available on many Unix-like POSIX-conformant operating systems such as FreeBSD, NetBSD, OpenBSD, GNU/Linux, Mac OS X and Solaris. DR-DOS and Microsoft Windows implementations also exist.
 Use POSIX calls if cross-platform portability is required. If you are writing networking code that runs exclusively in OS X and iOS, you should generally avoid POSIX networking calls, because they are harder to work with than higher-level APIs. However, if you are writing networking code that must be shared with other platforms, you can use the POSIX networking APIs so that you can use the same code everywhere.
 
 <a name="nsthread"></a>
+
 ## NSThread
+
 A simple Objective-C wrapper around pthreads. This makes the code look more familiar in a Cocoa environment. It is a relatively lightweight way to implement multiple paths of execution inside of an application. For example, you can define a thread as a subclass of `NSThread`, which encapsulates the code you want to run in the background.
 
 Though Operation queues is the preferred way to perform tasks concurrently, depending on application there may still be times when you need to create custom threads.
@@ -131,16 +140,19 @@ Use threads for specific tasks that cannot be implemented in any other way.
 If you need more predictable behavior from code running in the background, threads may still offer a better alternative.
 
 _Inter-thread Communication_
-* Direct messaging
-* Global variables, shared memory, and objects
-* Conditions
-* Run loop sources
-* Ports and sockets
-* Message queues
-* Cocoa distributed objects
+
+- Direct messaging
+- Global variables, shared memory, and objects
+- Conditions
+- Run loop sources
+- Ports and sockets
+- Message queues
+- Cocoa distributed objects
 
 <a name="run-loops"></a>
+
 ## Run Loops
+
 Циклы выполнения – часть инфраструктуры, используемой для управления событиями, прибывающими асинхронно в потоке. Ждет данные от одного или нескольких источников, чтобы запустить код на исполнение. Циклы выполнения работают по мониторингу одного или нескольких источников событий для потока. Как только события прибыли, система пробуждает поток и отправляет события на цикл выполнения, который затем передает их указанным обработчикам. Если нет событий готовых быть обработанными, цикл выполнения ставит поток в режим сна.
 Одна из опасностей потокового программирования, это конфликты ресурсов между несколькими потоками. Если несколько потоков пытаются использовать или модифицировать один и тот же ресурс в одно и то же время, то могут возникнуть проблемы. Один из способов решить проблему заключается в устранении общего ресурса в целом и убедиться, что каждый поток имеет свой собственный набор ресурсов, на котором он работает.
 Run loops are not technically a concurrency mechanism like GCD or operation queues, because they don’t enable the parallel execution of tasks. However, run loops tie in directly with the execution of tasks on the main dispatch/operation queue and they provide a mechanism to execute code asynchronously.
@@ -151,9 +163,10 @@ A run loop receives events from two different types of sources. Input sources de
 
 <img src="https://github.com/sashakid/ios-guide/blob/master/Images/runloop.jpg">
 
-https://suelan.github.io/2021/02/13/20210213-dive-into-runloop-ios/
+<https://suelan.github.io/2021/02/13/20210213-dive-into-runloop-ios/>
 
 <a name="nsobject-instance-methods"></a>
+
 ## NSObject instance methods
 
 Group of `performSelector` methods and `cancelPreviousPerformRequests` methods
@@ -161,10 +174,13 @@ Group of `performSelector` methods and `cancelPreviousPerformRequests` methods
 ```objectivec
 - (void)performSelectorInBackground:(SEL)aSelector withObject:(id)arg;
 ```
+
 This method creates a new thread in your application, putting your application into multithreaded mode if it was not already. The method represented by aSelector must set up the thread environment just as you would for any other new thread in your program.
 
 <a name="gcd"></a>
+
 ## GCD
+
 With GCD you don’t interact with threads directly anymore. Instead you add blocks of code to queues, and GCD manages a thread pool behind the scenes. GCD decides on which particular thread your code blocks are going to be executed on, and it manages these threads according to the available system resources. This alleviates the problem of too many threads being created, because the threads are now centrally managed and abstracted away from application developers. The other important change with GCD is that you as a developer think about work items in a queue rather than threads. This new mental model of concurrency is easier to work with. GCD exposes five different queues: the main queue running on the main thread, three background queues with different priorities, and one background queue with an even lower priority, which is I/O throttled. Furthermore, you can create custom queues, which can either be serial or concurrent queues. While custom queues are a powerful abstraction, all blocks you schedule on them will ultimately trickle down to one of the system’s global queues and its thread pool(s).
 
 __Dispatch Queue__
@@ -189,12 +205,12 @@ __Dispatch Source__
 
 Dispatch sources are a C-based mechanism __for processing specific types of system events asynchronously__. A dispatch source encapsulates information about a particular type of system event and submits a specific block object or function to a dispatch queue whenever that event occurs. You can use dispatch sources to monitor the following types of system events:
 
-* Timers
-* Signal handlers
-* Descriptor-related events
-* Process-related events
-* Mach port events
-* Custom events that you trigger
+- Timers
+- Signal handlers
+- Descriptor-related events
+- Process-related events
+- Mach port events
+- Custom events that you trigger
 
 - async - concurrent: the code runs on a background thread. Control returns immediately to the main thread (and UI). The block can't assume that it's the only block running on that queue
 - async - serial: the code runs on a background thread. Control returns immediately to the main thread. The block can assume that it's the only block running on that queue
@@ -207,16 +223,19 @@ Dispatch sources are a C-based mechanism __for processing specific types of syst
 
 __Плюсы__
 
-* Визуально — он самый короткий и простой в реализации. Он возможен с использованием блоков. Этот подход тоже очень гибкий (хотя отменять блок поставленный в очередь нельзя стандартными способами). В GCD можно настраивать приоритеты, блоки захватывают переменные из окружения блока.
+- Визуально — он самый короткий и простой в реализации. Он возможен с использованием блоков. Этот подход тоже очень гибкий (хотя отменять блок поставленный в очередь нельзя стандартными способами). В GCD можно настраивать приоритеты, блоки захватывают переменные из окружения блока.
 
 <a name="swift-3-api"></a>
+
 #### Swift 3 API
 
 The QoS classes are:
-* User-interactive: This represents tasks that need to be done immediately in order to provide a nice user experience. Use it for UI updates, event handling and small workloads that require low latency. The total amount of work done in this class during the execution of your app should be small. This should run on the main thread.
-* User-initiated: The represents tasks that are initiated from the UI and can be performed asynchronously. It should be used when the user is waiting for immediate results, and for tasks required to continue user interaction. This will get mapped into the high priority global queue.
-* Utility: This represents long-running tasks, typically with a user-visible progress indicator. Use it for computations, I/O, networking, continous data feeds and similar tasks. This class is designed to be energy efficient. This will get mapped into the low priority global queue.
-* Background: This represents tasks that the user is not directly aware of. Use it for prefetching, maintenance, and other tasks that don’t require user interaction and aren’t time-sensitive. This will get mapped into the background priority global queue.
+
+- User-interactive: This represents tasks that need to be done immediately in order to provide a nice user experience. Use it for UI updates, event handling and small workloads that require low latency. The total amount of work done in this class during the execution of your app should be small. This should run on the main thread.
+- User-initiated: The represents tasks that are initiated from the UI and can be performed asynchronously. It should be used when the user is waiting for immediate results, and for tasks required to continue user interaction. This will get mapped into the high priority global queue.
+- Utility: This represents long-running tasks, typically with a user-visible progress indicator. Use it for computations, I/O, networking, continous data feeds and similar tasks. This class is designed to be energy efficient. This will get mapped into the low priority global queue.
+- Background: This represents tasks that the user is not directly aware of. Use it for prefetching, maintenance, and other tasks that don’t require user interaction and aren’t time-sensitive. This will get mapped into the background priority global queue.
+
 ```swift
 DispatchQueue.global(attributes: [.qosDefault]).async {
   // Background thread
@@ -227,7 +246,9 @@ DispatchQueue.global(attributes: [.qosDefault]).async {
 ```
 
 <a name="nsoperationqueue"></a>
+
 ## NSOperationQueue
+
 Operation queues are a Cocoa abstraction of the queue model exposed by GCD. While GCD offers more low-level control, operation queues implement several convenient features on top of it, which often makes it the best and safest choice for application developers. The `NSOperationQueue` class has two different types of queues: the main queue and custom queues. The main queue runs on the main thread, and custom queues are processed in the background. In any case, the tasks which are processed by these queues are represented as subclasses of `NSOperation`. Whereas dispatch queues always execute tasks in first-in, first-out order, operation queues __take other factors into account when determining the execution order of tasks__. Primary among these factors is whether a given task depends on the completion of other tasks. You configure dependencies when defining your tasks and can use them to create complex execution-order graphs for your tasks. Because the `NSOperation` class is essentially an abstract base class, you typically define custom subclasses to perform your tasks. However, the Foundation framework does include some concrete subclasses that you can create and use as is to perform tasks.
 
 `NSBlockOperation` exectues a block. `NSInvocationOperation` executes a `NSInvocation` (or a method defined by target, selector, object). `NSOperation` must be subclassed, it offers the most flexibility but requires the most code. `NSBlockOperation` and `NSInvocationOperation` are both subclasses of `NSOperation`. They are provided by the system so you don't have to create a new subclass for simple tasks. Using `NSBlockOperation` and `NSInvocationOperation` should be enough for most tasks.
@@ -236,14 +257,18 @@ After an operation begins executing, it continues performing its task until it i
 
 __Плюсы__
 
-* Можно для каждой очереди настраивать приоритет и количество одновременно выполняющихся операций. `NSOperationQueue` самостоятельно создает и поддерживает пул потоков, в которых исполняются `NSOperation`. Так же `NSOperation` предоставляет возможность отменять операции, приостанавливать всю очередь, запускать ее снова и много чего прочего.
+- Можно для каждой очереди настраивать приоритет и количество одновременно выполняющихся операций. `NSOperationQueue` самостоятельно создает и поддерживает пул потоков, в которых исполняются `NSOperation`. Так же `NSOperation` предоставляет возможность отменять операции, приостанавливать всю очередь, запускать ее снова и много чего прочего.
 
 <a name="async-await"></a>
+
 ## async / await
 
-Плюсы
+`async` означает асинхронный, и его можно рассматривать как атрибут метода, показывающий, что метод выполняет асинхронную работу. Чтобы вызвать такой метод, нужно использовать аттрибут `await`.
 
-- визуальная эстетичность кода. Читать код стало на порядок легче, отчасти от того, что мы избегаем callback hell’ов. Это, в свою очередь, снижает вероятность допустить ошибку - забыть вызвать completionHandler, из-за нарушить логику работы программы, теперь нельзя. Да и что тут говорить, код, с закосом под синхронный, стал намного элегантнее. Вот это:
+Плюсы:
+
+- визуальная эстетичность кода. Читать код стало на порядок легче, отчасти от того, что мы избегаем callback hell’ов. Это, в свою очередь, снижает вероятность допустить ошибку - забыть вызвать `completionHandler`, из-за нарушить логику работы программы, теперь нельзя. Да и что тут говорить, код, с закосом под синхронный, стал намного элегантнее. Вот это:
+
 ```swift
 func obtainFirstCarsharing(completionHandler: @escaping (CarsharingCarDetail?) -> Void) {
     fetchCars { [weak self] cars in
@@ -257,7 +282,9 @@ func obtainFirstCarsharing(completionHandler: @escaping (CarsharingCarDetail?) -
     }
 }
 ```
+
 Теперь может выглядеть так:
+
 ```swift
 func obtainFirstCarsharing() async throws -> CarsharingCarDetail {
     let allCars = try await fetchCars()
@@ -265,11 +292,13 @@ func obtainFirstCarsharing() async throws -> CarsharingCarDetail {
     return try await fetchCarDetail(with: firstCarId)
 }
 ```
-Замечу, что асинхронная функция, помимо результирующей модели, может вернуть ошибку - это нормальное поведение, которое разработчик может закладывать. В таком случае у нас есть возможность обрабатывать ошибки посредством try/catch.
+
+Асинхронная функция, помимо результирующей модели, может вернуть ошибку - это нормальное поведение, которое разработчик может закладывать. В таком случае у нас есть возможность обрабатывать ошибки посредством try/catch.
 
 - async/await является неблокирующим механизмом. Сразу отмечу, что неблокирующий тут не равно непрерывный / синхронный. На это слово надо взглянуть под другим ракурсом - неблокирующим механизм является для потока. Что это значит?
 
 Взглянем на примеры:
+
 ```swift
 let queue = DispatchQueue(label: "citymobil.queue.com")
 queue.sync { /* Execute WorkItem */ }
@@ -279,6 +308,7 @@ semaphore.wait()
 // ----------------------------
 let _ = try await service.fetchCars()
 ```
+
 Рассмотрим поведение потока с очередью, которая вызывает sync-метод — синхронно выполняет какую-нибудь WorkItem-задачу. В месте вызова sync поток блокируется и доступ к нему возвращается только после исполнения sync-замыкания. С семафорами ситуация схожа, если не хуже: они, очевидно, находятся вне философии очередей - могут заблокировать какой-либо поток, в котором выполняется WorkItem, отданный очереди.
 В случае с async/await синхронное выполнение метода приостанавливается: точкой приостановки является await, при этом сам поток не простаивает в ожидании.
 
@@ -292,22 +322,28 @@ let _ = try await service.fetchCars()
 ```swift
 let syncQueue = DispatchQueue(label: "queue.sync.com", attributes: .concurrent)
 for i in 1...32 {
-	DispatchQueue.global().async {
-		syncQueue.sync { /* do some work */ }
-	}
+  DispatchQueue.global().async {
+    syncQueue.sync { /* do some work */ }
+  }
 }
 ```
+
 Здесь включаются в работу большое количество потоков. При этом каждое переключение между ними (context switch) становится все более ресурсоемким для системы при большом его количестве. Несмотря на то, что чего-то критичного в этих переключениях нет - context switch внутри одного процесса в общем то происходит достаточно быстро, и в большинстве случаев мы можем себе позволить не задумываться о нем - заблокированный поток, де факто, держит свой стек и занимает память. В довесок, мы можем легко воспроизвести ситуацию, где исчерпаем рабочие потоки, тем самым воссоздав thread explosion (взрыв потоков). Мы можем избежать такой ситуации, грамотно спроектировав работу с многопоточным кодом - например, использовать здесь concurrentPerform или ненулевые семафоры. Но Apple, кажется, "встроил" подобные оптимизации в систему:
 
 <img src="https://github.com/sashakid/ios-guide/blob/master/Images/continuation.png">
 
-Аналогичный код, переписанный с async/await, на условном двухъядерном устройстве будет гонять по одному потоку, которые не станут простаивать в ожидании, а стало быть и переключения между ними не будет. Вместо этого, переключение будет происходить преимущественно внутри одного потока между continuation — объектами (чуть ниже вернемся к ним), и будет сводиться к переключению между методами. Apple заявляет, что это на порядок легче для системы.
+Аналогичный код, переписанный с async/await, на условном двухъядерном устройстве будет гонять по одному потоку, которые не станут простаивать в ожидании, а стало быть и переключения между ними не будет. Вместо этого, переключение будет происходить преимущественно внутри одного потока между continuation—объектами, и будет сводиться к переключению между методами.
+
+Swift Concurrency works with a cooperative thread pool, meaning that the system actively tries to match the number of threads to the number of available cores. This approach eliminates the issues related to thread explosion, but they require a different approach to dispatch work items. 
+ 
+Instead of using the same work items that GCD uses, Swift concurrency uses a construct called a ”continuation” for asynchronous code. It stores all information needed to suspend and resume an individual task, pushing the suspension point down the hierarchy. This structure means that when a particular method needs to wait for a resource, the thread can pick up another task instead. 
 
 __Актор (actor)__
 
 Сущность, редназначенная для предотвращения состояний гонки (race conditions) в асинхронных классов. Хотя это не новая концепция, акторы являются частью гораздо более крупного замысла. Да, теоретически вы можете реализовать все, что делает актор, просто добавив `NSLock` в свойства/методы ваших классов, но на практике у них есть несколько важных бонусов. Во-первых, механизм синхронизации, используемый акторами, — это не известные нам блокировки, а новая Cooperative Threading Model (модель кооперативной потоковой обработки) async/await в которой потоки могут плавно «изменять» контексты для выполнения других фрагментов кода, чтобы избежать простаивающих потоков, а во-вторых, наличие акторов позволяет компилятору проверить многие проблемы параллелизма прямо во время компиляции, давая вам сразу знать если есть какая-либо потенциальная опасность.
 
 Actor isolation is how actors protect their mutable state. For actors, the primary mechanism for this protection is by only allowing their stored instance properties to be accessed directly on self. For example, here is a method that attempts to transfer money from one account to another:
+
 ```swift
 actor BankAccount {
   let accountNumber: Int
@@ -336,6 +372,7 @@ extension BankAccount {
   }
 }
 ```
+
 __AsyncSequence__
 
 A type that provides asynchronous, sequential, iterated access to its elements.
@@ -349,7 +386,7 @@ Swift ships with two built-in executors: the default concurrent executor, used f
 
 ---
 
-**Structured concurrency**
+__Structured concurrency__
 
 is a programming paradigm aimed at improving the clarity, quality, and development time of a computer program by using a structured approach to concurrent programming. The core concept is the encapsulation of concurrent threads of execution (here encompassing kernel and userland threads and processes) by way of control flow constructs that have clear entry and exit points and that ensure all spawned threads have completed before exit. Such encapsulation allows errors in concurrent threads to be propagated to the control structure's parent scope and managed by the native error handling mechanisms of each particular computer language. It allows control flow to remain readily evident by the structure of the source code despite the presence of concurrency. To be effective, this model must be applied consistently throughout all levels of the program – otherwise concurrent threads may leak out, become orphaned, or fail to have runtime errors correctly propagated. Structured concurrency is analogous to structured programming, which introduced control flow constructs that encapsulated sequential statements and subroutines.
 
@@ -371,12 +408,40 @@ let res = await x + y + z
 print(res)
 ```
 
-https://docs.swift.org/swift-book/LanguageGuide/Concurrency.html
+С концепцией структурированного параллелизма в языке появилось два новых типа данных: `Task` и `TaskGroup`, которые позволяют выполнять параллельные операции индивидуально или скоординировано.
 
-https://developer.apple.com/videos/play/wwdc2021/10254/
+```swift
+func runMultipleCalculations() async throws {
+  let taskOne = Task {
+    (0..<50).map(fibonacci)
+  }
+
+  let taskTwo = Task {
+    try await getWeatherReadings(for: "Rome")
+  }
+
+  let resultOne = await taskOne.value
+  let resultTwo = try await taskTwo.value
+  print("The first 50 numbers in the Fibonacci sequence are: \(resultOne)")
+  print("Rome weather readings are: \(resultTwo)")
+}
+```
+
+В приведенном выше примере приоритет не задан, поэтому он будет выставлен по умолчанию, но при необходимости его можно задать следующим образом: `Task(priority: .high)`.
+Помимо выполнения операций, Task также предоставляет нам несколько статических методов для управления вызовами:
+
+- Вызов `Task.sleep()` переводит текущую задачу спящий режим на определенное количество наносекунд. `1_000_000_000` (миллиард) наносекунд равняется 1 секунде.
+- Вызов `Task.checkCancellation()` проверяет не был ли вызван для отмены метод `cancel()`, и если был, то выбросит `CancellationError`.
+- Вызов `Task.yield()` приостанавливает текущую задачу на несколько мгновений, чтобы дать некоторое время другим задачам, которые могут ожидать свой очереди. Это особенно важно, если вы выполняете высоко-нагруженную работу в цикле.
+
+<https://docs.swift.org/swift-book/LanguageGuide/Concurrency.html>
+
+<https://developer.apple.com/videos/play/wwdc2021/10254/>
 
 <a name="idle-time-notifications"></a>
+
 ### Idle-time notifications
+
 - [Idle-time notifications](#idle-time-notifications)
 
 `NSNotification`
@@ -392,9 +457,11 @@ A notification center buffer.
 A notification dispatch mechanism that enables the broadcast of notifications across task boundaries.
 
 <a name="timers"></a>
+
 ### Timers
 
 3 ways to create a timer:
+
 1. Scheduling a timer with the current run loop;
 2. Creating a timer that you later register with a run loop;
 3. Initializing a timer with a given fire date.
@@ -402,9 +469,11 @@ A notification dispatch mechanism that enables the broadcast of notifications ac
 Because the run loop maintains the timer, from the perspective of object lifetimes there’s typically no need to keep a reference to a timer after you’ve scheduled it. (Because the timer is passed as an argument when you specify its method as a selector, you can invalidate a repeating timer when appropriate within that method.) In many situations, however, you also want the option of invalidating the timer—perhaps even before it starts. In this case, you do need to keep a reference to the timer, so that you can stop it whenever appropriate. If you create an unscheduled timer (see Unscheduled Timers), then you must maintain a strong reference to the timer so that it is not deallocated before you use it.
 
 <a name="synchronization"></a>
+
 ## Synchronization
 
 <a name="memory-barriers"></a>
+
 ### Memory Barriers and Volatile Variables
 
 A memory barrier is a type of nonblocking synchronization tool used to ensure that memory operations occur in the correct order.
@@ -412,6 +481,7 @@ A memory barrier is a type of nonblocking synchronization tool used to ensure th
 Volatile variables apply another type of memory constraint to individual variables. The compiler often optimizes code by loading the values for variables into registers. For local variables, this is usually not a problem. If the variable is visible from another thread however, such an optimization might prevent the other thread from noticing any changes to it. Applying the volatile keyword to a variable forces the compiler to load that variable from memory each time it is used. You might declare a variable as volatile if its value could be changed at any time by an external source that the compiler may not be able to detect.
 
 <a name="atomic"></a>
+
 ### Atomic Operations
 
 `/usr/include/libkern/OSAtomic.h`
@@ -421,6 +491,7 @@ Atomic operations let you perform simple mathematical and logical operations on 
 Operation types: Add, Increment, Decrement, Logical OR, Logical AND, Logical XOR, Compare and swap, Test and set, Test and clear
 
 <a name="lock"></a>
+
 ### Lock
 
 Mechanism for enforcing limits on access to a resource in an environment where there are many threads of execution. A lock is designed to enforce a mutual exclusion concurrency control policy.
@@ -429,7 +500,7 @@ A mutually exclusive (or mutex) lock acts as a protective barrier around a resou
 
 ---
 
-**POSIX Mutex Lock**
+__POSIX Mutex Lock__
 
 ```c
 pthread_mutex_t mutex;
@@ -446,7 +517,8 @@ void MyLockingFunction() {
 
 ---
 
-**NSLock**
+__NSLock__
+
 ```objectivec
 BOOL moreToDo = YES;
 NSLock *theLock = [[NSLock alloc] init];
@@ -465,7 +537,7 @@ The `NSLock` class uses `POSIX` threads to implement its locking behavior. When 
 
 ---
 
-**@synchronized**
+__@synchronized__
 
 ```objectivec
 - (NSString *)myString {
@@ -476,6 +548,7 @@ The `NSLock` class uses `POSIX` threads to implement its locking behavior. When 
 ```
 
 is transformed into:
+
 ```objectivec
 - (NSString *)myString {
   NSString *retval = nil;
@@ -486,13 +559,15 @@ is transformed into:
   return retval;
 }
 ```
+
 As a precautionary measure, the `@synchronized` block implicitly adds an exception handler to the protected code. This handler automatically releases the mutex in the event that an exception is thrown. This means that in order to use the `@synchronized` directive, you must also enable Objective-C exception handling in your code. If you do not want the additional overhead caused by the implicit exception handler, you should consider using the lock classes.
 
 ---
 
-**Recursive lock**
+__Recursive lock__
 
 A recursive lock is a variant on the mutex lock. A recursive lock allows a single thread to acquire the lock multiple times before releasing it. Other threads remain blocked until the owner of the lock releases the lock the same number of times it acquired it. Recursive locks are used during recursive iterations primarily but may also be used in cases where multiple methods each need to acquire the lock separately. As its name implies, this type of lock is commonly used inside a recursive function to prevent the recursion from blocking the thread. You could similarly use it in the non-recursive case to call functions whose semantics demand that they also take the lock.
+
 ```objectivec
 NSRecursiveLock *theLock = [[NSRecursiveLock alloc] init];
 void MyRecursiveFunction(int value) {
@@ -505,13 +580,14 @@ void MyRecursiveFunction(int value) {
 }
 MyRecursiveFunction(5);
 ```
+
 If you did not use an `NSRecursiveLock` object for this code, the thread would deadlock when the function was called again.
 
-**Read-write lock**
+__Read-write lock__
 
 A read-write lock is also referred to as a shared-exclusive lock. This type of lock is typically used in larger-scale operations and can significantly improve performance if the protected data structure is read frequently and modified only occasionally.
 
-**pthread_rwlock**
+__pthread_rwlock__
 
 ```c
 thread_rwlock_rdlock(p);
@@ -523,7 +599,7 @@ ACCESS_ONCE(x)++;
 thread_rwlock_unlock(p);
 ```
 
-**GCD dispatch barrier**
+__GCD dispatch barrier__
 
 Add a `.barrier` flag to mark the added job as a barrier task. It will prevent any other tasks from running in parallel with it, so any tasks added later will wait until this task finishes work. This is useful if you have some tasks that can mostly be run concurrently, but a subset of those tasks requires exclusive access to some resource (e.g. a database for writing) and other tasks can't run until the resource is released.
 
@@ -533,7 +609,7 @@ dispatchQueue.async(qos: .userInitiated, flags: .barrier) {
 }
 ```
 
-**NSOperationQueue Barrier Task**
+__NSOperationQueue Barrier Task__
 
 Call `addBarrierBlock()` on an `OperationQueue`. It works exactly like the `DispatchQueue` version.
 
@@ -543,7 +619,7 @@ operationQueue.addBarrierBlock {
 }
 ```
 
-*Are sync/async the same thing as barrier?*
+_Are sync/async the same thing as barrier?_
 
 Sync/async and barriers are two completely different issues. The sync/async dictates the flow or behavior of the calling thread (i.e. does it wait or not). Barriers dictate the behavior of the queue to which it it was dispatched (whether it’s allowed to run concurrently with any other dispatched blocks to that queue). Note, though, that barriers do not work on global queues; they only affect private concurrent queues that you created. As the docs say about barriers:
 
@@ -551,13 +627,13 @@ Sync/async and barriers are two completely different issues. The sync/async dict
 
 ---
 
-**Distributed lock**
+__Distributed lock__
 
 A distributed lock provides mutually exclusive access at the process level. Unlike a true mutex, a distributed lock does not block a process or prevent it from running. It simply reports when the lock is busy and lets the process decide how to proceed.
 
 ---
 
-**Spin lock**
+__Spin lock__
 
 A spin lock polls its lock condition repeatedly until that condition becomes true. Spin locks are most often used on multiprocessor systems where the expected wait time for a lock is small. In these situations, it is often more efficient to poll than to block the thread, which involves a context switch and the updating of thread data structures.
 
@@ -573,25 +649,27 @@ in some situations.
 
 ---
 
-**Double-checked lock**
+__Double-checked lock__
 
 A double-checked lock is an attempt to reduce the overhead of taking a lock by testing the locking criteria prior to taking the lock. Because double-checked locks are potentially unsafe, the system does not provide explicit support for them and their use is discouraged.
 
 ---
 
-**Condition lock**
+__Condition lock__
 
 An `NSConditionLock` object defines a mutex lock that can be locked and unlocked with specific values. You should not confuse this type of lock with a condition. The behavior is somewhat similar to conditions, but is implemented very differently. Typically, you use an `NSConditionLock` object when threads need to perform tasks in a specific order, such as when one thread produces data that another consumes. While the producer is executing, the consumer acquires the lock using a condition that is specific to your program. (The condition itself is just an integer value that you define.) When the producer finishes, it unlocks the lock and sets the lock condition to the appropriate integer value to wake the consumer thread, which then proceeds to process the data.
 
 <a name="semaphore"></a>
+
 ### Semaphore
+
 _Is the number of free identical toilet keys. Example, say we have four toilets with identical locks and keys. The semaphore count - the count of keys - is set to 4 at beginning (all four toilets are free), then the count value is decremented as people are coming in. If all toilets are full, ie. there are no free keys left, the semaphore count is 0. Now, when eq. one person leaves the toilet, semaphore is increased to 1 (one free key), and given to the next person in the queue._
 
 Variable or abstract data type used to control access to a common resource by multiple processes in a concurrent system. A trivial semaphore is a plain variable that is changed (for example, incremented or decremented, or toggled) depending on programmer-defined conditions. The variable is then used as a condition to control access to some system resource. A useful way to think of a semaphore as used in the real-world systems is as a record of how many units of a particular resource are available, coupled with operations to adjust that record safely (i.e. to avoid race conditions) as units are required or become free, and, if necessary, wait until a unit of the resource becomes available. Semaphores are a useful tool in the prevention of race conditions; however, their use is by no means a guarantee that a program is free from these problems. Semaphores which allow an arbitrary resource count are called __counting semaphores__, while semaphores which are restricted to the values 0 and 1 (or locked/unlocked, unavailable/available) are called __binary semaphores__ and are used to implement locks.
 
 Семафор позволяет выполнять какой-либо участок кода одновременно только конкретному количеству потоков. В основе семафора лежит счетчик, который и определяет, можно ли выполнять участок кода текущему потоку или нет. Если счетчик больше нуля — поток выполняет код, в противном случае — нет.Семафор в GCD представлен типом `dispatch_semaphore_t`. Для создания семафора существует функция `dispatch_semaphore_create`, которая принимает один аргумент — число потоков, которые могут одновременно выполнять участок кода.
 
-**How to implement max concurrent functionality**
+__How to implement max concurrent functionality__
 
 ```c
 dispatch_semaphore_t concurrencyLimitingSemaphore = dispatch_semaphore_create(limit);
@@ -602,7 +680,8 @@ dispatch_async(someConcurrentQueue, ^{
     dispatch_semaphore_signal(concurrencyLimitingSemaphore);
 }
 ```
-**Conditions**
+
+__Conditions__
 
 A condition is another type of semaphore that allows threads to signal each other when a certain condition is true. Conditions are typically used to indicate the availability of a resource or to ensure that tasks are performed in a specific order. When a thread tests a condition, it blocks unless that condition is already true. It remains blocked until some other thread explicitly changes and signals the condition. The difference between a condition and a mutex lock is that multiple threads may be permitted access to the condition at the same time. The condition is more of a gatekeeper that lets different threads through the gate depending on some specified criteria.
 
@@ -610,7 +689,9 @@ A condition is another type of semaphore that allows threads to signal each othe
 2. NSCondition
 
 <a name="mutex"></a>
+
 ### Mutex
+
 _Is a key to a toilet. One person can have the key - occupy the toilet - at the time. When finished, the person gives (frees) the key to the next person in the queue._
 
 Мьютекс является одним из видов семафора, который предоставляет доступ одновременно только одному потоку. Если мьютекс используется и другой поток пытается получить его, что поток блокируется до тех пор, пока мьютекс не освободится от своего первоначального владельца. Если несколько потоков соперничают за одни и те же мьютексы, только одному будет разрешен к нему доступ.
@@ -618,6 +699,7 @@ _Is a key to a toilet. One person can have the key - occupy the toilet - at the 
 <img src="https://github.com/sashakid/ios-guide/blob/master/Images/mutex.png">
 
 <a name="performance"></a>
+
 ### Performance
 
 <img src="https://github.com/sashakid/ios-guide/blob/master/Images/lock_performance.png">
@@ -631,6 +713,7 @@ So, if you’ve got hotly-contested locks, OSSpinLock probably isn’t for you (
 `NSLock` is a pretty wrapper on pthread mutexes. They don’t provide much else, so there’s not much point in using them over pthread mutexes.
 
 <a name="diff"></a>
+
 ### Differences
 
 __semaphore vs. mutex vs. lock__
@@ -650,13 +733,17 @@ __Explanation 3__
 A Mutex is different than a semaphore as it is a locking mechanism while a semaphore is a signalling mechanism. A binary semaphore can be used as a Mutex but a Mutex can never be used as a semaphore
 
 <a name="race-condition"></a>
+
 ## Что такое гонка условий?
+
 Can always happen if multiple threads access a shared resource without making sure that one thread is finished operating on a resource before another one begins accessing it.
 
 <img src="https://github.com/sashakid/ios-guide/blob/master/Images/race_condition.png">
 
 <a name="deadlock"></a>
+
 ### Deadlock
+
 Two or more competing tasks are each waiting on the other to finish. You can observe this in real life when cars arrive simultaneously at a four-way stop.
 
 <img src="https://github.com/sashakid/ios-guide/blob/master/Images/deadlock.png">
@@ -675,10 +762,13 @@ queue.sync {
 Putting this code anywhere in your app will immediately result in a crash before the second print statement runs. The queue is running code synchronously. The second closure can't run until the first one completes. The first closure can't complete until the second closure is run since its dispatched synchronously.
 
 <a name="livelock"></a>
+
 ### Livelock
+
 Система не застревает, но занимается бесполезной работой. A livelock occurs when a request for an exclusive lock is repeatedly denied because a series of overlapping shared locks keep interfering. It is an endless loop in program execution. This could be a case when two threads exit allowing each other to write to or update record(s) in a database.
 
 Here's a very simple Java example of livelock where a husband and wife are trying to eat soup, but only have one spoon between them. Each spouse is too polite, and will pass the spoon if the other has not yet eaten.
+
 ```java
 public class Livelock {
     static class Spoon {
@@ -744,7 +834,9 @@ public class Livelock {
     }
 }
 ```
+
 Run the program and you'll get:
+
 ```
 Bob: You eat first my darling Alice!
 Alice: You eat first my darling Bob!
@@ -754,13 +846,17 @@ Bob: You eat first my darling Alice!
 Alice: You eat first my darling Bob!
 ...
 ```
+
 This will go on forever if uninterrupted. This is a livelock because both Alice and Bob are repeatedly asking each other to go first in an infinite loop (hence live). In a deadlock situation, both Alice and Bob would simply be frozen waiting on each other to go first — they won't be doing anything except wait (hence dead).
 
 <a name="starvation"></a>
+
 ### Starvation
+
 Locking shared resources can result in the readers-writers problem. Taking a reading lock is allowed as long as there is no writing lock on the resource. In this situation, a thread that is waiting to acquire a write lock can be starved by more read locks occurring in the meantime.
 
 <a name="priority-inversion"></a>
+
 ### Priority inversion
 
 The problem can occur when you have a high-priority and a low-priority task share a common resource. When the low-priority task takes a lock to the common resource, it is supposed to finish off quickly in order to release its lock and to let the high-priority task execute without significant delays. Since the high-priority task is blocked from running as long as the low-priority task has the lock, there is a window of opportunity for medium-priority tasks to run and to preempt the low-priority task, because the medium-priority tasks have now the highest priority of all currently runnable tasks. At this moment, the medium-priority tasks hinder the low-priority task from releasing its lock, therefore effectively gaining priority over the still waiting, high-priority tasks.
@@ -768,31 +864,36 @@ The problem can occur when you have a high-priority and a low-priority task shar
 <img src="https://github.com/sashakid/ios-guide/blob/master/Images/priority_inversion.png">
 
 <a name="как-избежать-гонки-условий"></a>
+
 ### Как избежать гонки условий
+
 The best way to avoid both deadlock and livelock situations is to take only one lock at a time. If you must acquire more than one lock at a time, you should make sure that other threads do not try to do something similar.
 
-* Avoid Synchronization Altogether
+- Avoid Synchronization Altogether
 
 The best way to implement concurrency is to reduce the interactions and inter-dependencies between your concurrent tasks. If each task operates on its own private data set, it does not need to protect that data using locks. Even in situations where two tasks do share a common data set, you can look at ways of partitioning that set or providing each task with its own copy.
 
-* Understand the Limits of Synchronization
+- Understand the Limits of Synchronization
 
 Synchronization tools are effective only when they are used consistently by all threads in an application. If you create a mutex to restrict access to a specific resource, all of your threads must acquire the same mutex before trying to manipulate the resource. Failure to do so defeats the protection offered by the mutex and is a programmer error.
 
-* Watch Out for Deadlocks and Livelocks
+- Watch Out for Deadlocks and Livelocks
 
 The best way is to take only one lock at a time. If you must acquire more than one lock at a time, you should make sure that other threads do not try to do something similar.
 
-* Use Volatile Variables Correctly
+- Use Volatile Variables Correctly
 
 <a name="dispatch_sync-dispatch_async"></a>
+
 ## Чем отличается dispatch_async от dispatch_sync?
+
 Когда это возможно, асинхронное выполнение с использованием `dispatch_async` и `dispatch_async_f` функций предпочтительнее, чем синхронный вариант. При добавлении объекта блока или функции в очередь, нет никакого способа узнать, когда этот код будет выполняться. В результате, добавляя блоки или функции асинхронно позволяет запланировать выполнение кода и продолжать делать другую работу из вызывающего потока. Это особенно важно, если вы планировали выполнить задачу из основного потока приложения, возможно, в ответ на некоторые пользовательские события.
 Хотя вы должны добавлять задачи асинхронно по мере возможности, все же могут быть случаи, когда вам нужно добавить задачу синхронно, чтобы предотвратить гонку условий или другие ошибки синхронизации. В этих случаях можно использовать функции `dispatch_sync` и `dispatch_sync_f` для добавления задачи в очередь. Эти функции блокируют текущий поток исполнения до завершения выполнения указанной задачи.
 
 __Важно:__ Вы никогда не должны вызывать функции `dispatch_sync` или `dispatch_sync_f` из задачи, которая выполняется в той же очереди, в которой вы планируете переход к функции. Это особенно важно для последовательных очередей, которые гарантированно приведут к deadlock, но также следует избегать одновременных очередей.
 
 Следующий пример показывает, как использовать блочные варианты для отправки задачи асинхронно и синхронно:
+
 ```objectivec
 dispatch_queue_t myCustomQueue;
 myCustomQueue = dispatch_queue_create("com.example.MyCustomQueue", NULL);
@@ -809,15 +910,20 @@ printf("Оба блока были завершены.\n");
 ```
 
 <a name="многопоточность-uikit"></a>
+
 ## Как многопоточность работает с UIKit?
+
 In Cocoa Touch, the `UIApplication` i.e. the instance of your application is attached to the main thread because this thread is created by `UIApplicatioMain()`, the entry point function of Cocoa Touch. It sets up main event loop, including the application’s run loop, and begins processing events. Application's main event loop receives all the UI events i.e. touches, gestures etc. These application UI events are further forwarded to `UIResponder`'s following the chain of responders usually like `UIApplication->UIWindow->UIViewController->UIView->subviews (UIButton, etc...)` Responders handle events like button press, tap, pinch zoom, swipe etc. which get translated as change in the UI. Hence as you can see these chain of events occur on main thread which is why UIKit, the framework which contains the responders should operate on main thread.
 One of the most common mistakes even experienced iOS/Mac developers make is accessing parts of UIKit/AppKit on background threads. It’s very easy to make the mistake of setting properties like image from a background thread, because their content is being requested from the network in the background anyway. Apple’s code is performance-optimized and will not warn you if you change properties from different threads. For the most part, UIKit classes should be used only from an application’s main thread. This is particularly true for classes derived from `UIResponder` or that involve manipulating your application’s user interface in any way.
 
 <a name="atomic-vs-nonatomic"></a>
+
 ## Atomic vs nonatomic. Чем отличаются? Как вручную переопределить atomic/nonatomic сеттер в не ARC коде?
+
 Cинхронизировать чтение/запись между потоками или нет.
 Atomic – thread safe.
 Тут все сложнее и неоднозначнее, есть ряд способов как сделать threadsafe аксессоры к пропертям. Самый простой способ это сделать – добавить конструкцию `@synchronized`:
+
 ```objectivec
 - (NSString *)foo {
   @synchronized(self) {
@@ -834,9 +940,11 @@ Atomic – thread safe.
   }
 }
 ```
+
 Таким образом используя `@synchronized` мы лочим по ключу `self` доступ к `foo`, однако у такого метода есть очевидный недостаток, если в классе будет две переменные (или 100500) к которым нужен одновременный доступ с разных потоков, то они будут лочиться и друг относительно друга, т.к `self` для них один и тот же, в таких случаях нужно использовать другие методы лока, как `NSLock`, `NSRecursiveLock`,...
 
 <a name="отмена-операций"></a>
+
 # Можно ли отменить операцию в GCD? А в NSOperationQueue?
 
 To suspend a dispatch queue, it's simply `dispatch_suspend(queue)` or `queue.suspend()` in Swift 3. That doesn't affect any tasks currently running, but merely prevents new tasks from starting on that queue. Also, you obviously only suspend queues that you created (not global queues, not main queue). To resume a dispatch queue, it's `dispatch_resume(queue)` or `queue.resume()`. There's no concept of "auto resume", so you'd just have to manually resume it when appropriate.
@@ -846,7 +954,9 @@ In terms of canceling tasks queued on dispatch queues, this is a new feature of 
 If you want to cancel tasks, you might also consider using operation queues, `NSOperationQueue`. It also supports constraining the degree of concurrency with `maxConcurrentOperationCount` (whereas with dispatch queues you can only choose between serial and concurrent, and controlling concurrency more than that requires a tiny bit of effort on your part). If using operation queues, you suspend and resume by changing the suspended property of the queue. And to pass it around, you just pass the `NSOperationQueue` object you instantiated.
 
 <a name="gcd-vs-nsoperationqueue"></a>
+
 # Когда лучше использовать GCD, а когда NSOperationQueue?
+
 `NSOperationQueue` can be more suitable for long-running operations that may need to be cancelled or have complex dependencies.
 
 GCD dispatch queues are better for short tasks that should have minimum performance and memory overhead.

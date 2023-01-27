@@ -1,21 +1,21 @@
 - [Язык СИ](#язык-си)
-	- [Битовые операции](#битовые-операции)
-	- [Примеры битовых операций](#примеры-битовых-операций)
-	- [Что такое указатель и ссылка и в чем разница](#что-такое-указатель-и-ссылка-и-в-чем-разница)
-	- [Почему (NSError **) использует указатель на указатель](#почему-nserror-использует-указатель-на-указатель)
-	- [How to return 2+ values from a function](#how-to-return-2+-values-from-a-function)
-	- [What is the difference between char* const and const char*](#what-is-the-difference-between-char-const-and-const-char)
-	- [Что значит n&(n – 1)](#что-значит-n-n–1)
+  - [Битовые операции](#битовые-операции)
+  - [Что такое указатель и ссылка и в чем разница?](#что-такое-указатель-и-ссылка-и-в-чем-разница)
+  - [Почему (NSError \*\*) использует указатель на указатель?](#почему-nserror--использует-указатель-на-указатель)
+  - [How to return 2+ values from a function?](#how-to-return-2-values-from-a-function)
+  - [What is the difference between char *const and const char*?](#what-is-the-difference-between-char-const-and-const-char)
+  - [Что значит n\&(n – 1)?](#что-значит-nn--1)
 
 <a name="язык-си"></a>
-# Язык СИ.
 
-* Лаконичность и быстрота (почти как Ассемблер)
-* Переносимость на различные архитектуры
-* Набор низкоуровневых средств
-* Прямой доступ к памяти
-* Операции над битами
-* Адресная арифметика
+# Язык СИ
+
+- Лаконичность и быстрота (почти как Ассемблер)
+- Переносимость на различные архитектуры
+- Набор низкоуровневых средств
+- Прямой доступ к памяти
+- Операции над битами
+- Адресная арифметика
 
 Си – универсальный язык программирования, считается удобным для системного программирования, хотя он удобен и для написания прикладных программ. Среди преимуществ языка Си следует отметить переносимость программ на компьютеры различной архитектуры и из одной операционной системы в другую, лаконичность записи алгоритмов, логическую стройность программ, а также возможность получить программный код, сравнимый по скорости выполнения с программами, написанными на языке ассемблера. Последнее связано с тем, что хотя Си является языком высокого уровня, имеющим полный набор конструкций структурного программирования, он также обладает набором низкоуровневых средств, обеспечивающих доступ к аппаратным средствам компьютера.
 Программа на Cи состоит из программных единиц одного типа – функций. Аргументы могут передаваться функциям посредством копирования значений этих аргументов; при этом вызванная функция не может изменить фактический аргумент в вызывающей подпрограмме.
@@ -27,7 +27,9 @@
 <img src="https://github.com/sashakid/ios-guide/blob/master/Images/c_types.png">
 
 <a name="битовые-операции"></a>
+
 ## Битовые операции
+
 В своих программах вы не адресуете отдельные биты, а имеете дело с группами битов - байтами. Если представить байт как 8-разрядное целое число без знака, его биты соответствуют последовательным степеням `2`.
 
 <img src="https://github.com/sashakid/ios-guide/blob/master/Images/binary.png">
@@ -43,16 +45,20 @@
 __Побитовое `И` (`AND`, `&`)__
 
 `2` байта можно объединить поразрядной операцией `И` для создания третьего байта. В этом случае бит третьего байта равен `1` только в том случае, если оба соответствующих бита первых двух байтов равны `1`.
+
 ```
 0011
 0101
 ----
 0001
 ```
+
 Часто используется для обнуления некоторой группы разрядов. Например:
+
 ```c
 n = n & 0177;
 ```
+
 обнуляет в `n` все разряды, кроме младших семи.
 
 __Побитовое `ИЛИ` (`OR`, `|`)__
@@ -60,25 +66,31 @@ __Побитовое `ИЛИ` (`OR`, `|`)__
 <img src="https://github.com/sashakid/ios-guide/blob/master/Images/or_example.png">
 
 Программа выдает результат объединения двух байтов поразрядной операцией `ИЛИ`:
+
 ```
-Hex: 		03c0 | 0a90 = 0bd
-Decimal: 	0600 | 01690 = 0189
+Hex:   03c0 | 0a90 = 0bd
+Decimal:  0600 | 01690 = 0189
 ```
+
 ```
 0011
 0101
 ----
 0111
 ```
+
 Применяют для установки разрядов; так,
+
 ```c
 х = х | SET_ON;
 ```
+
 устанавливает единицы в тех разрядах `х`, которым соответствуют единицы в `SET_ON`.
 
 __Побитовое исключающее `ИЛИ` (сложение по модулю два, `XOR`, `^`)__
 
 Исключающая операция `ИЛИ` объединяет два байта и создает третий байт. Бит результата равен `1` в том случае, если ровно один из двух соответствующих битов входных байтов равен `1`.
+
 ```
 0011
 0101
@@ -89,15 +101,19 @@ __Побитовое исключающее `ИЛИ` (сложение по мо
 __Побитовое отрицание (дополнение, унарный оператор `НЕ`, `NOT`, `~`)__
 
 Дополнением к существующему байту называется байт, биты которого находятся в противоположном состоянии: все нули заменяются единицами, а все единицы заменяются нулями.
+
 ```
 0011
 ----
 1100
 ```
+
 Унарный оператор `~` поразрядно "обращает" целое т.е. превращает каждый единичный бит в нулевой и наоборот. Например:
+
 ```c
 х = х & ~077
 ```
+
 обнуляет в `х` последние `6` разрядов. Заметим, что запись `х & ~077` не зависит от длины слова, и, следовательно, она лучше, чем `х & 0177700`, поскольку последняя подразумевает, что `х` занимает `16` битов. Не зависимая от машины форма записи `~077` не потребует дополнительных затрат при счете, так как `~077` — константное выражение, которое будет вычислено во время компиляции.
 
 __Сдвиг влево `<<`__
@@ -122,31 +138,42 @@ __Примеры битовых операций:__
 ```
 
 <a name="что-такое-указатель-и-ссылка-и-в-чем-разница"></a>
+
 ## Что такое указатель и ссылка и в чем разница?
+
 __Указатель__ (C, C++, Objective-C)  – переменная, которая содержит в качестве значения адрес памяти переменной, которая уже в свою очередь содержит значение. Т.о. имя переменной отсылает к значению прямо, а указатель – косвенно. Указатель не несет информации о содержимом объекта, а содержит сведения о том, где размещен объект. Для определения указателя надо указать тип объекта, на который указывает указатель, и символ звездочки `*`.
+
 ```c
 int x = 10; // определяем переменную
 int *p; // определяем указатель
 p = &x; // указатель получает адрес переменной
-printf("%p \n", p);	// 0060FEA8
+printf("%p \n", p); // 0060FEA8
 ```
+
 Указатель хранит адрес объекта в памяти компьютера. И для получения адреса к переменной применяется операция `&`. Эта операция применяется только к таким объектам, которые хранятся в памяти компьютера, то есть к переменным и элементам массива. Указатель `p` будет ссылаться на адрес, по которому располагается переменная `x`, то есть на адрес `0x0060FEA8`. Но так как указатель хранит адрес, то мы можем по этому адресу получить хранящееся там значение, то есть значение переменной `x`. Для этого применяется операция `*` или операция разыменования, то есть та операция, которая применяется при определении указателя. Результатом этой операции всегда является объект, на который указывает указатель. Применим данную операцию и получим значение переменной `x`:
+
 ```c
 printf("x = %d \n", *p); // x = 10
 ```
+
 Используя полученное значение в результате операции разыменования мы можем присвоить его другой переменной:
+
 ```c
 int y = *p;
 printf("x = %d \n", y); // x = 10
 ```
+
 И также используя указатель, мы можем менять значение по адресу, который хранится в указателе:
+
 ```c
 *p = 45;
 printf("x = %d \n", x);  // 45
 ```
+
 Так как по адресу, на который указывает указатель, располагается переменная `x`, то соответственно ее значение изменится.
 
 __Ссылка__ (C++) — это объект, указывающий на определенные данные, но не хранящий их. Получение объекта по ссылке называется разыменованием. Ссылка не является указателем, а просто является другим именем для объекта. Главное отличие ссылки от указателей в том, что указатель это целое число и поэтому для него доступны операции с целыми числами, а для ссылки доступны только операции копирования и разыменования.
+
 ```c++
 int value = 7; // обычная переменная
 int &ref = value; // ссылка на переменную value
@@ -155,9 +182,11 @@ int &ref = value; // ссылка на переменную value
 Есть два способа обращения к функции – вызов по значению и вызов по ссылке. При вызове по значению создается копия аргумента и передается вызываемой функции. Изменение копии не влияют на значение оригинала в операторе вызова. Один из минусов этого способа – если передается большой элемент данных, то на его копирование может уйти дополнительное время.
 
 В вызове функции достаточно указать имя переменной и она будет передана по ссылке, тогда упоминание в теле вызываемой функции переменной по имени ее параметра в действительности является обращением к исходной переменной в вызывающей функции и эта исходная переменная может быть изменена непосредственно вызываемой функцией. Для передачи больших объектов используется константный ссылочный параметр, чтобы обеспечить защиту параметра, как при вызове по значению, и в то же время избежать накладных расходов при передаче копии большого объекта:
+
 ```c
 const int &count;
 ```
+
 `const` с указателем значит, что значение переменной не изменяется.
 
 Аргументы можно передавать в функцию тремя способами:
@@ -171,6 +200,7 @@ const int &count;
 __Различия__
 
 Ссылка — это тот же указатель, который неявно разыменовывается при доступе к значению, на которое он указывает («под капотом» ссылки реализованы с помощью указателей). Таким образом, в следующем коде:
+
 ```c++
 int value = 7;
 int *const ptr = &value;
@@ -179,12 +209,15 @@ int &ref = value;
 *ptr = 7;
 ref = 7;
 ```
+
 Поскольку ссылки должны быть инициализированы корректными объектами (они не могут быть нулевыми) и не могут быть изменены позже, то они, как правило, безопаснее указателей (так как риск разыменования нулевого указателя отпадает). Однако, они немного ограничены в функциональности по сравнению с указателями.
 
 Если определенное задание может быть решено с помощью как ссылок, так и указателей, то лучше использовать ссылки. Указатели следует использовать только в тех ситуациях, когда ссылки являются недостаточно эффективными (например, при динамическом выделении памяти).
 
 <a name="почему-nserror-использует-указатель-на-указатель"></a>
+
 ## Почему (NSError **) использует указатель на указатель?
+
 _Explanation 1:_
 if you pass a pointer to an object to your function, the function can only modify what the pointer is pointing to.
 if you pass a pointer to a pointer to an object then the function can modify the pointer to point to another object.
@@ -197,6 +230,7 @@ A pointer to a pointer is a form of multiple indirection, or a chain of pointers
 
 A variable that is a pointer to a pointer must be declared as such. This is done by placing an additional asterisk in front of its name. For example, the following declaration declares a pointer to a pointer of type `int`: `int **var;`
 When a target value is indirectly pointed to by a pointer to a pointer, accessing that value requires that the asterisk operator be applied twice, as is shown below in the example:
+
 ```c
 int main () {
 
@@ -220,11 +254,13 @@ int main () {
   return 0;
 }
 ```
+
 ```
 Value of var = 3000
 Value available at *ptr = 3000
 Value available at **pptr = 3000
 ```
+
 with a regular parameter, say `int`, you get a local copy
 
 with a pointer parameter, say `int*`, you can modify what it points to
@@ -235,18 +271,22 @@ with a double pointer parameter, say `int**`, you can modify the pointer itself,
 
 __In C:__
 
-* Returning the address of the first element of a local array has undefined behavior (at least dereferencing it later is). You may use output parameters, that is, pass two pointers, and set the values inside:
+- Returning the address of the first element of a local array has undefined behavior (at least dereferencing it later is). You may use output parameters, that is, pass two pointers, and set the values inside:
+
 ```c
 void Calculate(int x, int y, int* prod, int* quot) {
   *prod = x*y;
   *quot = x/y;
 }
 ```
+
 Usage:
+
 ```c
 int x = 10, y = 2, prod, quot;
 Calculate(x, y, &prod, &quot)
 ```
+
 * Another thing you could do is pack your data into a struct
 
 ```c
@@ -260,9 +300,10 @@ product_and_quot Calculate(int x, int y) {
   return p;
 }
 ```
+
 __in Objective-C:__
 
-* Pointers
+- Pointers
 
 ```objectivec
 - (void)convertA:(float)a B:(float)b C:(float) intoX:(float *)xOut Y:(float *)yOut Z:(float)zOut {
@@ -271,11 +312,14 @@ __in Objective-C:__
   *zOut = a*b + 4*c;
 }
 ```
+
 and call it like this:
+
 ```objectivec
 float x, y, z;
 [self convertA:a B:b C:c intoX:&x Y:&y Z:&z];
 ```
+
 * Another way is to create a struct and return it:
 
 ```objectivec
@@ -291,22 +335,28 @@ struct XYZ {
   return xyz;
 }
 ```
+
 Call it like this:
+
 ```objectivec
 struct XYZ output = [self xyzWithA:a B:b C:c];
 ```
+
 * Double pointers with objects
 
 If you want to return more than one new object, your function should take pointers to the object pointer, thus:
+
 ```objectivec
 - (void)mungeFirst:(NSString **)stringOne andSecond:(NSString **)stringTwo {
   *stringOne = [NSString stringWithString:@"foo"];
   *stringTwo = [NSString stringWithString:@"baz"];
 }
 ```
+
 * Blocks
 
 You can return two values with help of block:
+
 ```objectivec
 - (void)getUIControlles:(void (^)(UITextField *objTextFiled, UIView *objView))completionBlock {
   UITextField * textFiled = nil;
@@ -332,7 +382,8 @@ You can return two values with help of block:
   ```
 
 <a name="what-is-the-difference-between-char-const-and-const-char"></a>
-## What is the difference between char * const and const char *?
+
+## What is the difference between char *const and const char*?
 
 Существует четыре способа передачи в функцию указателя
 
@@ -344,17 +395,22 @@ You can return two values with help of block:
 <img src="https://github.com/sashakid/ios-guide/blob/master/Images/const_pointer.png">
 
 <a name="что-значит-n-n–1"></a>
+
 ## Что значит n&(n – 1)?
+
 It's figuring out if `n` is either `0` or an exact power of two.
 It works because a binary power of two is of the form `1000...000` and subtracting one will give you `111...111`. Then, when you `AND` those together, you get zero, such as with:
+
 ```
   1000 0000 0000 0000
 &  111 1111 1111 1111
   ==== ==== ==== ====
 = 0000 0000 0000 0000
 ```
+
 Any non-power-of-two input value will not give you zero when you perform that operation.
 For example, let's try all the 3-bit combinations:
+
 ```
 <----- binary ---->
   n     n    n-1   n&(n-1)
@@ -368,5 +424,6 @@ For example, let's try all the 3-bit combinations:
  6    110   101     100
  7    111   110     110
 ```
+
 You can see that only `0` and the powers of two (`1`, `2` and `4`) result in a `000-false` bit pattern, all others are non-zero or `true`.
 See the full Bit Twiddling Hacks document for all sorts of other wonderful (or dastardly, depending on your viewpoint) hackery.

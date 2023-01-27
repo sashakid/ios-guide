@@ -1,16 +1,16 @@
 - [iOS](#ios)
-	- [IPhone, resolution, pixels vs points](#iphone,-resolution,-pixels-vs-points)
-	- [Файловая система iOS](#файловая-система-ios)
-	- [Жизненный цикл приложения](#жизненный-цикл-приложения)
-	- [Жизненный цикл UIViewController](#жизненный-цикл-uiviewController)
-	- [Как работает UIScrollView?](#uiscrollview)
-	- [Как работает UITableView?](#как-работает-uitableview)
-	- [UIView](#uiview)
-  - [Фреймворки](#фреймворки)
-    - [Core Foundation](#core-foundation)
-	  - [UIKit](#uikit)
-    - [CFNetwork](#cfnetwork)
-    - [QuartzCore](#quartzcore)
+  - [IPhone, resolution, pixels vs points?](#iphone-resolution-pixels-vs-points)
+  - [Файловая система iOS](#файловая-система-ios)
+  - [Жизненный цикл приложения](#жизненный-цикл-приложения)
+  - [Жизненный цикл UIViewController](#жизненный-цикл-uiviewcontroller)
+  - [Как работает UIScrollView?](#как-работает-uiscrollview)
+  - [Как работает UITableView?](#как-работает-uitableview)
+  - [UIView](#uiview)
+- [Фреймворки](#фреймворки)
+  - [Core Foundation](#core-foundation)
+  - [UIKit](#uikit)
+  - [CFNetwork](#cfnetwork)
+  - [QuartzCore](#quartzcore)
 
 <a name="ios"></a>
 # iOS
@@ -183,6 +183,7 @@ Is a library with a set of programming interfaces conceptually derived from the 
 * Provides common API and other useful capabilities, including a plug-in architecture, XML property lists, and preferences
 
 An "opaque type" is a type where you don't have a full definition for the struct or class. In C, C++ and Ob-jective-C, you can tell the compiler that a type will be defined later by using a forward declaration:
+
 ```c
 // forward declaration of struct in C, C++ and Objective-C
 struct Foo;
@@ -191,12 +192,15 @@ class Bar;
 // forward declaration of class in Objective-C:
 @class Baz;
 ```
+
 The compiler doesn't have enough information to let you do anything directly with the struct or class except declare pointers to it, but this is frequently all you need to do. This allows library and framework creators to hide implementation details. Users of a library or framework then call helper functions to create, manipulate and destroy instances of a forward declared struct or class. For example, a framework creator could create these functions for `struct Foo`:
+
 ```c
 struct Foo *createFoo(void);
 void addNumberToFoo(struct Foo *foo, int number);
 void destroyFoo(struct Foo *foo);
 ```
+
 As part of the Core Foundation framework, Apple makes common Objective-C classes like `NSString`, `NSArray` and `NSBundle` available to C programmers through opaque types. C programmers use pointers and helper functions to create, manipulate and destroy instances of these Objective-C classes. Apple calls this "toll-free bridging". They follow a common naming convention: `CF` prefix + class name + `Ref` suffix, where `CF` stands for "Core Foundation" and `Ref` is short for "Reference", meaning it's a pointer.
 Core Foundation makes it possible for the different frameworks and libraries on OS X to share code and data. Applications, libraries, and frameworks can define C routines that incorporate Core Foundation types in their external interfaces; they can thus communicate data—as Core Foundation objects—to each other through these interfaces. Core Foundation also provides “toll-free bridging” between certain services and the Cocoa’s Foundation framework. Toll-free bridging enables you to substitute Cocoa objects for Core Foundation objects in function parameters and vice versa.
 Some Core Foundation types and functions are abstractions of things that have specific implementations on different operating systems. Code that makes use of these APIs is thus easier to port to different platforms. Date and number types abstract time utilities and offers facilities for converting between absolute and Gregorian measures of time. It also abstracts numeric values and provides facilities for converting between different internal representations of those values.
@@ -255,6 +259,7 @@ A stream is a sequence of bytes transmitted serially over a communications path.
 Quartz 2D is an API of the Core Graphics framework that implements drawing.
 Quartz Core is a framework that includes APIs for animation and image processing.
 Quartz frameworks and their APIs
+
 * CoreGraphics.framework
 * Quartz 2D API manages the graphic context and implements drawing.
 * Quartz Services API provides low level access to the window server. This includes display hardware, resolution, refresh rate, and others.

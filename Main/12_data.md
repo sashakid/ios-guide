@@ -1,19 +1,22 @@
 - [Data](#data)
-	- [Общие-понятия](#общие-понятия)
-	- [Что такое Core Data? Опишите стек core data](#core-data)
-	- [Целесообразность использования Core Data](#целесообразность-использования-core-data)
-	- [Какие есть нюансы при использовании Core Data в разных потоках? Как синхронизировать данные между потоками?](#core-data-в-разных-потоках)
-	- [Какие типы хранилищ поддерживает CoreData?](#типы-хранилищ)
-	- [Что такое ленивая загрузка? Что ее связывает с Core Data? Опишите ситуация когда она может быть полезной? Что такое faulting?](#ленивая-загрузка-core-data)
-	- [Что такое fetch result controller?](#fetch-result-controller)
-	- [Как сделать миграцию БД?](#db-migration)
-	- [Какие плюсы и минусы у Realm? Чем отличается от Core Data?](#realm-vs-coredata)
+  - [Общие понятия](#общие-понятия)
+  - [Что такое Core Data? Опишите стек core data](#что-такое-core-data-опишите-стек-core-data)
+  - [Целесообразность использования Core Data](#целесообразность-использования-core-data)
+  - [Какие есть нюансы при использовании Core Data в разных потоках? Как синхронизировать данные между потоками?](#какие-есть-нюансы-при-использовании-core-data-в-разных-потоках-как-синхронизировать-данные-между-потоками)
+  - [Что такое ленивая загрузка? Что ее связывает с Core Data? Опишите ситуация когда она может быть полезной? Что такое faulting?](#что-такое-ленивая-загрузка-что-ее-связывает-с-core-data-опишите-ситуация-когда-она-может-быть-полезной-что-такое-faulting)
+  - [Что такое fetch result controller?](#что-такое-fetch-result-controller)
+  - [Как сделать миграцию БД?](#как-сделать-миграцию-бд)
+  - [Какие плюсы и минусы у Realm? Чем отличается от Core Data?](#какие-плюсы-и-минусы-у-realm-чем-отличается-от-core-data)
+- [Минусы realm](#минусы-realm)
 
 <a name="data"></a>
+
 # Data
 
 <a name="общие-понятия"></a>
+
 ## Общие понятия
+
 _Реляционная база данных_ — база данных, основанная на реляционной модели данных. Слово «реляционный» происходит от англ. relation (отношение). Для работы с реляционными БД применяют реляционные СУБД.
 
 _Реляционная модель данных (РМД)_ — логическая модель данных, прикладная теория построения баз данных, которая является приложением к задачам обработки данных таких разделов математики как теории множеств и логика первого порядка. Термин «реляционный» означает, что теория основана на математическом понятии отношение (relation). В качестве неформального синонима термину «отношение» часто встречается слово таблица. Необходимо помнить, что «таблица» есть понятие нестрогое и неформальное и часто означает не «отношение» как абстрактное понятие, а визуальное представление отношения на бумаге или экране. Некорректное и нестрогое использование термина «таблица» вместо термина «отношение» нередко приводит к недопониманию. Наиболее частая ошибка состоит в рассуждениях о том, что РМД имеет дело с «плоскими», или «двумерными» таблицами, тогда как таковыми могут быть только визуальные представления таблиц. Отношения же являются абстракциями, и не могут быть ни «плоскими», ни «неплоскими».
@@ -27,6 +30,7 @@ __Пример SQL:__
 Create a table to store information about weather observation stations:
 
 -- No duplicate ID fields allowed
+
 ```sql
 CREATE TABLE STATION
 (ID INTEGER PRIMARY KEY,
@@ -35,16 +39,21 @@ STATE CHAR(2),
 LAT_N REAL,
 LONG_W REAL);
 ```
+
 populate the table STATION with a few rows:
+
 ```sql
 INSERT INTO STATION VALUES (13, 'Phoenix', 'AZ', 33, 112);
 INSERT INTO STATION VALUES (44, 'Denver', 'CO', 40, 105);
 INSERT INTO STATION VALUES (66, 'Caribou', 'ME', 47, 68);
 ```
+
 query to look at table STATION in undefined order:
+
 ```sql
 SELECT * FROM STATION;
 ```
+
 ID | CITY | STATE | LAT_N | LONG_W
 ---|------|-------|-------|-------
 13 | Phoenix | AZ | 33 | 112
@@ -54,10 +63,12 @@ ID | CITY | STATE | LAT_N | LONG_W
 query to select Northern stations (Northern latitude > 39.7):
 
 -- selecting only certain rows is called a "restriction".
+
 ```sql
 SELECT * FROM STATION
 WHERE LAT_N > 39.7;
 ```
+
 ID | CITY | STATE | LAT_N | LONG_W
 ---|------|-------|-------|-------
 44 | Denver | CO | 40 | 105
@@ -66,9 +77,11 @@ ID | CITY | STATE | LAT_N | LONG_W
 query to select only ID, CITY, and STATE columns:
 
 -- selecting only certain columns is called a "projection".
+
 ```sql
 SELECT ID, CITY, STATE FROM STATION;
 ```
+
 ID | CITY | STATE
 ---|------|------
 13 | Phoenix | AZ
@@ -76,17 +89,21 @@ ID | CITY | STATE
 66 | Caribou | ME
 
 query to both "restrict" and "project":
+
 ```sql
 SELECT ID, CITY, STATE FROM STATION
 WHERE LAT_N > 39.7;
 ```
+
 ID | CITY | STATE
 ---|------|------
 44 | Denver | CO
 66 | Caribou | ME
 
 <a name="core-data"></a>
+
 ## Что такое Core Data? Опишите стек core data
+
 Apple предоставляет гибкий фреймворк для работы с хранимыми на устройстве данными — Core Data. Большинство деталей по работе с хранилищем данных Core Data скрывает, позволяя вам сконцентрироваться на том, что действительно делает ваше приложение веселым, уникальным и удобным в использовании. Не смотря на то, что Core Data может хранить данные в реляционной базе данных вроде SQLite, Core Data не является СУБД (системой управления БД). По-правде, Core Data в качестве хранилища может вообще не использовать реляционные базы данных. Core Data скорее является оболочкой для работы с данными, которая позволяет работать с сущностями и их связями (отношениями к другим объектами), атрибутами, в том виде, который напоминает работы с объектным графом в обычном объектно-ориентированном программировании.
 
 A Core Data stack is composed of the following objects: one or more managed object contexts connected to a single persistent store coordinator which is in turn connected to one or more persistent stores. A stack contains all the Core Data components you need to fetch, create, and manipulate managed objects. Minimally it contains:
@@ -120,18 +137,20 @@ A managed object model is a set of objects that together form a blueprint descri
 A managed object context represents a single object space, or scratch pad, in a Core Data application. A managed object context is an instance of `NSManagedObjectContext`. Its primary responsibility is to manage a collection of managed objects. These managed objects represent an internally consistent view of one or more persistent stores. The context is a powerful object with a central role in the life-cycle of managed objects, with responsibilities from life-cycle management (including faulting) to validation, inverse relationship handling, and undo/redo. From your perspective, the context is the central object in the Core Data stack. It’s the object you use to create and fetch managed objects, and to manage undo and redo operations. Within a given context, there is at most one managed object to represent any given record in a persistent store. __When you fetch objects, the context asks its parent object store to return those objects that match the fetch request__. Changes that you make to managed objects are not committed to the parent store until you save the context.
 
 <a name="целесообразность-использования-core-data"></a>
+
 ## Целесообразность использования Core Data
+
 Core Data уменьшает количество кода, написанного для поддержки модели слоя приложения, как правило, на 50% - 70%, измеряемое в строках кода. Core Data имеет зрелый код, качество которого обеспечивается путем юнит-тестов, и используется ежедневно миллионами клиентов в широком спектре приложений. Структура была оптимизирована в течение нескольких версий. Она использует информацию, содержащуюся в модели и выполненяет функции, как правило, не работающие на уровне приложений в коде. Кроме того, в дополнение к отличной безопасности и обработке ошибок, она предлагает лучшую масштабируемость при работе с памятью, относительно любого конкурирующего решения. Другими словами: вы могли бы потратить долгое время тщательно обрабатывая Ваши собственные решения оптимизации для конкретной предметной области, вместо того, чтобы получить преимущество в производительности, которую Core Data предоставляет бесплатно для любого приложения.
 
 __Когда нецелесообразно использовать Core Data:__
-* если планируется использовать очень небольшой объем данных. В этом случае проще воспользоваться для хранения Ваших данных объектами коллекций - массивами или словарями и сохранять их в .plist файлы.
-* если используется кросс-платформерная архитектура или требуется доступ к строго определенному формату файла с данными (хранилищу), например SQLite.
-* использование баз данных клиент-сервер, например MySQL или PostgreSQL.
+- если планируется использовать очень небольшой объем данных. В этом случае проще воспользоваться для хранения Ваших данных объектами коллекций - массивами или словарями и сохранять их в .plist файлы.
+- если используется кросс-платформерная архитектура или требуется доступ к строго определенному формату файла с данными (хранилищу), например SQLite.
+- использование баз данных клиент-сервер, например MySQL или PostgreSQL.
 
 __SQLite__
-* Максимальный объем хранимых данных базы SQLite составляет 2 терабайта.
-* Чтение из базы данных может производиться одним и более потоками, например несколько процессов могут одновременно выполнять `SELECT`. Однако запись в базу данных может осуществляться, только, если база в данный момент не занята другим процессом.
-* SQLite не накладывает ограничения на типы данных. Любые данные могут быть занесены в любой столбец. Ограничения по типам данных действуют только на `INTEGER PRIMARY KEY`, который может содержать только 64-битное знаковое целое.
+- Максимальный объем хранимых данных базы SQLite составляет 2 терабайта.
+- Чтение из базы данных может производиться одним и более потоками, например несколько процессов могут одновременно выполнять `SELECT`. Однако запись в базу данных может осуществляться, только, если база в данный момент не занята другим процессом.
+- SQLite не накладывает ограничения на типы данных. Любые данные могут быть занесены в любой столбец. Ограничения по типам данных действуют только на `INTEGER PRIMARY KEY`, который может содержать только 64-битное знаковое целое.
 
 SQLite версии 3.0 и выше позволяет хранить BLOB данные в любом поле, даже если оно объявлено как поле другого типа.
 Обращение к SQLite базе из двух потоков одновременно неизбежно вызовет краш. Выхода два:
@@ -183,28 +202,35 @@ __Пример SQLite__
 ```
 
 <a name="core-data-в-разных-потоках"></a>
+
 ## Какие есть нюансы при использовании Core Data в разных потоках? Как синхронизировать данные между потоками?
+
 In Core Data, the managed object context can be used with two concurrency patterns, defined by `NSMainQueueConcurrencyType` and `NSPrivateQueueConcurrencyType`.
 
-* `NSMainQueueConcurrencyType` is specifically for use with your application interface and can only be used on the main queue of an application.
+- `NSMainQueueConcurrencyType` is specifically for use with your application interface and can only be used on the main queue of an application.
 
-* The `NSPrivateQueueConcurrencyType` configuration creates its own queue upon initialization and can be used only on that queue. Because the queue is private and internal to the `NSManagedObjectContext` instance, it can only be accessed through the `performBlock:` and the `performBlockAndWait:` methods.
+- The `NSPrivateQueueConcurrencyType` configuration creates its own queue upon initialization and can be used only on that queue. Because the queue is private and internal to the `NSManagedObjectContext` instance, it can only be accessed through the `performBlock:` and the `performBlockAndWait:` methods.
 
 `NSManagedObject` instances are not intended to be passed between queues. Doing so can result in corruption of the data and termination of the application. When it is necessary to hand off a managed object reference from one queue to another, it must be done through `NSManagedObjectID` instances. You retrieve the managed object ID of a managed object by calling the `objectID` method on the `NSManagedObject` instance.
 
 <a name="ленивая-загрузка-core-data"></a>
+
 ## Что такое ленивая загрузка? Что ее связывает с Core Data? Опишите ситуация когда она может быть полезной? Что такое faulting?
+
 Для загрузки данных из БД в память приложения удобно пользоваться загрузкой не только данных об объекте, но и о сопряжённых с ним объектах. Это делает загрузку данных проще для разработчика: он просто использует объект, который, тем не менее вынужден загружать все данные в явном виде. Но это ведёт к случаям, когда будет загружаться огромное количество сопряжённых объектов, что плохо скажется на производительности в случаях, когда эти данные реально не нужны. Паттерн Lazy Loading (Ленивая Загрузка) подразумевает отказ от загрузки дополнительных данных, когда в этом нет необходимости. Вместо этого ставится маркер о том, что данные не загружены и их надо загрузить в случае, если они понадобятся. Как известно, если Вы ленивы, то вы выигрываете в том случае, если дело, которое вы не делали на самом деле и не надо было делать.
 Faulting isn't unique to Core Data. A similar technique is used in many other frameworks, such as Ember and Ruby on Rails. Faulting is a mechanism Core Data employs to reduce your application’s memory usage, only load data when it's needed. A fault is a placeholder object that represents a managed object that has not yet been fully realized, or a collection object that represents a relationship. To make faulting work, Core Data does a bit of magic under the hood by creating custom subclasses at compile time that represent the faults.
 
 <img src="https://github.com/sashakid/ios-guide/blob/master/Images/core_data_faulting.png">
 
 <a name="fetch-result-controller"></a>
+
 ## Что такое fetch result controller?
+
 Данные сами по себе может быть и представляют какую-либо ценность, но, обычно их нужно использовать. Одним из элементов представления данных в iOS служат таблицы (объекты класса `UITableView`), которые через объект класса `NSFetchedResultsController` можно привязать к CoreData. После этого при изменении данных в CoreData будет актуализироваться информация в таблице. Так же, с помощью таблицы можно управлять данными в хранилище.
 `NSFetchedResultsController` — контроллер результатов выборки. Создается, обычно один экземпляр на `ViewController`, но вполне может работать и без оного, внутрь которого помещается исключительно для того, что бы было проще привязать данные к виду.
 
 <a name="db-migration"></a>
+
 ## Как сделать миграцию БД?
 
 You can only open a Core Data store using the managed object model used to create it. Changing a model will therefore make it incompatible with (and so unable to open) the stores it previously created. If you change your model, you therefore need to change the data in existing stores to new version—changing the store format is known as migration. To migrate a store, you need both the version of the model used to create it, and the current version of the model you want to migrate to. You can create a versioned model that contains more than one version of a managed object model. Within the versioned model you mark one version as being the current version. Core Data can then use this model to open persistent stores created using any of the model versions, and migrate the stores to the current version. To help Core Data perform the migration, though, you may have to provide information about how to map from one version of the model to another. This information may be in the form of hints within the versioned model itself, or in a separate mapping model file that you create.
@@ -238,6 +264,7 @@ Lightweight migration is especially convenient during early stages of applicatio
 A further advantage of using lightweight migration—beyond the fact that you don’t need to create the mapping model yourself—is that if you use an inferred model and you use the SQLite store, then Core Data can perform the migration in situ (solely by issuing SQL statements). This can represent a significant performance benefit as Core Data doesn’t have to load any of your data. Because of this, you are encouraged to use inferred migration where possible, even if the mapping model you might create yourself would be trivial.
 
 <a name="realm-vs-coredata"></a>
+
 ## Какие плюсы и минусы у Realm? Чем отличается от Core Data?
 
 Realm - это no-sql база данных для Android (Java, Kotlin), iOS (Objective-C, Swift), Xamarin (C#) и JavaScript (React Native, Node.js). Так же есть backend, который позволяет синхронизировать данные из всех источников. Из ключевых особенностей стоит отметить zero copy, MVCC и ACID. Встроенного механизма устаревания и очистки данных нет.
@@ -256,6 +283,7 @@ An important advantage Realm has over Core Data is consistency across threads. A
 __Syntax__
 
 The recent introduction of the `NSFetchedResultsType` protocol makes working with Core Data elegant and concise. Creating a managed object for an entity no longer requires multiple lines of code.
+
 ```swift
 let note = Note(context: managedObjectContext)
 ```

@@ -1,34 +1,39 @@
 
 - [Swift](#swift)
-	- [Memory management](#memory-management)
-	- [Сlosures and functions](#closures-and-functions)
-	- [How Do I Declare a Closure in Swift?](#how-do-i-declare-a-closure-in-swift)
-	- [Generics](#generics)
-	- [Что такое протокол-ориентированное программирование? Как оно связано со Swift? Чем протоколы Swift отличаются от протоколов Objective-C?](#protocols)
-	- [Difference between Array VS NSArray VS |AnyObject|](#array-nsarray-anyobject)
-	- [Objective-C id is Swift Any or AnyObject](#id-any-anyobject)
-	- [ValueType vs. ReferenceType](#valuetype-vs-referencetype)
-	- [What is copy on write mechanism](#copy-on-write)
-	- [RxSwift](#rxswift)
-	- [SwiftUI](#swiftui)
-	- [Combine](#combine)
-	- [Metod Dispatching](#method-dispatching)
-	- [Чем отличается Generic от Protocol?](#generic-vs-protocol)
-	- [Какие бывают анимации?](#animations)
-	- [Что такое type erasure?](#type-erasure)
-	- [Разница между map, compactMap и flatMap?](#map-functions)
-	- [Что такое opaque type? Какие еще бывают типы?](#opaque-type)
-	- [Что такое async / await?](#async-await)
+  - [Memory management](#memory-management)
+  - [Сlosures and functions](#сlosures-and-functions)
+  - [How Do I Declare a Closure in Swift?](#how-do-i-declare-a-closure-in-swift)
+  - [Generics](#generics)
+  - [Что такое протокол-ориентированное программирование? Как оно связано со Swift? Чем протоколы Swift отличаются от протоколов Objective-C?](#что-такое-протокол-ориентированное-программирование-как-оно-связано-со-swift-чем-протоколы-swift-отличаются-от-протоколов-objective-c)
+  - [Difference between Array VS NSArray VS \[AnyObject\]](#difference-between-array-vs-nsarray-vs-anyobject)
+  - [Objective-C id is Swift Any or AnyObject](#objective-c-id-is-swift-any-or-anyobject)
+  - [ValueType vs. ReferenceType](#valuetype-vs-referencetype)
+  - [What is copy on write mechanism](#what-is-copy-on-write-mechanism)
+  - [RxSwift](#rxswift)
+  - [SwiftUI](#swiftui)
+  - [Combine](#combine)
+  - [Publishers](#publishers)
+  - [Subscribers](#subscribers)
+  - [Operators](#operators)
+  - [Metod Dispatching](#metod-dispatching)
+  - [Чем отличается Generic от Protocol?](#чем-отличается-generic-от-protocol)
+  - [Какие бывают анимации?](#какие-бывают-анимации)
+  - [Что такое type erasure?](#что-такое-type-erasure)
+  - [Разница между map, compactMap и flatMap?](#разница-между-map-compactmap-и-flatmap)
+  - [Что такое opaque type?](#что-такое-opaque-type)
+  - [Что такое Sendable?](#что-такое-sendable)
 
 <a name="swift"></a>
+
 # Swift
+
 * Multi-paradigm: protocol-oriented, object-oriented, functional, imperative, block structured
-* Designed by	Chris Lattner and Apple Inc.
-* First appeared:	June 2, 2014
-* Stable release:	5.6.1 / April 8, 2022
-* Typing discipline:	Static, strong, inferred
-* OS: Darwin, Linux, FreeBSD
-* Influenced by C#, CLU, D, Haskell, Objective-C, Python, Ruby, Rust
+- Designed by Chris Lattner and Apple Inc.
+- First appeared: June 2, 2014
+- Stable release: 5.6.1 / April 8, 2022
+- Typing discipline: Static, strong, inferred
+- OS: Darwin, Linux, FreeBSD
+- Influenced by C#, CLU, D, Haskell, Objective-C, Python, Ruby, Rust
 
 Swift is a multi-paradigm, compiled programming language created by Apple Inc. for iOS, OS X, watchOS and tvOS development. Swift is designed to work with Apple's Cocoa and Cocoa Touch frameworks and the large body of existing Objective-C code written for Apple products. Swift is in-tended to be more resilient to erroneous code ("safer") than Objective-C and also more concise. It is built with the LLVM compiler and later and uses the Objective-C runtime, allowing C, Objective-C, C++ and Swift code to run within a single program.
 
@@ -52,6 +57,7 @@ __Минусы__
 - Поддержка IDE: Xcode, официальная среда разработки Apple, не соответствует требованиям в некоторых областях поддержки, включая выделение синтаксиса, автозаполнение, рефакторинг и компиляцию.
 
 <a name="memory-management"></a>
+
 ## Memory management
 
 At hardware level, memory is just a long list of bytes. We treat it as if it were organized into three virtual parts:
@@ -82,6 +88,7 @@ The mechanism of ARC is implemented in a library called Swift Runtime. It implem
 __Introducing Side Tables__
 
 Side tables are mechanism for implementing Swift weak references. Typically objects don’t have any weak references, hence it is wasteful to reserve space for weak reference count in every object. This information is stored externally in side tables, so that it can be allocated only when it’s really needed. Instead of directly pointing to an object, weak reference points to the side table, which in its turn points to the object. This solves two problems: saves memory for weak reference count, until an object really needs it; allows to safely zero out weak reference, since it does not directly point to an object, and no longer a subject to race conditions. Side table is just a reference count + a pointer to an object. They are declared in Swift Runtime as follows (C++ code):
+
 ```c++
 class HeapObjectSideTableEntry {
   std::atomic<HeapObject*> object;
@@ -89,6 +96,7 @@ class HeapObjectSideTableEntry {
   // Operations to increment and decrement reference counts
 }
 ```
+
 __Swift Object Life Cycle__
 
 Swift objects have their own life cycle, represented by a finite state machine on the figure below. Square brackets indicate a condition that triggers transition from state to state.
@@ -117,13 +125,16 @@ During their life cycle, the objects maintain following invariants:
 - The `unowned` reference count adds +1 to the `strong` one, which is decremented after object’s `deinit` completes.
 - The `weak` reference count adds +1 to the `unowned` reference count. It is decremented after the object is freed from memory.
 
-https://github.com/apple/swift/blob/main/stdlib/public/SwiftShims/RefCount.h
+<https://github.com/apple/swift/blob/main/stdlib/public/SwiftShims/RefCount.h>
 
 <a name="closures-and-functions"></a>
+
 ## Сlosures and functions
+
 ```swift
 ()->()
 ```
+
 Closures in Swift are similar to blocks in C and Objective-C.
 Closures are first-class objects, so that they can be nested and passed around (as do blocks in Objective-C). In Swift, functions are just a special case of closures.
 
@@ -131,174 +142,226 @@ _Defining a function:_
 
 You define a function with the `func` keyword. Functions can take and return none, one or multiple parameters (tuples).
 Return values follow the `->` sign.
+
 ```swift
 func jediGreet(name: String, ability: String) -> (farewell: String, mayTheForceBeWithYou: String) {
-	return ("Good bye, \(name).", " May the \(ability) be with you.")
+ return ("Good bye, \(name).", " May the \(ability) be with you.")
 }
 ```
+
 _Calling a function:_
+
 ```swift
 let retValue = jediGreet("old friend", "Force")
 println(retValue)
 println(retValue.farewell)
 println(retValue.mayTheForceBeWithYou)
 ```
+
 _Function types_
 
 Every function has its own function type, made up of the parameter types and the return type of the function itself.
 For example the following function:
+
 ```swift
 func sum(x: Int, y: Int) -> (result: Int) { return x + y }
 ```
+
 has a function type of:
+
 ```swift
 (Int, Int) -> (Int)
 ```
+
 Function types can thus be used as parameters types or as return types for nesting functions.
 
 _Passing and returning functions_
 
 The following function is returning another function as its result which can be later assigned to a variable and called.
+
 ```swift
 func jediTrainer() -> ((String, Int) -> String) {
-	func train(name: String, times: Int) -> (String) {
-		return "\(name) has been trained in the Force \(times) times"
-  	}
-  	return train
+ func train(name: String, times: Int) -> (String) {
+  return "\(name) has been trained in the Force \(times) times"
+   }
+   return train
 }
 let train = jediTrainer()
 train("Obi Wan", 3)
 ```
+
 _Variadic functions_
 
 Variadic functions are functions that have a variable number of arguments (indicated by `...` after the argument's type) that can be accessed into their body as an array.
+
 ```swift
 func jediBladeColor(colors: String...) -> () {
-	for color in colors {
-		println("\(color)")
-  	}
+ for color in colors {
+  println("\(color)")
+   }
 }
 jediBladeColor("red","green")
 ```
 
 __Closures__
+
 ```swift
 {()->() in}
 ```
+
 _Defining a closure:_
 
 Closures are typically enclosed in curly braces `{ }` and are defined by a function type `() -> ()`, where `->` separates the arguments and the return type, followed by the `in` keyword which separates the closure header from its body.
+
 ```swift
 { (params) -> returnType in
   statements
 }
 ```
+
 An example could be the map function applied to an Array:
+
 ```swift
 let padawans = ["Knox", "Avitla", "Mennaus"]
 padawans.map({(padawan: String) -> String in
-	"\(padawan) has been trained!"
+ "\(padawan) has been trained!"
 })
 ```
 
 _Closures with known types:_
 When the type of the closure's arguments are known, you can do as follows:
+
 ```swift
 func applyMutliplication(value: Int, multFunction: Int -> Int) -> Int {
-	return multFunction(value)
+ return multFunction(value)
 }
 
 applyMutliplication(2, {value in
-	value * 3
+ value * 3
 })
 ```
 
 _Closures shorthand argument names:_
 
 Closure arguments can be references by position `($0, $1, ...)` rather than by name
+
 ```swift
 applyMutliplication(2, {$0 * 3})
 ```
+
 Furthermore, when a closure is the last argument of a function, parenthesis can be omitted as such:
+
 ```swift
 applyMutliplication(2) {$0 * 3}
 ```
 
 <a name="how-do-i-declare-a-closure-in-swift"></a>
+
 ## How Do I Declare a Closure in Swift?
+
 _As a variable:_
+
 ```swift
 var closureName: (parameterTypes) -> (returnType)
 ```
+
 _As an optional variable:_
+
 ```swift
 var closureName: ((parameterTypes) -> (returnType))?
 ```
+
 _As a type alias:_
+
 ```swift
 typealias closureType = (parameterTypes) -> (returnType)
 ```
+
 _As a constant:_
+
 ```swift
 let closureName: closureType = { ... }
 ```
+
 _As an argument to a function call:_
+
 ```swift
 func({(parameterTypes) -> (returnType) in statements})
 ```
+
 _As a function parameter:_
+
 ```swift
 array.sort({ (item1: Int, item2: Int) -> Bool in return item1 < item2 })
 ```
+
 _As a function parameter with implied types:_
+
 ```swift
 array.sort({ (item1, item2) -> Bool in return item1 < item2 })
 ```
+
 _As a function parameter with implied return type:_
+
 ```swift
 array.sort({ (item1, item2) in return item1 < item2 })
 ```
+
 _As the last function parameter:_
+
 ```swift
 array.sort { (item1, item2) in return item1 < item2 }
 ```
+
 _As the last parameter, using shorthand argument names:_
+
 ```swift
 array.sort { return $0 < $1 }
 ```
+
 _As the last parameter, with an implied return value:_
+
 ```swift
 array.sort { $0 < $1 }
 ```
+
 _As the last parameter, as a reference to an existing function:_
+
 ```swift
 array.sort(<)
 ```
+
 _As a function parameter with explicit capture semantics:_
+
 ```swift
 array.sort({ [unowned self] (item1: Int, item2: Int) -> Bool in
-	return item1 < item2
+ return item1 < item2
 })
 ```
+
 _As a function parameter with explicit capture semantics and inferred parameters / return type:_
+
 ```swift
 array.sort({ [unowned self] in return item1 < item2 })
 ```
 
 <a name="generics"></a>
+
 ## Generics
 
 Generic code enables you to write flexible, reusable functions and types that can work with any type, subject to requirements that you define. You can write code that avoids duplication and expresses its intent in a clear, abstracted manner.
 Generics are one of the most powerful features of Swift, and much of the Swift standard library is built with generic code. In fact, you’ve been using generics throughout the Language Guide, even if you didn’t realize it. For example, Swift’s Array and Dictionary types are both generic collections. You can create an array that holds Int values, or an array that holds String values, or indeed an array for any other type that can be created in Swift. Similarly, you can create a dictionary to store values of any specified type, and there are no limitations on what that type can be.
+
 ```swift
 func swapTwoValues<T>(inout a: T, inout _ b: T) {
-	let temporaryA = a
-	a = b
-	b = temporaryA
+ let temporaryA = a
+ a = b
+ b = temporaryA
 }
 ```
 
 <a name="protocols"></a>
+
 ## Что такое протокол-ориентированное программирование? Как оно связано со Swift? Чем протоколы Swift отличаются от протоколов Objective-C?
 
 Protocol-Oriented Programming is a new programming paradigm ushered in by Swift 2.0. In the Protocol-Oriented approach, we start designing our system by defining protocols. We rely on new concepts: protocol extensions, protocol inheritance, and protocol compositions. The paradigm also changes how we view semantics. In Swift, value types are preferred over classes. However, object-oriented concepts don’t work well with structs and enums: a struct cannot inherit from another struct, neither can an enum inherit from another enum. So inheritance - one of the fundamental object-oriented concepts - cannot be applied to value types. On the other hand, value types can inherit from protocols, even multiple protocols. Thus, with POP, value types have become first class citizens in Swift.
@@ -351,13 +414,17 @@ _Полиморфизм_
 POP поддерживает 2 вида полиморфизма:
 
 - полиморфизм подтипов. Он же используется в ООП:
+
 ```swift
 func process(service: ServiceType) { ... }
 ```
+
 - параметрический полиморфизм. Используется в обобщенном программировании.
+
 ```swift
 func process<Service: ServiceType>(service: Service) { ... }
 ```
+
 В случае с полиморфизмом подтипов, нам неизвестен конкретный тип, который передаётся в функцию — нахождение реализации методов этого типа будет осуществляться во время выполнения (Dynamic dispatch). При использовании параметрического полиморфизма — тип параметра известен во время компиляции, соответственно и его методы (Static dispatch). За счёт того, что на этапе сборки известны используемые типы, компилятор имеет возможность лучше оптимизировать код — в первую очередь, за счёт использования подстановки (inline) функций.
 
 _Наследование_
@@ -367,6 +434,7 @@ _Наследование_
 В POP получение нужной функциональности происходит за счёт добавления соответствий протоколам, которые предоставляют функции через extensions. При этом мы не ограничены классами, имеем возможность расширять за счёт протоколов структуры и enum-ы. Протоколы могут наследоваться от других протоколов — это означает добавление к собственным требованиям требований от родительских протоколов.
 
 <a name="array-nsarray-anyobject"></a>
+
 ## Difference between Array VS NSArray VS [AnyObject]
 
 `Array` is a struct, therefore it is a value type in Swift.
@@ -376,6 +444,7 @@ _Наследование_
 `[AnyObject]` is the same as `Array<AnyObject>`
 
 <a name="id-any"></a>
+
 ## Objective-C id is Swift Any or AnyObject
 
 `Any` can represent an instance of any type at all, including function types and optional types.
@@ -385,6 +454,7 @@ _Наследование_
 > As part of its interoperability with Objective-C, Swift offers convenient and efficient ways of working with Cocoa frameworks. Swift automatically converts some Objective-C types to Swift types, and some Swift types to Objective-C types. Types that can be converted between Objective-C and Swift are referred to as bridged types. Anywhere you can use a bridged Objective-C reference type, you can use the Swift value type instead. This lets you take advantage of the functionality available on the reference type’s implementation in a way that is natural in Swift code. For this reason, you should almost never need to use a bridged reference type directly in your own code. In fact, when Swift code imports Objective-C APIs, the importer replaces Objective-C reference types with their corresponding value types. Likewise, when Objective-C code imports Swift APIs, the importer also replaces Swift value types with their corresponding Objective-C reference types.
 
 <a name="valuetype-vs-referencetype"></a>
+
 ## ValueType vs. ReferenceType
 
 > __Reference type__: a type that once initialized, when assigned to a variable or constant, or when passed to a function, returns a reference to the same existing instance.
@@ -393,9 +463,9 @@ A typical example of a reference type is an object. Once instantiated, when we e
 
 When to use:
 
-* Subclasses of NSObject must be class types
-* Comparing instance identity with === makes sense
-* You want to create shared, mutable state
+- Subclasses of NSObject must be class types
+- Comparing instance identity with === makes sense
+- You want to create shared, mutable state
 
 > __Value type__: a type that creates a new instance (copy) when assigned to a variable or constant, or when passed to a function.
 
@@ -403,14 +473,16 @@ A typical example of a value type is a primitive type. Common primitive types, t
 
 When to use:
 
-* Comparing instance data with == makes sense (Equatable protocol)
-* You want copies to have independent state
-* The data will be used in code across multiple threads (avoid explicit synchronization)
+- Comparing instance data with == makes sense (Equatable protocol)
+- You want copies to have independent state
+- The data will be used in code across multiple threads (avoid explicit synchronization)
 
 <a name="copy-on-write"></a>
+
 ## What is copy on write mechanism
 
 A fully stack allocated value type will not need reference counting, but a value type with inner references will unfortunately inherit this ability.
+
 ```swift
 final class ExampleClass {
   let exampleString = "Ex value"
@@ -422,23 +494,29 @@ struct ExampleStruct {
   let ref4 = ExampleClass()
 }
 ```
+
 This way of having inner reference types is an expensive operation that requires many calls to `malloc/free` and a significant reference counting overhead each time you copy. `COW` enables value types to be referenced when they are copied just like reference types. The real copy only happens when you have an already existing strong reference and you are trying to modify that copy.
+
 ```swift
 let array = [1,2,3] //address A
 var notACopy = array //still address A
 notACopy += [4,5,6] //now address B
 ```
+
 __Manually implementing Copy On Write__
 
 Swift standard library has already implemented `COW` for Dictionary, Array etc. The easiest way to implement copy-on-write is to compose existing copy-on-write data structures, such as Array. Swift arrays are values, but the content of the array is not copied around every time the array is passed as an argument because it features copy-on-write traits.There are two obvious disadvantages of using Array for `COW` semantics. The first problem is that Array exposes methods like `append` and `count` that don’t make any sense in the context of a value wrapper. These methods can make the use of the reference wrapper awkward. It is possible to work around this problem by creating a wrapper struct that will hide the unused APIs and the optimizer will remove this overhead, but this wrapper will not solve the second problem. The Second problem is that Array has code for ensuring program safety and interaction with Objective-C. Swift checks if indexed accesses fall within the array bounds and when storing a value if the array storage needs to be extended. These runtime checks can slow things down. An alternative to using Array is to implement a dedicated copy-on-write data structure to replace Array as the value wrapper.
 
 Let’s consider a struct Car in which we want to use Copy on Write:
+
 ```swift
 struct Car {
   let model = "M3"
 }
 ```
+
 We can create a `Ref` class which will wrap our `Car` value type.
+
 ```swift
 final class Ref<T> {
   var val : T
@@ -459,13 +537,16 @@ struct Box<T> {
     }
 }
 ```
+
 The `Box` struct has a reference to `Ref` class and will return the value of our `Car` struct . When you try to set the value, it checks if there are any existing strong references and creates a new `Ref` if needed thereby limiting the copies to be made only while writing to it. `isKnownUniquelyReferenced` returns a boolean indicating whether the given object is known to have a single strong reference.
 
 <a name="rxswift"></a>
+
 ## RxSwift
 
 The first thing you need to understand is that everything in RxSwift is an observable sequence or something that operates on or subscribes to events emitted by an observable sequence. Arrays, Strings or Dictionaries will be converted to observable sequences in RxSwift. You can create an observable sequence of any Object that conforms to the `Sequence` Protocol from the Swift Standard Library. Observable sequences can emit zero or more events over their lifetimes.
 In RxSwift an `Event` is just an Enumeration Type with 3 possible states:
+
 1. `.next(value: T)` — When a value or collection of values is added to an observable sequence it will send the next event to its subscribers as seen above. The associated value will contain the actual value from the sequence.
 2. `.error(error: Error)` — If an Error is encountered, a sequence will emit an error event. This will also terminate the sequence.
 3. `.completed` — If a sequence ends normally it sends a completed event to its subscribers
@@ -474,6 +555,7 @@ If you want to cancel a subscription you can do that by calling dispose on it. Y
 __Subjects__
 
 A `Subject` is a special form of an Observable Sequence, you can subscribe and dynamically add elements to it. There are currently 4 different kinds of Subjects in RxSwift
+
 1. `PublishSubject`: If you subscribe to it you will get all the events that will happen after you subscribed.
 2. `BehaviourSubject`: A behavior subject will give any subscriber the most recent element and everything that is emitted by that sequence after the subscription happened.
 3. `ReplaySubject`: If you want to replay more than the most recent element to new subscribers on the initial subscription you need to use a `ReplaySubject`. With a `ReplaySubject`, you can define how many recent items you want to emit to new subscribers.
@@ -482,6 +564,7 @@ A `Subject` is a special form of an Observable Sequence, you can subscribe and d
 __Schedulers__
 
 Operators will work on the same thread as where the subscription is created. In RxSwift you use schedulers to force operators do their work on a specific queue. You can also force that the subscription should happen on a specifc Queue. You use `subscribeOn` and `observeOn` for those tasks. If you are familiar with the concept of operation-queues or dispatch-queues this should be nothing special for you. A scheduler can be serial or concurrent similar to `GCD` or `OperationQueue`. There are 5 Types of Schedulers in RxSwift:
+
 1. `MainScheduler` — “Abstracts work that needs to be performed on MainThread. In case schedule methods are called from the main thread, it will perform the action immediately without scheduling.This scheduler is usually used to perform UI work.”
 2. `CurrentThreadScheduler` — “Schedules units of work on the current thread. This is the default scheduler for operators that generate elements.”
 3. `SerialDispatchQueueScheduler` — “Abstracts the work that needs to be performed on a specific dispatch_queue_t. It will make sure that even if a concurrent dispatch queue is passed, it's transformed into a serial one.Serial schedulers enable certain optimizations for observeOn.The main scheduler is an instance of SerialDispatchQueueScheduler"
@@ -497,11 +580,13 @@ __What's the difference between `bind` and `subscribe`?__
 By using `bind(onNext)` you can express that stream should never emit `error` and you interested only in item events. So you should use `subscribe(onNext:...)` when you interested in `error` / `complete` / `disposed` events and `bind(onNext...)` otherwise
 
 <a name="swiftui"></a>
+
 ## SwiftUI
 
 SwiftUI предполагает, что описание структуры вашего View целиком находится в коде. Причем, Apple предлагает нам декларативный стиль написания этого кода. То есть, примерно так:
 
 `Это View. Она состоит из двух текстовых полей и одного рисунка. Текстовые поля расположены друг за другом горизонтально. Картинка находится под ними и ее края обрезаны в форме круга.`
+
 ```swift
 struct ContentView: View {
     var text1 = "some text"
@@ -518,8 +603,10 @@ struct ContentView: View {
     }
 }
 ```
-Обратите внимание, `View` — это структура с некоторыми параметрами. Что бы структура стала `View` — нам нужно задать вычисляемый параметр `body`, который возвращает `some View`. Содержание замыкания` body: some View { … }` — это и есть описание того, что будет отражено на экране.
+
+Обратите внимание, `View` — это структура с некоторыми параметрами. Что бы структура стала `View` — нам нужно задать вычисляемый параметр `body`, который возвращает `some View`. Содержание замыкания`body: some View { … }` — это и есть описание того, что будет отражено на экране.
 Три типа элементов, из которых строится тело View:
+
 - Другие View, т.е. Каждая `View` содержит в себе одну или несколько других `View`. Те, в свою очередь могут так же содержать как предопределенные системные `View` вроде `Text()`, так и кастомные, сложные, написанные самим разработчиком.
 - Модификаторы - благодаря им, мы коротко и внятно сообщаем SwiftUI, какой мы хотим видеть данную `View`
 - Контейнеры - `HStack`, `VStack`, `ZStack`, `Group`, `Section` и прочие. Фактически, контейнеры — это те же `View`, но у них есть особенность. Вы передаете в них некий контент, который нужно отобразить. Вся фишка контейнера в том, что он должны как-то сгруппировать и отобразить элементы этого контента. В этом смысле, контейнеры похожи на модификаторы, с той лишь разницей, что модификаторы предназначены изменять одну уже готовую `View`, а контейнеры выстраивают эти View (элементы контента, или блоки декларативного синтаксиса) в определенном порядке, например вертикально или горизонтально.
@@ -578,6 +665,7 @@ struct CounterView: View {
 `ForEach` — это набор subView, сгенерированных для каждого элемента коллекции исходя из переданного контента.
 
 Роль navigation controller берет на себя специальный `NavigationView`. Достаточно обернуть ваш код в `NavigationView{...}`. А само действие перехода можно добавить в специальную кнопку `NavigationLink`, которая пушит условный экран `DetailView`.
+
 ```swift
 var body: some View {
     NavigationView {
@@ -590,18 +678,21 @@ var body: some View {
 ```
 
 <a name="combine"></a>
+
 ## Combine
 
 На WWDC 2019 был представлен фреймворк Combine от Apple. Он позволяет моделировать все виды асинхронных событий и операций типа “значения, изменяющиеся во времени”. Не смотря на то, что данное понятие, часто используется в мире реактивного программирования как концепция и способ организации логики, поначалу бывает сложно сразу во всем разобраться.
 
 ## Publishers
----
-Every publisher can emit multiple events of these three types: 
-1. An output value of the publisher’s generic `Output` type. 
-2. A successful completion.
-3. A completion with an error of the publisher’s `Failure` type. 
 
-Publishers do not emit any values if there are no subscribers to potentially receive the output 
+---
+Every publisher can emit multiple events of these three types:
+
+1. An output value of the publisher’s generic `Output` type.
+2. A successful completion.
+3. A completion with an error of the publisher’s `Failure` type.
+
+Publishers do not emit any values if there are no subscribers to potentially receive the output
 
 `Subject` — A publisher that exposes a method for outside callers to publish elements.
 
@@ -613,18 +704,19 @@ protocol Subject<Output, Failure> : AnyObject, Publisher
 
 `CurrentValueSubject` — A subject that wraps a single value and publishes a new element whenever the value changes.. *Unlike `PassthroughSubject`, `CurrentValueSubject` maintains a buffer of the most recently published element. Calling `send(_:)` on a `CurrentValueSubject` also updates the current value, making it equivalent to updating the value directly.*
 
-**Analogy**
+__Analogy__
 
 > `PassthroughSubject` = A doorbell push button. When someone rings the door, you are notified only if you are at home (you are the subscriber)
 `PassthroughSubject` doesn't have a state, it emits whatever it receives to its subscribers.
 
 > `CurrentValueSubject` = A light switch Someone turns on the lights in your home when you are outside. You get back home and you know someone has turned them on. `CurrentValueSubject` has an initial state, it retains the data you put in as its state.
 
-**Difference**
+__Difference__
 
 `CurrentValueSubject` is a value, a publisher and a subscriber all in one. Sadly it doesn’t fire `objectWillChange.send()` when used inside an `ObservableObject`. You can specify an error type.
 
-`@Published `is a property wrapper, thus:
+`@Published`is a property wrapper, thus:
+
 - It is not yet supported in top-level code.
 - It is not supported in a protocol declaration.
 - It can only be used within a class.
@@ -634,11 +726,11 @@ The error type of its publisher is `Never`. My biggest beef against `@Published`
 
 `ConnectablePublisher` — type which doesn’t produce any elements until we call its `connect()` method. We can convert any publisher or subscriber into a ConnectablePublisher by calling the method `makeConnectable()`
 
-**Convenience Publishers**
+__Convenience Publishers__
 
-`Future` — can be used to asynchronously produce a single result and then complete. A Future is a publisher that will eventually produce a single value and finish, or it will fail. It does this by invoking a closure when a value or error is available, and that closure is, in fact, the promise. `Promise` is a type alias to a closure that receives a `Result` containing either a single value published by the `Future`, or an error. A future is greedy, meaning executes as soon as it’s created. It does not require a subscriber like regular publishers that are lazy. 
+`Future` — can be used to asynchronously produce a single result and then complete. A Future is a publisher that will eventually produce a single value and finish, or it will fail. It does this by invoking a closure when a value or error is available, and that closure is, in fact, the promise. `Promise` is a type alias to a closure that receives a `Result` containing either a single value published by the `Future`, or an error. A future is greedy, meaning executes as soon as it’s created. It does not require a subscriber like regular publishers that are lazy.
 
-`Just` — creates a publisher that emits a single value to a subscriber and then complete 
+`Just` — creates a publisher that emits a single value to a subscriber and then complete
 
 `Deferred` — A publisher that awaits subscription before running the supplied closure to create a publisher for the new subscriber.
 
@@ -649,6 +741,7 @@ The error type of its publisher is `Never`. My biggest beef against `@Published`
 `Record` — A publisher that allows for recording a series of inputs and a completion, for later playback to each subscriber.
 
 ## Subscribers
+
 ---
 A `Subscriber` instance receives a stream of elements from a `Publisher`, along with life cycle events describing changes to their relationship. A given subscriber’s `Input` and `Failure` associated types must match the `Output` and `Failure` of its corresponding publisher.
 
@@ -657,16 +750,18 @@ A `Subscriber` instance receives a stream of elements from a `Publisher`, along 
 `Assign` — The assign subscriber allows you to, without the need of custom code, bind the resulting output to some property on your data model or on a UI control to display the data directly on-screen via a key path.
 
 ## Operators
+
 ---
-Operators are methods declared on the `Publisher` protocol that return either the same or a new publisher. That’s very useful because you can call a bunch of operators one after the other, effectively chaining them together. As an added bonus, operators always have input and output, commonly referred to as `upstream` and `downstream` — this allows them to avoid shared state. 
+Operators are methods declared on the `Publisher` protocol that return either the same or a new publisher. That’s very useful because you can call a bunch of operators one after the other, effectively chaining them together. As an added bonus, operators always have input and output, commonly referred to as `upstream` and `downstream` — this allows them to avoid shared state.
 
 `Scheduler` — A protocol that defines when and how to execute a closure.
 
 <img src="https://github.com/sashakid/ios-guide/blob/master/Images/subscription.png">
 
-**Subscription lifecycle**
+__Subscription lifecycle__
 
 By meeting these protocols, now we are secure to understand how the relation between publisher and subscriber is established:
+
 1. A new subscriber requires a subscription from the publisher by calling `receive` method on the publisher by passing the subscriber as a parameter
 2. The publisher creates a custom subscription, an object that is responsible for keeping the subscriber up to date with the publisher and sends it to the subscriber through the `receive(Subscription)` method.
 3. Within the `receive(Subscription)` method, the subscriber calls the request method on the `Subscription` object that was just received establishing the true demand it requires from the publisher.
@@ -674,14 +769,17 @@ By meeting these protocols, now we are secure to understand how the relation bet
 5. As the Subscription has some mechanism for keeping track of publisher's emitted values, it just needs to send them to the subscriber via the `receive(Input)` method.
 6. When some event requires the subscription to complete, the `Subscription` calls the `receive(Completion)` method on the Subscriber and the process finishes.
 
-**Examples**
+__Examples__
 
 `Publishers` могут быть бесконечно активны либо завершены по итогу какого-либо события, а также `Publishers` могут быть опционально не выполнены, если произошла какая-то ошибка. Чтобы внедрить `Combine`, Apple доработали некоторые из своих основных библиотек, чтобы они так же могли поддерживаться `Combine`. Например, вот так может использоваться тип `URLSession` для создания `Publisher`, выполняющего сетевой запрос по заданному URL-адресу:
+
 ```swift
 let url = URL(string: "https://api.github.com/repos/johnsundell/publish")!
 let publisher = URLSession.shared.dataTaskPublisher(for: url)
 ```
+
 После того, как мы создали `Publisher`, мы можем привязать к нему подписки, например, с помощью `sink` API, который позволяет передавать замыкание, срабатывающее каждый раз, когда было получено новое значение, а так же другое замыкание, которое отрабатывает когда `publisher` завершает свою работу:
+
 ```swift
 let cancellable = publisher.sink(
     receiveCompletion: { completion in
@@ -697,10 +795,12 @@ let cancellable = publisher.sink(
     }
 )
 ```
+
 Обратите внимание на то, как описанный выше метод `sink` возвращает значение, которое мы храним как `cancellable`. При присоединении нового подписчика, `Publisher` всегда возвращает объект, соответствующий протоколу `Cancellable`, действующему как токен для новой подписки. Затем, нам нужно сохранить этот токен до тех пор, пока мы хотим оставить нашу подписку активной, иначе как только она будет освобождена (deallocated), наша подписка будет автоматически отменена (кстати, подписку можно отменить вручную при помощи вызова метода `cancel()` у токена). Операторы используются для построения реактивных цепочек или пайплайнов (конвейеров), по которым могут проходить наши данные, где каждый оператор применяет некоторую форму преобразования к данным, которые были ему отправлены.
 `cancellable` используется для отслеживания подписки (subscription) на `Publisher` и должен сохраняться до тех пор, пока мы хотим, чтобы эта подписка (`subscription`) оставалась активной.
 
 Пример с операторами:
+
 ```swift
 let sub = NotificationCenter.default
     .publisher(for: NSControl.textDidChangeNotification, object: filterField)
@@ -712,6 +812,7 @@ let sub = NotificationCenter.default
 ```
 
 <a name="method-dispatching"></a>
+
 ## Metod Dispatching
 
  Method Dispatch is how a program selects which instructions to execute when invoking a method. It’s something that happens every time a method is called, and not something that you tend to think a lot about.
@@ -734,6 +835,7 @@ __Table or Dynamic Dispatch__
 _Virtual table_
 
 Classes have tables, called `Virtual Tables`. Each table has an array of function pointers to methods of the corresponding class. Every subclass has its own copy of `Virtual Table` with different function pointers to those methods, which are overridden. As a subclass adds a new method to its definition, the method is appended to the end of the corresponding table. The compiler builds the tables, and at runtime, the tables are used to determine which method should be called
+
 ```swift
 class ParentClass {
     func method1() { }
@@ -752,6 +854,7 @@ class ChildClass: ParentClass {
 let obj = ChildClass()
 obj.method2()
 ```
+
 Each class instance has a property type (or `isa` in Objective-C, each NSObject has this property). The tables are stored in some static memory region and can be taken by this property. When `method2` is called, the process will:
 
 1. take `Virtual Table` for the object of 0xB00 (ChildClass) by its property type
@@ -770,6 +873,7 @@ method2(obj)
 _Protocol Witness Tables_
 
 `Virtual Tables` are used when using classes and inheritance, and `Protocol Witness Tables` — when conforming to protocols. The problem is that structures don’t support inheritance because they don’t have `Virtual Tables`. But conforming to protocols allows them to use `Table Dispatch` and polymorphism. However, instead of `Virtual Tables`, they get Protocol `Witness Tables`
+
 ```swift
 // Polymorphism without classes and inheritance
 protocol Noisable {
@@ -787,7 +891,9 @@ struct Fox: Noisable {
 let noisers: [Noisable] = [Cat(), Cat(), Fox(), Fox(), Cat()]
 for noiser in noisers { noiser.makeNoise() } // polymorphism
 ```
+
 Each type (value and reference) that conforms to a protocol has its own `Protocol Witness Table`. The table has pointers to those methods of the type that are required by the protocol. Structures and classes that conform to a protocol can have different sizes. To store them in the same array (like noisers) or in the same type property, or to pass them as an argument to the same function, and also to find corresponding `Protocol Witness Table` for each of them, Swift uses `existential containers` - is a structure, that always has a fixed size (in x64, it is 5 * 64 = 320 bit or five machine words), and consists of three parts:
+
 1. reference to `Value Witness Table` (VWT),
 2. a reference to `Protocol Witness Table` (PWT)
 3. a value buffer to store an instance itself
@@ -807,6 +913,7 @@ A key point of Message Dispatch is modifying the dispatch behavior at runtime, a
 Method Swizzling allows exchanging the implementation of two class methods at runtime. This will affect every instance of a modified class, which was or will be created. If you have methodA and methodB, method swizzling allows you to call the implementation of methodB when calling methodA, and vice versa. It could be helpful for setting some default behavior to a class, avoiding inheritance. But Swift can use protocols for these purposes (Objective-C cannot)
 
 Isa-Swizzling allows exchanging the type of a given single object with another type at runtime. If you have two classes: ClassA and ClassB, you can create an instance of ClassA, then at runtime change its type to ClassB (change property isa), then call some method of ClassB, and then switch the type back to ClassA
+
 ```swift
 class ParentClass {
     dynamic func method1() { }
@@ -818,6 +925,7 @@ class ChildClass: ParentClass {
     dynamic func method3() { }
 }
 ```
+
 <img src="https://github.com/sashakid/ios-guide/blob/master/Images/method-dispatch.png">
 
 Swift builds this hierarchy as a tree structure and puts it into some static memory region. When a message is dispatched (method2 is called), the process will:
@@ -841,6 +949,7 @@ Where a method is declared determines what the method dispatch is used
 Inheritance from NSObject makes a class “dynamic message dispatchable”, but methods in initial declarations are called via Table Dispatch
 
 Object type determines which type of dispatch will be used on a method call. If the type is a protocol, then look at the protocol row in the table. If it casts the object to its class type or structure type, then look at the class or value type rows in the table
+
 ```swift
 class A {
     func doAction() { }                      // table dispatch
@@ -871,6 +980,7 @@ final class Animal {
 __dynamic__
 
 The dynamic keyword enables Message Dispatch on a method defined in a class. This keyword implicitly marks the method as `@objc`, which means the method is visible for Objective-C runtime. Swift doesn’t say that dynamic is available for classes only, but structures and enumerations don’t support inheritance. The runtime doesn’t have to figure out which implementation it needs to use. Thus, at runtime for structures and enums dynamic doesn’t work. Using this keyword can make your code less performant
+
 ```swift
 class Animal {
     // message dispatch at Objective-C runtime
@@ -881,6 +991,7 @@ class Animal {
 __@objc__
 
 The `@objc` keyword does not alter the method dispatch. It just makes the method visible for Objective-C runtime. The most common use of @objc is making selectors. And also, using `@objc` allows overriding methods declared in class extensions (by default, it is impossible because of Static Dispatch)
+
 ```swift
 class Animal {
     @objc func move() { } // is visible at Objective-C runtime
@@ -901,30 +1012,34 @@ The @nonobjc keyword does alter the method dispatch. It can be used to disable `
 __@objc final__
 
 Keyword `@objc final` enables Direct Dispatch on a method and registers the method selector at Objective-C runtime. The keyword allows the method to respond when performing a selector or other Objective-C features, along with giving the performance of `Direct Dispatch`
+
 ```swift
 class Animal {
     // direct dispatch, visible for Objective-C runtime
     @objc final func move() { }
 }
 ```
+
 If a property is observed with KVO and that property is upgraded to Direct Dispatch, the code will still compile, but the dynamically generated KVO method won’t be triggered
 
 <a name="#generic-vs-protocol"></a>
+
 ## Чем отличается Generic от Protocol?
 
 `Generic` is an `incomplete Type`. Generic code enables you to write flexible, reusable functions and types that can work with any type, subject to requirements that you define. You can write code that avoids duplication and expresses its intent in a clear, abstracted manner.
 
 The problem is that the same can be applied almost exactly to a `Protocol` :-( Where’s the misunderstanding? Let’s expand the official Stack example by adding a simple check to see if the last element added is “cuatro”.
+
 ```swift
 struct Stack<Element> {
-	var items = [Element]()
-	mutating func push(_ item: Element) {
-		items.append(item)
-	}
+ var items = [Element]()
+ mutating func push(_ item: Element) {
+  items.append(item)
+ }
 
-	mutating func pop() -> Element {
-		return items.removeLast()
-	}
+ mutating func pop() -> Element {
+  return items.removeLast()
+ }
 }
 
 var stackOfStrings = Stack<String> ()
@@ -935,22 +1050,24 @@ stackOfStrings.push("cuatro")
 
 let lastElement = stackOfStrings.pop()
 if lastElement == "cuatro" {
-	print("That's a bingo!")
+ print("That's a bingo!")
 }
 ```
+
 This code will compile and actually print “That’s a bingo!”.
 
 Let’s try the same thing with our Protocol example.
+
 ```swift
 struct Stack {
-	var items = [StackElement]()
-	mutating func push(_ item: StackElement) {
-		items.append(item)
-	}
+ var items = [StackElement]()
+ mutating func push(_ item: StackElement) {
+  items.append(item)
+ }
 
-	mutating func pop() -> StackElement {
-		return items.removeLast()
-	}
+ mutating func pop() -> StackElement {
+  return items.removeLast()
+ }
 }
 
 protocol StackElement {}
@@ -965,19 +1082,22 @@ stackOfStrings.push("cuatro")
 
 let lastElement = stackOfStrings.pop()
 if lastElement == "cuatro" {
-	print("That's a bingo!")
+ print("That's a bingo!")
 }
 
 ❌ Value of protocol type 'StackElement' cannot conform to 'StringProtocol'; only struct/enum/class types can conform to protocols
 ```
+
 This code doesn’t even compile!
 
 In the Protocol stack, what type is our pop function returning?
+
 ```swift
 mutating func pop() -> StackElement {
-	return items.removeLast()
+ return items.removeLast()
 }
 ```
+
 If you answered StackElement, you’re wrong. The correct answer is, again, “I don’t know“.
 
 Protocols hide away the underlying type. If a `Generic` is an `incomplete Type`, then a `Protocol` is a `masked Type`. When we have a function that returns a `Protocol`, the compiler cannot tell you what concrete type is actually implementing the `Protocol`! Of course you could check what type it is by doing something like if lastElement `is String` but then you’re trying to fit a round peg in a square hole.
@@ -985,6 +1105,7 @@ Protocols hide away the underlying type. If a `Generic` is an `incomplete Type`,
 Once a Generic becomes complete (e.g. `Array<String>`) it is a fully concrete type. It can be compared to other types. Constants or variables declared as `Protocols` can never be compared to concrete types. That’s the difference between a `Generic` and a `Protocol`. `Protocols` are meant to mask types at the cost of losing concreteness and `Generics` are meant to become complete types by finding their other half.
 
 <a name="#animations"></a>
+
 ## Какие бывают анимации?
 
 - UIKit
@@ -1029,6 +1150,7 @@ While Core Animation gives access to the view's underlying layer, exposing a dif
 __UIView's animation methods__
 
 These are still the easiest to use in my opinion. Very straight forward API without making too big of a code footprint. I use this either for simple fire-and-forget animations (such as making a button pop when selected), or when I want to make a complex keyframe animation since its keyframe support is great.
+
 ```swift
 UIView.animate(withDuration: 0.5, delay: 0.0, options: .curveEaseOut, animations: {
     button.transform = .init(scaleX: 1.1, y: 1.1)
@@ -1055,6 +1177,7 @@ __UIViewPropertyAnimator__
 Added in iOS 10, as the name suggests this is another view-based animation API. There are a few things that make it different from UIView's animation methods, the main ones being that it supports interactive animations and allows modifying animations dynamically. You can pause, rewind, or scrub an animation, as well as adding more animation blocks on the go or reversing the animation while it's playing, which makes it quite powerful. I use this when I want an animation to be controlled by the user. The scrubbing works by setting a fractionComplete property on the animator object, which can easily be hooked up to a pan gesture recognizer or a force touch recognizer (or even a key using KVO).
 
 As mentioned, you can also store a reference to a UIViewPropertyAnimator and change its animations or completion blocks during the animation.
+
 ```swift
 // Create an animation object with an initual color change animation
 let animator = UIViewPropertyAnimator(duration: duration, curve: .linear) {
@@ -1068,14 +1191,17 @@ animator.addAnimations {
 
 animator.startAnimation()
 ```
+
 Worth noting is that you can actually use UIView.animate and UIView.animateKeyframes from within your UIViewPropertyAnimator animations blocks, should you feel the need to use both.
 
 <a name="type-erasure"></a>
+
 ## Что такое type erasure?
 
 Type-erasure simply means "erasing" a specific type to a more abstract type in order to do something with the abstract type (like having an array of that abstract type). And this happens in Swift all the time, pretty much whenever you see the word `Any`. The most straightforward way to think of type erasure is to consider it a way to hide an object's "real" type. В стандартной библиотеке Swift много примеров такого подхода: `AnyHashable`, `AnyIterator`, `AnySequence`, `AnyCollection` и т.д.
 
 <a name="map-functions"></a>
+
 ## Разница между map, compactMap и flatMap?
 
 The word all three methods share is “map”, which in this context means “transform from one thing to another.”
@@ -1085,6 +1211,7 @@ The word all three methods share is “map”, which in this context means “tr
 `flatMap()`: transform then flatten
 
 <a name="opaque-type"></a>
+
 ## Что такое opaque type?
 
 Opaque return types is a new language feature that is introduced in Swift 5.1 by Apple. It can be used to return some value for function/method, and property without revealing the concrete type of the value to client that calls the API. The return type will be some type that implement a protocol. Using this solution, the module API doesn’t have to publicly leak the underlying internal return type of the method, it just need to return the opaque type of the protocol using the some keyword. The Swift compiler also will be able to preserve the underlying identity of the return type unlike using protocol as the return type. SwiftUI uses opaque return types inside its View protocol that returns some View in the body property.
@@ -1096,6 +1223,7 @@ Here are some of the essential things that opaque return types provides to keep 
 - Provides strong guarantees of underlying identity by returning a specific type in runtime. The trade off is losing flexibility of returning multiple type of value offered by using protocol as return type.
 - Because of the strong guarantee of returning a specific protocol type. The function can return opaque protocol type that has Self or associated type requirement.
 - While the protocol leaves the decision to return the type to its caller of the function. In reverse for opaque return types, the function itself have the decision for the specific type of the return value as long as it implements the protocol.
+
 ```swift
 protocol MobileOS {
     associatedtype Version
@@ -1116,10 +1244,52 @@ func buildPreferredOS() -> MobileOS {
 } // Compiler ERROR 😭
 Protocol 'MobileOS' can only be used as a generic constraint because it has Self or associated type requirements
 ```
+
 Solution:
+
 ```swift
 func buildPreferredOS() -> some MobileOS {
     return iOS(version: 13.1)
 }
 ```
+
 Using the opaque return type, we finally can return MobileOS as the return type of the function. The compiler maintains the identity of the underlying specific return type here and the caller doesn’t have to know the internal type of the return type as long as it implements the MobileOS protocol
+
+<a name="sendable"></a>
+
+## Что такое Sendable?
+
+Протокол `Sendable` и оболочка `@Sendable` добавляет поддержку «отправляемых» данных, то есть данных, которые можно безопасно передавать в другой поток. Это достигается с помощью нового протокола `Sendable` и атрибута `@Sendable` для функций.
+К таким данным относятся:
+
+- Все базовые типы данных, такие как `Bool`, `Int`, `String` и т.д.
+- Опциональные типы данных, если они являются типами значений.
+- Любые типы коллекций, в качестве элементов которых выступают типы значений (`Array<String>`, `Dictionary<Int, String>`).
+- Кортежи, в которых все элементы являются типами значений.
+- Метатипы, такие как `String.self.`
+
+Все перечисленные выше типы данных теперь подписаны под протокол `Sendable` и их можно безопасно передавать между разными потоками. Что же касается пользовательских типов данных, то тут все ависит от того, чем конкретно они являются:
+
+- Протоколу `Sendable`, автоматически соответствуют все акторы.
+- Пользовательские структуры и перечисления, также автоматически соответствуют `Sendable` протоколу, если только они не содержат внутри себя ссылочные типы данных.
+- В том случае если пользовательские классы не наследуются от других классов или наследуютсяя только от `NSObject` и при этом помечены ключевым словом `final`, а также имеют в качестве свойств только типы значений, то в этом случае они тоже могут соответствовать `Sendable` протоколу.
+  
+Атрибут `@Sendable` в функциях или замыканиях, позволяет выполнять код параллельно но с определенными ограничениями, для того, что бы разработчики не стреляли сами себе в ноги:
+
+```swift
+func printScore() async { 
+    let score = 1
+    Task { print(score) }
+    Task { print(score) }
+}
+```
+
+В данном примере действие, которое мы передаем в инициализатор `Task`, по умолчанию помечено как `@Sendable`. Данный атрибут позволяет выполнять задачи параллельно в разных потоках. А это возможно благодаря тому, что, что свойство score, в теле блока замыкания `Task`, является константой. Если бы свойство score было переменной, то доступ к ней могла бы получить одна из задач, в то время как другая может менять значение этой переменной.
+
+Атрибутом `@Sandable` можно помечать и свои собственный функции и замыкания:
+
+```swift
+func runLater(_ completionHandler: @escaping @Sendable () -> Void) -> Void {
+    DispatchQueue.global().asyncAfter(deadline: .now() + 3, execute: completionHandler)
+}
+```

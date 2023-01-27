@@ -56,27 +56,37 @@ Hugging => content does not want to grow
 Compression Resistance => content does not want to shrink
 
 Say you've got a button like this:
+
 ```
 [       Click Me      ]
 ```
+
 and you've pinned the edges to a larger superview with priority 500.
 
 Then, if Hugging priority > 500 it'll look like this:
+
 ```
 [Click Me]
 ```
+
 If Hugging priority < 500 it'll look like this:
+
 ```
 [       Click Me      ]
 ```
+
 If the superview now shrinks then, if the Compression Resistance priority > 500, it'll look like this
+
 ```
 [Click Me]
 ```
+
 Else if Compression Resistance priority < 500, it could look like this:
+
 ```
 [Cli..]
 ```
+
 If it doesn't work like this then you've probably got some other constraints going on that are messing up your good work!
 
 E.g. you could have it pinned to the superview with priority 1000. Or you could have a width priority. If so, this can be helpful:
@@ -135,8 +145,8 @@ It is typically easiest to work from the most general size class to the most spe
 
 Compared to working with springs and struts, Auto Layout introduces two additional steps to the process before views can be displayed:
 
-* updating constraints
-* laying out views
+- updating constraints
+- laying out views
 
 Each step is dependent on the one before; display depends on layout, and layout depends on updating constraints.
 
@@ -151,4 +161,4 @@ Since each step depends on the one before it, the display pass will trigger a la
 
 It’s important to remember that these three steps are not a one-way street. Constraint-based layout is an iterative process. The layout pass can make changes to the constraints based on the previous layout solution, which again triggers updating the constraints following another layout pass. This can be leveraged to create advanced layouts of custom views, but you can also get stuck in an infinite loop if every call of your custom implementation of layoutSubviews results in another layout pass.
 
-https://habr.com/ru/post/536136/
+<https://habr.com/ru/post/536136/>
