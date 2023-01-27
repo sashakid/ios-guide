@@ -2,13 +2,13 @@
   - [Основные понятия многопоточности](#основные-понятия-многопоточности)
   - [API для работы с многопоточностью и их альтернативы](#api-для-работы-с-многопоточностью-и-их-альтернативы)
     - [POSIX Threads](#posix-threads)
-  - [NSThread](#nsthread)
-  - [Run Loops](#run-loops)
-  - [NSObject instance methods](#nsobject-instance-methods)
-  - [GCD](#gcd)
+    - [NSThread](#nsthread)
+    - [Run Loops](#run-loops)
+    - [NSObject instance methods](#nsobject-instance-methods)
+    - [GCD](#gcd)
       - [Swift 3 API](#swift-3-api)
-  - [NSOperationQueue](#nsoperationqueue)
-  - [async / await](#async--await)
+    - [NSOperationQueue](#nsoperationqueue)
+    - [async / await](#async--await)
     - [Idle-time notifications](#idle-time-notifications)
     - [Timers](#timers)
   - [Synchronization](#synchronization)
@@ -25,9 +25,9 @@
     - [Starvation](#starvation)
     - [Priority inversion](#priority-inversion)
     - [Как избежать гонки условий](#как-избежать-гонки-условий)
-  - [Чем отличается dispatch\_async от dispatch\_sync?](#чем-отличается-dispatch_async-от-dispatch_sync)
-  - [Как многопоточность работает с UIKit?](#как-многопоточность-работает-с-uikit)
-  - [Atomic vs nonatomic. Чем отличаются? Как вручную переопределить atomic/nonatomic сеттер в не ARC коде?](#atomic-vs-nonatomic-чем-отличаются-как-вручную-переопределить-atomicnonatomic-сеттер-в-не-arc-коде)
+- [Чем отличается dispatch\_async от dispatch\_sync?](#чем-отличается-dispatch_async-от-dispatch_sync)
+- [Как многопоточность работает с UIKit?](#как-многопоточность-работает-с-uikit)
+- [Atomic vs nonatomic. Чем отличаются? Как вручную переопределить atomic/nonatomic сеттер в не ARC коде?](#atomic-vs-nonatomic-чем-отличаются-как-вручную-переопределить-atomicnonatomic-сеттер-в-не-arc-коде)
 - [Можно ли отменить операцию в GCD? А в NSOperationQueue?](#можно-ли-отменить-операцию-в-gcd-а-в-nsoperationqueue)
 - [Когда лучше использовать GCD, а когда NSOperationQueue?](#когда-лучше-использовать-gcd-а-когда-nsoperationqueue)
 
@@ -130,7 +130,7 @@ Use POSIX calls if cross-platform portability is required. If you are writing ne
 
 <a name="nsthread"></a>
 
-## NSThread
+### NSThread
 
 A simple Objective-C wrapper around pthreads. This makes the code look more familiar in a Cocoa environment. It is a relatively lightweight way to implement multiple paths of execution inside of an application. For example, you can define a thread as a subclass of `NSThread`, which encapsulates the code you want to run in the background.
 
@@ -151,7 +151,7 @@ _Inter-thread Communication_
 
 <a name="run-loops"></a>
 
-## Run Loops
+### Run Loops
 
 Циклы выполнения – часть инфраструктуры, используемой для управления событиями, прибывающими асинхронно в потоке. Ждет данные от одного или нескольких источников, чтобы запустить код на исполнение. Циклы выполнения работают по мониторингу одного или нескольких источников событий для потока. Как только события прибыли, система пробуждает поток и отправляет события на цикл выполнения, который затем передает их указанным обработчикам. Если нет событий готовых быть обработанными, цикл выполнения ставит поток в режим сна.
 Одна из опасностей потокового программирования, это конфликты ресурсов между несколькими потоками. Если несколько потоков пытаются использовать или модифицировать один и тот же ресурс в одно и то же время, то могут возникнуть проблемы. Один из способов решить проблему заключается в устранении общего ресурса в целом и убедиться, что каждый поток имеет свой собственный набор ресурсов, на котором он работает.
@@ -167,7 +167,7 @@ A run loop receives events from two different types of sources. Input sources de
 
 <a name="nsobject-instance-methods"></a>
 
-## NSObject instance methods
+### NSObject instance methods
 
 Group of `performSelector` methods and `cancelPreviousPerformRequests` methods
 
@@ -179,7 +179,7 @@ This method creates a new thread in your application, putting your application i
 
 <a name="gcd"></a>
 
-## GCD
+### GCD
 
 With GCD you don’t interact with threads directly anymore. Instead you add blocks of code to queues, and GCD manages a thread pool behind the scenes. GCD decides on which particular thread your code blocks are going to be executed on, and it manages these threads according to the available system resources. This alleviates the problem of too many threads being created, because the threads are now centrally managed and abstracted away from application developers. The other important change with GCD is that you as a developer think about work items in a queue rather than threads. This new mental model of concurrency is easier to work with. GCD exposes five different queues: the main queue running on the main thread, three background queues with different priorities, and one background queue with an even lower priority, which is I/O throttled. Furthermore, you can create custom queues, which can either be serial or concurrent queues. While custom queues are a powerful abstraction, all blocks you schedule on them will ultimately trickle down to one of the system’s global queues and its thread pool(s).
 
@@ -247,7 +247,7 @@ DispatchQueue.global(attributes: [.qosDefault]).async {
 
 <a name="nsoperationqueue"></a>
 
-## NSOperationQueue
+### NSOperationQueue
 
 Operation queues are a Cocoa abstraction of the queue model exposed by GCD. While GCD offers more low-level control, operation queues implement several convenient features on top of it, which often makes it the best and safest choice for application developers. The `NSOperationQueue` class has two different types of queues: the main queue and custom queues. The main queue runs on the main thread, and custom queues are processed in the background. In any case, the tasks which are processed by these queues are represented as subclasses of `NSOperation`. Whereas dispatch queues always execute tasks in first-in, first-out order, operation queues __take other factors into account when determining the execution order of tasks__. Primary among these factors is whether a given task depends on the completion of other tasks. You configure dependencies when defining your tasks and can use them to create complex execution-order graphs for your tasks. Because the `NSOperation` class is essentially an abstract base class, you typically define custom subclasses to perform your tasks. However, the Foundation framework does include some concrete subclasses that you can create and use as is to perform tasks.
 
@@ -261,7 +261,7 @@ __Плюсы__
 
 <a name="async-await"></a>
 
-## async / await
+### async / await
 
 `async` означает асинхронный, и его можно рассматривать как атрибут метода, показывающий, что метод выполняет асинхронную работу. Чтобы вызвать такой метод, нужно использовать аттрибут `await`.
 
@@ -295,7 +295,7 @@ func obtainFirstCarsharing() async throws -> CarsharingCarDetail {
 
 Асинхронная функция, помимо результирующей модели, может вернуть ошибку - это нормальное поведение, которое разработчик может закладывать. В таком случае у нас есть возможность обрабатывать ошибки посредством try/catch.
 
-- async/await является неблокирующим механизмом. Сразу отмечу, что неблокирующий тут не равно непрерывный / синхронный. На это слово надо взглянуть под другим ракурсом - неблокирующим механизм является для потока. Что это значит?
+`async/await` является неблокирующим механизмом. Сразу отмечу, что неблокирующий тут не равно непрерывный / синхронный. На это слово надо взглянуть под другим ракурсом - неблокирующим механизм является для потока. Что это значит?
 
 Взглянем на примеры:
 
@@ -885,7 +885,7 @@ The best way is to take only one lock at a time. If you must acquire more than o
 
 <a name="dispatch_sync-dispatch_async"></a>
 
-## Чем отличается dispatch_async от dispatch_sync?
+# Чем отличается dispatch_async от dispatch_sync?
 
 Когда это возможно, асинхронное выполнение с использованием `dispatch_async` и `dispatch_async_f` функций предпочтительнее, чем синхронный вариант. При добавлении объекта блока или функции в очередь, нет никакого способа узнать, когда этот код будет выполняться. В результате, добавляя блоки или функции асинхронно позволяет запланировать выполнение кода и продолжать делать другую работу из вызывающего потока. Это особенно важно, если вы планировали выполнить задачу из основного потока приложения, возможно, в ответ на некоторые пользовательские события.
 Хотя вы должны добавлять задачи асинхронно по мере возможности, все же могут быть случаи, когда вам нужно добавить задачу синхронно, чтобы предотвратить гонку условий или другие ошибки синхронизации. В этих случаях можно использовать функции `dispatch_sync` и `dispatch_sync_f` для добавления задачи в очередь. Эти функции блокируют текущий поток исполнения до завершения выполнения указанной задачи.
@@ -911,14 +911,14 @@ printf("Оба блока были завершены.\n");
 
 <a name="многопоточность-uikit"></a>
 
-## Как многопоточность работает с UIKit?
+# Как многопоточность работает с UIKit?
 
 In Cocoa Touch, the `UIApplication` i.e. the instance of your application is attached to the main thread because this thread is created by `UIApplicatioMain()`, the entry point function of Cocoa Touch. It sets up main event loop, including the application’s run loop, and begins processing events. Application's main event loop receives all the UI events i.e. touches, gestures etc. These application UI events are further forwarded to `UIResponder`'s following the chain of responders usually like `UIApplication->UIWindow->UIViewController->UIView->subviews (UIButton, etc...)` Responders handle events like button press, tap, pinch zoom, swipe etc. which get translated as change in the UI. Hence as you can see these chain of events occur on main thread which is why UIKit, the framework which contains the responders should operate on main thread.
 One of the most common mistakes even experienced iOS/Mac developers make is accessing parts of UIKit/AppKit on background threads. It’s very easy to make the mistake of setting properties like image from a background thread, because their content is being requested from the network in the background anyway. Apple’s code is performance-optimized and will not warn you if you change properties from different threads. For the most part, UIKit classes should be used only from an application’s main thread. This is particularly true for classes derived from `UIResponder` or that involve manipulating your application’s user interface in any way.
 
 <a name="atomic-vs-nonatomic"></a>
 
-## Atomic vs nonatomic. Чем отличаются? Как вручную переопределить atomic/nonatomic сеттер в не ARC коде?
+# Atomic vs nonatomic. Чем отличаются? Как вручную переопределить atomic/nonatomic сеттер в не ARC коде?
 
 Cинхронизировать чтение/запись между потоками или нет.
 Atomic – thread safe.

@@ -1,4 +1,3 @@
-
 - [Swift](#swift)
   - [Memory management](#memory-management)
   - [Сlosures and functions](#сlosures-and-functions)

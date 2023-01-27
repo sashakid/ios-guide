@@ -4,7 +4,7 @@
   - [Что такое REST архитектура?](#что-такое-rest-архитектура)
   - [Как загрузить что-то из интернета? NSURL, NSURLSession, NSURLConnection, NSURLRequest](#как-загрузить-что-то-из-интернета-nsurl-nsurlsession-nsurlconnection-nsurlrequest)
   - [Парсинг JSON, HTML, XML](#парсинг-json-html-xml)
-- [Сокет, TCP, UDP, NSStream - когда что применять?](#сокет-tcp-udp-nsstream---когда-что-применять)
+  - [Сокет, TCP, UDP, NSStream - когда что применять?](#сокет-tcp-udp-nsstream---когда-что-применять)
   - [Как написать синхронную обертку для асинхронного метода?](#как-написать-синхронную-обертку-для-асинхронного-метода)
 
 <a name="networking"></a>
@@ -248,7 +248,7 @@ Con:
 
 <a name="socket-tcp-udp-nsstream"></a>
 
-# Сокет, TCP, UDP, NSStream - когда что применять?
+## Сокет, TCP, UDP, NSStream - когда что применять?
 
 __Socket__
 
