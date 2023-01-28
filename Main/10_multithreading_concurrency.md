@@ -965,3 +965,44 @@ GCD dispatch queues are better for short tasks that should have minimum performa
 <a name="gcd-vs-async-await"></a>
 
 # Difference between GCD and async/await
+
+**How GCD works**
+
+Since a concurrent queue can handle multiple work items at once, the system will bring up several threads until we have saturated all the CPU cores. If a thread blocks and there is more work to be done on the concurrent queue, GCD will bring up more threads to drain the remaining work items. In GCD, it's easy to have excessive concurrency:
+
+- Overcommitting the system with more threads than CPU cores (e.g., Apple Watch only has 2 cores)
+- Risk of thread explosion
+
+Too many threads come with performance costs:
+
+- Memory overhead - as each blocked thread is holding onto valuable memory and resources while waiting to run again
+- Scheduling overhead - as new threads are brought up, the CPU need to perform a full thread context switch in order to switch away from the old thread to start executing the new thread
+
+> In computing, a context switch is the process of storing the state of a process or of a thread, so that it can be restored and execution resumed from the same point later. This allows multiple processes to share a single CPU, and is an essential feature of a multitasking operating system.
+
+<img src="https://github.com/sashakid/ios-guide/blob/master/Images/context_switch.png">
+
+**How async/await works**
+
+- have one thread running on each cpu core - create only as many threads as there are CPU cores
+- replace blocked threads with lightweight objects called continuations to track resumption of work - this way threads are be able to cheaply and efficiently switch between work items when they are blocked
+- no context switches - instead of a full thread context switch, swapping continuations comes has the cost of a function call
+
+*How sync functions work*
+
+- Every thread in a running program has one stack, which it uses to store state for function calls
+- When the thread executes a function call, a new frame is pushed onto its stack
+- This newly created stack frame can be used by the function to store parameters, local variables, the return address, and any other information that is needed
+- Once the function finishes executing and returns, its stack frame is popped
+
+*How async functions work*
+
+- like for non-async functions, the stack frame stores local variables that do not need to be available across suspension points (a.k.a. await calls)
+- async functions will also have an associated frame stored in the heap
+- async frames (a.k.a. the async function frame in the heap) store information that does need to be available across suspension points
+instead of adding new stack frames across function calls, the top most stack frame is replaced when any variables that will be needed in the future will already have been stored in the list of async frames
+- suppose the execution of an async function is suspended, and the thread is reused to do some other useful work instead of being blocked
+- since all information that is maintained across a suspension point is stored on the heap, it can be used to continue execution at a later stage
+- this also means that the stack frame can be (and is) safely destroyed
+- this list of async frames is the runtime representation of a `continuation`
+- once we resume (in the same or another thread), we create again its stack frame and continue its execution with the info from the heap
