@@ -30,6 +30,7 @@
 - [Atomic vs nonatomic. Чем отличаются? Как вручную переопределить atomic/nonatomic сеттер в не ARC коде?](#atomic-vs-nonatomic-чем-отличаются-как-вручную-переопределить-atomicnonatomic-сеттер-в-не-arc-коде)
 - [Можно ли отменить операцию в GCD? А в NSOperationQueue?](#можно-ли-отменить-операцию-в-gcd-а-в-nsoperationqueue)
 - [Когда лучше использовать GCD, а когда NSOperationQueue?](#когда-лучше-использовать-gcd-а-когда-nsoperationqueue)
+- [Difference between GCD and async/await](#difference-between-gcd-and-asyncawait)
 
 <a name="multithreading-and-concurrency"></a>
 
@@ -960,3 +961,7 @@ If you want to cancel tasks, you might also consider using operation queues, `NS
 `NSOperationQueue` can be more suitable for long-running operations that may need to be cancelled or have complex dependencies.
 
 GCD dispatch queues are better for short tasks that should have minimum performance and memory overhead.
+
+<a name="gcd-vs-async-await"></a>
+
+# Difference between GCD and async/await
