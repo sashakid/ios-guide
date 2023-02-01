@@ -11,6 +11,7 @@
 		- [VIPER](#viper)
 		- [Redux](#redux)
 		- [VIP](#vip)
+			- [VIP vs VIPER](#vip-vs-viper)
 		- [SOAP](#soap)
 	- [Порождающие шаблоны](#порождающие-шаблоны)
 		- [Abstract factory](#abstract-factory)
@@ -53,9 +54,9 @@
 __How Cocoa Adapts Design Patterns__
 
 You can find adaptations of design patterns throughout Cocoa, in both its OS X and iOS versions. Mechanisms and architectures based on patterns are common in Cocoa frameworks and in the Objective-C runtime and language. Cocoa often puts its own distinctive spin on a pattern because its designs are influenced by factors such as language capabilities or existing architectures.
-This section contains summaries of most of the design patterns cataloged in Design Patterns: Elements of Reusable Object-Oriented Software. Each section not only summarizes the pattern but discusses the Cocoa implementations of it. Only patterns that Cocoa implements are listed, and each description of a pattern in the following sections pertains to a particular Cocoa context.
-Implementations of design patterns in Cocoa come in various forms. Some of the designs described in the following sections, such as protocols and categories, are features of the Objective-C language. In other cases, the “instance of a pattern” is implemented in one class or a group of related classes (for example, class clusters and singleton classes). And in other cases the pattern adaptation is a major framework architecture, such as the responder chain. Some of the pattern-based mechanisms you get almost “for free” while others require some work on your part. And even if Cocoa does not implement a pattern, you are encouraged to do so yourself when the situation warrants it; for example, object composition (Decorator pattern) is often a better technique than subclassing for extending class behavior.
-Two design patterns are reserved for later sections, Model-View-Controller (MVC) and object modeling. MVC is a compound, or aggregate pattern, meaning that it is based on several catalog patterns. Object modeling has no counterpart in the Gang of Four catalog, instead originating from the domain of relational databases. Yet MVC and object modeling are perhaps the most important and pervasive design patterns in Cocoa, and to a large extent they are interrelated patterns. They play a crucial role in the design of several technologies, including bindings, undo management, scripting, and the document architecture. To learn more about these patterns, see The Model-View-Controller Design Pattern and Object Modeling.
+Implementations of design patterns in Cocoa come in various forms. Some of the designs, such as protocols and categories, are features of the Objective-C language. In other cases, the “instance of a pattern” is implemented in one class or a group of related classes (for example, class clusters and singleton classes). And in other cases the pattern adaptation is a major framework architecture, such as the responder chain. Some of the pattern-based mechanisms you get almost “for free” while others require some work on your part. And even if Cocoa does not implement a pattern, you are encouraged to do so yourself when the situation warrants it; for example, object composition (Decorator pattern) is often a better technique than subclassing for extending class behavior.
+
+https://developer.apple.com/library/archive/documentation/Cocoa/Conceptual/CocoaFundamentals/CocoaDesignPatterns/CocoaDesignPatterns.html
 
 <a name="принципы"></a>
 
@@ -66,7 +67,7 @@ You Aren’t Gonna Need It / Вам это не понадобится
 
 Если пишете код, то будьте уверены, что он вам понадобится. Не пишите код, если думаете, что он пригодится позже. Этот принцип применим при рефакторинге. Если вы занимаетесь рефакторингом метода, класса или файла, не бойтесь удалять лишние методы. Даже если раньше они были полезны – теперь они не нужны.
 
-__DRY (Don’t Repeat Yourself) or DIE (duplication is evil)__
+__DRY__ (Don’t Repeat Yourself) or __DIE__ (duplication is evil)
 
 Дублирование кода – пустая трата времени и ресурсов. Вам придется поддерживать одну и ту же логику и тестировать код сразу в двух местах, причем если вы измените код в одном месте, его нужно будет изменить и в другом. В большинстве случаев дублирование кода происходит из-за незнания системы. Прежде чем что-либо писать, проявите прагматизм: осмотритесь. Возможно, эта функция где-то реализована. Возможно, эта бизнес-логика существует в другом месте. Повторное использование кода – всегда разумное решение.
 
@@ -154,16 +155,19 @@ Domain-driven design
 Это принцип, направленный на создание оптимальных систем. Всё сводится к описанию моделей, которые входят в бизнес-логику системы, которая устанавливает связь между реальными условиями применения системы и кодом. Фактически DDD - это набор правил, которые позволяют принимать правильные проектные решения. Данный подход позволяет значительно ускорить процесс проектирования программного обеспечения в незнакомой предметной области. Он особо полезен в тех случаях, когда разработчик не является специалистом в области разрабатываемой системы.
 
 Терминология:
-Область (domain) — предметная область, к которой применяется разрабатываемое программное обеспечение;
-Модель (model) — описывает отдельные аспекты области;
-Язык описания — используется для единого стиля описания домена и модели.
+
+- Область (domain) — предметная область, к которой применяется разрабатываемое программное обеспечение;
+- Модель (model) — описывает отдельные аспекты области;
+- Язык описания — используется для единого стиля описания домена и модели.
 
 Правила:
+
 Ограниченные связи - использование нескольких моделей на различных уровнях проекта. Данный подход используется для уменьшения различных связей между моделями, что исключает сложность и запутанность кода. Например: User и AuthedUser, что приводит к неясности, в каком контексте используется модель. Рекомендуется всегда определять контекст и границы использования.
 Целостность - определение минимальных границ модели. При участие большого числа разработчиков часто приводит к избыточному дроблению моделей, что приводит к потере целостности проекта. Рекомендуется постоянно проверять используемые модели на схожесть и принимать меры по объединению, в случае необходимости - это позволяет держать проект в одной концепции.
 Взаимосвязь - при работе над несколькими моделями в группе, разработчики могут не знать о сущностях других моделей, что усложняет процесс конечной общей сборки продукта. Рекомендуется на этапе проектирования точно обозначить, что именно выполняет каждая модель и как она взаимосвязана с другими. В конечном итоге должна получиться диаграмма взаимосвязей моделей.
 
 Элементы:
+
 Контекст - определение границ применения модели. Например: покупатель и посетитель - человек в разных контекстах.
 Сущность - объекты, над которыми совершаются действия, которые применимы только в конкретном контексте. Каждая сущность уникальная по характеристикам и имеет свой жизненный цикл. Например: человек, покупка.
 Объект-значение - это свойства модели, применяются для описания сущностей, они не имеют жизненного цикла. Например: в магазине 2 человека, где число людей - это описание модели, но не относится к конкретной сущности.
@@ -171,9 +175,9 @@ Domain-driven design
 Событие - событие, которое происходит в рамках проектируемой модели. Например: запуск двигателя автомобиля водителем, где старт - событие в модели.
 Сервис - объект модели, который не может быть выделен в сущность, но выполняет какое-то действие. Например: система контроля блокировки колёс, в модели, которая описывает управление автомобилем - это сервис, а не сущность.
 
-## Что такое clean architecture
+<a name="clean-architecture"></a>
 
-- [Что такое clean architecture?](#clean-architecture)
+## Что такое clean architecture
 
 Оригинальная схема из статьи Robert C. Martin:
 <img src="https://github.com/sashakid/ios-guide/blob/master/Images/clean-architecture.jpg">
@@ -194,7 +198,7 @@ __Особенности мобильных приложений__
 
 Кто-то думает, что на схемах изображены сущности (особенно это затрагивает UseCases и Entities). Но это не так. На схемах изображены слои, в них может находиться много сущностей. В них будут находиться интерфейсы для переходов между слоями (Boundaries), различные DTO, основные классы слоя (Interactors для слоя UseCases, например).
 
-`Data Transfer Object (DTO) — один из шаблонов проектирования, используется для передачи данных между подсистемами приложения. Data Transfer Object, в отличие от business object или data access object не должен содержать какого-либо поведения.`
+> Data Transfer Object (DTO) — один из шаблонов проектирования, используется для передачи данных между подсистемами приложения. Data Transfer Object, в отличие от business object или data access object не должен содержать какого-либо поведения.
 
 __Entities__
 
@@ -223,7 +227,11 @@ SOLID (сокр. от англ. Single responsibility, Open-closed, Liskov subst
 
 1. "__S__", Single responsibility, Принцип единственной ответственности
 
-Обозначает, что каждый объект должен иметь одну ответственность и эта ответственность должна быть полностью инкапсулирована в класс. Все его поведения должны быть направлены исключительно на обеспечение этой ответственности. Следующие приёмы позволяют соблюдать принцип единственной ответственности: разработка через тестирование, выделение класса, фасад, Proxy, DAO.
+> Модуль должен отвечать перед одним и только одним актором.
+
+Под актором здесь понимается группа, состоящая из одного или нескольких лиц, желающих изменения поведения программного модуля. Для определения соответствия программного модуля принципу единственной ответственности не всегда достаточно изучения лишь кода этого модуля. Требуется изучить также как этот модуль используется во внешнем по отношению к нему коде. Иными словами, каждый актор определяет контекст использования модуля или, что тоже самое, набор сценариев использования модуля. Это может показаться неочевидным сразу, но каждый сценарий использования модуля отражает чьё-либо желание зафиксированное в коде.
+
+Следующие приёмы позволяют соблюдать принцип единственной ответственности: разработка через тестирование, выделение класса, фасад, Proxy, DAO.
 
 2. "__O__", Open-closed, Принцип открытости / закрытости
 
@@ -237,7 +245,9 @@ SOLID (сокр. от англ. Single responsibility, Open-closed, Liskov subst
 
 4. "__I__", Interface segregation, Принцип разделения интерфейса
 
-Роберт Мартин определил его так: «Клиенты не должны зависеть от методов, которые они не используют». Принцип разделения интерфейсов говорит о том, что слишком «толстые» интерфейсы необходимо разделять на более маленькие и специфические, чтобы клиенты маленьких интерфейсов знали только о методах, которые необходимы им в работе. В итоге, при изменении метода интерфейса не должны меняться клиенты, которые этот метод не используют.
+> Клиенты не должны зависеть от методов, которые они не используют
+
+Принцип разделения интерфейсов говорит о том, что слишком «толстые» интерфейсы необходимо разделять на более маленькие и специфические, чтобы клиенты маленьких интерфейсов знали только о методах, которые необходимы им в работе. В итоге, при изменении метода интерфейса не должны меняться клиенты, которые этот метод не используют.
 
 5. "__D__", Dependency inversion, Принцип инверсии зависимостей
 
@@ -354,13 +364,23 @@ Configurator — “суперкласс”, который инициализи
 
 <https://clean-swift.com/clean-swift-ios-architecture/>
 
+<a name="vip-vs-viper"></a>
+
+#### VIP vs VIPER
+
+VIP and VIPER have the same basic components, but the data flow is different. Although VIP follows a unidirectional approach, VIPER has a bidirectional flow that starts with the presenter.
+
+<img src="https://github.com/sashakid/ios-guide/blob/master/Images/vip_vs_viper.png">
+
+In VIPER, the presenter directs data between the view and the interactor. The view and interactor don’t talk with each other.
+
 <a name="soap"></a>
 
 ### SOAP
 
 SOA is a style of software design where services are provided to the other components by application components, through a communication protocol over a network. The basic principles of service-oriented architecture are independent of vendors, products and technologies.
 
-A service is a unit of logic that runs in the network with the following characteristics:
+A **service** is a unit of logic that runs in the network with the following characteristics:
 
 - It handles a business processes
 - It can access another service
@@ -368,9 +388,7 @@ A service is a unit of logic that runs in the network with the following charact
 - It has only one responsibility
 - You should perceive services as tools. We will import them in other classes, and with them, we are going to build features. This structure will give us the benefits mentioned earlier. These tools will help us handling API, Core data, location, any third party code or business process.
 
-Two types of services
-
-In our implementation of SOA, we use two types of services: managers and regular services. Structurally they are the same, but managers have these attributes:
+In our implementation of SOA, we use **two types of services**: managers and regular services. Structurally they are the same, but managers have these attributes:
 
 - It is a service built around some framework - Core data
 - Generic and straightforward - Knows only to fetch, save, update and delete data, doesn’t work with specific data
@@ -398,7 +416,7 @@ Example: <https://github.com/pakisha/Medium6>
 
 ### Abstract factory
 
-Предоставляет интерфейс для создания семейств взаимосвязанных или взаимозависимых объектов, не специфицируя их конкретных классов. Шаблон реализуется созданием абстрактного класса Factory, который представляет собой интерфейс для создания компонентов системы (например, для оконного интерфейса он может создавать окна и кнопки). Затем пишутся классы, реализующие этот интерфейс.
+Предоставляет интерфейс для создания семейств взаимосвязанных или взаимозависимых объектов, не специфицируя их конкретных классов. Шаблон реализуется созданием абстрактного класса Factory, который представляет собой интерфейс для создания компонентов системы (например, для оконного интерфейса он может создавать окна и кнопки). Затем пишутся классы, реализующие этот интерфейс. Его еще называют фабрикой фабрик.
 - Система не должна зависеть от того, как создаются, компонуются и представляются входящие в неё объекты.
 - Входящие в семейство взаимосвязанные объекты должны использоваться вместе и вам необходимо обеспечить выполнение этого ограничения.
 - Система должна конфигурироваться одним из семейств составляющих её объектов.
@@ -419,6 +437,8 @@ _Минусы_
 
 - необходимость создавать наследника Creator для каждого нового типа продукта (ConcreteProduct). Впрочем, современные языки программирования поддерживают конструкции, что позволяет реализовать фабричный метод без иерархии классов Creator
 
+https://refactoring.guru/ru/design-patterns/factory-comparison
+
 <a name="lazy-initialization"></a>
 
 ### Lazy initialization
@@ -437,14 +457,14 @@ _Недостатки_
 
 ```objectivec
 - (UITableViewCell *)tableView:(UITableView *)tableView cellForRowAtIndexPath:(NSIndexPath *)indexPath {
- static NSString *CellIdentifier = @"CellIdentifier";
- cell = [tableView dequeueReusableCellWithIdentifier:CellIdentifier];
- if (cell == nil) {
-  //ленивая загрузка
-  cell = [[UITableViewCell alloc] initWithStyle:UITableViewCellStyleDefault reuseIdentifier:CellIdentifier];
- }
- cell.textLabel.text = someText;
- return cell;
+	static NSString *CellIdentifier = @"CellIdentifier";
+	cell = [tableView dequeueReusableCellWithIdentifier:CellIdentifier];
+	if (cell == nil) {
+  		//ленивая загрузка
+  		cell = [[UITableViewCell alloc] initWithStyle:UITableViewCellStyleDefault reuseIdentifier:CellIdentifier];
+	}
+	cell.textLabel.text = someText;
+	return cell;
 }
 ```
 
@@ -467,10 +487,10 @@ _Non thread safe_
 @implementation Singleton
 static Singleton *sharedSingleton_ = nil;
 + (Singleton *)sharedInstance {
- if (sharedSingleton_ == nil) {
-  sharedSingleton_ = [[Singleton alloc] init];
- }
- return sharedSingleton_;
+	if (sharedSingleton_ == nil) {
+		sharedSingleton_ = [[Singleton alloc] init];
+	}
+	return sharedSingleton_;
 }
 @end
 ```
@@ -484,12 +504,12 @@ _Thread safe_
 
 ```objectivec
 + (MyClass *)singleton {
- static dispatch_once_t pred;
- static MyClass *shared = nil;
- dispatch_once(&pred, ^{
-  shared = [[MyClass alloc] init];
-  });
-  return shared;
+	static dispatch_once_t pred;
+	static MyClass *shared = nil;
+	dispatch_once(&pred, ^{
+		shared = [[MyClass alloc] init];
+	});
+	return shared;
 }
 ```
 
@@ -625,18 +645,18 @@ The view hierarchy is also used by the responder chain for handling events and a
 
 ```objectivec
 @interface Class1 {
- id delegate;
+	id delegate;
 }
 - (id)delegate;
 - (void)setDelegate:(id)newDelegate;
 
 @implementation Class1
 - (id)delegate {
- return delegate;
+	return delegate;
 }
 
 - (void)setDelegate:(id)newDelegate {
- delegate = newDelegate;
+	delegate = newDelegate;
 }
 ```
 
@@ -688,7 +708,7 @@ C использованием KVC:
 ```objectivec
 double totalSalary = 0.0;
 for (Employee *employee in employees) {
- totalSalary += [employee.salary doubleValue];
+	totalSalary += [employee.salary doubleValue];
 }
 double averageSalary = totalSalary / [employees count];
 ```
@@ -745,9 +765,9 @@ __Недостатки__
 
 ```objectivec
 - (void) setObservable:(id)observable {
- [_observable addObserver:self forKeyPath:@"property" options:NSKeyValueObservingOptionNew context:nil];
- _observable = observable;
- [_observable removeObserver:self forKeyPath:@"property"];
+	[_observable addObserver:self forKeyPath:@"property" options:NSKeyValueObservingOptionNew context:nil];
+	_observable = observable;
+	[_observable removeObserver:self forKeyPath:@"property"];
 }
 ```
 
@@ -951,90 +971,115 @@ __Ignoring Errors__
 __String Literals__
 
 __Неуместная сложность (нарушение KISS)__
+
 Принудительное использование чрезмерно сложных шаблонов проектирования там, где более простой архитектуры было бы достаточно. Использование сложных паттернов без необходимости показывает не ваш скилл, а неспособность увидеть картину целиком и избежать излишней сложности.
 
 __Shotgun surgery, xирургия дробовиком__
+
 Термин  используется для случая, когда одно изменение в коде влечёт за собой множество других изменений.
 
 __Bloaters, раздувальщики__
 
-Long Method
+*Long Method*
+
 Метод содержит слишком большое число строк кода. Длина метода более десяти строк должна начинать вас беспокоить.
 
-Large Class
+*Large Class*
+
 Класс содержит множество полей/методов/строк кода.
 
-Primitive Obsession
-Использование элементарных типов вместо маленьких объектов для небольших задач (например, валюта, диапазоны, специальные строки для телефонных номеров и т. п.)
-Использование констант для кодирования какой-то информации (например, константа USER_ADMIN_ROLE = 1 для обозначения пользователей с ролью администратора).
-Использование строковых констант в качестве названий полей в массивах.
+*Primitive Obsession*
 
-Long Parameter List
+- Использование элементарных типов вместо маленьких объектов для небольших задач (например, валюта, диапазоны, специальные строки для телефонных номеров и т. п.)
+- Использование констант для кодирования какой-то информации (например, константа USER_ADMIN_ROLE = 1 для обозначения пользователей с ролью администратора).
+- Использование строковых констант в качестве названий полей в массивах.
+
+*Long Parameter List*
+
 Количество параметров метода больше трёх-четырёх.
 
-Data Clumps
+*Data Clumps*
+
 Иногда в разных частях кода встречаются одинаковые группы переменных (например, параметры подключения к базе данных). Такие группы следует превращать в самостоятельные классы.
 
 __Object-Orientation Abusers, нарушители объектно-ориентированного дизайна__
 
-Switch Statements
+*Switch Statements*
+
 У вас есть сложный оператор switch или последовательность if-ов.
 
-Temporary Field
+*Temporary Field*
+
 Временные поля — это поля, которые нужны объекту только при определённых обстоятельствах. Только тогда они заполняются какими-то значениями, оставаясь пустыми в остальное время.
 
-Refused Bequest
+*Refused Bequest*
+
 Если подкласс использует лишь малую часть унаследованных методов и свойств суперкласса, это является признаком неправильной иерархии. При этом ненужные методы могут просто не использоваться либо быть переопределёнными и выбрасывать исключения.
 
-Alternative Classes with Different Interfaces
+*Alternative Classes with Different Interfaces*
+
 Два класса выполняют одинаковые функции, но имеют разные названия методов.
 
 __Change Preventers, утяжелители изменений__
 
-Divergent Change
+*Divergent Change*
+
 При внесении изменений в класс приходится изменять большое число различных методов. Например, для добавления нового вида товара вам нужно изменить методы поиска, отображения и заказа товаров.
 
-Shotgun Surgery
+*Shotgun Surgery*
+
 При выполнении любых модификаций приходится вносить множество мелких изменений в большое число классов.
 
-Parallel Inheritance Hierarchies
+*Parallel Inheritance Hierarchies*
+
 Всякий раз при создании подкласса какого-то класса приходится создавать ещё один подкласс для другого класса.
 
 __Dispensables, замусориватели__
 
-Comments
+*Comments*
+
 Метод содержит множество поясняющих комментариев.
 
-Duplicate Code
+*Duplicate Code*
+
 Два фрагмента кода выглядят почти одинаковыми.
 
-Lazy Class
+*Lazy Class*
+
 На понимание и поддержку классов всегда требуются затраты времени и денег. А потому, если класс не делает достаточно много, чтобы уделять ему достаточно внимания, он должен быть уничтожен.
 
-Data Class
+*Data Class*
+
 Классы данных — это классы, которые содержат только поля и простейшие методы для доступа к ним (геттеры и сеттеры). Это просто контейнеры для данных, используемые другими классами. Эти классы не содержат никакой дополнительной функциональности и не могут самостоятельно работать с данными, которыми владеют.
 
-Dead Code
+*Dead Code*
+
 Переменная, параметр, поле, метод или класс больше не используются (чаще всего потому, что устарели).
 
-Speculative Generality
+*Speculative Generality*
+
 Класс, метод, поле или параметр не используются.
 
 __Couplers, опутыватели связями__
 
-Feature Envy
+*Feature Envy*
+
 Метод обращается к данным другого объекта чаще, чем к собственным данным.
 
-Inappropriate Intimacy
+*Inappropriate Intimacy*
+
 Один класс использует служебные поля и методы другого класса.
 
-Message Chains
-Вы видите в коде цепочки вызовов вроде такой $a->b()->c()->d()
+*Message Chains*
 
-Middle Man
+Вы видите в коде цепочки вызовов вроде такой `$a->b()->c()->d()`
+
+*Middle Man*
+
 Если класс выполняет одно действие — делегирует работу другому классу — стоит задуматься, зачем он вообще существует.
 
 __Incomplete Library Class__
+
 Библиотеки через некоторое время перестают удовлетворять требованиям пользователей. Естественное решение — внести изменения в библиотеку — очень часто оказывается недоступным, так как библиотека закрыта для записи.
 
 <a name="какая-разница-между-использованием-делагатов-и-нотификейшенов"></a>
@@ -1051,7 +1096,7 @@ __Incomplete Library Class__
 
 ```objectivec
 - (void)dealloc {
- [[NSNotificationCenter defaultCenter] removeObserver:self];
+	[[NSNotificationCenter defaultCenter] removeObserver:self];
 }
 ```
 
@@ -1059,8 +1104,8 @@ __Incomplete Library Class__
 
 ```objectivec
 - (void)dealloc {
- [windowThatBossesMeAround setDelegate:nil];
- [tableViewThatBegsForData setDataSource:nil];
+	[windowThatBossesMeAround setDelegate:nil];
+	[tableViewThatBegsForData setDataSource:nil];
 }
 ```
 
@@ -1068,7 +1113,7 @@ __Incomplete Library Class__
 
 ```objectivec
 - (void)dealloc {
- [buttonThatKeepsSendingMeMessages setTarget:nil];
+	[buttonThatKeepsSendingMeMessages setTarget:nil];
 }
 ```
 
@@ -1327,10 +1372,10 @@ ImageCache.shared.doSomething()
 let other = ImageCache()
 ```
 
-What is Shared Instance Good For
+**What is Shared Instance Good For**
 
 Shared instances are great when it's computationally or memory intensive to have lots of instances created and/or used. A great example of that is Apple's `URLSession`. They do a lot of optimizations with caching) responses and much more for each session instance. It is an anti-pattern to create a new session for each request because those optimizations cannot take effect. However, they don't make it a singleton because there are times when a developer may want customize the session differently for different groups of web requests. This is also why I called my shared instance type ”ImageCache.” Most images are probably well suited to be saved in one large cache. However, you may want to separate out certain important images in a separate and smaller cache that makes it less likely any of the images will be purged (removed to make room for newer images).
 
-What is Shared Instance NOT Good For
+**What is Shared Instance NOT Good For**
 
 Even more so than Singleton, Share Instances are very often used in a lazy and poor fashion. Instead of passing instances to other objects through Dependency Injection, people will use static instances to gain access to a required dependency. This leads to “spaghetti” code where there's no clear distinction of roles within our code making it hard to understand, debug, and maintain. It also opens up our code to conflicts when multiple objects are interacting with the shared instance at the same time. Even in many cases where a shared instance might make sense, it is still better to pass around the instance (usually through initializers) that you want to share as opposed to creating a static variable. For example, if you've got a class to manage the persisted data in your app. One might try to use a shared instance but this is still problematic because you won't want any object anywhere to start making modifications. Instead, you want to be more careful about who can make changes and you can manage that much better by requiring that you pass that to the relevant objects. That extra layer of “pain” actually helps you write better code. Something like image caches and url sessions are so universal and generic that it makes sense to use it from anywhere. It's rare that's the case.
