@@ -11,9 +11,6 @@
   - [RxSwift](#rxswift)
   - [SwiftUI](#swiftui)
   - [Combine](#combine)
-  - [Publishers](#publishers)
-  - [Subscribers](#subscribers)
-  - [Operators](#operators)
   - [Metod Dispatching](#metod-dispatching)
   - [Чем отличается Generic от Protocol?](#чем-отличается-generic-от-protocol)
   - [Какие бывают анимации?](#какие-бывают-анимации)
@@ -26,7 +23,8 @@
 
 # Swift
 
-* Multi-paradigm: protocol-oriented, object-oriented, functional, imperative, block structured
+- Multi-paradigm: protocol-oriented, object-oriented, functional, imperative, block structured
+
 - Designed by Chris Lattner and Apple Inc.
 - First appeared: June 2, 2014
 - Stable release: 5.6.1 / April 8, 2022
@@ -682,7 +680,7 @@ var body: some View {
 
 На WWDC 2019 был представлен фреймворк Combine от Apple. Он позволяет моделировать все виды асинхронных событий и операций типа “значения, изменяющиеся во времени”. Не смотря на то, что данное понятие, часто используется в мире реактивного программирования как концепция и способ организации логики, поначалу бывает сложно сразу во всем разобраться.
 
-## Publishers
+__Publishers__
 
 ---
 Every publisher can emit multiple events of these three types:
@@ -739,7 +737,7 @@ __Convenience Publishers__
 
 `Record` — A publisher that allows for recording a series of inputs and a completion, for later playback to each subscriber.
 
-## Subscribers
+__Subscribers__
 
 ---
 A `Subscriber` instance receives a stream of elements from a `Publisher`, along with life cycle events describing changes to their relationship. A given subscriber’s `Input` and `Failure` associated types must match the `Output` and `Failure` of its corresponding publisher.
@@ -748,7 +746,7 @@ A `Subscriber` instance receives a stream of elements from a `Publisher`, along 
 
 `Assign` — The assign subscriber allows you to, without the need of custom code, bind the resulting output to some property on your data model or on a UI control to display the data directly on-screen via a key path.
 
-## Operators
+__Operators__
 
 ---
 Operators are methods declared on the `Publisher` protocol that return either the same or a new publisher. That’s very useful because you can call a bunch of operators one after the other, effectively chaining them together. As an added bonus, operators always have input and output, commonly referred to as `upstream` and `downstream` — this allows them to avoid shared state.
