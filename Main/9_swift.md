@@ -24,10 +24,9 @@
 # Swift
 
 - Multi-paradigm: protocol-oriented, object-oriented, functional, imperative, block structured
-
 - Designed by Chris Lattner and Apple Inc.
 - First appeared: June 2, 2014
-- Stable release: 5.6.1 / April 8, 2022
+- Stable release: 5.7 / September 12, 2022
 - Typing discipline: Static, strong, inferred
 - OS: Darwin, Linux, FreeBSD
 - Influenced by C#, CLU, D, Haskell, Objective-C, Python, Ruby, Rust
@@ -799,10 +798,10 @@ let cancellable = publisher.sink(
 Пример с операторами:
 
 ```swift
-let sub = NotificationCenter.default
+let subscription = NotificationCenter.default
     .publisher(for: NSControl.textDidChangeNotification, object: filterField)
-    .map( { ($0.object as! NSTextField).stringValue } )
-    .filter( { $0.unicodeScalars.allSatisfy({CharacterSet.alphanumerics.contains($0)}) } )
+    .map({ ($0.object as! NSTextField).stringValue })
+    .filter({ $0.unicodeScalars.allSatisfy({ CharacterSet.alphanumerics.contains($0) }) })
     .debounce(for: .milliseconds(500), scheduler: RunLoop.main)
     .receive(on: RunLoop.main)
     .assign(to:\MyViewModel.filterString, on: myViewModel)
