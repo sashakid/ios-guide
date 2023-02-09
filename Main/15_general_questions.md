@@ -54,6 +54,7 @@
   - [Какие ты знаешь менеджеры зависимостей? В чем между ними разница?](#какие-ты-знаешь-менеджеры-зависимостей-в-чем-между-ними-разница)
   - [Чем отличается статическая библиотека от динамической?](#чем-отличается-статическая-библиотека-от-динамической)
   - [Как положить в массив weak объекты?](#как-положить-в-массив-weak-объекты)
+  - [Что такое agile, scrum и kanban?](#что-такое-agile-scrum-и-kanban)
 
 <a name="общие-вопросы"></a>
 
@@ -1650,39 +1651,77 @@ __Зачем мигрировать с Cocoapods на SPM?__
 
 ## Чем отличается статическая библиотека от динамической?
 
-Библиотека представляет собой набор программных кодов, объединяющих N файлов, это способ обмена программными кодами.
+**What is a Library?**
 
-- Библиотека с открытым исходным кодом: исходный код является общедоступным, и вы можете увидеть реализацию каждого файла реализации .m, например, широко используемых библиотек с открытым исходным кодом AFNetworking, SDWebImage и т. Д. На Github.
-- Закрытая исходная библиотека: исходный код не открыт, это скомпилированный двоичный файл, и никакой конкретной реализации не видно. Закрытая исходная библиотека делится на статическую библиотеку и динамическую библиотеку.
+Libraries are files that define pieces of code and data that are not a part of your Xcode target.
 
-Что такое статические библиотеки?
+The process of merging external libraries with app’s source code files is known as linking. The product of linking is a single executable file that can be run on a device, say iPhone or Mac. Besides linking, every Xcode project undergoes 4 more phases to produce an executable application. Libraries fall into two categories based on how they are linked to the app:
 
-- .a
-- .framework
+- Static libraries — .a
+- Dynamic libraries — .dylib
 
-Какая форма динамической библиотеки?
+Additionally, a special kind of libraries exists:
 
-- .dylib
-- .framework
+- Text Based .dylib stubs — .tbd
 
-В чем разница между статической библиотекой и динамической библиотекой?
+**What is a Framework?**
 
-- Файлы `.a` должны быть статическими библиотеками
-- `.dylib` должны быть динамическими библиотеками
-- `.framework` может быть статическими библиотеками или динамическими библиотеками.
+Framework is a package that can contain resources such as dynamic libraries, strings, headers, images, storyboards etc. With small changes to its structure, it can even contain other frameworks. Such aggregate is known as umbrella framework.
 
-Когда статическая библиотека связана, она будет полностью назначена исполняемому файлу. Если несколько приложений используют одну и ту же статическую библиотеку, каждое приложение будет копировать копию. Недостатком является то, что это тратит впустую память, что аналогично определению базовой переменной. Использование этой базовой переменной - это новая копия данных, а не исходное определение.
-Динамическая библиотека не будет скопирована, только одна копия. Программа динамически загружается в память во время работы программы. Система будет загружена только один раз. Несколько программ совместно используют одну копию, что экономит память. Это похоже на использование адрес памяти переменной. переменная
-Однако, если динамическая библиотека, определенная сама по себе, используется в проекте, Apple не позволит ей быть в списке. После iOS8 Apple открыла интерфейс для динамической загрузки `.dylib` для монтирования.
+Frameworks are also bundles ending with `.framework` extension. They can be accessed by `NSBundle` / `Bundle` class from code and, unlike most bundle files, can be browsed in the file system that makes it easier for developers to inspect its contents. Frameworks have versioned bundle format which allows to store multiple copies of code and headers to support older program version.
 
-Каковы сценарии применения статических библиотек?
+**Static Library**
 
-1. Защитите свой собственный основной код. Например, результаты, которые кто-то исследовал в течение многих лет, должны быть сохранены, и они раскрывают, как компания выживает.
-2. Упакуйте проект MRC в статическую библиотеку, которую можно использовать непосредственно в `ARC` без преобразования. Например, если кто-то другой использует библиотеку с открытым исходным кодом, написанную `MRC`, и помещает ее в ваш собственный проект `ARC`, вам необходимо добавить параметр компиляции в каждый файл-`fno-objc-arc` Это относительно хлопотно: упакуйте весь проект в статическую библиотеку и поместите его прямо в проект, не добавляя параметры компиляции к каждому файлу.
+Static libraries are collections of object files. In its turn, object file is just a name for a file that comes out of a compiler and contains machine code. Static libraries are ending with `.a` suffix and are created with an archiver tool. If it sounds very similar to a ZIP archive, then it’s exactly what it is. You can think of a static library as an archive of multiple object files. `.a` is an old format originally used by UNIX and its ar tool. Object files have `Mach-O` format which is a special file format for iOS and macOS operating systems. It is basically a binary stream with the following chunks:
 
-Что такое архитектура?
+- Header: Specifies the target architecture of the file. Since one `Mach-O` contains code and data for one architecture, code intended for `x86-64` will not run on `arm64`.
+- Load commands: Specify the logical structure of the file, like the location of the symbol table.
+- Raw segment data: Contains raw code and data.
 
-Архитектура ЦП - это спецификация, установленная производителями ЦП для продуктов ЦП, принадлежащих к той же серии. Основная цель - различать важные инструкции для разных типов ЦП. Архитектура симулятора не является такая же, как архитектура на реальной машине. Точно так же архитектура между имитатором и имитатором, реальное устройство и реальное устройство также различаются. Если структура статической библиотеки и соответствующего имитатора тестового проекта или структуры на реальное устройство не соответствует, будет выдана ошибка `Undefined symbols for ... architecture arm64 / i386`
+An attentive eye might have noticed that `Mach-O` files support single architecture. Then how can a Swift app with lots of static libraries run on all devices and even the simulator? The answer is `lipo` tool. It allows to package multiple single architecture libraries into a universal one, called fat binary, or vice-versa. 
+
+**Dynamic Library**
+
+Dynamic libraries, as opposed to the static ones, rather than being copied into single monolithic executable, are loaded into memory when they are actually needed. This could happen either at load time or at runtime. Dynamic libraries are usually shared between applications, therefore the system needs to store only one copy of the library and let different processes access it. As a result, invoking code and data from dynamic libraries happens slower than from the static ones. All iOS and macOS system libraries are dynamic. Hence our apps will benefit from the future improvements that Apple makes to standard library frameworks without creating and shipping new builds.
+
+**Text Based .dylib Stubs**
+
+When we link system libraries, such as `UIKit` or `Foundation`, we don’t want to copy their entirety into the app, because it would be too large. Linker is also strict about this and does not accept shared `.dylib` libraries to be linked against, but only `.tbd` ones. So what are those? Text-based `.dylib` stub, or `.tbd`, is a text file that contains the names of the methods without their bodies, declared in a dynamic library. It results in a significantly lower size of `.tbd` compared to a matching `.dylib`. Along with method names, it contains location of the corresponding .dylib, architecture, platform and some other metadata. 
+Comparing Static vs. Dynamic Libraries
+
+**Static Libraries**
+
+✓ Pros:
+
+- Static libraries are guaranteed to be present in the app and have correct version.
+- No need to keep an app up to date with library updates.
+- Better performance of library calls.
+
+✕ Cons:
+
+- Inflated app size.
+- Launch time degrades because of bloated app executable.
+- Must copy whole library even if using single function.
+  
+**Dynamic Libraries**
+
+✓ Pros:
+
+- Can benefit from library improvements without app re-compile. Especially useful with system libraries.
+- Takes less disk space, since it is shared between applications.
+- Faster startup time, as it is loaded on-demand during runtime.
+- Loaded by pieces: no need to load whole library if using single function.
+  
+✕ Cons:
+
+- Can potentially break the program if anything changes in the library.
+- Slower calls to library functions, as it is located outside application executable.
+  
+**Summary**
+
+- Libraries and frameworks are basic building blocks for creating iOS and macOS programs.
+- Libraries are collections of code and data, while frameworks are hierarchial directories with different kinds of files, including other libraries and frameworks.
+- Based on how libraries are linked, they can be static or dynamic. Each kind of linking comes with its pros and cons. Understanding them will help you to make the right choice between static and dynamic libraries for your project.
 
 <a name="array-with-weak"></a>
 
@@ -1718,3 +1757,22 @@ foos.append({ [weak foo] in return foo })
 
 foos.forEach { $0()?.doSomething() }
 ```
+
+<a name="agile-scrum-kanban"></a>
+
+## Что такое agile, scrum и kanban?
+
+Agile (agile software development, от англ. agile – проворный) – это семейство «гибких» подходов к разработке программного обеспечения. Такие подходы также иногда называют фреймворками или agile-методологиями. Agile возник в IT-среде, но затем распространился и в другие сферы – от промышленной инженерии до искусственного интеллекта.
+
+Смысл Agile сформулирован в Agile-манифесте разработки ПО: 
+> Люди и взаимодействие важнее процессов и инструментов. Работающий продукт важнее исчерпывающей документации. Сотрудничество с заказчиком важнее согласования условий контракта. Готовность к изменениям важнее следования первоначальному плану.
+
+Agile-манифест – главный документ всех «гибких» подходов к разработке. Он был создан в 2001 году группой энтузиастов-программистов, которые хотели понять, что именно лежит в основе разработки востребованного и полезного IT-продукта. Agile предполагает, что при реализации проекта не нужно опираться только на заранее созданные подробные планы. Важно ориентироваться на постоянно меняющиеся условия внешней и внутренней среды и учитывать обратную связь от заказчиков и пользователей. Это поощряет разработчиков и инженеров экспериментировать и искать новые решения, не ограничивая себя жесткими рамками и стандартами.
+
+К отдельным agile-подходам относятся scrum и kanban.
+
+Scrum – это «подход структуры». Над каждым проектом работает универсальная команда специалистов, к которой присоединяется еще два человека: владелец продукта и scrum-мастер. Первый соединяет команду с заказчиком и следит за развитием проекта; это не формальный руководитель команды, а скорее куратор. Второй помогает первому организовать бизнес-процесс: проводит общие собрания, решает бытовые проблемы, мотивирует команду и следит за соблюдением scrum-подхода. Scrum-подход делит рабочий процесс на равные спринты – обычно это периоды от недели до месяца, в зависимости от проекта и команды. Перед спринтом формулируются задачи на данный спринт, в конце – обсуждаются  результаты, а команда начинает новый спринт. Спринты очень удобно сравнивать между собой, что позволяет управлять эффективностью работы.
+
+Kanban – это «подход баланса». Его задача – сбалансировать разных специалистов внутри команды и избежать ситуации, когда дизайнеры работают сутками, а разработчики жалуются на отсутствие новых задач. Вся команда едина – в kanban нет ролей владельца продукта и scrum-мастера. Бизнес-процесс делится не на универсальные спринты, а на стадии выполнения конкретных задач: «Планируется», «Разрабатывается», «Тестируется», «Завершено» и др. Главный показатель эффективности в kanban – это среднее время прохождения задачи по доске. Задача прошла быстро – команда работала продуктивно и слаженно. Задача затянулась – надо думать, на каком этапе и почему возникли задержки и чью работу надо оптимизировать.
+
+Для визуализации agile-подходов используют доски: физические и электронные. Они позволяют сделать рабочий процесс открытым и понятным для всех специалистов, что важно, когда у команды нет одного формального руководителя.
