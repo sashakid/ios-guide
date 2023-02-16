@@ -8,7 +8,8 @@
     - [Generics](#generics)
     - [Associated Types](#associated-types)
     - [Что такое type erasure?](#что-такое-type-erasure)
-    - [Что такое opaque type?](#что-такое-opaque-type)
+    - [Что такое opaque type? (some)](#что-такое-opaque-type-some)
+    - [Что такое existential type? (any)](#что-такое-existential-type-any)
     - [Чем отличается Generic от Protocol?](#чем-отличается-generic-от-protocol)
   - [Difference between Array VS NSArray VS \[AnyObject\]](#difference-between-array-vs-nsarray-vs-anyobject)
   - [Objective-C id is Swift Any or AnyObject](#objective-c-id-is-swift-any-or-anyobject)
@@ -522,9 +523,62 @@ The Container protocol defines three required capabilities that any container mu
 
 ### Что такое type erasure?
 
+There are two types of protocols:
+
+1. Protocols which leverage generics under-the-hood (with `associatedtype` or `Self`)
+2. Protocols which do not (the protocols we know and love from Objective-C)
+
+```swift
+/// A protocol with an associated type.
+protocol AssociatedTypeProtocol {
+    associatedtype AssociatedType
+    func stringRepresentation(from type: AssociatedType) -> String
+}
+
+/// A protocol with "self requirements".
+protocol SelfReferentialProtocol {
+    /// Used to differentiate instances of the protocol later.
+    var value: String { get }
+    /// An example of a method with Self requirements.
+    func compare(with: Self) -> Bool
+}
+```
+
+When we define protocols in our code, the compiler creates a protocol witness which allows the compiler to perform type-checking. In the case of protocols with associated types, the protocol witness requires the use of generics. It’s this use of generics which prevents us from creating an array of a protocol with associated types or using it as a parameter to a method.
+
+Type erasure is a pattern applied to protocols with associated types or self requirements. It allows us to work around the strong type safety of the Swift compiler in order to use these protocols in a way that is similar to using protocols without associated types.
+
 Type-erasure simply means "erasing" a specific type to a more abstract type in order to do something with the abstract type (like having an array of that abstract type). And this happens in Swift all the time, pretty much whenever you see the word `Any`. The most straightforward way to think of type erasure is to consider it a way to hide an object's "real" type. В стандартной библиотеке Swift много примеров такого подхода: `AnyHashable`, `AnyIterator`, `AnySequence`, `AnyCollection` и т.д.
 
-### Что такое opaque type?
+Examples of type erasure before language features (`some` Swift 5.1 or `any` Swift 5.6 keywords):
+
+https://medium.com/swiftworld/swift-world-type-erasure-5b720bc0318a
+
+***
+
+**What is a protocol witness?**
+
+A protocol witness is a way for the compiler to make our protocol into a concrete type. This type is only known to the compiler and cannot be used in our code — unless of course we decide to write the code ourselves! For the protocols above, the compiler generates concrete types that look like this:
+
+```swift
+struct AssociatedTypeProtocolWitness<Type> {
+    let stringRepresentation: (Type) -> String
+}
+
+struct SelfReferentialProtocolWitness<Type> {
+    let value: String
+    let compare: (Type, Type) -> Bool
+}
+```
+A protocol witness is simply an instance of one of these types. There’s no problem when creating an array of our protocol witnesses, but notice how we have to specify a type for the generic parameter.
+
+```swift
+let witnesses: [AssociatedTypeProtocolWitness<String>] = []
+```
+
+When using protocols, we’re not able to provide this necessary type information to the compiler. This is why the compiler complains that our protocol can only be used as a generic constraint when it has associated type or self requirements.
+
+### Что такое opaque type? (some)
 
 Opaque return types is a new language feature that is introduced in Swift 5.1 by Apple. It can be used to return some value for function/method, and property without revealing the concrete type of the value to client that calls the API. The return type will be some type that implement a protocol. Using this solution, the module API doesn’t have to publicly leak the underlying internal return type of the method, it just need to return the opaque type of the protocol using the `some` keyword. The Swift compiler also will be able to preserve the underlying identity of the return type unlike using protocol as the return type. SwiftUI uses opaque return types inside its `View` protocol that returns `some View` in the body property.
 
@@ -567,6 +621,49 @@ func buildPreferredOS() -> some MobileOS {
 ```
 
 Using the opaque return type, we finally can return `MobileOS` as the return type of the function. The compiler maintains the identity of the underlying specific return type here and the caller doesn’t have to know the internal type of the return type as long as it implements the MobileOS protocol
+
+**Usage**
+
+1. Opaque result types can be used with PATs (protocols with associated types)
+2. Opaque result types have identity
+
+```swift
+//   foo() -> <Output : Equatable> Output {
+func foo() -> some Equatable { 
+  return 5 // The opaque result type is inferred to be Int.
+}
+
+let x = foo()
+let y = foo()
+print(x == y) // Legal both x and y have the return type of foo.
+```
+
+This is legal because the compiler knows that both x and y have the same concrete type. This is an important requirement for `==`, where both parameters of type `Self`.
+
+3. Opaque result types compose with generic placeholders
+
+### Что такое existential type? (any)
+
+By using the `any` keyword in front of a protocol, we’re defining an existential type of a specific protocol.
+
+```swift
+protocol Content: Identifiable where ID == UUID {
+    var url: URL { get }
+}
+
+struct ImageContent: Content {
+    let id = UUID()
+    let url: URL
+}
+
+let content: any Content = ImageContent(...)
+```
+
+**When to use Existentials**
+
+1. Consider starting with concrete types first, don’t overcomplicate from the start
+2. Move to opaque types using the `some` keyword once you need more type flexibility
+3. Change `some` to `any` when you know you need to store arbitrary (random) values
 
 ### Чем отличается Generic от Protocol?
 
@@ -642,9 +739,9 @@ mutating func pop() -> StackElement {
 }
 ```
 
-If you answered StackElement, you’re wrong. The correct answer is, again, “I don’t know“.
+If you answered `StackElement`, you’re wrong. The correct answer is, again, “I don’t know“.
 
-Protocols hide away the underlying type. If a `Generic` is an `incomplete Type`, then a `Protocol` is a `masked Type`. When we have a function that returns a `Protocol`, the compiler cannot tell you what concrete type is actually implementing the `Protocol`! Of course you could check what type it is by doing something like if lastElement `is String` but then you’re trying to fit a round peg in a square hole.
+Protocols hide away the underlying type. If a `Generic` is an `incomplete Type`, then a `Protocol` is a `masked Type`. When we have a function that returns a `Protocol`, the compiler cannot tell you what concrete type is actually implementing the `Protocol`! Of course you could check what type it is by doing something like `if lastElement is String` but then you’re trying to fit a round peg in a square hole.
 
 Once a Generic becomes complete (e.g. `Array<String>`) it is a fully concrete type. It can be compared to other types. Constants or variables declared as `Protocols` can never be compared to concrete types. That’s the difference between a `Generic` and a `Protocol`. `Protocols` are meant to mask types at the cost of losing concreteness and `Generics` are meant to become complete types by finding their other half.
 
