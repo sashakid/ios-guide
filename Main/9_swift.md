@@ -177,8 +177,6 @@ Furthermore, when a closure is the last argument of a function, parenthesis can 
 applyMutliplication(2) {$0 * 3}
 ```
 
-<a name="how-do-i-declare-a-closure-in-swift"></a>
-
 ## How Do I Declare a Closure in Swift?
 
 _As a variable:_
@@ -267,8 +265,6 @@ _As a function parameter with explicit capture semantics and inferred parameters
 array.sort({ [unowned self] in return item1 < item2 })
 ```
 
-<a name="memory-management"></a>
-
 ## Memory management
 
 At hardware level, memory is just a long list of bytes. We treat it as if it were organized into three virtual parts:
@@ -338,10 +334,6 @@ During their life cycle, the objects maintain following invariants:
 
 <https://github.com/apple/swift/blob/main/stdlib/public/SwiftShims/RefCount.h>
 
-<a name="generics"></a>
-
-<a name="valuetype-vs-referencetype"></a>
-
 ### ValueType vs. ReferenceType
 
 > __Reference type__: a type that once initialized, when assigned to a variable or constant, or when passed to a function, returns a reference to the same existing instance.
@@ -363,8 +355,6 @@ When to use:
 - Comparing instance data with == makes sense (Equatable protocol)
 - You want copies to have independent state
 - The data will be used in code across multiple threads (avoid explicit synchronization)
-
-<a name="copy-on-write"></a>
 
 ### What is copy on write mechanism
 
@@ -426,8 +416,6 @@ struct Box<T> {
 ```
 
 The `Box` struct has a reference to `Ref` class and will return the value of our `Car` struct . When you try to set the value, it checks if there are any existing strong references and creates a new `Ref` if needed thereby limiting the copies to be made only while writing to it. `isKnownUniquelyReferenced` returns a boolean indicating whether the given object is known to have a single strong reference.
-
-<a name="pop"></a>
 
 ## Что такое протокол-ориентированное программирование? (POP)
 
@@ -500,8 +488,6 @@ _Наследование_
 
 В POP получение нужной функциональности происходит за счёт добавления соответствий протоколам, которые предоставляют функции через extensions. При этом мы не ограничены классами, имеем возможность расширять за счёт протоколов структуры и enum-ы. Протоколы могут наследоваться от других протоколов — это означает добавление к собственным требованиям требований от родительских протоколов.
 
-<a name="generics"></a>
-
 ### Generics
 
 Generic code enables you to write flexible, reusable functions and types that can work with any type, subject to requirements that you define. You can write code that avoids duplication and expresses its intent in a clear, abstracted manner.
@@ -514,8 +500,6 @@ func swapTwoValues<T>(inout a: T, inout _ b: T) {
  b = temporaryA
 }
 ```
-
-<a name="associated-types"></a>
 
 ### Associated Types
 
@@ -536,13 +520,9 @@ The Container protocol defines three required capabilities that any container mu
 - It must be possible to access a count of the items in the container through a count property that returns an Int value.
 - It must be possible to retrieve each item in the container with a subscript that takes an Int index value.
 
-<a name="type-erasure"></a>
-
 ### Что такое type erasure?
 
 Type-erasure simply means "erasing" a specific type to a more abstract type in order to do something with the abstract type (like having an array of that abstract type). And this happens in Swift all the time, pretty much whenever you see the word `Any`. The most straightforward way to think of type erasure is to consider it a way to hide an object's "real" type. В стандартной библиотеке Swift много примеров такого подхода: `AnyHashable`, `AnyIterator`, `AnySequence`, `AnyCollection` и т.д.
-
-<a name="opaque-type"></a>
 
 ### Что такое opaque type?
 
@@ -587,8 +567,6 @@ func buildPreferredOS() -> some MobileOS {
 ```
 
 Using the opaque return type, we finally can return `MobileOS` as the return type of the function. The compiler maintains the identity of the underlying specific return type here and the caller doesn’t have to know the internal type of the return type as long as it implements the MobileOS protocol
-
-<a name="#generic-vs-protocol"></a>
 
 ### Чем отличается Generic от Protocol?
 
@@ -670,8 +648,6 @@ Protocols hide away the underlying type. If a `Generic` is an `incomplete Type`,
 
 Once a Generic becomes complete (e.g. `Array<String>`) it is a fully concrete type. It can be compared to other types. Constants or variables declared as `Protocols` can never be compared to concrete types. That’s the difference between a `Generic` and a `Protocol`. `Protocols` are meant to mask types at the cost of losing concreteness and `Generics` are meant to become complete types by finding their other half.
 
-<a name="array-nsarray-anyobject"></a>
-
 ## Difference between Array VS NSArray VS [AnyObject]
 
 `Array` is a struct, therefore it is a value type in Swift.
@@ -680,8 +656,6 @@ Once a Generic becomes complete (e.g. `Array<String>`) it is a fully concrete ty
 
 `[AnyObject]` is the same as `Array<AnyObject>`
 
-<a name="id-any"></a>
-
 ## Objective-C id is Swift Any or AnyObject
 
 `Any` can represent an instance of any type at all, including function types and optional types.
@@ -689,8 +663,6 @@ Once a Generic becomes complete (e.g. `Array<String>`) it is a fully concrete ty
 `AnyObject` can represent an instance of any class type.
 
 > As part of its interoperability with Objective-C, Swift offers convenient and efficient ways of working with Cocoa frameworks. Swift automatically converts some Objective-C types to Swift types, and some Swift types to Objective-C types. Types that can be converted between Objective-C and Swift are referred to as bridged types. Anywhere you can use a bridged Objective-C reference type, you can use the Swift value type instead. This lets you take advantage of the functionality available on the reference type’s implementation in a way that is natural in Swift code. For this reason, you should almost never need to use a bridged reference type directly in your own code. In fact, when Swift code imports Objective-C APIs, the importer replaces Objective-C reference types with their corresponding value types. Likewise, when Objective-C code imports Swift APIs, the importer also replaces Swift value types with their corresponding Objective-C reference types.
-
-<a name="method-dispatching"></a>
 
 ## Metod Dispatching
 
@@ -901,8 +873,6 @@ class Animal {
 
 If a property is observed with KVO and that property is upgraded to Direct Dispatch, the code will still compile, but the dynamically generated KVO method won’t be triggered
 
-<a name="#animations"></a>
-
 ## Какие бывают анимации?
 
 - UIKit
@@ -991,8 +961,6 @@ animator.startAnimation()
 
 Worth noting is that you can actually use UIView.animate and UIView.animateKeyframes from within your UIViewPropertyAnimator animations blocks, should you feel the need to use both.
 
-<a name="sendable"></a>
-
 ## Что такое Sendable?
 
 Протокол `Sendable` и оболочка `@Sendable` добавляет поддержку «отправляемых» данных, то есть данных, которые можно безопасно передавать в другой поток. Это достигается с помощью нового протокола `Sendable` и атрибута `@Sendable` для функций.
@@ -1030,8 +998,6 @@ func runLater(_ completionHandler: @escaping @Sendable () -> Void) -> Void {
 }
 ```
 
-<a name="map-functions"></a>
-
 ## Разница между map, compactMap и flatMap?
 
 The word all three methods share is “map”, which in this context means “transform from one thing to another.”
@@ -1039,8 +1005,6 @@ The word all three methods share is “map”, which in this context means “tr
 `compactMap()`: transform then unwrap
 
 `flatMap()`: transform then flatten
-
-<a name="rxswift"></a>
 
 ## RxSwift
 
@@ -1078,8 +1042,6 @@ Driver ensures that observe occurs only on main thread. Thumb rule is are you tr
 __What's the difference between `bind` and `subscribe`?__
 
 By using `bind(onNext)` you can express that stream should never emit `error` and you interested only in item events. So you should use `subscribe(onNext:...)` when you interested in `error` / `complete` / `disposed` events and `bind(onNext...)` otherwise
-
-<a name="swiftui"></a>
 
 ## SwiftUI
 
@@ -1176,8 +1138,6 @@ var body: some View {
     }
 }
 ```
-
-<a name="combine"></a>
 
 ## Combine
 
