@@ -1,47 +1,47 @@
 - [OBJECTIVE-C](#objective-c)
-	- [Transparent and opaque data types](#transparent-and-opaque-data-types)
-	- [Toll-Free Bridged Types](#toll-free-bridged-types)
-	- [Директивы компилятора](#директивы-компилятора)
+  - [Transparent and opaque data types](#transparent-and-opaque-data-types)
+  - [Toll-Free Bridged Types](#toll-free-bridged-types)
+  - [Директивы компилятора](#директивы-компилятора)
 - [MEMORY MANAGEMENT](#memory-management)
-	- [Память в стеке и в куче](#память-в-стеке-и-в-куче)
-	- [Manual retain-release](#manual-retain-release)
-	- [Automatic Reference Counting](#automatic-reference-counting)
-	- [Модификаторы](#модификаторы)
-	- [Что такое property?](#что-такое-property)
-	- [Написать сеттер и геттер для свойства, с ARC и без](#написать-сеттер-и-геттер-для-свойства-с-arc-и-без)
-	- [В каких случаях лучше использовать strong, а в каких copy для NSString? Почему?](#в-каких-случаях-лучше-использовать-strong-а-в-каких-copy-для-nsstring-почему)
-	- [`autorelease` vs `release`?](#autorelease-vs-release)
-	- [Что делать, если проект написан с использованием ARC, а нужно использовать классы сторонней библиотеки написанной без ARC?](#что-делать-если-проект-написан-с-использованием-arc-а-нужно-использовать-классы-сторонней-библиотеки-написанной-без-arc)
-	- [Владение объектами](#владение-объектами)
-	- [Вопрос о циклах удержания, и почему свойства delegate обычно задаются как assign?](#вопрос-о-циклах-удержания-и-почему-свойства-delegate-обычно-задаются-как-assign)
-	- [Нужно ли ретейнить делегат для CAAnimation?](#нужно-ли-ретейнить-делегат-для-caanimation)
-	- [Если я вызову performSelector:withObject:afterDelay: объекту пошлется сообщение retain?](#если-я-вызову-performselectorwithobjectafterdelay-объекту-пошлется-сообщение-retain)
-	- [Вы можете объяснить, что происходит когда вы посылаете объекту сообщение autorelease?](#вы-можете-объяснить-что-происходит-когда-вы-посылаете-объекту-сообщение-autorelease)
-	- [Объясните что такое retain count?](#объясните-что-такое-retain-count)
+  - [Память в стеке и в куче](#память-в-стеке-и-в-куче)
+  - [Manual retain-release](#manual-retain-release)
+  - [Automatic Reference Counting](#automatic-reference-counting)
+  - [Модификаторы](#модификаторы)
+  - [Что такое property?](#что-такое-property)
+  - [Написать сеттер и геттер для свойства, с ARC и без](#написать-сеттер-и-геттер-для-свойства-с-arc-и-без)
+  - [В каких случаях лучше использовать strong, а в каких copy для NSString? Почему?](#в-каких-случаях-лучше-использовать-strong-а-в-каких-copy-для-nsstring-почему)
+  - [`autorelease` vs `release`?](#autorelease-vs-release)
+  - [Что делать, если проект написан с использованием ARC, а нужно использовать классы сторонней библиотеки написанной без ARC?](#что-делать-если-проект-написан-с-использованием-arc-а-нужно-использовать-классы-сторонней-библиотеки-написанной-без-arc)
+  - [Владение объектами](#владение-объектами)
+  - [Вопрос о циклах удержания, и почему свойства delegate обычно задаются как assign?](#вопрос-о-циклах-удержания-и-почему-свойства-delegate-обычно-задаются-как-assign)
+  - [Нужно ли ретейнить делегат для CAAnimation?](#нужно-ли-ретейнить-делегат-для-caanimation)
+  - [Если я вызову performSelector:withObject:afterDelay: объекту пошлется сообщение retain?](#если-я-вызову-performselectorwithobjectafterdelay-объекту-пошлется-сообщение-retain)
+  - [Вы можете объяснить, что происходит когда вы посылаете объекту сообщение autorelease?](#вы-можете-объяснить-что-происходит-когда-вы-посылаете-объекту-сообщение-autorelease)
+  - [Объясните что такое retain count?](#объясните-что-такое-retain-count)
 - [КОЛЛЕКЦИИ В Objective-C](#коллекции-в-objective-c)
-	- [Core Foundation](#core-foundation)
-	- [Foundation](#foundation)
-	- [Разница между NSSet и NSArray](#разница-между-nsset-и-nsarray)
-	- [Difference between NSArray and CFArray](#difference-between-nsarray-and-cfarray)
-	- [Enumeration](#enumeration)
-	- [Filtering](#filtering)
-	- [Sorting](#sorting)
-	- [Зачем нужен NSCache? В чем от реализации кэша на NSDictionary?](#зачем-нужен-nscache-в-чем-от-реализации-кэша-на-nsdictionary)
+  - [Core Foundation](#core-foundation)
+  - [Foundation](#foundation)
+  - [Разница между NSSet и NSArray](#разница-между-nsset-и-nsarray)
+  - [Difference between NSArray and CFArray](#difference-between-nsarray-and-cfarray)
+  - [Enumeration](#enumeration)
+  - [Filtering](#filtering)
+  - [Sorting](#sorting)
+  - [Зачем нужен NSCache? В чем от реализации кэша на NSDictionary?](#зачем-нужен-nscache-в-чем-от-реализации-кэша-на-nsdictionary)
 - [RUNTIME](#runtime)
-	- [Что такое указатель isa? Для чего он нужен?](#что-такое-указатель-isa-для-чего-он-нужен)
-	- [Что происходит с методом после того, как он не нашелся в объекте класса, которому его вызвали?](#что-происходит-с-методом-после-того-как-он-не-нашелся-в-объекте-класса-которому-его-вызвали)
-	- [Что такое классы в Objective-C, структура классов?](#что-такое-классы-в-objective-c-структура-классов)
-	- [Чем объект Objective-c отличается от структуры С, что такое структура в C?](#чем-объект-objective-c-отличается-от-структуры-с-что-такое-структура-в-c)
-	- [Вопрос о методах isKindOfClass, isMemberOfClass](#вопрос-о-методах-iskindofclass-ismemberofclass)
-	- [Тип id](#тип-id)
-	- [Dynamic method resolution](#dynamic-method-resolution)
+  - [Что такое указатель isa? Для чего он нужен?](#что-такое-указатель-isa-для-чего-он-нужен)
+  - [Что происходит с методом после того, как он не нашелся в объекте класса, которому его вызвали?](#что-происходит-с-методом-после-того-как-он-не-нашелся-в-объекте-класса-которому-его-вызвали)
+  - [Что такое классы в Objective-C, структура классов?](#что-такое-классы-в-objective-c-структура-классов)
+  - [Чем объект Objective-c отличается от структуры С, что такое структура в C?](#чем-объект-objective-c-отличается-от-структуры-с-что-такое-структура-в-c)
+  - [Вопрос о методах isKindOfClass, isMemberOfClass](#вопрос-о-методах-iskindofclass-ismemberofclass)
+  - [Тип id](#тип-id)
+  - [Dynamic method resolution](#dynamic-method-resolution)
 - [БЛОКИ](#блоки)
-	- [Типы блоков](#типы-блоков)
-	- [When and why block captures `self` and when they don't?](#when-and-why-block-captures-self-and-when-they-dont)
-	- [Примеры объявления и использования блоков](#примеры-объявления-и-использования-блоков)
-	- [В чем отличие блока от лямбды и замыкания](#в-чем-отличие-блока-от-лямбды-и-замыкания)
-	- [Обратный вызов](#обратный-вызов)
-	- [Когда использовать блоки, делегаты, KVO и уведомления?](#когда-использовать-блоки-делегаты-kvo-и-уведомления)
+  - [Типы блоков](#типы-блоков)
+  - [When and why block captures `self` and when they don't?](#when-and-why-block-captures-self-and-when-they-dont)
+  - [Примеры объявления и использования блоков](#примеры-объявления-и-использования-блоков)
+  - [В чем отличие блока от лямбды и замыкания](#в-чем-отличие-блока-от-лямбды-и-замыкания)
+  - [Обратный вызов](#обратный-вызов)
+  - [Когда использовать блоки, делегаты, KVO и уведомления?](#когда-использовать-блоки-делегаты-kvo-и-уведомления)
 
 <a name="objective-c"></a>
 
@@ -75,6 +75,28 @@ __Минусы__
 
 In computer science, an opaque data type is a data type whose concrete data structure is not defined in an interface. This enforces information hiding, since its values can only be manipulated by calling subroutines that have access to the missing information. The concrete representation of the type is hidden from its users, and the visible implementation is incomplete. A data type whose representation is visible is called transparent. Opaque data types are frequently used to implement abstract data types.
 Some languages, such as C, allow the declaration of opaque records (structs), whose size and fields are hidden from the client. The only thing that the client can do with an object of such a type is to take its memory address, to produce an opaque pointer. If the information provided by the interface is sufficient to determine the type's size, then clients can declare variables, fields, and arrays of that type, assign their values, and possibly compare them for equality. This is usually the case for opaque pointers.
+
+In C, C++ and Objective-C, you can tell the compiler that a type will be defined later by using a forward declaration:
+```objectivec
+// forward declaration of struct in C, C++ and Objective-C
+struct Foo;
+
+// forward declaration of class in C++:
+class Bar;
+
+// forward declaration of class in Objective-C:
+@class Baz;
+```
+
+The compiler doesn't have enough information to let you do anything directly with the struct or class except declare pointers to it, but this is frequently all you need to do. This allows library and framework creators to hide implementation details. Users of a library or framework then call helper functions to create, manipulate and destroy instances of a forward declared struct or class. For example, a framework creator could create these functions for struct `Foo`:
+
+```objectivec
+struct Foo *createFoo(void);
+void addNumberToFoo(struct Foo *foo, int number);
+void destroyFoo(struct Foo *foo);
+```
+
+As part of the Core Foundation framework, Apple makes common Objective-C classes like `NSString`, `NSArray` and `NSBundle` available to C programmers through opaque types. C programmers use pointers and helper functions to create, manipulate and destroy instances of these Objective-C classes. Apple calls this "toll-free bridging". They follow a common naming convention: "CF" prefix + class name + "Ref" suffix, where "CF" stands for "Core Foundation" and "Ref" is short for "Reference", meaning it's a pointer.
 
 <a name="toll-free-bridged-types"></a>
 

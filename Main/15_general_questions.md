@@ -1100,18 +1100,52 @@ The Collection method `map(_:)` also accepts a single function as a parameter, a
 
 __Reduce__
 
-The Collection method `reduce(_:_:)` takes two parameters. The first is a starting value of a generic type `Element`, and the second is a function that combines a value of type `Element` with an element in the collection to produce another value of type `Element`.
-The input function applies to each element of the calling collection, one-by-one, until it reaches the end of the collection and produces a final accumulated value of type `Element`.
+Метод `reduce(_:, _:)` «сворачивает» последовательность `Sequence` до единственного аккумулирующего значения и имеет два параметра. Первый параметр — это стартовое аккумулирующее значение, а второй параметр — это функция, которая комбинирует аккумулирующее значение с элементом последовательности `Sequence` для получения нового аккумулирующего значения. Входная функция-параметр применяется к каждому элементу последовательности `Sequence`, один за другим, до тех пор, пока не достигнет конца и не создаст финальное аккумулируюшее значение.
+
+```swift
+let sum = Array(1...100).reduce(0, +)
+```
+
+Это классический тривиальный пример использования функции высшего порядка `reduce(_:, _:)` - подсчет суммы элементов массива `Array`.
+
+**Function Concatenation**
+
+```swift
+let numbers: [[Int]] = [[1, 3, 6, 2], [2, 5, 7], [1, 3]]
+let sum: Int = numbers
+    .flatMap({ $0 })
+    .reduce(0, { $0 + $1 })
+// sum = 30
+```
 
 __Pure Functions__
 
 One of the primary concepts in FP that leads to the ability to reason consistently about program structure, as well as confidently test program results, is the idea of a pure function. A function can be considered pure if it meets two criteria:
+
 - The function always produces the same output when given the same input, e.g., the output only depends on its input.
 - The function creates zero side effects outside of it.
 
 Pure functions are closely related to the concept of __referential transparency__. An element of a program is referentially transparent if you can replace it with its definition and always produce the same result. It makes for predictable code and allows the compiler to perform optimizations. Pure functions satisfy this condition.
 
+**Functors and Monads**
+
+A functor is just a fancy word for something that can implement `.map()`. So for example, in
+
+```swift
+let array = [1, 2, 3].map { $0 * 2 }
+```
+
+`array` is a functor.
+
+A monad is simply a functor that can also implement `.flatMap()`. So in
+
+```swift
+let newArray = array.flatMap { String($0) }
+```
+
+`array` is a monad and `newArray` is a functor.
 ***
+
 __Objective-C__
 
 The concept of a lambda in Objective-C is now encapsulated with the idea of Blocks which are the equivalent of pass-by-reference functions. Of course, arguably one had that already in C with the idea of function pointers; blocks are just a way of also capturing local state (i.e. can be closures). Here's an example of defining a lambda to multiply two numbers together:
@@ -1130,6 +1164,31 @@ triple = multiplyBy(3);
 ```
 
 Note that you can intermix blocks with object types (usually using `id` as the object type) and many of the new Objective-C object data structures have some kind of block-level operation. GCD also uses blocks in order to pass in arbitrary events; however, note that GCD can also be used with function pointers as well.
+
+***
+
+**Преимущества и недостатки функционального программирования**
+
+**Плюсы**
+
+1. Высокоуровневые абстракции, которые скрывают большое количество подробностей таких рутинных операций, как, например, итерирование. За счет этого код получается короче, и, как следствие, гарантирует меньшее количество ошибок, которые могут быть допущены.
+2. Поскольку чистые функции не изменяют никаких состояний и полностью зависят от ввода, их легко понять. Возвращаемое значение, предоставляемое такими функциями, совпадает с выводом, произведенным ими. Аргументы и тип возвращаемого значения чистых функций выдаются их сигнатурой функции.
+3. Из-за природы чистых функций, позволяющих избежать изменения переменных или каких-либо данных за ее пределами, реализация параллелизма становится эффективной.
+4. Он поддерживает концепцию ленивого вычисления, что означает, что значение оценивается и сохраняется только тогда, когда оно требуется.
+Чистые функции принимают аргументы один раз и выдают неизменяемый результат. Следовательно, они не производят скрытого вывода. Они используют неизменяемые значения, что упрощает отладку и тестирование.
+5. Этот стиль рассматривает функции как значения и передает то же самое другим функциям как параметры. Это улучшает понимание и читаемость кода.
+
+**Минусы**
+
+1. На чистых функциональных языках не существует эффективного неупорядоченного словаря и множества
+2. Не существует чисто функциональных слабых хэш-таблиц (weak hash table)
+3. Не существует чисто функциональных потокобезопасных коллекций
+4. Большинство алгоритмов на графах выглядят хуже и работают намного медленнее, если написаны в функциональном стиле
+5. Инерция традиционных императивных структур данных и алгоритмов огромна
+6. Как оказывается, все существующие реализации функциональных языков, как чистых, так и нечистых (impure), спроектированы так, что аллоцируют слишком много памяти
+7. Чистое функциональное программирование хорошо для параллелизма в теории, но не очень хорошо с точки зрения производительности на практике, а высокая производительность на практике—единственная настоящая задача параллелизма
+8. Понадобилось 50 лет, чтоб разбавить концентрацию высокомерных снобов в сообществе до той степени, чтоб можно было получить полезный ответ по функциональному программированию
+9. О функциональном программировании циркулирует множество ложной информации
 
 <a name="custom-root-class"></a>
 
