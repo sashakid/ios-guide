@@ -420,7 +420,15 @@ The `Box` struct has a reference to `Ref` class and will return the value of our
 
 ## Что такое протокол-ориентированное программирование? (POP)
 
-Protocol-Oriented Programming is a new programming paradigm ushered in by Swift 2.0. In the Protocol-Oriented approach, we start designing our system by defining protocols. We rely on new concepts: protocol extensions, protocol inheritance, and protocol compositions. The paradigm also changes how we view semantics. In Swift, value types are preferred over classes. However, object-oriented concepts don’t work well with structs and enums: a struct cannot inherit from another struct, neither can an enum inherit from another enum. So inheritance - one of the fundamental object-oriented concepts - cannot be applied to value types. On the other hand, value types can inherit from protocols, even multiple protocols. Thus, with POP, value types have become first class citizens in Swift.
+Protocol-Oriented Programming is a new programming paradigm ushered in by Swift 2.0. In the Protocol-Oriented approach, we start designing our system by defining protocols. 
+
+We rely on new concepts: 
+
+- protocol extensions
+- protocol inheritance 
+- protocol compositions 
+  
+The paradigm also changes how we view semantics. In Swift, value types are preferred over classes. However, object-oriented concepts don’t work well with structs and enums: a struct cannot inherit from another struct, neither can an enum inherit from another enum. So inheritance - one of the fundamental object-oriented concepts - cannot be applied to value types. On the other hand, value types can inherit from protocols, even multiple protocols. Thus, with POP, value types have become first class citizens in Swift.
 
 Protocol-Oriented Programming опирается на Generic Programming и концепцию Traits. Использование POP повышает переиспользование кода, лучше структурирует код, уменьшает дублирование кода, избегает сложности с иерархией наследования классов, делает код более связным.
 
@@ -444,6 +452,14 @@ Swift types can adopt multiple protocols.
 - Протокол как маркер
 - Retroactive modeling (extensions)
 - Протокол как констрейнт
+
+**Проблемы ООП и зачем нам нужно ПОП**
+
+Известно, что в ООП существует ряд слабых мест, которые способны "перегрузить" выполнение программы. Рассмотрим наиболее явные и часто встречаемые:
+
+- Allocation: Stack или Heap?
+- Reference counting: больше или меньше?
+- Method dispatch: статическая или динамическая?
 
 __Отличия POP от OOP__
 
