@@ -220,6 +220,12 @@ __Repository (Gateway)__
 
 Для iOS-разработки чистая архитектура реализована в модели VIP или VIPER, которая позиционируется как замена шаблону MVC.
 
+**Difference between clean code and clean architecture**
+
+"Clean Architecture" is about boundaries and dependencies between "sub systems" and components of your software system. It helps structuring your code for changeability. By that following "Clean Architecture" will give you a "good" project structure.
+
+"Clean Code" is about the implementation of your "sub systems", components, classes and functions. It helps in structuring your code for readability and maintainability.
+
 <a name="что-такое-solid"></a>
 
 ## Что такое SOLID?
