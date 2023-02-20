@@ -1,6 +1,7 @@
 - [Swift](#swift)
   - [Сlosures and functions](#сlosures-and-functions)
   - [How Do I Declare a Closure in Swift?](#how-do-i-declare-a-closure-in-swift)
+  - [Что такое capture list?](#что-такое-capture-list)
   - [Memory management](#memory-management)
     - [ValueType vs. ReferenceType](#valuetype-vs-referencetype)
     - [What is copy on write mechanism](#what-is-copy-on-write-mechanism)
@@ -266,6 +267,60 @@ _As a function parameter with explicit capture semantics and inferred parameters
 array.sort({ [unowned self] in return item1 < item2 })
 ```
 
+## Что такое capture list?
+
+By default, a closure expression captures constants and variables from its surrounding scope with strong references to those values. You can use a capture list to explicitly control how values are captured in a closure.
+
+A capture list is written as a comma-separated list of expressions surrounded by square brackets, before the list of parameters. If you use a capture list, you must also use the in keyword, even if you omit the parameter names, parameter types, and return type. The entries in the capture list are initialized when the closure is created. For each entry in the capture list, a constant is initialized to the value of the constant or variable that has the same name in the surrounding scope. For example in the code below, `a` is included in the capture list but `b` is not, which gives them different behavior.
+
+```swift
+var a = 0
+var b = 0
+let closure = { [a] in
+ print(a, b)
+}
+
+a = 10
+b = 10
+closure()
+// Prints "0 10"
+```
+
+There are two different things named `a`, the variable in the surrounding scope and the constant in the closure’s scope, but only one variable named `b`. The a in the inner scope is initialized with the value of the `a` in the outer scope when the closure is created, but their values aren’t connected in any special way. This means that `a` change to the value of a in the outer scope doesn’t affect the value of `a` in the inner scope, nor does `a` change to `a` inside the closure affect the value of `a` outside the closure. In contrast, there’s only one variable named `b` — the `b` in the outer scope — so changes from inside or outside the closure are visible in both places.
+
+This distinction isn’t visible when the captured variable’s type has reference semantics. For example, there are two things named `x` in the code below, a variable in the outer scope and a constant in the inner scope, but they both refer to the same object because of reference semantics.
+
+```swift
+class SimpleClass {
+    var value: Int = 0
+}
+var x = SimpleClass()
+var y = SimpleClass()
+let closure = { [x] in
+    print(x.value, y.value)
+}
+
+x.value = 10
+y.value = 10
+closure()
+// Prints "10 10"
+```
+
+If the type of the expression’s value is a class, you can mark the expression in a capture list with `weak` or `unowned` to capture a `weak` or `unowned` reference to the expression’s value.
+```swift
+myFunction { print(self.title) }                    // implicit strong capture
+myFunction { [self] in print(self.title) }          // explicit strong capture
+myFunction { [weak self] in print(self!.title) }    // weak capture
+myFunction { [unowned self] in print(self.title) }  // unowned capture
+```
+
+You can also bind an arbitrary expression to a named value in a capture list. The expression is evaluated when the closure is created, and the value is captured with the specified strength. For example:
+
+```swift
+// Weak capture of "self.parent" as "parent"
+myFunction { [weak parent = self.parent] in print(parent!.title) }
+```
+
 ## Memory management
 
 At hardware level, memory is just a long list of bytes. We treat it as if it were organized into three virtual parts:
@@ -507,8 +562,9 @@ _Наследование_
 
 ### Generics
 
-Generic code enables you to write flexible, reusable functions and types that can work with any type, subject to requirements that you define. You can write code that avoids duplication and expresses its intent in a clear, abstracted manner.
-Generics are one of the most powerful features of Swift, and much of the Swift standard library is built with generic code. In fact, you’ve been using generics throughout the Language Guide, even if you didn’t realize it. For example, Swift’s Array and Dictionary types are both generic collections. You can create an array that holds Int values, or an array that holds String values, or indeed an array for any other type that can be created in Swift. Similarly, you can create a dictionary to store values of any specified type, and there are no limitations on what that type can be.
+Swift – это типобезопасный язык. Всякий раз, когда мы работаем с типами, нам нужно явно их указывать. Например, нам нужна функция, которая будет работать более чем с одним типом. Swift имеет типы `Any` и `AnyObject`, но их стоит использовать осторожно и далеко не всегда. Использование `Any` и `AnyObject` сделает ваш код ненадежным, поскольку будет невозможно отследить несоответствие типов при компиляции. Именно тут на помощь приходят дженерики.
+
+Generic код позволяет создавать многократно используемые функции и типы данных, которые могут работать с любым типом, отвечающем определенным ограничениям, обеспечивая при этом типобезопасность во время компиляции. Этот подход позволяет писать код, который помогает избежать дублирования и выражает свой функционал в понятной абстрактной манере. Например, такие типы как `Array`, `Set` и `Dictionary` используют дженерики для хранения элементов.
 
 ```swift
 func swapTwoValues<T>(inout a: T, inout _ b: T) {
