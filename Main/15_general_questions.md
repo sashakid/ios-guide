@@ -849,22 +849,11 @@ Inline функция избавляет процессор прыгать в я
 
 - Если нужно другое поведение, что использовать?
 
-1. `NSPointerArray`
-2. Self made container:
+Foundation collection classes, which can store weak references and have a broader range of available memory semantics: 
 
-```swift
-struct WeakContainer<T where T: AnyObject> {
-  weak var _value : T?
-  init (value: T) {
-    _value = value
-  }
-  func get() -> T? {
-    return _value
-  }
-}
-
-let myArray: Array<WeakContainer<MyClass>> = [myObject1, myObject2]
-```
+1. `NSPointerArray` (like array)
+2. `NSMapTable` (like dictionary)
+3. `NSHashTable` (like set)
 
 - Mожно ли узнать, какой объект сколько раз был добавлен в set?
 
@@ -1787,11 +1776,11 @@ Comparing Static vs. Dynamic Libraries
 
 ## Как положить в массив weak объекты?
 
-1. Using `NSPointerArray` or `NSHashTable`
-
-> `NSPointerArray` - A collection similar to an array, but with a broader range of available memory semantics.
-
-> `NSHashTable` - A collection similar to a set, but with broader range of available memory semantics.
+1. Foundation classes
+  
+- `NSPointerArray`: A collection similar to an array, but with a broader range of available memory semantics.
+- `NSHashTable`: A collection similar to a set, but with broader range of available memory semantics.
+- `NSMapTable`: A collection similar to a dictionary, but with a broader range of available memory semantics.
 
 2. Custom container
 
