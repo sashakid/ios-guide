@@ -544,6 +544,8 @@ struct Box<T> {
 
 The `Box` struct has a reference to `Ref` class and will return the value of our `Car` struct . When you try to set the value, it checks if there are any existing strong references and creates a new `Ref` if needed thereby limiting the copies to be made only while writing to it. `isKnownUniquelyReferenced` returns a boolean indicating whether the given object is known to have a single strong reference.
 
+https://github.com/apple/swift/blob/main/docs/OptimizationTips.rst
+
 ## Что такое протокол-ориентированное программирование? (POP)
 
 Protocol-Oriented Programming is a new programming paradigm ushered in by Swift 2.0. In the Protocol-Oriented approach, we start designing our system by defining protocols. 
