@@ -392,25 +392,95 @@ During their life cycle, the objects maintain following invariants:
 
 ### ValueType vs. ReferenceType
 
-> __Reference type__: a type that once initialized, when assigned to a variable or constant, or when passed to a function, returns a reference to the same existing instance.
+> __Reference type__ (class, closure, function): a type that once initialized, when assigned to a variable or constant, or when passed to a function, returns a reference to the same existing instance. Is stored in the heap part of memory which makes a class comparatively slower than a `struct` in terms of performance. 
 
 A typical example of a reference type is an object. Once instantiated, when we either assign it or pass it as a value, we are actually assigning or passing around the reference to the original instance (i.e. its location in memory). Reference types assignment is said to have shallow copy semantics.
 
 When to use:
 
-- Subclasses of NSObject must be class types
-- Comparing instance identity with === makes sense
+- Subclasses of `NSObject` must be class types
+- Comparing instance identity with `===` makes sense
 - You want to create shared, mutable state
 
-> __Value type__: a type that creates a new instance (copy) when assigned to a variable or constant, or when passed to a function.
+<img src="https://github.com/sashakid/ios-guide/blob/master/Images/class_memory.png">
+
+> __Value type__ (struct, enum, tuple): a type that creates a new instance (copy) when assigned to a variable or constant, or when passed to a function. Is created on the stack. So, it is faster to instantiate (and destroy) a `struct` than a `class`.
 
 A typical example of a value type is a primitive type. Common primitive types, that are also values types, are: `Int`, `Double`, `String`, `Array`, `Dictionary`, `Set`. Once instantiated, when we either assign it or pass it as a value, we are actually getting a copy of the original instance. The most common value types in Swift are structs, enums and tuples can be value types. Value types assignment is said to have deep copy semantics.
 
 When to use:
 
-- Comparing instance data with == makes sense (Equatable protocol)
+- Comparing instance data with `==` makes sense (`Equatable` protocol)
 - You want copies to have independent state
 - The data will be used in code across multiple threads (avoid explicit synchronization)
+
+<img src="https://github.com/sashakid/ios-guide/blob/master/Images/struct_memory.png">
+
+**Mutability**
+
+`var` and `let` function differently for reference types and value types.
+
+For reference types, `let` means the reference must remain constant. In other words, you can’t change the instance the constant references, but you can mutate the instance itself.
+
+For value types, `let` means the instance must remain constant. No properties of the instance will ever change, regardless of whether the property is declared with `let` or `var`.
+
+It’s much easier to control mutability with value types. To achieve the same immutability and mutability behaviors with reference types, you’d need to implement immutable and mutable class variants such as `NSString` and `NSMutableString`
+
+**Mixing Value and Reference Types**
+
+*Reference Types Containing Value Type Properties*
+
+```swift
+struct Address {
+  var streetAddress: String
+  var city: String
+  var state: String
+  var postalCode: String
+}
+
+class Person {          // Reference type
+  var name: String      // Value type
+  var address: Address  // Value type
+
+  init(name: String, address: Address) {
+    self.name = name
+    self.address = address
+  }
+}
+```
+
+This mixing of types makes perfect sense in this scenario. Each class instance has its own value type property instances that aren’t shared. There’s no risk of two different people sharing and unexpectedly changing the address of the other person.
+
+*Value Types Containing Reference Type Properties*
+
+```swift
+struct Bill {
+  let amount: Float
+  let billedTo: Person
+}
+```
+
+Each copy of `Bill` is a unique copy of the data, but numerous `Bill` instances will share the the `billedTo` `Person` object. This adds quite a bit of complexity in maintaining the value semantics of your objects. For instance, how do you compare two `Bill` objects since value types should be `Equatable`?
+
+**Heap Allocated Value Types**
+
+If the size of your value type cannot be determined during compile time (because of a protocol/generic requirement), or if your value type recursively contains / is contained by a reference type (remember that closures are also reference types), then it will require heap allocation. This can range from being not being an issue at all to making your struct perform exponentially worse than it would if it was a class instead.
+
+Stack allocated value types are great because their life are directly related to their scope's life, but if your value type is the child of a class, a reference is all it takes for it to outlive its scope. This situation is common in `@escaping` closures, and this value type will lose its stack allocation properties in order to be fully heap allocated alongside the reference type. In a way, you could even say that this kind of value type is a reference type itself, as living in the heap means that several objects can point to it - even though it still possesses value semantics.
+
+If your value type is instead the parent of a heap allocated class, then it will not be heap allocated itself, but it will inherit reference counting overhead in order to be able to keep it's inner references alive. This can cause a considerable drop in performance depending on the complexity of the value type.
+
+In the Standard Library, examples of value types with child references are `String`, `Array`, `Dictionary` and `Set`. These value types contain internal reference types that manage the storage of elements in the heap, allowing them to increase/decrease in size as needed.
+
+Since heap operations are more expensive than stack ones, copying heap allocated value types is not a constant operation like in stack allocated ones. To prevent this from hurting performance, the Standard Library's extensible data structures are copy-on-write.
+
+*Problematic Reference Counting in Value Types With Inner References*
+
+Since all reference types require reference counting, increasing the amount of properties of a class of classes will not change the runtime of this algorithm, as merely increasing the reference count of the parent reference will be enough to keep it's inner references alive.
+
+However, value types do not naturally have a reference count. If your value type contains inner references, copying it will require increasing the reference count of it's children instead - not the first, not the second, but literally every single one of them.
+
+<img src="https://github.com/sashakid/ios-guide/blob/master/Images/mixed_memory.png">
 
 ### What is copy on write mechanism
 
@@ -420,6 +490,7 @@ A fully stack allocated value type will not need reference counting, but a value
 final class ExampleClass {
   let exampleString = "Ex value"
 }
+
 struct ExampleStruct {
   let ref1 = ExampleClass()
   let ref2 = ExampleClass()
@@ -428,7 +499,7 @@ struct ExampleStruct {
 }
 ```
 
-This way of having inner reference types is an expensive operation that requires many calls to `malloc/free` and a significant reference counting overhead each time you copy. `COW` enables value types to be referenced when they are copied just like reference types. The real copy only happens when you have an already existing strong reference and you are trying to modify that copy.
+This way of having inner reference types is an expensive operation that requires many calls to `malloc/free` and a significant reference counting overhead each time you copy. `COW` enables value types to be referenced when they are copied just like reference types. The real copy only happens when you have an already existing strong reference and you are trying to modify that copy. The Swift Standard library implements this set of mechanisms for some value types such as `Array`, where the value will be copied only upon mutation, and even then, only if it has more than one reference to it, because if this value is uniquely referenced, it doesn’t need to copy, it can be just mutated on the reference. So, just assign to a variable or pass an `Array` to a function doesn’t necessarily means it’ll be copied and that really improve the performance.
 
 ```swift
 let array = [1,2,3] //address A
