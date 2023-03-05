@@ -52,6 +52,16 @@
 
 # Архитектура
 
+**Что такое архитектура**
+
+Архитектура программного обеспечения — совокупность важнейших решений об организации программной системы. Архитектура включает:
+
+- выбор структурных элементов и их интерфейсов, с помощью которых составлена система, а также их поведения в рамках сотрудничества структурных элементов;
+- соединение выбранных элементов структуры и поведения во всё более крупные системы;
+- архитектурный стиль, который направляет всю организацию — все элементы, их интерфейсы, их сотрудничество и их соединение.
+  
+Общепринятого определения «архитектуры программного обеспечения» не существует.
+
 __How Cocoa Adapts Design Patterns__
 
 You can find adaptations of design patterns throughout Cocoa, in both its OS X and iOS versions. Mechanisms and architectures based on patterns are common in Cocoa frameworks and in the Objective-C runtime and language. Cocoa often puts its own distinctive spin on a pattern because its designs are influenced by factors such as language capabilities or existing architectures.
