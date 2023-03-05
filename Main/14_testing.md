@@ -102,42 +102,25 @@ BDD, Behaviour Driven Development - Из-за некоторого методо�
 
 ## F.I.R.S.T Principles of Unit Testing
 
-**Fast**
+**Быстрота (Fast)**
 
-- A developer should not hesitate to run the tests as they are slow.
-- All of these including setup, the actual test and tear down should execute really fast (milliseconds) as you may have thousands of tests in your entire project.
+Тесты должны выполняться быстро. Все мы знаем, что разработчики люди, а люди ленивы, поскольку эти выражения являются “транзитивными”, то можно сделать вывод, что люди тоже ленивы. А ленивый человек не захочет запускать тесты при каждом изменении кода, если они будут долго выполняться.
 
-**Isolated/Independent**
+**Независимость (Independent)**
 
-- A test method should do the 3 As => Arrange, Act, Assert
-- Arrange: The data used in a test should not depend on the environment in which the test is running. All the data needed for a test should be arranged as part of the test.
-- Act: Invoke the actual method under test.
-- Assert: A test method should test for a single logical outcome, implying that typically there should be only a single logical assert. A logical assert could have multiple physical asserts as long as all the asserts test the state of a single object. In a few cases, an action can update multiple objects.
-- Avoid doing asserts in the Arrange part, let it throw exceptions and your test will still fail.
-- No order-of-run dependency. They should pass or fail the same way in suite or when run individually.
-- Do not do any more actions after the assert statement(s), preferably single logical assert.
+Результаты выполнения одного теста не должны быть входными данными для другого. Все тесты должны выполняться в произвольном порядке, поскольку в противном случае при сбое одного теста каскадно “накроется” выполнение целой группы тестов.
 
-**Repeatable**
+**Повторяемость (Repeatable)**
 
-- A test method should NOT depend on any data in the environment/instance in which it is running.
-- Deterministic results - should yield the same results every time and at every location where they run.
-- No dependency on date/time or random functions output.
-- Each test should setup or arrange it's own data.
-- What if a set of tests need some common data? Use Data Helper classes that can setup this data for re-usability.
+Тесты должны давать одинаковые результаты не зависимо от среды выполнения. Результаты не должны зависеть от того, выполняются ли они на вашем локальном компьютере, на компьютере соседа или же на билд-сервере. В противном случае найти концы с концами будет весьма не просто.
 
-**Self-Validating**
+**Очевидность (Self-Validating)**
 
-- No manual inspection required to check whether the test has passed or failed.
+Результатом выполнения теста должно быть булево значение. Тест либо прошел, либо не прошел и это должно быть легко понятно любому разработчику.  Не нужно заставлять людей читать логи только для того, чтобы определить прошел тест успешно или нет.
 
-**Thorough**
+**Своевременность (Timely)**
 
-- Should cover every use case scenario and NOT just aim for 100% coverage.
-- Tests for corner/edge/boundary values.
-- Tests for large data sets - this will test runtime and space complexity.
-- Tests for security with users having different roles - behavior may be different based on user's role.
-- Tests for large values - overflow and underflow errors for data types like integer.
-- Tests for exceptions and errors.
-- Tests for illegal arguments or bad inputs.
+Тесты должны создаваться своевременно. Несвоевременность написания тестов является главной причиной того, что они откладываются на потом, а это “потом” так никогда и не наступает. Даже если вы и не будете писать тесты перед кодом (хотя этот вариант уже доказал свою жизнеспособность) их нужно писать как минимум параллельно с кодом.
 
 ## Как тестировать асинхронные методы?
 
