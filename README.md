@@ -22,4 +22,5 @@ _Привет, приняв участие за свою практику в б�
 * [Задачи](Main/16_tasks.md)
 
 Donation in BTC: bc1qtm6xv97tl96hp4udhfu3zsq8fp5d2lufe26rs0
+
 Donation in USDT(TRC20): TDysULcqQrZDE4Fb88Yub65fz5xLeLiK41
