@@ -21,6 +21,8 @@ _Привет, приняв участие за свою практику в б�
 * [Общие вопросы](Main/15_general_questions.md)
 * [Задачи](Main/16_tasks.md)
 
-Donation in BTC: bc1qtm6xv97tl96hp4udhfu3zsq8fp5d2lufe26rs0
+Donations for a coffee ☕️ 😘
 
-Donation in USDT(TRC20): TDysULcqQrZDE4Fb88Yub65fz5xLeLiK41
+BTC: bc1qtm6xv97tl96hp4udhfu3zsq8fp5d2lufe26rs0
+
+USDT(TRC20): TDysULcqQrZDE4Fb88Yub65fz5xLeLiK41
