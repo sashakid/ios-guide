@@ -42,6 +42,8 @@ _Возможные состояния программы_
 <img src="https://github.com/sashakid/ios-guide/blob/master/Images/app_states_2.png">
 <img src="https://github.com/sashakid/ios-guide/blob/master/Images/app_states_3.png">
 
+https://manasaprema04.medium.com/application-life-cycle-in-ios-f7365d8c1636
+
 <a name="жизненный-цикл-uiviewController"></a>
 ## Жизненный цикл UIViewController
 <img src="https://github.com/sashakid/ios-guide/blob/master/Images/uiviewcontroller.png">
