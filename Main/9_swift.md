@@ -2,6 +2,7 @@
   - [Сlosures and functions](#сlosures-and-functions)
   - [How Do I Declare a Closure in Swift?](#how-do-i-declare-a-closure-in-swift)
   - [Что такое capture list?](#что-такое-capture-list)
+  - [Optional](#optional)
   - [Memory management](#memory-management)
     - [ValueType vs. ReferenceType](#valuetype-vs-referencetype)
     - [What is copy on write mechanism](#what-is-copy-on-write-mechanism)
@@ -27,7 +28,7 @@
 - Multi-paradigm: protocol-oriented, object-oriented, functional, imperative, block structured
 - Designed by Chris Lattner and Apple Inc.
 - First appeared: June 2, 2014
-- Stable release: 5.7 / September 12, 2022
+- Stable release: 6.0 / 16 Sep 24
 - Typing discipline: Static, strong, inferred
 - OS: Darwin, Linux, FreeBSD
 - Influenced by C#, CLU, D, Haskell, Objective-C, Python, Ruby, Rust
@@ -320,6 +321,34 @@ You can also bind an arbitrary expression to a named value in a capture list. Th
 // Weak capture of "self.parent" as "parent"
 myFunction { [weak parent = self.parent] in print(parent!.title) }
 ```
+
+## Optional
+
+`Optional` в Swift — это специальный тип, который позволяет переменной или константе либо содержать значение, либо быть пустой (равной `nil`). Он помогает безопасно работать с переменными, которые могут быть “ничем” (отсутствовать). `Optional` делает код более безопасным и помогает избежать аварийного завершения программы из-за неожиданных значений `nil`.
+
+Упрощенная реализация:
+
+```swift
+enum Optional<Wrapped> where Wrapped: Equatable  {
+    case some(Wrapped)
+    case none
+}
+
+extension Optional: Equatable {
+    static func ==(lhs: Optional, rhs: Optional) -> Bool {
+        switch (lhs, rhs) {
+            case (.some(let value1), .some(let value2)):
+                return value1 == value2
+            case (.some, .none), (.none, .some):
+                return false
+            case (.none, .none):
+                return true
+        }
+    }
+}
+```
+
+https://github.com/swiftlang/swift/blob/main/stdlib/public/core/Optional.swift
 
 ## Memory management
 

@@ -13,7 +13,6 @@
   - [Как работают push нотификации?](#как-работают-push-нотификации)
   - [Memory warning](#memory-warning)
   - [Как реализовать кеш?](#как-реализовать-кеш)
-  - [Какой контент лучше хранить в Documents, а какой в Cache?](#какой-контент-лучше-хранить-в-documents-а-какой-в-cache)
   - [Как из строки вытащить подстроку?](#как-из-строки-вытащить-подстроку)
   - [NSCoding, archiving?](#nscoding-archiving)
   - [Константы, typedef, enum, #define](#константы-typedef-enum-define)
@@ -515,16 +514,6 @@ NSArray *paths = NSSearchPathForDirectoriesInDomains(NSCachesDirectory, NSUserDo
 NSString *cachePath = [paths objectAtIndex:0];
 NSURL *fileURL = [NSURL fileURLWithPath:[cachePath stringByAppendingPathComponent:@"Matsedl.pdf"]];
 ```
-
-<a name="как-лучше-хранить"></a>
-
-## Какой контент лучше хранить в Documents, а какой в Cache?
-
-Кеш - это специальный буфер (контейнер), содержащий информацию. Эта информация может быть запрошена с наибольшей вероятностью. Соответственно, доступ к этому буферу должен быть очень быстрым, он должен быть быстрее чем доступ к сети или к данным на жестком диске. В операционной системе iOS присутствует функция кэширования, но прямого доступа к данным в кэше нету. Для получения доступа следует использовать класс `NSCache`.
-- Only documents and other data that is user-generated, or that cannot otherwise be recreated by your application, should be stored in the `<Application_Home>/Documents` directory and will be automatically backed up by iCloud.
-- Data that can be downloaded again or regenerated should be stored in the `<Application_Home>/Library/Caches` directory. Examples of files you should put in the Caches directory include database cache files and downloadable content, such as that used by magazine, newspaper, and map applications.
-- Data that is used only temporarily should be stored in the `<Application_Home>/tmp` directory. Although these files are not backed up to iCloud, remember to delete those files when you are done with them so that they do not continue to consume space on the user’s device.
-- Use the "do not back up" attribute for specifying files that should remain on device, even in low storage situations. Use this attribute with data that can be recreated but needs to persist even in low storage situations for proper functioning of your app or because customers expect it to be available during offline use. This attribute works on marked files regardless of what directory they are in, including the Documents directory. These files will not be purged and will not be included in the user's iCloud or iTunes backup. Because these files do use on-device storage space, your app is responsible for monitoring and purging these files periodically.
 
 <a name="как-из-строки-вытащить-подстроку"></a>
 
@@ -1270,6 +1259,8 @@ There are two kinds of closures, non-escaping and escaping. Non-escaping closure
 <img src="https://github.com/sashakid/ios-guide/blob/master/Images/when-to-use-weak-self.png">
 
 <a name="responder-chain"></a>
+
+Шаблон "цепочка ответственности" помогает избежать привязки отправителя запроса к его получателю, что дает возможность обработать данный запрос несколькими объектами. Это достигается путем создания цепочки объектов, каждый из которых может обрабатывать запрос, или передавать запрос по цепочке до тех пор, пока он не будет обработан. С данным шаблоном отправителю не нужно ничего знать о получателе.
 
 ## Что происходит, когда юзер нажимает на UIButton на экране?
 

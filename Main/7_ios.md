@@ -1,51 +1,132 @@
 - [iOS](#ios)
-  - [IPhone, resolution, pixels vs points?](#iphone-resolution-pixels-vs-points)
-  - [Файловая система iOS](#файловая-система-ios)
+  - [UIApplication](#uiapplication)
+  - [AppDelegate](#appdelegate)
+  - [UIWindow](#uiwindow)
+  - [UIViewController](#uiviewcontroller)
+  - [UIView](#uiview)
   - [Жизненный цикл приложения](#жизненный-цикл-приложения)
   - [Жизненный цикл UIViewController](#жизненный-цикл-uiviewcontroller)
   - [Как работает UIScrollView?](#как-работает-uiscrollview)
   - [Как работает UITableView?](#как-работает-uitableview)
-  - [UIView](#uiview)
-- [Фреймворки](#фреймворки)
-  - [Core Foundation](#core-foundation)
-  - [UIKit](#uikit)
-  - [CFNetwork](#cfnetwork)
-  - [QuartzCore](#quartzcore)
+  - [UIView](#uiview-1)
+  - [IPhone, resolution, pixels vs points?](#iphone-resolution-pixels-vs-points)
+  - [Файловая система iOS](#файловая-система-ios)
+  - [Какой контент лучше хранить в Documents, а какой в Cache?](#какой-контент-лучше-хранить-в-documents-а-какой-в-cache)
 
 <a name="ios"></a>
 # iOS
-<a name="iphone,-resolution,-pixels-vs-points"></a>
-## IPhone, resolution, pixels vs points?
-<img src="https://github.com/sashakid/ios-guide/blob/master/Images/resolutions.png">
-A pixel on iOS is the full resolution of the device, which means if I have an image that is 100x100 pixels in length, then the phone will render it 100x100 pixels on a standard non-retina device. However, because newer iPhones have a quadrupled pixel density, that same image will render at 100x100 pixels, but look half that size. The iOS engineers solved this a long time ago (way back in OS X with Quartz) when they introduced Core Graphics' point system. A point is a standard length equivalent to 1x1 pixels on a non-retina device, and 2x2 pixels on a retina device. That way, your 100x100 image will render twice the size on a retina device and basically normalize what the user sees.
-It also provides a standard system of measurement on iOS devices because no matter how the pixel density chanes, there have always been 320x480 points on an iPhone screen and 768x1024 points on an iPad screen.*
-But at the same time, you can basically disregard the documentation considering that retina devices were introduced with iOS 4 at a minimum, and I don't know of too many people still running iOS 3 on a newer iPhone. But if such a case arises, your UIImage would need to be rendered at exactly twice it's dimensions in pixels on a retina iPhone to make up for the pixel density difference.
 
-<a name="файловая-система-ios"></a>
-## Файловая система iOS
-<img src="https://github.com/sashakid/ios-guide/blob/master/Images/file_system.png">
+## UIApplication
+
+UIApplication — центральная точка контроля
+
+The centralized point of control and coordination for apps running in iOS.
+Every iOS app has exactly one instance of `UIApplication` (or, very rarely, a subclass of `UIApplication`). When an app launches, the system calls the `UIApplicationMain(_:_:_:_:)` function. Among its other tasks, this function creates a singleton `UIApplication` object that you access using shared. Your app’s application object handles the initial routing of incoming user events. It dispatches action messages forwarded to it by control objects (instances of the `UIControl` class) to appropriate target objects. The application object maintains a list of open windows (`UIWindow` objects), which it can use to retrieve any of the app’s `UIView` objects. The `UIApplication` class defines a delegate that conforms to the `UIApplicationDelegate` protocol and must implement some of the protocol’s methods. The application object informs the delegate of significant runtime events—for example, app launch, low-memory warnings, and app termination—giving it an opportunity to respond appropriately. Apps can cooperatively handle a resource, such as an email or an image file, through the `open(_:options:completionHandler:)` method. For example, an app that calls this method with an email `URL` causes the Mail app to launch and display the message.
+The APIs in this class allow you to manage device-specific behavior. 
+
+Use your `UIApplication` object to do the following:
+
+- Temporarily suspend incoming touch events (`beginIgnoringInteractionEvents()`)
+- Register for remote notifications (`registerForRemoteNotifications()`)
+- Trigger the undo-redo UI (`applicationSupportsShakeToEdit`)
+- Determine whether there is an installed app registered to handle a `URL` scheme (`canOpenURL(_:)`)
+- Extend the execution of the app so that it can finish a task in the background (`beginBackgroundTask(expirationHandler:)` and `beginBackgroundTask(withName:expirationHandler:)`)
+- Schedule and cancel local notifications (`scheduleLocalNotification(_:)` and `cancelLocalNotification(_:)`)
+- Coordinate the reception of remote-control events (`beginReceivingRemoteControlEvents()` and `endReceivingRemoteControlEvents()`)
+- Perform app-level state restoration tasks (methods in the Managing state restoration task group)
+
+## AppDelegate
+
+AppDelegate — шарит состояния приложения и взаимодействия с системой
+
+A set of methods to manage shared behaviors for your app. Your app delegate object manages your app’s shared behaviors. The app delegate is effectively the root object of your app, and it works in conjunction with `UIApplication` to manage some interactions with the system. Like the `UIApplication` object, `UIKit` creates your app delegate object early in your app’s launch cycle so it’s always present.
+
+Use your app delegate object to handle the following tasks:
+
+- Initializing your app’s central data structures
+- Configuring your app’s scenes
+- Responding to notifications originating from outside the app, such as low-memory warnings, download completion notifications, and more
+- Responding to events that target the app itself, and aren’t specific to your app’s scenes, views, or view controllers
+- Registering for any required services at launch time, such as Apple Push Notification service
+
+When your app’s state changes, UIKit notifies you by calling methods of the appropriate delegate object:
+
+- In iOS 13 and later, use UISceneDelegate objects to respond to life-cycle events in a scene-based app.
+- In iOS 12 and earlier, use the UIApplicationDelegate object to respond to life-cycle events.
+
+## UIWindow
+
+UIWindow — отвечает за UI
+
+The backdrop for your app’s user interface and the object that dispatches events to your views. Windows work with your view controllers to handle events and to perform many other tasks that are fundamental to your app’s operation. `UIKit` handles most window-related interactions, working with other objects as needed to implement many app behaviours.
+
+You use windows only when you need to do the following:
+
+- Provide a main window to display your app’s content.
+- Create additional windows (as needed) to display additional content.
+
+Normally, Xcode provides your app’s main window. New iOS projects use storyboards to define the app’s views. Storyboards require the presence of a window property on the app delegate object, which the Xcode templates automatically provide. If your app doesn’t use storyboards, you must create this window yourself. Most apps need only one window, which displays the app’s content on the device’s main screen. Although you can create additional windows on the device’s main screen, extra windows are commonly used to display content on an external screen, as described in Presenting content on a connected display.
+
+You also use UIWindow objects for a handful of other tasks:
+
+- Setting the z-axis level of your window, which affects the visibility of the window relative to other windows.
+- Showing windows and making them the target of keyboard events.
+- Converting coordinate values to and from the window’s coordinate system.
+- Changing the root view controller of a window.
+- Changing the screen on which the window is displayed.
+
+Windows don’t have any visual appearance of their own. Instead, a window hosts one or more views, which are managed by the window’s root view controller. You configure the root view controller in your storyboards, adding whatever views are appropriate for your interface.
+You should rarely need to subclass UIWindow. The kinds of behaviors you might implement in a window can usually be implemented in a higher-level view controller more easily. One of the few times you might want to subclass is to override the `becomeKey()` or `resignKey()` methods to implement custom behaviors when a window’s key status changes. For information about how to display a window on a specific screen, see `UIScreen`.
+
+## UIViewController
+
+A `UIViewController` is the cornerstone of an iOS app's architecture, managing a screen's content and the interactions within it. It acts as a bridge between the app's data and the `UIViews`, handling tasks such as view hierarchy management, user interaction responses, and navigation between different screens.
+
+## UIView
+
+A `UIView` is the fundamental building block for creating and managing the visual content within an iOS application. It represents a rectangular area on the screen and is responsible for drawing content, handling user interactions, and managing the layout of subviews. In essence, every visual element you see in an iOS app, from buttons to labels to custom graphics, is a subclass of UIView.
+
+- Initialization: The UIView is initialized via `init(frame:)` or `init(coder:)` if loaded from a storyboard.
+- Adding to a Superview: Once created, the view can be added to a superview using `addSubview(_:)`.
+- Layout: The view’s layout is determined, typically involving methods like `layoutSubviews()` where the view can adjust the frames of its subviews.
+- Drawing: The `draw(_:)` method is called when the view needs to render its content, like custom graphics.
+- Event Handling: The view handles user interactions such as touches using methods like `touchesBegan(_:with:)`.
+- Removing from Superview: The view can be removed from its superview using `removeFromSuperview()`.
+- Deinitialization: Finally, when the view is no longer needed, it’s deallocated from memory.
 
 <a name="жизненный-цикл-приложения"></a>
 ## Жизненный цикл приложения
 <img src="https://github.com/sashakid/ios-guide/blob/master/Images/lifecycle.png">
 
-<img src="https://github.com/sashakid/ios-guide/blob/master/Images/app_states.png">
+| Состояние | Видимо | Принимает события | Выполняет код | 
+| Not running (Приложение не запущено или завершило работу) — приложение не было запущено или его работа была прекращена | Нет | Нет | Нет |
+| Inactive (Приложение в памяти, но временно не принимает пользовательские события. Это может быть подготовка к активному состоянию или переход к фоновому.) | Преимущественно | Нет | Да | 
+| Active (Приложение активно работает, пользователь может с ним взаимодействовать) | Да | Да | Да | 
+| Background (Приложение находится в фоновом режиме. Может выполнять фоновые задачи, такие как загрузка данных) | Нет | Нет | Да | 
+| Suspended (Приложение в фоновом режиме, но не выполняет никаких задач. Система может выгрузить его для освобождения памяти) | Нет | Нет | Нет | 
 
-_Возможные состояния программы_
-
-* Not running (не запущенное) — приложение не было запущено или его работа была прекращена
-* Inactive (неактивное) — приложение работает, но не принимает события (например, когда пользователь заблокировал телефон при запущенном приложении)
-* Active (активное) — нормальное состояние приложения при его работе
-* Background (фоновое) — приложение больше не на дисплее, но оно все еще выполняет код
-* Suspended (приостановленное) — приложение занимает память, но не выполняет код
-
-<img src="https://github.com/sashakid/ios-guide/blob/master/Images/app_states_2.png">
-<img src="https://github.com/sashakid/ios-guide/blob/master/Images/app_states_3.png">
-
-https://manasaprema04.medium.com/application-life-cycle-in-ios-f7365d8c1636
+| Метод делегата	| Состояние | Описание состояния |
+| application(_:didFinishLaunchingWithOptions:)	| Not Running → Inactive	| Приложение запускается, но еще не готово принимать пользовательские события. Используется для инициализации. | 
+| applicationWillResignActive(_:)	| Active → Inactive	| Приложение временно становится неактивным (например, из-за входящего звонка). Приостановка работы. | 
+| applicationDidBecomeActive(_:)	| Inactive → Active	| Приложение становится активным и готовым к взаимодействию с пользователем. | 
+| applicationDidEnterBackground(_:)	Active → Background	| Приложение уходит в фоновый режим. Выполняет фоновые задачи и освобождает ресурсы. | 
+| applicationWillEnterForeground(_:)	Background → Inactive	| Приложение возвращается из фонового режима, готовясь снова стать активным. | 
+| applicationWillTerminate(_:)	| Background → Not Running	| Приложение завершает работу. Система завершает его процесс, и данные должны быть сохранены. | 
 
 <a name="жизненный-цикл-uiviewController"></a>
 ## Жизненный цикл UIViewController
+
+- Initialization: The view controller is instantiated, either programmatically or from a storyboard.
+- View Loading: The `loadView()` method is called, creating the view hierarchy for the view controller.
+- View Did Load: The `viewDidLoad()` method is called, where you typically initialize data and setup UI elements.
+- View Will Appear: The `viewWillAppear(_:)` method is called just before the view becomes visible, useful for tasks like updating the UI based on new data.
+- View Did Appear: The `viewDidAppear(_:)` method is called after the view has appeared on the screen, often used for starting animations or tracking analytics.
+- View Will Disappear: The `viewWillDisappear(_:)` method is invoked just before the view is hidden, useful for saving state or stopping tasks.
+- View Did Disappear: The `viewDidDisappear(_:)` method is called after the view is no longer visible, allowing you to clean up resources or stop processes.
+- Deinitialization: The view controller is deallocated when it’s no longer needed, cleaning up any remaining resources.
+- `viewWillLayoutSubviews` gets called anytime your view controller's view has its bounds changed. This happens when the view is loaded, when a rotation event occurs, or when a child view controller has its size changed by its parent. (There are probably some other situations, too). If there is anything you need to update before that view lays itself out (and before your constraints are re-applied) you should do it here. you should generally not update constraints here, because updating constraints can cause another layout pass.
+- `viewDidLayoutSubviews` is called once all of your subviews have been laid out. If you need to fine-tune that layout by manually adjusting frames, for instance, this would be the place to do it.
+
 <img src="https://github.com/sashakid/ios-guide/blob/master/Images/uiviewcontroller.png">
 
 <a name="uiscrollview"></a>
@@ -118,160 +199,22 @@ UIView *view = [[UIView alloc]initWithFrame: appFrame];
 }
 ```
 
-<a name="фреймворки"></a>
-# Фреймворки
-Cocoa — объектно-ориентированный фреймворк для операционной системы macOS производства компании Apple.
-Приложения, использующие Cocoa, обычно разрабатываются с помощью среды разработки Xcode (в прошлом называвшегося Project Builder) и Interface Builder с использованием языка Objective-C или Swift. Однако, среда Cocoa также доступна и при разработке на других языках, таких как Ruby, Python и Perl с помощью связующих библиотек (MacRuby, PyObjC и CamelBones соответственно). Также можно писать Cocoa-программы на Objective-C в обычном текстовом редакторе и вручную компилировать их с помощью GCC или make-сценариев для GNUstep.
-Cocoa Touch — это фреймворк для создания приложений под iPhone, iPod touch, и iPad.
-Библиотека Cocoa Touch предоставляет уровень абстракции для iOS (операционной системы iPhone, iPad и iPod touch). Cocoa Touch основана на классах фреймворка Cocoa, используемого в macOS, и, аналогично ей, использует язык Objective-C. Cocoa Touch следует шаблону проектирования Model-View-Controller.
-Инструменты для разработки приложений с использованием Cocoa Touch включены в iOS SDK. iOS-технологии можно рассматривать как набор слоев, где Cocoa Touch находится на самом высоком уровне, а Core OS и ядро macOS — на более низких. Это позволяет реализовывать многие сложные задачи, сокращая объём работы, которую пришлось бы проделывать разработчикам, работай они на более низком уровне. Тем не менее, некоторые низкие слои абстрагирования могут быть доступны разработчикам по мере необходимости. Расположение слоев абстрагирования можно представить в следующем виде (от высшего к низшему):
-* Cocoa Touch
-* Media / Application Services
-* Core Services
-* Core OS / ядро macOS
+<a name="iphone,-resolution,-pixels-vs-points"></a>
+## IPhone, resolution, pixels vs points?
+<img src="https://github.com/sashakid/ios-guide/blob/master/Images/resolutions.png">
+A pixel on iOS is the full resolution of the device, which means if I have an image that is 100x100 pixels in length, then the phone will render it 100x100 pixels on a standard non-retina device. However, because newer iPhones have a quadrupled pixel density, that same image will render at 100x100 pixels, but look half that size. The iOS engineers solved this a long time ago (way back in OS X with Quartz) when they introduced Core Graphics' point system. A point is a standard length equivalent to 1x1 pixels on a non-retina device, and 2x2 pixels on a retina device. That way, your 100x100 image will render twice the size on a retina device and basically normalize what the user sees.
+It also provides a standard system of measurement on iOS devices because no matter how the pixel density chanes, there have always been 320x480 points on an iPhone screen and 768x1024 points on an iPad screen.*
+But at the same time, you can basically disregard the documentation considering that retina devices were introduced with iOS 4 at a minimum, and I don't know of too many people still running iOS 3 on a newer iPhone. But if such a case arises, your UIImage would need to be rendered at exactly twice it's dimensions in pixels on a retina iPhone to make up for the pixel density difference.
 
-Аудио и Видео
-* Core Audio
-* OpenAL
-* Media Library
-* AV Foundation
+<a name="файловая-система-ios"></a>
+## Файловая система iOS
+<img src="https://github.com/sashakid/ios-guide/blob/master/Images/file_system.png">
 
-Графика и анимация
-* Core Animation
-* OpenGL ES
-* Quartz 2D
+<a name="как-лучше-хранить"></a>
+## Какой контент лучше хранить в Documents, а какой в Cache?
 
-Прикладные программы
-* Address Book
-* Core Location
-* Map Kit
-* Store Kit
-
-Управление данными
-* Core Data
-* SQLite
-* Сети и Интернет
-* Bonjour
-* WebKit
-* BSD Sockets
-
-__Core Animation__
-
-Используйте Core Animation для создания богатых пользовательских интерфейсов с легкой моделью программирования на основе композиции независимых слоев графики.
-
-__Core Audio__
-
-Core Audio является профессиональной технологией для воспроизведения, обработки и записи звука, что позволяет легко добавлять мощные звуковые функции к вашему приложению.
-
-__Core Data__
-
-Core Data обеспечивает объектно-ориентированное решение для управления данными, которое легко в использовании и понимании, построено для обработки модели данных необходимых любому приложению, как большому так и маленькому.
-
-__Core Text__ is an advanced, low-level technology for laying out text and handling fonts.
-Core Text is for apps that need a low-level text-handling technology correlating with the Core Graphics framework (Quartz). If you work directly with Quartz and you need to draw some text, use Core Text. If, for example, you have your own page layout engine—you have some text and you know where it needs to go in your view—you can use Core Text to generate the glyphs and position them relative to each other with all the features of fine typesetting, such as kerning, ligatures, line-breaking, hyphenation, and justification.
-Core Text Lays Out Text. Core Text generates glyphs (from character codes and font data) and positions them relative to each other in glyph runs. It breaks glyph runs into lines, and it assembles lines into multiline frames (such as paragraphs). Core Text also provides glyph- and layout-related data, such as glyph locations and measurement of lines and frames. It handles character attributes and paragraph styles, including various types of tab styles and positioning.
-You Can Manage Fonts With Core Text
-The Core Text font API provides fonts, font collections, font descriptors, and easy access to font data. It also provides support for multiple master fonts, font variations, font cascading, and font linking. Core Text provides an alternative to Quartz for loading your own fonts into the current process, that is, font activation.
-<img src="https://github.com/sashakid/ios-guide/blob/master/Images/core_text.png">
-
-<a name="core-foundation"></a>
-## Core Foundation
-
-Core Foundation (also called CF) is a C application programming interface (API) in macOS & iOS, and is a mix of low-level routines and wrapper functions. Some types in Core Foundation are "toll-free bridged", or interchangeable with a simple cast, with those of their Foundation Kit counterparts. For example, one could create a CFDictionaryRef Core Foundation type, and then later simply use a standard C cast to convert it to its Objective-C counterpart, `(NSDictionary *)`, and then use the desired Objective-C methods on that object as one normally would.
-Is a library with a set of programming interfaces conceptually derived from the Objective-C-based Foundation framework but implemented in the C language. To do this, Core Foundation implements a limited object model in C. Core Foundation defines opaque types that encapsulate data and functions, hereafter referred to as “objects.” The programming interfaces of Core Foundation objects have been designed for ease of use and reuse. At a general level, Core Foundation:
-* Enables sharing of code and data among various frameworks and libraries
-* Makes some degree of operating-system independence possible
-* Supports internationalization with Unicode strings
-* Provides common API and other useful capabilities, including a plug-in architecture, XML property lists, and preferences
-
-An "opaque type" is a type where you don't have a full definition for the struct or class. In C, C++ and Ob-jective-C, you can tell the compiler that a type will be defined later by using a forward declaration:
-
-```c
-// forward declaration of struct in C, C++ and Objective-C
-struct Foo;
-// forward declaration of class in C++:
-class Bar;
-// forward declaration of class in Objective-C:
-@class Baz;
-```
-
-The compiler doesn't have enough information to let you do anything directly with the struct or class except declare pointers to it, but this is frequently all you need to do. This allows library and framework creators to hide implementation details. Users of a library or framework then call helper functions to create, manipulate and destroy instances of a forward declared struct or class. For example, a framework creator could create these functions for `struct Foo`:
-
-```c
-struct Foo *createFoo(void);
-void addNumberToFoo(struct Foo *foo, int number);
-void destroyFoo(struct Foo *foo);
-```
-
-As part of the Core Foundation framework, Apple makes common Objective-C classes like `NSString`, `NSArray` and `NSBundle` available to C programmers through opaque types. C programmers use pointers and helper functions to create, manipulate and destroy instances of these Objective-C classes. Apple calls this "toll-free bridging". They follow a common naming convention: `CF` prefix + class name + `Ref` suffix, where `CF` stands for "Core Foundation" and `Ref` is short for "Reference", meaning it's a pointer.
-Core Foundation makes it possible for the different frameworks and libraries on OS X to share code and data. Applications, libraries, and frameworks can define C routines that incorporate Core Foundation types in their external interfaces; they can thus communicate data—as Core Foundation objects—to each other through these interfaces. Core Foundation also provides “toll-free bridging” between certain services and the Cocoa’s Foundation framework. Toll-free bridging enables you to substitute Cocoa objects for Core Foundation objects in function parameters and vice versa.
-Some Core Foundation types and functions are abstractions of things that have specific implementations on different operating systems. Code that makes use of these APIs is thus easier to port to different platforms. Date and number types abstract time utilities and offers facilities for converting between absolute and Gregorian measures of time. It also abstracts numeric values and provides facilities for converting between different internal representations of those values.
-One of the major benefits Core Foundation brings to application development is internationalization support. Through its String objects, Core Foundation facilitates easy, robust, and consistent internationalization across all OS X and Cocoa programming interfaces and implementations. The essential part of this support is a type, CFString, instances of which represent an array of 16-bit Unicode characters. A CFString object is flexible enough to hold megabytes worth of characters and yet simple and low-level enough for use in all programming interfaces communicating character data. It accomplishes this with performance not much different than that associated with standard C strings.
-
-_CFAllocator CFArray CFAttributedString CFBag CFBinaryHeap CFBitVector CFBoolean CFBundle
-CFCalendar CFCharacterSet CFData CFDate CFDateFormatter CFDictionary CFError CFFileDescriptor CFLocale CFMachPort CFMessagePort CFMutableArray CFMutableAttributedString CFMutableBag CFMutableBitVector CFMutableCharacterSet CFMutableData CFMutableDictionary CFMutableSet CFMutableString CFNotificationCenter CFNull CFNumber CFNumberFormatter CFPlugIn CFPlugInInstance CFPropertyList CFReadStream CFRunLoop CFRunLoopObserver CFRunLoopSource CFRunLoopTimer CFSet CFSocket CFString CFStringTokenizer CFTimeZone CFTree CFType CFURL CFUserNotifi-cation CFUUID CFWriteStream CFXMLNode CFXMLParser CFXMLTree_
-
-In a technical sense, yes, it is faster, for exactly that reason. In a practical sense, no, it's not faster. For one thing, the speed dif-ference is tiny. We're talking milliseconds saved over the life of the entire process.
-The savings might be bigger on the iPhone, but it's still pretty much the tiniest speed gain you can get. Your time is much better spent profiling your app in Instruments and going where it tells you and ironing out the hot spots in your own code. And that's where Foundation becomes faster: Your time. Code that uses Foundation's autorelease feature whenever feasible saves you a lot of time and headaches by avoiding easily-avoidable memory leaks (namely, forgetting to write or failing to reach release messages). CF does not have autorelease, so you have to remember to explicitly CFRelease everything you create or copy with it—and when you forget or fail to reach that code (and I do mean when—I speak from experience), you will spend much more time hunting down the memory leak. The static analyzer helps, but it will never be able to catch everything. (You technically can autorelease CF objects, but the code to do so is terribly ugly and you're only watering down your already-minuscule speed gain.)
-So, stick to Foundation as much as possible. Don't go overboard with the autorelease; even in pure Cocoa, there are still times when explicitly releasing objects is warranted (mostly tight loops), and this goes double for Cocoa Touch (since iOS will kill your app if you allocate too much memory, so you'll want to release big objects like images as soon as possible). But usually, autorelease saves you far more time than CF will ever save your users. The non-time-related reason is that Objective-C code, with argument names (from the message selector) mixed in with values, is far easier to read than C function-based code. This may not make your work go any faster, but it certainly makes it more fun.
-Core Foundation is a set of foundational APIs for some very well used and basic functionalities in the system. Their existence in C is partially historical, and partially to promote use in tools, such as command line utilities, which were historically considered difficult to program in Cocoa. Many iOS programmers never directly use Core Foundation APIs, because much of the func-tionality is available in the Cocoa or Cocoa Touch Foundation framework classes. However, you cannot write an iOS (or OS X) application without Cocoa or Cocoa Touch. From my experience, it is good to understand the concepts behind both Core Foun-dation and the Cocoa/Cocoa Touch Foundation frameworks and especially their interactions (toll-free bridging and memory management at the interface between the two in an ARC environment), but for many people, the Core Foundation pieces can be left until later. Personally, I would suggest that a basic understanding of the concepts above is a good idea to anyone pro-gramming the Mac or iOS.
-
-History: The Foundation dates to ~1993/1994 and the APIs therein were a part of the OpenStep APIs published by NeXT.
-What is the purpose of CoreFoundation framework?
-CF was created during the transition of Mac OS to macOS to help support that transition. Initially, it was done both for speed and to allow purely non-Objective-C programs to be written. Over time, that has proven to be a non-issue and CF has more and more bits that are implemented in Objective-C (have a look at the CoreFoundation binary using something like otool).
-CFLite is a light-weight, portable, pure-C (IIRC) variant.
-Doesn't the Cocoa Framework provide every thing that's needed already?
-More or less. And, certainly moreso for building GUI applications on either iOS or OS X.
-Does the CoreFoundation Framework provide any advantages that the CocoaFramework does not provide?
-Several, but generally at a cost of decreased simplicity and increased fragility.
-For example, the CF collections allow you to completely customize how memory is managed and objects are identified; you can provide custom allocation/free/hashing/comparison hooks. Through this, you can "easily" encapsulate non-Objective-C types in CF collections.
-
-<a name="uikit"></a>
-## UIKit
-The UIKit framework provides the classes needed to construct and manage an application’s user interface for iOS. It provides an application object, event handling, drawing model, windows, views, and controls specifically designed for a touch screen interface.
-The UIKit framework defines a number of functions, many of them used in graphics and drawing operations.
-<img src="https://github.com/sashakid/ios-guide/blob/master/Images/uikit.png">
-
-<a name="cfnetwork"></a>
-## CFNetwork
-CFNetwork is a low-level, high-performance framework that gives you the ability to have detailed control over the protocol stack. It is an extension to BSD sockets, the standard socket abstraction API that provides objects to simplify tasks such as communicating with FTP and HTTP servers or resolving DNS hosts. CFNetwork is based, both physically and theoretically, on BSD sockets.
-Just as CFNetwork relies on BSD sockets, there are a number of Cocoa classes that rely on CFNetwork (NSURL, for example). In addition, the Web Kit is a set of Cocoa classes to display web content in win-dows. Both of these classes are very high level and implement most of the details of the networking protocols by themselves.
-<img src="https://github.com/sashakid/ios-guide/blob/master/Images/cfnetwork.png">
-
-__When to Use CFNetwork__
-
-CFNetwork has a number of advantages over BSD sockets. It provides run-loop integration, so if your application is run loop based you can use network protocols without implementing threads. CFNet-work also contains a number of objects to help you use network protocols without having to imple-ment the details yourself. For example, you can use FTP protocols without having to implement all of the details with the CFFTP API. If you understand the networking protocols and need the low-level control they provide but don't want to implement them yourself, then CFNetwork is probably the right choice.
-There are a number of advantages of using CFNetwork instead of Foundation-level networking APIs. CFNetwork is focused more on the network protocols, whereas the Foundation-level APIs are focused more on data access, such as transferring data over HTTP or FTP. Although Foundation APIs do pro-vide some configurability, CFNetwork provides a lot more.
-Now that you understand how CFNetwork interacts with the other OS X networking APIs, you're ready to become familiar with the CFNetwork APIs along with two APIs that form the infrastructure for CFNetwork.
-CFNetwork Infrastructure
-Before learning about the CFNetwork APIs, you must first understand the APIs which are the foundation for the majority of CFNetwork. CFNetwork relies on two APIs that are part of the Core Foundation framework, CFSocket and CFStream. Understanding these APIs is essential to using CFNetwork.
-
-__CFSocket API__
-
-Sockets are the most basic level of network communications. A socket acts in a similar manner to a telephone jack. It allows you to connect to another socket (either locally or over a network) and send data to that socket. The most common socket abstraction is BSD sockets. CFSocket is an abstraction for BSD sockets. With very little overhead, CFSocket provides almost all the functionality of BSD sockets, and it integrates the socket into a run loop. CFSocket is not limited to stream-based sockets (for example, TCP), it can handle any type of socket. You could create a CFSocket object from scratch using the CFSocketCreate function, or from a BSD socket using the CFSocketCreateWithNative function. Then, you could create a run-loop source using the function CFSocketCreateRunLoopSource and add it to a run loop with the function CFRunLoopAddSource. This would allow your CFSocket callback function to be run whenever the CFSocket object receives a message.
-
-__CFStream API__
-
-Read and write streams provide an easy way to exchange data to and from a variety of media in a device-independent way. You can create streams for data located in memory, in a file, or on a network (using sockets), and you can use streams without loading all of the data into memory at once.
-A stream is a sequence of bytes transmitted serially over a communications path. Streams are one-way paths, so to communicate bidirectionally an input (read) stream and output (write) stream are necessary. Except for file-based streams, you cannot seek within a stream; once stream data has been provided or consumed, it cannot be retrieved again from the stream. CFStream is an API that provides an abstraction for these streams with two new CFType objects: CFReadStream and CFWriteStream. Both types of stream follow all of the usual Core Foundation API conventions. CFStream is built on top of CFSocket and is the foundation for CFHTTP and CFFTP. As you can see in Figure 1-2, even though CFStream is not officially part of CFNetwork, it is the basis for almost all of CFNetwork.
-<img src="https://github.com/sashakid/ios-guide/blob/master/Images/cf.png">
-
-<a name="quartzcore"></a>
-## QuartzCore
-Quartz 2D is an API of the Core Graphics framework that implements drawing.
-Quartz Core is a framework that includes APIs for animation and image processing.
-Quartz frameworks and their APIs
-
-* CoreGraphics.framework
-* Quartz 2D API manages the graphic context and implements drawing.
-* Quartz Services API provides low level access to the window server. This includes display hardware, resolution, refresh rate, and others.
-* QuartzCore.framework
-* Core Animation: Objective-C API to do 2D animation.
-* Core Image: image and video processing (filters, warp, transitions).iOS 5
-Quartz.framework OS X only
-* Image Kit: display and edit images.
-* PDF Kit: display and edit PDFs.
-* Quartz Composer: display Quartz Composer compositions.
-* QuickLookUI: preview media elements.
-
-All three frameworks use OpenGL underneath because all drawing in iOS or OS X goes through OpenGL at some point. OpenGL (Open Graphics Library — открытая графическая библиотека, графический API) — спецификация, определяющая независимый от языка программирования платформонезависимый программный интерфейс для написания приложений, использующих двумерную и трёхмерную компьютерную графику. Включает более 250 функций для рисования сложных трёхмерных сцен из простых примитивов. Используется при создании компьютерных игр, САПР, виртуальной реальности, визуализации в научных исследованиях. На платформе Windows конкурирует с DirectX.
+Кеш - это специальный буфер (контейнер), содержащий информацию. Эта информация может быть запрошена с наибольшей вероятностью. Соответственно, доступ к этому буферу должен быть очень быстрым, он должен быть быстрее чем доступ к сети или к данным на жестком диске. В операционной системе iOS присутствует функция кэширования, но прямого доступа к данным в кэше нету. Для получения доступа следует использовать класс `NSCache`.
+- Only documents and other data that is user-generated, or that cannot otherwise be recreated by your application, should be stored in the `<Application_Home>/Documents` directory and will be automatically backed up by iCloud.
+- Data that can be downloaded again or regenerated should be stored in the `<Application_Home>/Library/Caches` directory. Examples of files you should put in the Caches directory include database cache files and downloadable content, such as that used by magazine, newspaper, and map applications.
+- Data that is used only temporarily should be stored in the `<Application_Home>/tmp` directory. Although these files are not backed up to iCloud, remember to delete those files when you are done with them so that they do not continue to consume space on the user’s device.
+- Use the "do not back up" attribute for specifying files that should remain on device, even in low storage situations. Use this attribute with data that can be recreated but needs to persist even in low storage situations for proper functioning of your app or because customers expect it to be available during offline use. This attribute works on marked files regardless of what directory they are in, including the Documents directory. These files will not be purged and will not be included in the user's iCloud or iTunes backup. Because these files do use on-device storage space, your app is responsible for monitoring and purging these files periodically.

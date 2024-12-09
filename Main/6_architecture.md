@@ -250,15 +250,109 @@ SOLID (сокр. от англ. Single responsibility, Open-closed, Liskov subst
 
 Следующие приёмы позволяют соблюдать принцип единственной ответственности: разработка через тестирование, выделение класса, фасад, Proxy, DAO.
 
+```swift
+// NetworkManager должен выполнять только сетевые запросы
+class NetworkManager {
+    func fetchData(url: URL) {
+        // Запрос к API
+    }
+
+    func updateUI() {
+        // обновляет пользовательский интерфейс
+    }
+}
+```
+
 2. "__O__", Open-closed, Принцип открытости / закрытости
 
 Программные сущности должны быть:
 - открыты для расширения: означает, что поведение сущности может быть расширено, путём создания новых типов сущностей.
 - закрыты для изменения: в результате расширения поведения сущности, не должны вносится изменения в код, которые эти сущности использует.
 
+```swift
+// Violates
+class Animal {
+    let name: String
+
+    init(name: String) {
+        self.name = name
+    }
+
+    func makeSound() {
+        if name == "Dog" {
+            print("Woof")
+        } else if name == "Cat" {
+            print("Meow")
+        }
+    }
+}
+
+// Fixed
+protocol Animal {
+    func makeSound()
+}
+
+class Dog: Animal {
+    func makeSound() {
+        print("Woof")
+    }
+}
+
+class Cat: Animal {
+    func makeSound() {
+        print("Meow")
+    }
+}
+```
+
 3. "__L__", Liskov substitution, Принцип подстановки Барбары Лисков
 
 Даёт определение понятия замещения — если `S` является подтипом `T`, тогда объекты типа `T` в программе могут быть замещены объектами типа `S` без каких-либо изменений желательных свойств этой программы (например, корректность). Более простыми словами можно сказать, что поведение наследуемых классов не должно противоречить поведению, заданному базовым классом, то есть поведение наследуемых классов должно быть ожидаемым для кода, использующего переменную базового типа.
+
+```swift
+// Violates LSP
+class Bird {
+    func fly() {
+        // flying logic
+    }
+}
+
+class Penguin: Bird {
+    override func fly() {
+        // Penguins can't fly, so this violates LSP
+        fatalError("Penguins can't fly")
+    }
+}
+
+// Follows LSP
+protocol Bird {
+    func move()
+}
+
+class FlyingBird: Bird {
+    func move() {
+        fly()
+    }
+
+    func fly() {
+        // flying logic
+    }
+}
+
+class Penguin: Bird {
+    func move() {
+        swim()
+    }
+
+    func swim() {
+        // swimming logic
+    }
+}
+
+// Usage
+let birds: [Bird] = [FlyingBird(), Penguin()]
+birds.forEach { $0.move() }
+```
 
 4. "__I__", Interface segregation, Принцип разделения интерфейса
 
@@ -266,11 +360,84 @@ SOLID (сокр. от англ. Single responsibility, Open-closed, Liskov subst
 
 Принцип разделения интерфейсов говорит о том, что слишком «толстые» интерфейсы необходимо разделять на более маленькие и специфические, чтобы клиенты маленьких интерфейсов знали только о методах, которые необходимы им в работе. В итоге, при изменении метода интерфейса не должны меняться клиенты, которые этот метод не используют.
 
+```swift
+// Violates ISP
+protocol Printer {
+    func printDocument()
+    func scanDocument()
+}
+
+// Follows ISP
+protocol Printer {
+    func printDocument()
+}
+
+protocol Scanner {
+    func scanDocument()
+}
+
+class SimplePrinter: Printer {
+    func printDocument() {
+        // printing logic
+    }
+}
+
+class AllInOnePrinter: Printer, Scanner {
+    func printDocument() {
+        // printing logic
+    }
+
+    func scanDocument() {
+        // scanning logic
+    }
+}
+```
+
 5. "__D__", Dependency inversion, Принцип инверсии зависимостей
 
 Принцип, используемый для уменьшения зацепления в компьютерных программах.
 - Модули верхних уровней не должны зависеть от модулей нижних уровней. Оба типа модулей должны зависеть от абстракций.
 - Абстракции не должны зависеть от деталей. Детали должны зависеть от абстракций.
+
+```swift
+// Violates DIP
+class DatabaseService {
+    func save(data: String) {
+        // save to database
+    }
+}
+
+class UserService {
+    private let dbService = DatabaseService()
+
+    func saveUserData(data: String) {
+        dbService.save(data)
+    }
+}
+
+// Follows DIP
+protocol DataService {
+    func save(data: String)
+}
+
+class DatabaseService: DataService {
+    func save(data: String) {
+        // save to database
+    }
+}
+
+class UserService {
+    private let dataService: DataService
+
+    init(dataService: DataService) {
+        self.dataService = dataService
+    }
+
+    func saveUserData(data: String) {
+        dataService.save(data)
+    }
+}
+```
 
 <a name="паттерны-проектирования"></a>
 
