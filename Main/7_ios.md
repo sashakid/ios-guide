@@ -118,16 +118,16 @@ A `UIView` is the fundamental building block for creating and managing the visua
 <a name="жизненный-цикл-uiviewController"></a>
 ## Жизненный цикл UIViewController
 
-- Initialization: The view controller is instantiated, either programmatically or from a storyboard.
-- View Loading: The `loadView()` method is called, creating the view hierarchy for the view controller.
-- View Did Load: The `viewDidLoad()` method is called, where you typically initialize data and setup UI elements.
-- View Will Appear: The `viewWillAppear(_:)` method is called just before the view becomes visible, useful for tasks like updating the UI based on new data.
-- View Did Appear: The `viewDidAppear(_:)` method is called after the view has appeared on the screen, often used for starting animations or tracking analytics.
-- View Will Disappear: The `viewWillDisappear(_:)` method is invoked just before the view is hidden, useful for saving state or stopping tasks.
-- View Did Disappear: The `viewDidDisappear(_:)` method is called after the view is no longer visible, allowing you to clean up resources or stop processes.
-- Deinitialization: The view controller is deallocated when it’s no longer needed, cleaning up any remaining resources.
-- `viewWillLayoutSubviews` gets called anytime your view controller's view has its bounds changed. This happens when the view is loaded, when a rotation event occurs, or when a child view controller has its size changed by its parent. (There are probably some other situations, too). If there is anything you need to update before that view lays itself out (and before your constraints are re-applied) you should do it here. you should generally not update constraints here, because updating constraints can cause another layout pass.
-- `viewDidLayoutSubviews` is called once all of your subviews have been laid out. If you need to fine-tune that layout by manually adjusting frames, for instance, this would be the place to do it.
+1. `init()` The view controller is instantiated, either programmatically or from a storyboard.
+2. `loadView()` method is called, creating the view hierarchy for the view controller.
+3. `viewDidLoad()` method is called, where you typically initialize data and setup UI elements.
+4. `viewWillAppear(_:)` method is called just before the view becomes visible, useful for tasks like updating the UI based on new data.
+5. `viewWillLayoutSubviews` gets called anytime your view controller's view has its bounds changed. This happens when the view is loaded, when a rotation event occurs, or when a child view controller has its size changed by its parent. (There are probably some other situations, too). If there is anything you need to update before that view lays itself out (and before your constraints are re-applied) you should do it here. you should generally not update constraints here, because updating constraints can cause another layout pass.
+6. `viewDidLayoutSubviews` is called once all of your subviews have been laid out. If you need to fine-tune that layout by manually adjusting frames, for instance, this would be the place to do it.
+7. `viewDidAppear(_:)` method is called after the view has appeared on the screen, often used for starting animations or tracking analytics.
+8. `viewWillDisappear(_:)` method is invoked just before the view is hidden, useful for saving state or stopping tasks.
+9. `viewDidDisappear(_:)` method is called after the view is no longer visible, allowing you to clean up resources or stop processes.
+10. `deinit()` The view controller is deallocated when it’s no longer needed, cleaning up any remaining resources.
 
 <img src="https://github.com/sashakid/ios-guide/blob/master/Images/uiviewcontroller.png">
 
