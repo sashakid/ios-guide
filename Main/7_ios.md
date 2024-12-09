@@ -108,11 +108,11 @@ A `UIView` is the fundamental building block for creating and managing the visua
 
 | Метод делегата	| Состояние | Описание состояния |
 | ---------------	| --------- | ------------------ |
-| application(_:didFinishLaunchingWithOptions:)	| Not Running → Inactive	| Приложение запускается, но еще не готово принимать пользовательские события. Используется для инициализации. | 
+| application(_:didFinishLaunchingWithOptions:)	| Not Running → Inactive | Приложение запускается, но еще не готово принимать пользовательские события. Используется для инициализации. | 
 | applicationWillResignActive(_:)	| Active → Inactive	| Приложение временно становится неактивным (например, из-за входящего звонка). Приостановка работы. | 
 | applicationDidBecomeActive(_:)	| Inactive → Active	| Приложение становится активным и готовым к взаимодействию с пользователем. | 
-| applicationDidEnterBackground(_:)	Active → Background	| Приложение уходит в фоновый режим. Выполняет фоновые задачи и освобождает ресурсы. | 
-| applicationWillEnterForeground(_:)	Background → Inactive	| Приложение возвращается из фонового режима, готовясь снова стать активным. | 
+| applicationDidEnterBackground(_:) |	Active → Background	| Приложение уходит в фоновый режим. Выполняет фоновые задачи и освобождает ресурсы. | 
+| applicationWillEnterForeground(_:) | Background → Inactive	| Приложение возвращается из фонового режима, готовясь снова стать активным. | 
 | applicationWillTerminate(_:)	| Background → Not Running	| Приложение завершает работу. Система завершает его процесс, и данные должны быть сохранены. | 
 
 <a name="жизненный-цикл-uiviewController"></a>
