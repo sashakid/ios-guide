@@ -471,3 +471,5 @@ func fibonacciIterative(_ n: Int) -> Int {
     return b
 }
 ```
+
+<img src="https://github.com/sashakid/ios-guide/blob/master/Images/array_sorting.png">

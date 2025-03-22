@@ -237,3 +237,5 @@ _red-black tree, rb-tree_
 - Все листья (NIL) — черные.
 - Оба потомка каждого красного узла — черные.
 - Всякий простой путь от данного узла до любого листового узла, являющегося его потомком, содержит одинаковое число черных узлов.
+
+<img src="https://github.com/sashakid/ios-guide/blob/master/Images/data_structures_operations.png">
