@@ -73,6 +73,74 @@ _hash table, hash map_
 
 Ассоциативный массив, хранит пары  в виде связанного списка (open hash, closed address) или массива пар (closed hash, open address). Индекс элемента равен хеш-функции от ключа i = hash(key). Разбиение множества на подмножества происходит с помощью хеш функции (пример: телефонная книга).
 
+```swift
+/// Простая реализация хеш-таблицы с цепочками (chaining)
+struct HashTable<Key: Hashable, Value> {
+	private typealias Element = (key: Key, value: Value)
+
+    private var buckets: [[Element]]
+    private(set) var count = 0
+
+    private let capacity: Int
+
+    init(capacity: Int = 16) {
+        self.capacity = max(1, capacity)
+        self.buckets = Array(repeating: [], count: capacity)
+    }
+
+    /// Хеш-функция: берем `hashValue`, берем по модулю размер массива
+    private func index(for key: Key) -> Int {
+        return abs(key.hashValue) % capacity
+    }
+
+    /// Вставка или обновление значения
+    mutating func insert(_ value: Value, for key: Key) {
+        let i = index(for: key)
+
+        // Проверка: существует ли уже такой ключ — обновляем
+        if let indexInBucket = buckets[i].firstIndex(where: { $0.key == key }) {
+            buckets[i][indexInBucket].value = value
+        } else {
+            // Иначе добавляем
+            buckets[i].append((key, value))
+            count += 1
+        }
+    }
+
+    /// Получение значения по ключу
+    func get(_ key: Key) -> Value? {
+        let i = index(for: key)
+        return buckets[i].first(where: { $0.key == key })?.value
+    }
+
+    /// Проверка наличия ключа
+    func contains(_ key: Key) -> Bool {
+        return get(key) != nil
+    }
+
+    /// Удаление значения по ключу
+    mutating func remove(_ key: Key) {
+        let i = index(for: key)
+        if let indexInBucket = buckets[i].firstIndex(where: { $0.key == key }) {
+            buckets[i].remove(at: indexInBucket)
+            count -= 1
+        }
+    }
+}
+```
+
+•	Хеш-функция: используем стандартный hashValue и берем по модулю capacity.
+
+•	Коллизии (если два ключа попали в одно и то же “ведро”) разрешаются цепочками — массивом кортежей.
+
+•	Все ключи уникальны, как в словаре (Dictionary).
+
+Производительность:
+
+•	Средняя: O(1) для вставки, поиска, удаления.
+
+•	Худшая (все в одном bucket): O(n).
+
 <img src="https://github.com/sashakid/ios-guide/blob/master/Images/hash_table.png">
 
 <a name="множество"></a>
@@ -157,6 +225,43 @@ _stack_
 - Неразрушающее чтение
 
 Функция стека – сохранить работу, невыполненную до конца, с возможностью переключения на другую работу.
+
+```swift
+/// Простая реализация стека (LIFO — последний пришёл, первый ушёл)
+struct Stack<T> {
+    private var elements: [T] = []
+
+    /// Добавляет элемент на вершину стека
+    mutating func push(_ value: T) {
+        elements.append(value)
+    }
+
+    /// Удаляет и возвращает верхний элемент (если он есть)
+    mutating func pop() -> T? {
+        return elements.popLast()
+    }
+
+    /// Возвращает верхний элемент, не удаляя его
+    func peek() -> T? {
+        return elements.last
+    }
+
+    /// Проверяет, пуст ли стек
+    var isEmpty: Bool {
+        return elements.isEmpty
+    }
+
+    /// Количество элементов в стеке
+    var count: Int {
+        return elements.count
+    }
+
+    /// Очистка стека
+    mutating func clear() {
+        elements.removeAll()
+    }
+}
+```
 
 <img src="https://github.com/sashakid/ios-guide/blob/master/Images/stack.png">
 
