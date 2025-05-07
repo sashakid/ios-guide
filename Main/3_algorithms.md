@@ -529,7 +529,7 @@ func removeDuplicates(_ nums: inout [Int]) -> Int {
 Используем два указателя: слева и справа, сравниваем символы.
 
 ```swift
-///	Время: O(n)
+/// Время: O(n)
 ///	Память: O(n) (фильтрация строки)
 func isPalindrome(_ s: String) -> Bool {
     let characters = Array(s.lowercased().filter { $0.isLetter || $0.isNumber })

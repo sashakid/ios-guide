@@ -13,6 +13,8 @@
 - [Какой метод вызовется: класса A или класса B?](#какой-метод-вызовется-класса-a-или-класса-b)
 - [`int8_t matrix [2048][2024]`, допустимо ли?](#int8_t-matrix-20482024-допустимо-ли)
 - [Одинаковую ли память занимают эти структуры и почему так?](#одинаковую-ли-память-занимают-эти-структуры-и-почему-так)
+- [Будет ли вызван deinit у A после выхода из test()?](#retain-in-class)
+- [Будет ли вызван deinit у ViewModel после выхода из test()? Что не так? Как исправить?](#retain-in-vm)
 
 <a name="string-autorelease"></a>
 
@@ -392,4 +394,131 @@ sizeof(StructA) == 8
 sizeof(StructB) == 12
 ```
 
-[Как происходит выравнивание указателей на объекты в Objective-C?](15_general_questions.md#data-structure-alignment)
+Выравнивание необходимо для оптимизации доступа к данным в памяти. Процессоры часто требуют, чтобы данные (например, целочисленные типы) находились в памяти по адресам, которые кратны их размеру. Это позволяет ускорить доступ к этим данным и избегать ошибок при их чтении или записи.
+
+```c
+struct StructA {
+  int32_t a;  // 4 байта
+  char b;     // 1 байт
+  char c;     // 1 байт
+};
+
+struct StructB {
+  char b;     // 1 байт
+  int32_t a;  // 4 байта
+  char c;     // 1 байт
+};
+```
+•	sizeof(StructA) == 8, так как после поля a (4 байта) компилятор вставляет 2 байта паддинга, чтобы выровнять поля структуры по 4 байта.
+
+•	sizeof(StructB) == 12, так как после поля b (1 байт) вставляется 3 байта паддинга для выравнивания поля a (4 байта). Далее стоит c (1 байт), и еще 2 байта паддинга.
+
+Таким образом, структуры занимают разное количество памяти из-за порядка расположения полей и выравнивания данных.
+
+Зачем нужно выравнивание?
+
+Выравнивание необходимо для оптимизации работы процессора, поскольку он может быстрее обращаться к данным, если они находятся по адресам, кратным их размеру.
+
+<a name="retain-in-class"></a>
+
+## Будет ли вызван deinit у A после выхода из test()?
+
+```swift
+class A {
+    var closure: (() -> Void)?
+    deinit { print("A deinit") }
+}
+
+func test() {
+    let a = A()
+    a.closure = {
+        print("Inside closure")
+    }
+}
+```
+
+Нет, deinit не будет вызван, потому что возникает retain cycle:
+
+•	a содержит closure (сильная ссылка на блок)
+
+•	блок захватывает a (неявно, через self), а замыкания по умолчанию захватывают переменные сильно
+
+```swift
+/// Правильное решение:
+func test() {
+    let a = A()
+    a.closure = { [weak a] in
+        print("Inside closure")
+        // Если нужно, можно: a?.doSomething()
+    }
+}
+```
+
+<a name="retain-in-vm"></a>
+
+## Будет ли вызван deinit у ViewModel после выхода из test()? Что не так? Как исправить?
+
+```swift
+class ViewModel {
+    var onUpdate: (() -> Void)?
+
+    func fetchData() {
+        DispatchQueue.global().async {
+            sleep(1)
+            self.onUpdate?()
+        }
+    }
+
+    deinit {
+        print("ViewModel deinit")
+    }
+}
+
+func test() {
+    let vm = ViewModel()
+    vm.onUpdate = {
+        print("UI updated")
+    }
+    vm.fetchData()
+}
+```
+
+Нет, deinit НЕ будет вызван после test() — снова из-за retain cycle, но на этот раз он завуалирован:
+
+1.	ViewModel → onUpdate → closure → self (ViewModel)
+
+2.	closure держит self, self держит closure — цикл.
+
+3.	closure будет вызван асинхронно, через DispatchQueue, а значит, объект vm останется в памяти до этого момента.
+
+И даже если бы ты вручную занулял vm.onUpdate, это было бы поздно, потому что self уже была захвачена замыканием.
+
+___
+
+А теперь представь, что ViewModel не просто хранит замыкание, а использует его в Combine: Когда будет вызван deinit у ViewModel, и как избежать утечки?
+
+```swift
+class ViewModel {
+    var cancellable: AnyCancellable?
+
+    func bind() {
+        cancellable = Timer.publish(every: 1, on: .main, in: .common)
+            .autoconnect()
+            .sink { _ in
+                self.doSomething()
+            }
+    }
+
+    func doSomething() {
+        print("tick")
+    }
+
+    deinit {
+        print("ViewModel deinit")
+    }
+}
+```
+
+self захватывается в sink, а sink живёт в cancellable, который хранится в self. Получаем цикл.
+
+Решение — [weak self] внутри .sink { [weak self] _ in ... }
