@@ -10,7 +10,7 @@
   - [Рекурсивная функция](#рекурсивная-функция)
   - [How to merge two sorted arrays into a sorted array?](#how-to-merge-two-sorted-arrays-into-a-sorted-array)
   - [Удаление дубликатов из отсортированного массива](#delete-duplicates)
-  - [Проверка палиндрома](#polyndrom)
+  - [Проверка палиндрома](#palindrome)
   - [Поиск пары с заданной суммой](#find-pair)
 
 # Алгоритмы
@@ -520,7 +520,7 @@ func removeDuplicates(_ nums: inout [Int]) -> Int {
 }
 ```
 
-<a name="polyndrom"></a>
+<a name="palindrome"></a>
 
 ## Проверка палиндрома
 

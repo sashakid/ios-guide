@@ -15,6 +15,10 @@
 - [Одинаковую ли память занимают эти структуры и почему так?](#одинаковую-ли-память-занимают-эти-структуры-и-почему-так)
 - [Будет ли вызван deinit у A после выхода из test()?](#retain-in-class)
 - [Будет ли вызван deinit у ViewModel после выхода из test()? Что не так? Как исправить?](#retain-in-vm)
+- [Задача на посещение веб-страниц](#web)
+- [Предсказать порядок вывода](#порядок)
+- [Задача на QOS](#qos)
+- [Задача на диспетчеризацию](#dispatch)
 
 <a name="string-autorelease"></a>
 
@@ -180,11 +184,11 @@ BOOL loginTester(NSString* login) {
         NSUInteger _n1 = [n1 unsignedLongValue];
         NSUInteger _n2 = [n2 unsignedLongValue];
         if (_n1 == _n2)
-        return NSOrderedSame;
+          return NSOrderedSame;
         else if (_n1 < _n2)
-        return NSOrderedAscending;
+          return NSOrderedAscending;
         else
-        return NSOrderedDescending;
+          return NSOrderedDescending;
         }];
         [selectedWords insertObject:word atIndex:indexToInsert];
         [countsOfSelectedWords insertObject:wordCountNSNumber atIndex:indexToInsert];
@@ -522,3 +526,263 @@ class ViewModel {
 self захватывается в sink, а sink живёт в cancellable, который хранится в self. Получаем цикл.
 
 Решение — [weak self] внутри .sink { [weak self] _ in ... }
+
+<a name="web"></a>
+
+## Задача на посещение веб-страниц
+
+Определите пользователей, которые за день посетили ровно две уникальные страницы (неважно, сколько раз они заходили на каждую из них, но важны только два разных PageId).
+
+1.	У нас есть логи с полями:
+
+•	Timestamp (дата и время посещения)
+
+•	PageId (идентификатор страницы)
+
+•	CustomerId (идентификатор пользователя)
+
+2.	Нужно сгруппировать данные по пользователям (CustomerId) и дню (Timestamp).
+3.	Проверить, что у каждого пользователя ровно 2 уникальных PageId за день.
+
+```swift
+import Foundation
+
+// Структура для хранения записей логов
+struct LogEntry {
+    let timestamp: Date
+    let pageId: Int
+    let customerId: Int
+}
+
+// Примерные входные данные
+let logs: [LogEntry] = [
+    LogEntry(timestamp: Date(), pageId: 1, customerId: 100),
+    LogEntry(timestamp: Date(), pageId: 2, customerId: 100),
+    LogEntry(timestamp: Date(), pageId: 1, customerId: 100), // Повтор страницы 1
+    LogEntry(timestamp: Date(), pageId: 3, customerId: 101),
+    LogEntry(timestamp: Date(), pageId: 4, customerId: 101),
+    LogEntry(timestamp: Date(), pageId: 5, customerId: 102)
+]
+
+// Функция для группировки логов по пользователям и дням
+func findUsersWithExactlyTwoUniquePages(logs: [LogEntry]) -> Set<Int> {
+    var userPages: [Int: [Date: Set<Int>]] = [:] // Словарь: CustomerId -> [Date -> Set<PageId>]
+
+    let calendar = Calendar.current
+
+    for log in logs {
+        let day = calendar.startOfDay(for: log.timestamp) // Упрощаем до даты без времени
+
+        // Если пользователь еще не существует в словаре, создаем запись
+        if userPages[log.customerId] == nil {
+            userPages[log.customerId] = [:]
+        }
+        
+        // Если день еще не существует для этого пользователя, создаем Set для страниц
+        if userPages[log.customerId]?[day] == nil {
+            userPages[log.customerId]?[day] = Set()
+        }
+
+        // Добавляем страницу в Set
+        userPages[log.customerId]?[day]?.insert(log.pageId)
+    }
+
+    // Фильтруем пользователей с ровно двумя уникальными страницами
+    var result = Set<Int>()
+    for (customerId, days) in userPages {
+        for (_, pages) in days {
+            if pages.count == 2 {
+                result.insert(customerId)
+            }
+        }
+    }
+    
+    return result
+}
+
+// Запускаем функцию
+let users = findUsersWithExactlyTwoUniquePages(logs: logs)
+print("Пользователи, посетившие ровно две уникальные страницы: \(users)")
+```
+
+•	Время работы: O(N), где N — это количество записей в логах.
+
+•	Это решение сохраняет высокую производительность и эффективно обрабатывает большие объемы данных.
+
+<a name="порядок"></a>
+
+## Предсказать порядок вывода
+
+```swift
+import Foundation
+
+let queue1 = DispatchQueue(label: "queue1", attributes: .concurrent)
+let queue2 = DispatchQueue(label: "queue2")
+let queue3 = DispatchQueue(label: "queue3")
+let mainQueue = DispatchQueue.main
+
+print("Start")
+queue1.async {
+    print("1")
+    queue2.sync {
+        print("2")
+        queue3.async {
+            print("3")
+            mainQueue.sync {
+                print("4")
+            }
+            print("5")
+        }
+        print("6")
+    }
+    print("7")
+}
+print("End")
+```
+
+```
+Start
+End
+1
+2
+6
+7
+3
+4
+5
+```
+
+<a name="qos"></a>
+
+## Задача на QOS
+
+```swift
+func log(_ message: String) {
+    print("\(message) — \(Thread.isMainThread ? "🟢 main" : "🔵 background")")
+}
+
+print("🚀 Start")
+
+let queueA = DispatchQueue.global(qos: .background)
+let queueB = DispatchQueue.global(qos: .userInitiated)
+let queueC = DispatchQueue.global(qos: .utility)
+let queueD = DispatchQueue.global(qos: .userInteractive)
+
+queueA.async {
+    log("A1 (background)")            // 1
+
+    queueB.async {
+        log("B1 (userInitiated)")      // 2
+
+        queueC.async {
+            log("C1 (utility)")        // 3
+
+            queueD.async {
+                log("D1 (userInteractive)")  // 4
+            }
+
+            log("C2 (utility)")        // 5
+        }
+
+        log("B2 (userInitiated)")      // 6
+    }
+
+    log("A2 (background)")            // 7
+}
+
+print("🚀 End")
+
+RunLoop.main.run(until: Date().addingTimeInterval(3))
+```
+
+```
+🚀 Start
+🚀 End
+A1 (background)
+A2 (background)
+B1 (userInitiated)
+B2 (userInitiated)
+C1 (utility)
+C2 (utility)
+D1 (userInteractive)
+```
+Но возможны перестановки между задачами, особенно C1/C2 и D1, в зависимости от загрузки системы. Однако D1 с userInteractive QoS будет выполнен быстрее, даже если был вложен в utility.
+
+•	queueA.async → запускается первой (низкий приоритет), но она и вложенные не блокируют.
+
+•	queueB.async (внутри A) имеет более высокий приоритет, выполняется быстрее.
+
+•	Даже вложенные задачи могут стартовать раньше внешних, если у них выше QoS.
+
+•	Все вложенные async блоки — независимы, они планируются системой по своим приоритетам.
+
+<a name="dispatch"></a>
+
+## Задача на диспетчеризацию
+
+```swift
+class Animal {
+    func speak() {
+        print("Animal speaks")
+    }
+}
+
+// ✅ Dog переопределяет метод speak
+class DogOverriding: Animal {
+    override func speak() {
+        print("DogOverriding barks")
+    }
+}
+
+// 🚫 Dog НЕ переопределяет, а просто объявляет метод с таким же именем
+class DogHiding: Animal {
+    func speak() {
+        print("DogHiding barks")
+    }
+}
+
+print("== Переопределение (override) ==")
+let dog1 = DogOverriding()
+dog1.speak()                          // DogOverriding barks
+
+let animal1: Animal = DogOverriding()
+animal1.speak()                       // DogOverriding barks (динамическая диспетчеризация)
+
+print("== Сокрытие (method hiding) ==")
+let dog2 = DogHiding()
+dog2.speak()                          // DogHiding barks
+
+let animal2: Animal = DogHiding()
+animal2.speak()                       // Animal speaks (статическая диспетчеризация)
+```
+
+```
+== Переопределение (override) ==
+DogOverriding barks
+DogOverriding barks
+== Сокрытие (method hiding) ==
+DogHiding barks
+Animal speaks
+```
+
+## ❗ Почему `method hiding` — плохая идея
+
+| Проблема                         | Описание |
+|----------------------------------|----------|
+| 🔍 **Трудность отладки**         | При чтении кода кажется, что вызывается метод сабкласса, но на деле — родительский. Это запутывает. |
+| ⚠️ **Неожиданное поведение**     | Один и тот же объект (`DogHiding`) вызывает разные методы в зависимости от типа ссылки (`Animal` или `DogHiding`). |
+| 🚫 **Не используется полиморфизм** | Полиморфизм работает только с `override`, а не с "method hiding". |
+| 🧪 **Тестировать сложнее**       | Нужно следить за типами переменных и знать, где может внезапно вызваться родительский метод. |
+
+## ✅ Когда может быть оправдано
+
+- Когда ты **намеренно хочешь скрыть** метод родителя, потому что сабкласс **полностью меняет логику**, и метод родителя **не должен быть виден**.
+- Например: у тебя старый `BaseAPI` с `request()`, а в `NewAPI` ты делаешь свою реализацию `request()` без наследования поведения.
+
+> ⚠️ Но даже тогда лучше **переименовать метод**, а не скрывать родительский.
+
+## 🧠 Вывод
+
+> **Никогда не скрывай методы родителя, если можешь этого избежать.**
+>
+> Используй `override`, если хочешь переопределить поведение.

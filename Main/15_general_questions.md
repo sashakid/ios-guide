@@ -56,6 +56,7 @@
   - [Что такое agile, scrum и kanban?](#что-такое-agile-scrum-и-kanban)
   - [Как происходит рендеринг графики?](#как-происходит-рендеринг-графики)
   - [Что такое VSYNC?](#что-такое-vsync)
+  - [Когда autoreleasepool нужен в свифте?](#autoreleasepool)
 
 <a name="общие-вопросы"></a>
 
@@ -2023,3 +2024,25 @@ class ViewController: UIViewController {
     }
 }
 ```
+
+<a name="autoreleasepool"></a>
+
+## Когда autoreleasepool нужен в свифте?
+
+Большие циклы, создающие много временных объектов
+
+```swift
+for i in 0..<10_000 {
+    autoreleasepool {
+        let image = UIImage(named: "image_\(i)")  // autoreleased
+        process(image)
+    }
+}
+```
+Если в цикле создаётся много autorelease-объектов (например, UIImage(named:), NSData, NSString, и т.п.), и ты не используешь autoreleasepool, они все висят в памяти до конца цикла, что может:
+
+•	вызвать всплеск потребления памяти;
+
+•	привести к падению из-за memory pressure;
+
+•	ухудшить производительность.

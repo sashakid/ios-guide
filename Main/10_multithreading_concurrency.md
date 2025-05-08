@@ -232,10 +232,11 @@ __Плюсы__
 
 The QoS classes are:
 
-- User-interactive: This represents tasks that need to be done immediately in order to provide a nice user experience. Use it for UI updates, event handling and small workloads that require low latency. The total amount of work done in this class during the execution of your app should be small. This should run on the main thread.
-- User-initiated: The represents tasks that are initiated from the UI and can be performed asynchronously. It should be used when the user is waiting for immediate results, and for tasks required to continue user interaction. This will get mapped into the high priority global queue.
-- Utility: This represents long-running tasks, typically with a user-visible progress indicator. Use it for computations, I/O, networking, continous data feeds and similar tasks. This class is designed to be energy efficient. This will get mapped into the low priority global queue.
-- Background: This represents tasks that the user is not directly aware of. Use it for prefetching, maintenance, and other tasks that don’t require user interaction and aren’t time-sensitive. This will get mapped into the background priority global queue.
+- __User-interactive__: This represents tasks that need to be done immediately in order to provide a nice user experience. Use it for UI updates, event handling and small workloads that require low latency. The total amount of work done in this class during the execution of your app should be small. This should run on the main thread.
+- __User-initiated__: The represents tasks that are initiated from the UI and can be performed asynchronously. It should be used when the user is waiting for immediate results, and for tasks required to continue user interaction. This will get mapped into the high priority global queue.
+- __Default__: Default tasks have a lower priority than user-initiated and user-interactive tasks, but a higher priority than utility and background tasks. Assign this class to tasks or queues that your app initiates or uses to perform active work on the user’s behalf.
+- __Utility__: This represents long-running tasks, typically with a user-visible progress indicator. Use it for computations, I/O, networking, continous data feeds and similar tasks. This class is designed to be energy efficient. This will get mapped into the low priority global queue.
+- __Background__: This represents tasks that the user is not directly aware of. Use it for prefetching, maintenance, and other tasks that don’t require user interaction and aren’t time-sensitive. This will get mapped into the background priority global queue.
 
 ```swift
 DispatchQueue.global(attributes: [.qosDefault]).async {
@@ -245,6 +246,14 @@ DispatchQueue.global(attributes: [.qosDefault]).async {
   })
 }
 ```
+
+| Тип очереди            | Как создаётся                                              | По умолчанию     | Пояснение                                                                 |
+|------------------------|------------------------------------------------------------|------------------|---------------------------------------------------------------------------|
+| Main Queue             | DispatchQueue.main                                         | serial           | Главная очередь UI. Только 1 задача за раз, используется для UI-работы.  |
+| Global Queue (по QoS)  | DispatchQueue.global(qos: .userInitiated)                  | concurrent       | Параллельная, шарится системой. Не нужно создавать вручную.              |
+| Global Queue (default) | DispatchQueue.global()                                     | concurrent       | То же, что global(qos: .default).                                        |
+| Custom Serial Queue    | DispatchQueue(label: "my.queue")                           | serial           | Последовательная пользовательская очередь.                               |
+| Custom Concurrent Queue| DispatchQueue(label: "my.queue", attributes: .concurrent)  | concurrent       | Параллельная пользовательская очередь.                                   |
 
 <a name="nsoperationqueue"></a>
 
@@ -910,6 +919,12 @@ dispatch_sync(myCustomQueue, ^{
 printf("Оба блока были завершены.\n");
 ```
 
+| Очередь         | async                     | sync                                           |
+|-----------------|---------------------------|------------------------------------------------|
+| serial          | Не блокирует вызывающий   | Блокирует вызывающий, задачи выполняются по порядку |
+| concurrent      | Не блокирует вызывающий, задачи могут идти параллельно | Блокирует вызывающий, задачи по-прежнему идут по порядку (для этого потока), но очередь может выполнять другие задачи параллельно |
+| main (главная)  | Не блокирует, если из фонового потока | Deadlock, если вызвать из самой main очереди! |
+
 <a name="многопоточность-uikit"></a>
 
 # Как многопоточность работает с UIKit?
@@ -948,11 +963,59 @@ Atomic – thread safe.
 
 # Можно ли отменить операцию в GCD? А в NSOperationQueue?
 
-To suspend a dispatch queue, it's simply `dispatch_suspend(queue)` or `queue.suspend()` in Swift 3. That doesn't affect any tasks currently running, but merely prevents new tasks from starting on that queue. Also, you obviously only suspend queues that you created (not global queues, not main queue). To resume a dispatch queue, it's `dispatch_resume(queue)` or `queue.resume()`. There's no concept of "auto resume", so you'd just have to manually resume it when appropriate.
+__GCD (Grand Central Dispatch)__
 
-In terms of canceling tasks queued on dispatch queues, this is a new feature of iOS 8 and you'd call `dispatch_block_cancel(block)` with your `dispatch_block_t`. This cancels queued blocks/items that have not started, but does not stop ones that are underway. If you want to be able to interrupt a dispatched block/item, you have to periodically examine `dispatch_block_testcancel()` or `item.isCancelled` in Swift 3.
+•	GCD не поддерживает полноценную отмену задач после их запуска.
 
-If you want to cancel tasks, you might also consider using operation queues, `NSOperationQueue`. It also supports constraining the degree of concurrency with `maxConcurrentOperationCount` (whereas with dispatch queues you can only choose between serial and concurrent, and controlling concurrency more than that requires a tiny bit of effort on your part). If using operation queues, you suspend and resume by changing the suspended property of the queue. And to pass it around, you just pass the `NSOperationQueue` object you instantiated.
+•	Можно использовать DispatchWorkItem, у которого есть методы:
+
+•	.cancel() — отменяет блок до его выполнения.
+
+•	.isCancelled — проверяется внутри блока для ручной отмены.
+
+•	Нельзя отменить уже выполняющийся async-блок.
+
+•	Приостановка (suspend/resume) возможна только для пользовательских очередей, не для .main или глобальных.
+
+```swift
+let workItem = DispatchWorkItem {
+    if workItem.isCancelled { return }
+    print("Работа началась")
+}
+
+DispatchQueue.global().async(execute: workItem)
+
+// Позднее...
+workItem.cancel()
+```
+
+__NSOperationQueue (или OperationQueue в Swift)__
+
+Поддерживает:
+
+•	.cancelAllOperations() — отмена всех операций в очереди.
+
+•	.cancel() — отмена конкретной Operation.
+
+•	Класс Operation (или BlockOperation) имеет флаг isCancelled, который можно проверять в коде.
+
+•	Очередь можно приостановить с помощью queue.isSuspended = true.
+
+•	Можно задавать зависимости между операциями и контролировать их выполнение.
+
+```swift
+let queue = OperationQueue()
+let operation = BlockOperation {
+    if operation.isCancelled { return }
+    print("Операция выполняется")
+}
+
+queue.addOperation(operation)
+
+// Позднее...
+operation.cancel()
+```
+
 
 <a name="gcd-vs-nsoperationqueue"></a>
 
@@ -961,6 +1024,20 @@ If you want to cancel tasks, you might also consider using operation queues, `NS
 `NSOperationQueue` can be more suitable for long-running operations that may need to be cancelled or have complex dependencies.
 
 GCD dispatch queues are better for short tasks that should have minimum performance and memory overhead.
+
+| Возможность                     | GCD (`DispatchQueue`)                      | NSOperationQueue (`OperationQueue`)          |
+|---------------------------------|--------------------------------------------|----------------------------------------------|
+| Отмена до начала выполнения     | ✅ `DispatchWorkItem.cancel()`             | ✅ `operation.cancel()`                       |
+| Отмена во время выполнения      | ✅ Только вручную через `isCancelled`      | ✅ При проверке `isCancelled` внутри блока    |
+| Приостановка очереди            | ✅ `queue.suspend()` (только custom)       | ✅ `queue.isSuspended = true`                 |
+| Возобновление очереди           | ✅ `queue.resume()`                        | ✅ `queue.isSuspended = false`                |
+| Ограничение параллелизма        | ⚠️ Только serial/concurrent                | ✅ `maxConcurrentOperationCount`              |
+| Задание приоритета (QoS)        | ✅ `DispatchQoS` при создании очереди      | ✅ `qualityOfService`                         |
+| Зависимости между задачами      | ❌                                          | ✅ `addDependency()`                          |
+| Повторное использование         | ⚠️ Только вручную через блоки              | ✅ Через наследование от `Operation`          |
+| Проверка отмены в задаче        | ✅ `isCancelled` у `DispatchWorkItem`      | ✅ `isCancelled` у `Operation`                |
+| Асинхронная операция со статусами | ❌ Нет                                   | ✅ Да (isExecuting, isFinished)              |
+
 
 <a name="gcd-vs-async-await"></a>
 
