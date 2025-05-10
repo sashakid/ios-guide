@@ -284,6 +284,8 @@ A pixel on iOS is the full resolution of the device, which means if I have an im
 It also provides a standard system of measurement on iOS devices because no matter how the pixel density chanes, there have always been 320x480 points on an iPhone screen and 768x1024 points on an iPad screen.*
 But at the same time, you can basically disregard the documentation considering that retina devices were introduced with iOS 4 at a minimum, and I don't know of too many people still running iOS 3 on a newer iPhone. But if such a case arises, your UIImage would need to be rendered at exactly twice it's dimensions in pixels on a retina iPhone to make up for the pixel density difference.
 
+https://www.ios-resolution.com
+
 <a name="файловая-система-ios"></a>
 ## Файловая система iOS
 <img src="https://github.com/sashakid/ios-guide/blob/master/Images/file_system.png">
