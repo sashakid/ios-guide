@@ -1,8 +1,8 @@
 - [Swift](#swift)
   - [Сlosures and functions](#сlosures-and-functions)
   - [How Do I Declare a Closure in Swift?](#how-do-i-declare-a-closure-in-swift)
-  - [autoclosure]()
-  - [escaping vs nonescaping]()
+  - [autoclosure](#autoclosure)
+  - [escaping vs nonescaping](#escaping-vs-nonescaping)
   - [Что такое capture list?](#что-такое-capture-list)
   - [Optional](#optional)
   - [Memory management](#memory-management)
@@ -17,8 +17,11 @@
     - [Чем отличается Generic от Protocol?](#чем-отличается-generic-от-protocol)
   - [Difference between Array VS NSArray VS \[AnyObject\]](#difference-between-array-vs-nsarray-vs-anyobject)
   - [Objective-C id is Swift Any or AnyObject](#objective-c-id-is-swift-any-or-anyobject)
+  - [5 уровней доступа](#5-уровней-доступа-access-control-levels)
   - [Metod Dispatching](#metod-dispatching)
   - [Какие бывают анимации?](#какие-бывают-анимации)
+  - [Таблица атрибутов Swift](#таблица-атрибутов-swift)
+  - [@objc vs @dynamic](#objc-vs-dynamic)
   - [Что такое Sendable?](#что-такое-sendable)
   - [Разница между map, compactMap и flatMap?](#разница-между-map-compactmap-и-flatmap)
   - [RxSwift](#rxswift)
@@ -30,7 +33,7 @@
 - Multi-paradigm: protocol-oriented, object-oriented, functional, imperative, block structured
 - Designed by Chris Lattner and Apple Inc.
 - First appeared: June 2, 2014
-- Stable release: 6.0 / 16 Sep 24
+- Stable release: 6.1 / MARCH 31, 2025
 - Typing discipline: Static, strong, inferred
 - OS: Darwin, Linux, FreeBSD
 - Influenced by C#, CLU, D, Haskell, Objective-C, Python, Ruby, Rust
@@ -1017,6 +1020,38 @@ Once a Generic becomes complete (e.g. `Array<String>`) it is a fully concrete ty
 
 > As part of its interoperability with Objective-C, Swift offers convenient and efficient ways of working with Cocoa frameworks. Swift automatically converts some Objective-C types to Swift types, and some Swift types to Objective-C types. Types that can be converted between Objective-C and Swift are referred to as bridged types. Anywhere you can use a bridged Objective-C reference type, you can use the Swift value type instead. This lets you take advantage of the functionality available on the reference type’s implementation in a way that is natural in Swift code. For this reason, you should almost never need to use a bridged reference type directly in your own code. In fact, when Swift code imports Objective-C APIs, the importer replaces Objective-C reference types with their corresponding value types. Likewise, when Objective-C code imports Swift APIs, the importer also replaces Swift value types with their corresponding Objective-C reference types.
 
+## 5 уровней доступа (access control levels)
+
+| Уровень доступа | Видимость                                | Особенности                                                        | Где используется               |
+|-----------------|-------------------------------------------|---------------------------------------------------------------------|--------------------------------|
+| `open`          | Любой модуль                              | Можно **наследовать** и **переопределять**                         | Только классы и их методы      |
+| `public`        | Любой модуль                              | Можно использовать, но **нельзя переопределять** вне модуля        | API библиотек                  |
+| `internal`      | Только текущий модуль (по умолчанию)      | Стандартное поведение, не требует явного указания                  | Внутри приложений              |
+| `fileprivate`   | Только текущий файл                       | Делит доступ между типами в одном файле                             | Когда несколько типов в файле  |
+| `private`       | Только внутри текущего типа или extension | Максимальная защита, даже между типами в одном файле нет доступа   | Инкапсуляция внутри типа       |
+
+```swift
+open class Animal {           // можно наследовать вне модуля
+    open func speak() {}
+}
+
+public class Vehicle {        // можно использовать, но нельзя наследовать вне модуля
+    public var speed = 0
+}
+
+internal struct Person {      // виден только внутри модуля
+    var name: String
+}
+
+fileprivate class Helper {    // доступна только в этом файле
+    func doSomething() {}
+}
+
+private class Logger {        // доступна только в этом типе / extension
+    func log() {}
+}
+```
+
 ## Metod Dispatching
 
  Method Dispatch is how a program selects which instructions to execute when invoking a method. It’s something that happens every time a method is called, and not something that you tend to think a lot about.
@@ -1313,6 +1348,99 @@ animator.startAnimation()
 ```
 
 Worth noting is that you can actually use UIView.animate and UIView.animateKeyframes from within your UIViewPropertyAnimator animations blocks, should you feel the need to use both.
+
+## Таблица атрибутов Swift
+
+| Атрибут             | Назначение                                                                 | Пример использования                          |
+|---------------------|----------------------------------------------------------------------------|-----------------------------------------------|
+| `@available`        | Указывает доступность API для платформ и версий                            | `@available(iOS 14, *)`                       |
+| `@discardableResult`| Позволяет игнорировать возвращаемое значение функции без предупреждения    | `@discardableResult func save() -> Bool`      |
+| `@objc`             | Делает Swift-элемент доступным для Objective-C                             | `@objc func greet()`                          |
+| `@nonobjc`          | Исключает элемент из экспорта в Objective-C                                | `@nonobjc func internalLogic()`               |
+| `@objcMembers`      | Автоматически применяет `@objc` ко всем членам класса                      | `@objcMembers class MyClass: NSObject`        |
+| `@escaping`         | Указывает, что замыкание может быть вызвано после выхода из функции        | `func fetchData(completion: @escaping () -> Void)` |
+| `@autoclosure`      | Автоматически преобразует выражение в замыкание                            | `func assert(_ condition: @autoclosure () -> Bool)` |
+| `@inlinable`        | Позволяет встроить реализацию функции в другие модули                      | `@inlinable public func compute()`            |
+| `@inline(__always)` | Принудительно встраивает функцию при компиляции                            | `@inline(__always) func fastPath()`           |
+| `@inline(never)`    | Запрещает встраивание функции при компиляции                               | `@inline(never) func slowPath()`              |
+| `@frozen`           | Фиксирует ABI структуры или перечисления для стабильности бинарного интерфейса | `@frozen public struct Config`            |
+| `@usableFromInline` | Делает элемент доступным для встраивания внутри модуля                     | `@usableFromInline internal func helper()`    |
+| `@dynamicCallable`  | Позволяет объекту вызываться как функция                                   | `@dynamicCallable struct PythonObject`        |
+| `@dynamicMemberLookup` | Позволяет доступ к членам объекта через динамические имена             | `@dynamicMemberLookup struct JSON`            |
+| `@propertyWrapper`  | Объявляет обертку свойства                                                 | `@propertyWrapper struct Capitalized`         |
+| `@resultBuilder`    | Объявляет построитель результатов для DSL                                   | `@resultBuilder struct HTMLBuilder`           |
+| `@main`             | Указывает точку входа в программу                                          | `@main struct AppEntry`                       |
+| `@UIApplicationMain`| Указывает точку входа в iOS-приложение                                     | `@UIApplicationMain class AppDelegate`        |
+| `@NSApplicationMain`| Указывает точку входа в macOS-приложение                                   | `@NSApplicationMain class AppDelegate`        |
+| `@testable`         | Позволяет модулю тестов получить доступ к `internal` элементам другого модуля | `@testable import MyModule`               |
+| `@IBInspectable`    | Делает свойство настраиваемым в Interface Builder                          | `@IBInspectable var cornerRadius: CGFloat`    |
+| `@IBDesignable`     | Позволяет отрисовывать кастомные компоненты в Interface Builder            | `@IBDesignable class CustomView: UIView`      |
+| `@IBOutlet`         | Связывает свойство с элементом интерфейса в Interface Builder              | `@IBOutlet weak var label: UILabel!`          |
+| `@IBAction`         | Связывает метод с действием интерфейса в Interface Builder                 | `@IBAction func buttonTapped(_ sender: UIButton)` |
+| `@GKInspectable`    | Делает свойство настраиваемым в редакторе SpriteKit                        | `@GKInspectable var speed: Float`             |
+| `@NSCopying`        | Обеспечивает копирование значения при присваивании                         | `@NSCopying var name: NSString`               |
+| `@NSManaged`        | Указывает, что свойство управляется Core Data                              | `@NSManaged var title: String?`               |
+| `@objcAttribute`    | Указывает специфичные атрибуты для Objective-C                             | `@objcAttribute var identifier: String`       |
+| `@convention(c)`    | Указывает C-совместимое соглашение о вызовах для функций                   | `let cFunc: @convention(c) () -> Void`        |
+| `@convention(block)`| Указывает соглашение о вызовах для Objective-C блоков                      | `let block: @convention(block) () -> Void`    |
+| `@convention(swift)`| Указывает стандартное Swift соглашение о вызовах                           | `let swiftFunc: @convention(swift) () -> Void`|
+| `@unknown`          | Обрабатывает неизвестные случаи в `switch` для перечислений                | `@unknown default:`                           |
+| `@_cdecl`           | Экспортирует функцию с C-совместимым именем                                | `@_cdecl("c_function") func swiftFunc()`      |
+| `@_silgen_name`     | Устанавливает имя функции на уровне SIL                                    | `@_silgen_name("custom_name") func swiftFunc()` |
+| `@_transparent`     | Помечает функцию как прозрачную для оптимизации                            | `@_transparent func optimizedFunc()`          |
+| `@_dynamicReplacement(for:)` | Заменяет реализацию метода во время выполнения (динамически)  | `@_dynamicReplacement(for: originalMethod) func newMethod()` |
+| `@_specialize`      | Указывает компилятору создать специализированную версию функции            | `@_specialize(where T == Int) func genericFunc<T>(value: T)` |
+| `@_alwaysEmitIntoClient` | Встраивает реализацию функции в клиентский модуль                    | `@_alwaysEmitIntoClient public func helper()` |
+
+• Атрибуты с префиксом _ (например, @_cdecl, @_silgen_name) являются внутренними и могут измениться в будущих версиях Swift. Их использование следует ограничивать случаями, когда это действительно необходимо, и с пониманием возможных последствий.
+
+• Атрибуты, связанные с Objective-C (@objc, @nonobjc, @objcMembers) обеспечивают совместимость и взаимодействие между Swift и Objective-C, что важно при разработке приложений, использующих оба языка.
+
+• Атрибуты для Interface Builder (@IBOutlet, @IBAction, @IBInspectable, @IBDesignable) облегчают интеграцию кода с визуальным редактором интерфейсов в Xcode.
+
+• Атрибуты, связанные с производительностью и оптимизацией (@inlinable, @inline(__always), @inline(never), @frozen, @usableFromInline) позволяют более точно контролировать поведение компилятора и оптимизацию кода.
+
+## @objc vs @dynamic
+
+Разница между @objc и @dynamic в Swift — в назначении и области применения. Оба связаны с Objective-C runtime, но используют его по-разному.
+
+🟢 @objc
+
+Назначение: Делает Swift-элемент (метод, свойство, класс и т.д.) доступным для Objective-C runtime.
+
+Зачем нужно:
+
+• Чтобы метод/свойство мог быть вызван через Objective-C (например, селектором в #selector()).
+
+• Чтобы использовать @IBAction, @IBOutlet, таймеры, target-action, KVO и т.п.
+
+```swift
+@objc class MyClass: NSObject {
+    @objc func tapped() {
+        print("Button tapped")
+    }
+}
+```
+Без @objc вы не сможете вызвать метод через Objective-C, например, передать в #selector(tapped).
+___
+
+🟡 @dynamic
+
+Назначение: Указывает, что геттер/сеттер свойства не будут генерироваться компилятором, а будут разрешаться динамически во время выполнения через Objective-C runtime.
+
+Зачем нужно:
+
+• Используется, например, с Core Data и KVO, где доступ к свойствам происходит динамически.
+
+• Компилятор не будет генерировать getter/setter — вы обязаны предоставить реализацию в runtime (обычно Objective-C делает это сам).
+
+```swift
+@objc class Person: NSObject {
+    @objc dynamic var name: String = ""
+}
+```
+Это нужно, чтобы KVO могла подписаться на изменения свойства name.
+
 
 ## Что такое Sendable?
 
