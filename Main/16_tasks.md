@@ -721,48 +721,65 @@ D1 (userInteractive)
 ## Задача на диспетчеризацию
 
 ```swift
+// MARK: - Протокол
+protocol Speaker {
+    func speak()
+}
+
+// MARK: - Базовый класс
 class Animal {
     func speak() {
         print("Animal speaks")
     }
 }
 
-// ✅ Dog переопределяет метод speak
+// ✅ DogOverriding переопределяет метод speak
 class DogOverriding: Animal {
     override func speak() {
         print("DogOverriding barks")
     }
 }
 
-// 🚫 Dog НЕ переопределяет, а просто объявляет метод с таким же именем
+// 🚫 DogHiding НЕ переопределяет метод, а просто определяет свой
 class DogHiding: Animal {
     func speak() {
         print("DogHiding barks")
     }
 }
 
-print("== Переопределение (override) ==")
+// ✅ DogProtocol реализует протокол Speaker
+class DogProtocol: Speaker {
+    func speak() {
+        print("DogProtocol barks")
+    }
+}
+
+print("== VTABLE (override) ==")
 let dog1 = DogOverriding()
 dog1.speak()                          // DogOverriding barks
+                                      // ✅ dynamic dispatch via vtable
 
 let animal1: Animal = DogOverriding()
-animal1.speak()                       // DogOverriding barks (динамическая диспетчеризация)
+animal1.speak()                       // DogOverriding barks
+                                      // ✅ dynamic dispatch via vtable
 
-print("== Сокрытие (method hiding) ==")
+print("== DIRECT DISPATCH (method hiding) ==")
 let dog2 = DogHiding()
 dog2.speak()                          // DogHiding barks
+                                      // 🚫 static dispatch (direct call)
 
 let animal2: Animal = DogHiding()
-animal2.speak()                       // Animal speaks (статическая диспетчеризация)
-```
+animal2.speak()                       // Animal speaks
+                                      // 🚫 static dispatch (direct call)
 
-```
-== Переопределение (override) ==
-DogOverriding barks
-DogOverriding barks
-== Сокрытие (method hiding) ==
-DogHiding barks
-Animal speaks
+print("== PROTOCOL WITNESS TABLE ==")
+let dog3 = DogProtocol()
+dog3.speak()                          // DogProtocol barks
+                                      // ✅ direct call (тип известен, не через протокол)
+
+let speaker: Speaker = DogProtocol()
+speaker.speak()                       // DogProtocol barks
+                                      // ✅ dynamic dispatch via Protocol Witness Table
 ```
 
 ## ❗ Почему `method hiding` — плохая идея
@@ -786,3 +803,4 @@ Animal speaks
 > **Никогда не скрывай методы родителя, если можешь этого избежать.**
 >
 > Используй `override`, если хочешь переопределить поведение.
+
