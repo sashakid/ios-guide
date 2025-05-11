@@ -22,6 +22,7 @@
   - [Какие бывают анимации?](#какие-бывают-анимации)
   - [Таблица атрибутов Swift](#таблица-атрибутов-swift)
   - [@objc vs @dynamic](#objc-vs-dynamic)
+  - [Использование Swift в Objective-C и наоборот](#использование-swift-в-objective-c-и-наоборот)
   - [Что такое Sendable?](#что-такое-sendable)
   - [Разница между map, compactMap и flatMap?](#разница-между-map-compactmap-и-flatmap)
   - [RxSwift](#rxswift)
@@ -1441,6 +1442,83 @@ ___
 ```
 Это нужно, чтобы KVO могла подписаться на изменения свойства name.
 
+## Использование Swift в Objective-C и наоборот
+
+__Использование Swift в Objective-C__
+
+Условия:
+
+• Класс Swift должен наследоваться от NSObject.
+
+• Класс, методы и свойства должны быть помечены @objc и быть public или open.
+
+• Проект должен использовать Objective-C Bridging Header и Generated Interface Header (ProjectName-Swift.h).
+
+```swift
+// in Swift
+import Foundation
+
+@objc class Greeter: NSObject {
+    @objc func sayHello(name: String) -> String {
+        return "Hello, \(name)!"
+    }
+}
+```
+```objectivec
+// in ObjC
+#import "YourProjectName-Swift.h"
+
+Greeter *greeter = [[Greeter alloc] init];
+NSString *message = [greeter sayHelloWithName:@"Alex"];
+NSLog(@"%@", message);
+```
+
+__Использование Objective-C в Swift__
+
+Условия:
+
+• В вашем проекте должен быть Bridging Header.
+
+• В него нужно импортировать .h файлы, которые вы хотите использовать.
+
+```objectivec
+// in ObjC
+
+// MyObjCHelper.h
+#import <Foundation/Foundation.h>
+
+@interface MyObjCHelper : NSObject
+- (NSString *)welcomeUser:(NSString *)name;
+@end
+
+// MyObjCHelper.m
+#import "MyObjCHelper.h"
+
+@implementation MyObjCHelper
+- (NSString *)welcomeUser:(NSString *)name {
+    return [NSString stringWithFormat:@"Welcome, %@!", name];
+}
+@end
+```
+
+Bridging Header (YourProject-Bridging-Header.h):
+```objectivec
+// in ObjC
+#import "MyObjCHelper.h"
+```
+
+```swift
+// in Swift
+let helper = MyObjCHelper()
+let message = helper.welcomeUser("Alex")
+print(message)
+```
+
+| Направление            | Что нужно                          | Ограничения и условия                     |
+|------------------------|-------------------------------------|-------------------------------------------|
+| **Swift → Objective-C** | `@objc`, `NSObject`, public/open     | Не поддерживает generics, enums, structs |
+| **Objective-C → Swift** | Bridging Header                      | Всё, что в .h — доступно в Swift         |
+| **Общее**              | Только классы, протоколы, методы     | Нет поддержки Swift struct, enum, generic напрямую |
 
 ## Что такое Sendable?
 
