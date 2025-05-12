@@ -500,7 +500,145 @@ In MVVM there is no Presenter. Instead the View binds directly to a Presentation
 - "__P__", Presenter: contains view logic for preparing content for display (as received from the Interactor) and for reacting to user inputs (by requesting new data from the Interactor).
 - "__E__", Entity: contains basic model objects used by the Interactor.
 - "__R__", Routing: contains navigation logic for describing which screens are shown in which order.
+
 <img src="https://github.com/sashakid/ios-guide/blob/master/Images/viper.png">
+
+___
+Простой пример:
+```
+Welcome/
+├── WelcomeEntity.swift
+├── WelcomeInteractor.swift
+├── WelcomePresenter.swift
+├── WelcomeRouter.swift
+├── WelcomeViewController.swift
+└── WelcomeProtocols.swift
+```
+
+WelcomeEntity.swift
+```swift
+struct WelcomeMessage {
+    let title: String
+}
+```
+WelcomeProtocols.swift
+```swift
+import UIKit
+
+// View <-> Presenter
+protocol WelcomeViewProtocol: AnyObject {
+    func show(message: WelcomeMessage)
+}
+
+protocol WelcomePresenterProtocol: AnyObject {
+    func viewDidLoad()
+}
+
+// Presenter <-> Interactor
+protocol WelcomeInteractorInputProtocol: AnyObject {
+    func fetchWelcomeMessage()
+}
+
+protocol WelcomeInteractorOutputProtocol: AnyObject {
+    func didFetch(message: WelcomeMessage)
+}
+
+// Presenter <-> Router
+protocol WelcomeRouterProtocol: AnyObject {
+    static func createModule() -> UIViewController
+}
+```
+WelcomeInteractor.swift
+```swift
+final class WelcomeInteractor: WelcomeInteractorInputProtocol {
+    weak var presenter: WelcomeInteractorOutputProtocol?
+
+    func fetchWelcomeMessage() {
+        let message = WelcomeMessage(title: "Привет, VIPER!")
+        presenter?.didFetch(message: message)
+    }
+}
+```
+WelcomePresenter.swift
+```swift
+final class WelcomePresenter: WelcomePresenterProtocol {
+    weak var view: WelcomeViewProtocol?
+    var interactor: WelcomeInteractorInputProtocol?
+    var router: WelcomeRouterProtocol?
+
+    func viewDidLoad() {
+        interactor?.fetchWelcomeMessage()
+    }
+}
+
+extension WelcomePresenter: WelcomeInteractorOutputProtocol {
+    func didFetch(message: WelcomeMessage) {
+        view?.show(message: message)
+    }
+}
+```
+WelcomeRouter.swift
+```swift
+import UIKit
+
+final class WelcomeRouter: WelcomeRouterProtocol {
+    static func createModule() -> UIViewController {
+        let view = WelcomeViewController()
+        let presenter = WelcomePresenter()
+        let interactor = WelcomeInteractor()
+        let router = WelcomeRouter()
+
+        view.presenter = presenter
+
+        presenter.view = view
+        presenter.interactor = interactor
+        presenter.router = router
+
+        interactor.presenter = presenter
+
+        return view
+    }
+}
+```
+WelcomeViewController.swift
+```swift
+import UIKit
+
+final class WelcomeViewController: UIViewController {
+    var presenter: WelcomePresenterProtocol?
+
+    private let label: UILabel = {
+        let label = UILabel()
+        label.textAlignment = .center
+        label.font = UIFont.systemFont(ofSize: 24, weight: .medium)
+        label.translatesAutoresizingMaskIntoConstraints = false
+        return label
+    }()
+
+    override func viewDidLoad() {
+        super.viewDidLoad()
+        view.backgroundColor = .white
+        view.addSubview(label)
+
+        NSLayoutConstraint.activate([
+            label.centerXAnchor.constraint(equalTo: view.centerXAnchor),
+            label.centerYAnchor.constraint(equalTo: view.centerYAnchor)
+        ])
+
+        presenter?.viewDidLoad()
+    }
+}
+
+extension WelcomeViewController: WelcomeViewProtocol {
+    func show(message: WelcomeMessage) {
+        label.text = message.title
+    }
+}
+```
+В AppDelegate или SceneDelegate:
+```swift
+window.rootViewController = WelcomeRouter.createModule()
+```
 
 <a name="redux"></a>
 
