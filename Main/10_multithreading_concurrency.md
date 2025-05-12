@@ -142,6 +142,109 @@ Is used to refer to a separate path of execution of tasks.
 Inside each program, however, exists always one (Main Thread) or more threads of execution, which can be used to perform different tasks simultaneously or in a nearly simultaneous manner. The system itself actually manages these threads of execution, scheduling them to run on the available cores and preemptively interrupting them as needed to allow other threads to run. The threads we’ve been talking about so far have been `software threads`. They’re (generally) independent units of computation. The `hardware threads` are based on the number of cores on the computer. A `hardware thread` is a physical CPU or core. So, a 4 core CPU can genuinely support 4 `hardware threads` at once - the CPU really is doing 4 things at the same time.
 After starting a thread, the thread runs in one of three main states: `running`, `ready`, or `blocked`. If a thread is `not currently running`, it is either `blocked` and waiting for input or it is `ready` to run but not scheduled to do so yet. The thread continues moving back and forth among these states until it finally exits and moves to the terminated state. When you create a new thread, you must specify an entry-point function for that thread. This entry-point function constitutes the code you want to run on the thread. When the function returns, or when you terminate the thread explicitly, the thread stops permanently and is reclaimed by the system. Because threads are relatively expensive to create in terms of memory and time, it is therefore recommended that your entry point function do a significant amount of work or set up a `run loop` to allow for recurring work to be performed.
 
+Общая структура: Software vs Hardware Threads
+
+<img src="https://github.com/sashakid/ios-guide/blob/master/Images/thread1.png">
+
+🔄 Как работает планировщик и context switch
+
+Context switch (переключение контекста) — это процесс, при котором ОС:
+
+1.	Сохраняет состояние текущего потока (регистры, стек, счетчик инструкций и т.д.)
+
+2.	Загружает состояние следующего потока
+
+3.	CPU продолжает выполнение другого потока
+
+📉 Пример: 10 software threads на 1 hardware thread
+
+<img src="https://github.com/sashakid/ios-guide/blob/master/Images/thread2.png">
+
+•	Только один софтварный поток работает в момент времени.
+
+•	Остальные — в очереди или в ожидании.
+
+•	Планировщик ОС через короткие интервалы переключает потоки.
+
+•	Это создает иллюзию параллелизма, хотя в реальности всё по очереди.
+
+💡 Краткий вывод:
+
+•	Да, много софтварных потоков могут использовать один хардварный поток — просто по очереди.
+
+•	Context switch позволяет делить время между ними, но это не бесплатно: он требует времени и ресурсов.
+
+•	Чем больше переключений — тем выше нагрузка на CPU и кеши.
+
+___
+
+__Зачем тогда создавать много софтварных тредов если в итоге они работают один за одним и задачи выполняются одна за одной?__
+
+✅ 1. Ожидание (waiting) — не блокирует CPU
+
+Многие потоки не заняты вычислениями, а ждут:
+
+•	сеть (запрос к серверу)
+
+•	диск (чтение файла)
+
+•	пользовательский ввод
+
+•	блокировки (mutex, semaphore)
+
+❗ Когда поток ждет, он не занимает CPU, и ОС может дать время другим потокам.
+
+➡ Это позволяет эффективно использовать процессор: пока один ждет, другие работают.
+
+✅ 2. Параллелизм на многоядерных CPU
+
+Если есть несколько hardware threads (например, 8 ядер), то несколько потоков действительно работают одновременно.
+
+➡ Чем больше потоков, тем выше шанс загрузить все ядра.
+
+✅ 3. Изоляция задач
+
+•	Разные потоки могут обслуживать разные клиенты, задачи, сервисы.
+
+•	Потоки — удобный способ изолировать выполнение: каждый поток — своя “мини-программа”.
+
+```
+Thread 1 — загрузка данных из сети
+Thread 2 — парсинг JSON
+Thread 3 — обновление UI
+Thread 4 — логгирование
+```
+
+✅ 4. Планировщик ОС сам управляет — не надо самому
+
+•	Потоки абстрагируют от ручного управления временем.
+
+•	Ты просто создаешь потоки, а ОС уже решает, когда и как их запускать.
+
+⸻
+
+✅ 5. Потоки — основа многих библиотек и фреймворков
+
+•	GCD, OperationQueue, async/await — всё это под капотом использует потоки.
+
+•	Даже если ты не создаешь их напрямую — они всё равно есть.
+
+⸻
+
+🔥 Краткий вывод:
+
+Создание множества потоков полезно, потому что:
+
+•	они ждут, не занимая CPU
+
+•	используют многоядерность
+
+•	разделяют логику приложения
+
+•	делают код проще и реактивнее
+
+•	ОС эффективно ими управляет
+
 __process__
 
 Is used to refer to a running executable, which can encompass multiple threads. It keeps track of what needs to be done and delegates the tasks to the threads. A process can have one or multiple threads. The process is like a project manager and the thread is like a worker.
