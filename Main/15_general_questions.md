@@ -1328,81 +1328,231 @@ There are two kinds of closures, non-escaping and escaping. Non-escaping closure
 
 ## Что происходит, когда юзер нажимает на UIButton на экране?
 
-__Understanding cocoa and cocoa touch responder chain__
+__📦 Общая архитектура событий в iOS__
 
-Applications in cocoa and cocoa touch have an event queue associated to them, this event queue will be filled with events from multiple sources. In order to handle the stream of event, each application maintain an event run loop that accepts and dispatches events in a FIFO order. When an application is launched the call to `UIApplicationMain` will create a `UIApplication` singleton object, this object will be responsible for handling and dispatching the events the system sends to the app events queue.
+Приложения в iOS (на базе Cocoa Touch) используют очередь событий. События поступают от разных источников:
 
-The application will receive events from sources as:
+•	пользовательские (тапы, свайпы, движения устройства),
 
-- UIControl Actions: these are the actions that are registered using the action/target pattern
-- User events: Events from user such as touches, shakes, motion, etc…
-- System events: Such as low memory, rotation, etc…
+•	системные (низкий заряд памяти, поворот экрана),
 
-Each of these events will be handled and processed by the application singleton before being dispatched to the appropriate receivers.
+•	действия от UIControl (например, UIButton).
 
-__UIControl Actions__
+Каждое приложение имеет run loop, который работает по принципу FIFO — «первым пришёл, первым обработан». Запуск приложения начинается с вызова UIApplicationMain, который создаёт синглтон UIApplication. Он обрабатывает события из очереди и отправляет их нужным объектам.
 
-`UIControl` actions are the action that are added to a control by calling the `addTarget:action:forControlEvents:` method, the `UIControl` will keep record of all the action/target pairs that have been added to it. When a user perform an event on a control, or when a `UIControl` calls `sendActionsForControlEvents` function, the action related to that control event will be sent to the registered target.
+___
 
-Lets take an example:
+__🎯 UIControl Actions (например, кнопки)__
 
-```objectivec
-UIButton button = [UIButton new];
-[button addTarget:self action:@selector(buttonTapped) forControlEvents:UIControlEventTouchUpInside];
+Когда ты добавляешь таргет к кнопке:
+
+```swift
+let button = UIButton()
+button.addTarget(self, action: #selector(buttonTapped), for: .touchUpInside)
 ```
 
-When the user taps on this button, an event will be dispatched to the `UIApplication` (using a `UIControl` internal copy of `sendActionsForControlEvents`), the application will read this action from its event queue and dispatch it in `UIApplication sendAction:to:from:forEvent:` function, the base implementation of that method will call the action on the registered target, the target will receive `buttonTapped` method in this case.
+Система сохраняет эту пару target/action. Когда пользователь нажимает кнопку:
 
-If we specify nil for the target:
+1.	Кнопка вызывает sendActions(for: .touchUpInside)
 
-```objectivec
-[button addTarget:nil action:@selector(buttonTapped) forControlEvents:UIControlEventTouchUpInside];
+2.	UIKit вызывает:
+
+```swift
+UIApplication.shared.sendAction(#selector(buttonTapped), to: target, from: sender, for: event)
 ```
 
-In this case the base implementation of `sendAction:to:from:forEvent` will send the `buttonTapped` selector to the current first responder. If the first responder does not implement that action (`buttonTapped` in our example), then it will be send to the next responder, the system will keep trying to find a valid responder in the responder chain, until there are no more responders in the chain. in that case this action will be dropped. Using this knowledge we can send an action to the first responder by calling `sendAction:to:from:forEvent` on the `UIApplication` singleton and passing nil as the target. For example we can send `resignFirstResponder` to the first responder and hence resign the keyboard by doing:
+3.	Метод buttonTapped вызывается у объекта-таргета.
 
-```objectivec
-[[UIApplication sharedApplication] sendAction:@selector(resignFirstResponder) to:nil from:nil forEvent:nil];
+❓ А если target = nil?
+
+```swift
+button.addTarget(nil, action: #selector(buttonTapped), for: .touchUpInside)
 ```
 
-__User Events__
+Система тогда ищет подходящего обработчика в цепочке респондера (responder chain), начиная с первого респондера.
 
-User events such as touches and device motion will be sent to the application event queue, if the user event is anything but a touch then the application will dispatch the call to the first responder, if the first responder couldn’t handle it, the system will follow the responder chain to find an appropriate responder.
+Пример: убрать клавиатуру у текущего UITextField:
 
-For touch events the flow is different: when the system detects a touch on the screen it will send this touch to the application, the application will receive the touch event in its `_touchesEvent` internal method. The application will then forward this event using `sendEvent` to the `UIWindow`, the window upon receiving this event start the process of hit-testing the views in order to find the one that received this touch. UIView’s `hitTest:withEvent` will be used to find the view that is under the touch, the implementation of hit-test will check if the touch is within the view bounds, by calling `pointInside:withEvent:` in each view. `hitTest` and `pointInside` will be called recursively until it reaches a top most leaf view. this view will be used as the first responder for the touch event. `UIWindow` will then send the touch events to this view.
+```swift
+UIApplication.shared.sendAction(#selector(UIResponder.resignFirstResponder), to: nil, from: nil, for: nil)
+```
+___
+__👆 Пользовательские события (тапы и прочее)__
 
-```objectivec
-- (void)touchesBegan:(NSSet *)touches withEvent:(UIEvent *)event;
-- (void)touchesMoved:(NSSet *)touches withEvent:(UIEvent *)event;
-- (void)touchesEnded:(NSSet *)touches withEvent:(UIEvent *)event;
-- (void)touchesCancelled:(NSSet *)touches withEvent:(UIEvent *)event;
+Если это не касание (например, встряска), оно отправляется первому респонденту, который может обработать его.
+
+А вот тапы и свайпы обрабатываются иначе:
+
+1.	Система фиксирует касание.
+
+2.	UIApplication получает событие и вызывает sendEvent(_:).
+
+3.	UIWindow начинает hit-test — процесс поиска вьюхи, на которую попала точка касания.
+
+___
+
+__🔍 Как работает hitTest__
+
+UIWindow вызывает hitTest(_:with:) у своего root view. Далее:
+
+```swift
+override func hitTest(_ point: CGPoint, with event: UIEvent?) -> UIView? {
+    if !isUserInteractionEnabled || isHidden || alpha < 0.01 {
+        return nil
+    }
+
+    if !point(inside: point, with: event) {
+        return nil
+    }
+
+    for subview in subviews.reversed() {
+        let convertedPoint = subview.convert(point, from: self)
+        if let hitView = subview.hitTest(convertedPoint, with: event) {
+            return hitView
+        }
+    }
+
+    return self
+}
 ```
 
-When an event is send to a view, this view has three choices:
+Что делает point(inside:with:)?
 
-1. Since the UIResponder base implementation of the four methods above forwards the event to the next responder, then if the view doesn’t implement a method of them, this method will be forwarded to the next responder.
-2. A view can implement any method from the above, do some processing, and then call super in order to let the next responder do some additional process.
-3. A view can implement any method from the above and choose to not forward the event to the next responder.
+Он проверяет, попала ли точка внутрь bounds вью:
 
-If the view chooses to not handle a touch event, then it will be sent up the responder chain, which will follow this path:
+```swift
+override func point(inside point: CGPoint, with event: UIEvent?) -> Bool {
+    return bounds.contains(point)
+}
+```
 
-- The first responder is the hit-tested view (the view under the touch)
-- Next responder is its super view
-- The chain continues up the view hierarchy until it reaches a view that is associated with a view controller
-- That view controller will be the next responder
-- If this view controller is a root controller, then the window will be the next responder
-- The application is the window’s next responder
-- The last responder in the chain is the App delegate
+Зачем convert(point, from:)?
+
+Каждая вью имеет свою систему координат. Чтобы сравнивать точку с subview, нужно перевести её в координаты этой подвью:
+
+```swift
+let convertedPoint = subview.convert(point, from: self)
+```
 
 <img src="https://github.com/sashakid/ios-guide/blob/master/Images/hittest.png">
 
-__System Events__
+___
+🧩 Обработка касания
 
-The system will send events to the application singleton, these system related events will be received by the application singleton and dispatched to the App delegate. The app delegate in turn will receive the events and handle them.
+Когда вью найдена, она становится first responder для touch-событий, и получает:
 
-The first responder
+```swift
+override func touchesBegan(_ touches: Set<UITouch>, with event: UIEvent?) {}
+override func touchesMoved(_ touches: Set<UITouch>, with event: UIEvent?) {}
+override func touchesEnded(_ touches: Set<UITouch>, with event: UIEvent?) {}
+override func touchesCancelled(_ touches: Set<UITouch>, with event: UIEvent?) {}
+```
 
-Any `UIResponder` can opt to become the first responder by receiving or calling the `becomeFirstResponder` method, the first responder will be given the chance to act upon user events when they are received. The touch events however will not be sent to the first responder, these events are sent to the view found by doing a recursive hit-test.
+Если вью не реализует нужный метод, он будет передан вверх по иерархии:
+
+•	сначала супервью,
+
+•	затем ViewController,
+
+•	потом UIWindow,
+
+•	потом UIApplication,
+
+•	и наконец AppDelegate.
+
+___
+
+__📶 Responder Chain (Цепочка респондера)__
+
+Цепочка респондера — это путь, по которому iOS ищет объект, способный обработать событие:
+
+```
+hit-tested view
+  → superview
+    → UIViewController
+      → UIWindow
+        → UIApplication
+          → AppDelegate
+```
+
+___
+🛠 Пример кастомной вьюхи
+
+```swift
+class TouchableView: UIView {
+    @IBInspectable var name: String = "Unnamed View"
+
+    override func point(inside point: CGPoint, with event: UIEvent?) -> Bool {
+        if super.point(inside: point, with: event) {
+            return true
+        }
+
+        for subview in subviews {
+            let convertedPoint = subview.convert(point, from: self)
+            if subview.point(inside: convertedPoint, with: event) {
+                return true
+            }
+        }
+
+        return false
+    }
+
+    override func hitTest(_ point: CGPoint, with event: UIEvent?) -> UIView? {
+        let result = super.hitTest(point, with: event)
+        if result != nil {
+            print("\(name) passed touch to \(type(of: result!))")
+        }
+        return result
+    }
+
+    override func touchesBegan(_ touches: Set<UITouch>, with event: UIEvent?) {
+        print("Tapped view: \(name)")
+    }
+}
+```
+___
+
+🧠 Итого
+
+•	UIApplication управляет потоком событий.
+
+•	UIControl может напрямую направить действие в target или через цепочку респондера.
+
+•	Для touch система делает hit-testing — вызывает hitTest и point(inside:).
+
+•	Координаты касания переводятся через convert(point, from:), т. к. у каждой вью — своя система координат.
+
+•	Если вью не обрабатывает событие, оно идет вверх по цепочке респондера.
+
+```
+[UIApplication] ← события от iOS
+       ↓
+[UIWindow]
+       ↓  hitTest
+[RootView]
+       ↓
+[Subview1]
+       ↓
+[Subview2] ← нашлась!
+       ↓
+ [touchesBegan]
+
+если не обработала → responder chain:
+
+[Subview2]
+   ↑
+[Subview1]
+   ↑
+[RootView]
+   ↑
+[ViewController]
+   ↑
+[UIWindow]
+   ↑
+[UIApplication]
+   ↑
+[AppDelegate]
+```
 
 <https://habr.com/ru/post/584100/>
 
