@@ -723,66 +723,125 @@ D1 (userInteractive)
 ## Задача на диспетчеризацию
 
 ```swift
-// MARK: - Протокол
+// MARK: - Протокол с requirement
 protocol Speaker {
-    func speak()
+    func speak() // Это requirement — будет участвовать в PWT
 }
 
-// MARK: - Базовый класс
+// MARK: - Extension к протоколу Speaker
+extension Speaker {
+    func shout() {
+        print("Speaker shouts (extension, не requirement, поэтому не попадает в PWT)")
+    }
+}
+
+// MARK: - Пустой протокол без requirements
+protocol Listener {} // Нет ни одного метода в протоколе
+
+// MARK: - Extension к пустому протоколу Listener
+extension Listener {
+    func listen() {
+        print("Listener listens (extension-only method, не доступен через Listener)")
+    }
+}
+
+// MARK: - Базовый класс с виртуальными методами
 class Animal {
     func speak() {
-        print("Animal speaks")
+        print("Animal speaks") // виртуальный метод, попадает в vtable
+    }
+
+    func eat() {
+        print("Animal eats") // виртуальный метод, может быть переопределён
     }
 }
 
-// ✅ DogOverriding переопределяет метод speak
-class DogOverriding: Animal {
+// MARK: - Extension к Animal
+extension Animal {
+    func sleep() {
+        print("Animal sleeps (extension method, не попадает в vtable)")
+    }
+}
+
+// MARK: - Подкласс с override методов
+class Dog: Animal {
     override func speak() {
-        print("DogOverriding barks")
+        print("Dog barks (override — dynamic dispatch через vtable)")
+    }
+
+    override func eat() {
+        print("Dog eats (override — dynamic dispatch через vtable)")
+    }
+
+    func run() {
+        print("Dog runs (новый метод, static dispatch)")
     }
 }
 
-// 🚫 DogHiding НЕ переопределяет метод, а просто определяет свой
+// MARK: - Подкласс с hiding (метод с тем же именем, но не override)
 class DogHiding: Animal {
     func speak() {
-        print("DogHiding barks")
+        print("DogHiding barks (method hiding — это НЕ override, будет static dispatch)")
     }
 }
 
-// ✅ DogProtocol реализует протокол Speaker
-class DogProtocol: Speaker {
+// MARK: - Класс, реализующий протокол Speaker
+class Parrot: Speaker {
     func speak() {
-        print("DogProtocol barks")
+        print("Parrot talks (реализация requirement — участвует в PWT)")
     }
 }
 
-print("== VTABLE (override) ==")
-let dog1 = DogOverriding()
-dog1.speak()                          // DogOverriding barks
-                                      // ✅ dynamic dispatch via vtable
+// MARK: - Структура, реализующая пустой протокол Listener
+struct MyListener: Listener {} // Не реализует listen() явно
 
-let animal1: Animal = DogOverriding()
-animal1.speak()                       // DogOverriding barks
-                                      // ✅ dynamic dispatch via vtable
+// MARK: - Использование
 
-print("== DIRECT DISPATCH (method hiding) ==")
-let dog2 = DogHiding()
-dog2.speak()                          // DogHiding barks
-                                      // 🚫 static dispatch (direct call)
+// ==== Dynamic dispatch через vtable ====
+let dog = Dog()
+dog.speak()    // вызов переопределенного метода → dynamic dispatch (vtable)
+dog.eat()      // тоже override → dynamic dispatch (vtable)
+dog.sleep()    // метод из extension → static dispatch (не в vtable)
+dog.run()      // обычный метод → static dispatch
+
+// ==== Animal-ссылка на Dog ====
+let animal: Animal = Dog()
+animal.speak() // вызов переопределенного метода → dynamic dispatch (vtable)
+animal.eat()   // dynamic dispatch
+animal.sleep() // extension method → static dispatch (компилятор подставит напрямую)
+
+// ==== Hiding — НЕ переопределение ====
+let hiding = DogHiding()
+hiding.speak() // static dispatch — метод вызывается напрямую
 
 let animal2: Animal = DogHiding()
-animal2.speak()                       // Animal speaks
-                                      // 🚫 static dispatch (direct call)
+animal2.speak() // вызов родительского метода, НЕ переопределён → dynamic dispatch, но вызовется Animal.speak()
 
-print("== PROTOCOL WITNESS TABLE ==")
-let dog3 = DogProtocol()
-dog3.speak()                          // DogProtocol barks
-                                      // ✅ direct call (тип известен, не через протокол)
+// ==== Protocol witness table ====
+let parrot = Parrot()
+parrot.speak() // direct call — тип известен компилятору, без PWT
 
-let speaker: Speaker = DogProtocol()
-speaker.speak()                       // DogProtocol barks
-                                      // ✅ dynamic dispatch via Protocol Witness Table
+let speaker: Speaker = parrot
+speaker.speak() // dynamic dispatch через PWT
+speaker.shout() // static dispatch — метод из extension, не requirement
+
+// ==== Extension-only method в пустом протоколе ====
+let myListener = MyListener()
+myListener.listen() // OK — тип известен, static dispatch
+
+let listener: Listener = MyListener()
+// listener.listen() // ❌ Ошибка — метод не является requirement, нет в PWT
 ```
+
+🧠 Ключевые моменты:
+
+•	✅ Методы, помеченные override, вызываются через vtable (dynamic dispatch).
+
+•	❌ Методы, определённые в extension, не участвуют в vtable или PWT — вызываются только при известном типе (static dispatch).
+
+•	❌ Если протокол не содержит requirement, его методы не видны через протокольную ссылку.
+
+•	❗ method hiding — это НЕ override, поэтому при обращении через родительский тип вызывается базовая версия метода.
 
 ## ❗ Почему `method hiding` — плохая идея
 
