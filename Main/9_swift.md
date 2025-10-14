@@ -7,6 +7,9 @@
   - [Коллекции в Swift](#коллекции-в-swift)
   - [Optional](#optional)
   - [Memory management](#memory-management)
+    - [Understanding srong, weak and unowned](#understanding-srong-weak-and-unowned)
+    - [Introducing Side Tables](#introducing-side-tables)
+    - [Swift Object Life Cycle](#swift-object-life-cycle)
     - [ValueType vs. ReferenceType](#valuetype-vs-referencetype)
     - [What is copy on write mechanism](#what-is-copy-on-write-mechanism)
   - [Что такое протокол-ориентированное программирование? (POP)](#что-такое-протокол-ориентированное-программирование-pop)
@@ -795,7 +798,9 @@ Memory management is the process of controlling program’s memory. Memory manag
 
 The essence of Swift memory management is: Swift preserves an object if it is strongly referenced and deallocates it otherwise. The rest is just an implementation detail.
 
-__Understanding Strong, Weak and Unowned__
+### Understanding srong, weak and unowned
+
+Поскольку Swift целиком наследует ARC от Objective-C, более подробно можно почитать здесь [Automatic Reference Counting](8_objectivec.md#automatic-reference-counting).
 
 The purpose of a strong reference is to keep an object alive. Strong referencing might result in several non-trivial problems:
 
@@ -812,7 +817,7 @@ __Defining Swift Runtime__
 
 The mechanism of ARC is implemented in a library called Swift Runtime. It implements such core features as the runtime type system, including dynamic casting, generics, and protocol conformance registration. Swift Runtime represents every dynamically allocated object with `HeapObject` struct. It contains all the pieces of data which make up an object in Swift: reference counts and type metadata. Internally every Swift object has three reference counts: one for each kind of reference. At the SIL generation phase, swift compiler inserts calls to the methods `swift_retain()` and `swift_release()`, wherever it’s appropriate. This is done by intercepting initialization and destruction of HeapObjects. Compilation is one of the steps of Xcode Build System. If you are an old school Objective-C programmer and wonder where is autorelease, then I have some news for you: there is no such thing for pure Swift objects. Now let’s move on to the weak references. The way they are implemented is closely connected with the concept of side tables.
 
-__Introducing Side Tables__
+### Introducing Side Tables
 
 Side tables are mechanism for implementing Swift weak references. Typically objects don’t have any weak references, hence it is wasteful to reserve space for weak reference count in every object. This information is stored externally in side tables, so that it can be allocated only when it’s really needed. Instead of directly pointing to an object, weak reference points to the side table, which in its turn points to the object. This solves two problems: saves memory for weak reference count, until an object really needs it; allows to safely zero out weak reference, since it does not directly point to an object, and no longer a subject to race conditions. Side table is just a reference count + a pointer to an object. They are declared in Swift Runtime as follows (C++ code):
 
@@ -823,8 +828,7 @@ class HeapObjectSideTableEntry {
   // Operations to increment and decrement reference counts
 }
 ```
-
-__Swift Object Life Cycle__
+### Swift Object Life Cycle
 
 Swift objects have their own life cycle, represented by a finite state machine on the figure below. Square brackets indicate a condition that triggers transition from state to state.
 
