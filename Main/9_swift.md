@@ -38,7 +38,7 @@
 - Multi-paradigm: protocol-oriented, object-oriented, functional, imperative, block structured
 - Designed by Chris Lattner and Apple Inc.
 - First appeared: June 2, 2014
-- Stable release: 6.1 / MARCH 31, 2025
+- Stable release: 6.2 / September 15, 2025
 - Typing discipline: Static, strong, inferred
 - OS: Darwin, Linux, FreeBSD
 - Influenced by C#, CLU, D, Haskell, Objective-C, Python, Ruby, Rust
@@ -802,14 +802,14 @@ The essence of Swift memory management is: Swift preserves an object if it is st
 
 Поскольку Swift целиком наследует ARC от Objective-C, более подробно можно почитать здесь [Automatic Reference Counting](8_objectivec.md#automatic-reference-counting).
 
-The purpose of a strong reference is to keep an object alive. Strong referencing might result in several non-trivial problems:
+The purpose of a `strong` reference is to keep an object alive. Strong referencing might result in several non-trivial problems:
 
 - Retain cycles. Considering that Swift language is not cycle-collecting, a reference R to an object which holds a strong reference to the object R (possibly indirectly), results in a reference cycle. We must write lots of boilerplate code to explicitly break the cycle.
 - It is not always possible to make strong references valid immediately on object construction, e.g. with delegates.
 
-Weak references address the problem of back references. An object can be destroyed if there are weak references pointing to it. A weak reference returns nil, when an object it points to is no longer alive. This is called `zeroing`.
+`weak` references address the problem of back references. An object can be destroyed if there are weak references pointing to it. A weak reference returns nil, when an object it points to is no longer alive. This is called `zeroing`.
 
-Unowned references are different flavor of weak, designed for tight validity invariants. Unowned references are `non-zeroing`. When trying to read a non-existent object by an unowned reference, a program will crash with assertion error. They are useful to track down and fix consistency bugs.
+`unowned` references are different flavor of weak, designed for tight validity invariants. Unowned references are `non-zeroing`. When trying to read a non-existent object by an unowned reference, a program will crash with assertion error. They are useful to track down and fix consistency bugs.
 
 > `unowned(safe)` is a non-owning reference that asserts on access that the object is still alive. It's sort of like a `weak` optional reference that's implicitly unwrapped with `x!` every time it's accessed. `unowned(unsafe)` is like `__unsafe_unretained` in ARC—it's a non-owning reference, but there's no runtime check that the object is still alive on access, so dangling references will reach into garbage memory.  `unowned` is always a synonym for `unowned(safe)` currently, but the intent is that it will be optimized to `unowned(unsafe)` in `-Ofast` builds when runtime checks are disabled.
 

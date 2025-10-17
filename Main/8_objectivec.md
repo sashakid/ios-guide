@@ -6,8 +6,9 @@
   - [Память в стеке и в куче](#память-в-стеке-и-в-куче)
   - [Manual retain-release](#manual-retain-release)
   - [Automatic Reference Counting](#automatic-reference-counting)
-  - [Модификаторы](#модификаторы)
   - [Что такое property?](#что-такое-property)
+  - [Модификаторы](#модификаторы)
+    - [Strong & Weak simple explanation](#strong--weak-simple-explanation)
   - [Написать сеттер и геттер для свойства, с ARC и без](#написать-сеттер-и-геттер-для-свойства-с-arc-и-без)
   - [В каких случаях лучше использовать strong, а в каких copy для NSString? Почему?](#в-каких-случаях-лучше-использовать-strong-а-в-каких-copy-для-nsstring-почему)
   - [`autorelease` vs `release`?](#autorelease-vs-release)
@@ -434,6 +435,12 @@ ARC only works with retainable object pointers (ROPs). There are three kinds of 
 
 All other pointer types, such as `char *` and CF objects such as `CFStringRef`, are not ARC compatible. If you use pointers that aren’t handled by ARC, you’ll have to manage them yourself. That’s OK, because ARC interoperates with manually managed memory.
 
+<a name="что-такое-property"></a>
+
+## Что такое property?
+
+Упрощенный способ для определения и создания методов доступа, обращающихся к существующим переменным экземплярам. Классы, которые подставляют переменные экземпляра, могут использовать обозначение свойства вместо того, чтобы использовать синтаксис getter и setter.
+
 <a name="модификаторы"></a>
 
 ## Модификаторы
@@ -468,7 +475,7 @@ __Для свойств__
 `strong` (ARC)
 это синоним для `retain`
 - it says "keep this in the heap until I don't point to it anymore"
-- in other words "I'am the owner, you cannot dealloc this before aim fine with that same as re-tain"
+- in other words "I'am the owner, you cannot dealloc this before aim fine with that same as retain"
 - you use strong only if you need to retain the object.
 - by default all instance variables and local variables are strong pointers.
 - we generally use strong for `UIViewController` (UI item's parents)
@@ -485,10 +492,6 @@ __Для свойств__
 
 `unsafe_unretained` (по умолчанию)
 всегда используется для свойств, содержащих необъектные значения. Что делать, если вы хотите использовать механизм ARC в более старых операционных системах, в которых обнуляемые слабые ссылки недоступны? Компания Apple предлагает использовать ключевое слово `__unsafe_unretained` и атрибут `unsafe_unretained`, которые сообщают механизму ARC, что указанная ссылка является слабой.
-
-_Strong & Weak Explanation_
-
-_It may be helpful to think about strong and weak references in terms of balloons. A balloon will not fly away as long as at least one person is holding on to a string attached to it. The number of people holding strings is the retain count. When no one is holding on to a string, the ballon will fly away (dealloc). Many people can have strings to that same balloon. You can get/set properties and call methods on the referenced object with both strong and weak references. A strong reference is like holding on to a string to that balloon. As long as you are holding on to a string attached to the balloon, it will not fly away. A weak reference is like looking at the balloon. You can see it, access it's properties, call it's methods, but you have no string to that balloon. If everyone holding onto the string lets go, the balloon flies away, and you cannot access it anymore._
 
 __Для переменных__
 
@@ -553,13 +556,11 @@ __Weak: "keep this as long as someone else points to it strongly"__
 _`weakObject` doesn't point to `<some_object>`.
 The result is that `<some_object>` is not deallocated, but `weakObject` will be the `nil` pointer._
 
-_[Note that all that is assuming `<some_object>` is not pointed to by another strong reference somewhere else / some other means of being "held"]_
+> Note that all that is assuming `<some_object>` is not pointed to by another strong reference somewhere else / some other means of being "held"
 
-<a name="что-такое-property"></a>
+### Strong & Weak simple explanation
 
-## Что такое property?
-
-Упрощенный способ для определения и создания методов доступа, обращающихся к существующим переменным экземплярам. Классы, которые подставляют переменные экземпляра, могут использовать обозначение свойства вместо того, чтобы использовать синтаксис getter и setter.
+_It may be helpful to think about strong and weak references in terms of balloons. A balloon will not fly away as long as at least one person is holding on to a string attached to it. The number of people holding strings is the retain count. When no one is holding on to a string, the ballon will fly away (dealloc). Many people can have strings to that same balloon. You can get/set properties and call methods on the referenced object with both strong and weak references. A strong reference is like holding on to a string to that balloon. As long as you are holding on to a string attached to the balloon, it will not fly away. A weak reference is like looking at the balloon. You can see it, access it's properties, call it's methods, but you have no string to that balloon. If everyone holding onto the string lets go, the balloon flies away, and you cannot access it anymore._
 
 <a name="написать-сеттер-и-геттер"></a>
 
