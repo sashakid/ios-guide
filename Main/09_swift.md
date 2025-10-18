@@ -29,6 +29,7 @@
   - [@objc vs @dynamic](#objc-vs-dynamic)
   - [Использование Swift в Objective-C и наоборот](#использование-swift-в-objective-c-и-наоборот)
   - [Что такое Sendable?](#что-такое-sendable)
+    - [Разница между Sendable и Actor](#разница-между-sendable-и-actor)
   - [Разница между map, compactMap и flatMap?](#разница-между-map-compactmap-и-flatmap)
   - [RxSwift](#rxswift)
   - [SwiftUI](#swiftui)
@@ -1974,6 +1975,20 @@ func runLater(_ completionHandler: @escaping @Sendable () -> Void) -> Void {
     DispatchQueue.global().asyncAfter(deadline: .now() + 3, execute: completionHandler)
 }
 ```
+
+### Разница между Sendable и Actor
+
+|  | **Sendable** | **Actor** |
+|---|---|---|
+| Что это | **Протокол**, гарантирующий, что тип *уже безопасен* для передачи между потоками | **Тип контейнера**, который *сам обеспечивает* потокобезопасность своего состояния |
+| Кто отвечает за безопасность | Сам тип (ты, как автор типа) | Система Swift (runtime + синтаксис `await`) |
+| Когда работает | При *копировании / передаче* значения в другую задачу | При *одновременном доступе* к общему состоянию |
+| Семантика | "Безопасно передать" | "Безопасно использовать" |
+| Типичная форма | `struct`, `enum`, `class` без shared state | `actor` (специальный reference type) |
+| Что гарантирует | Нет общей изменяемой памяти (value semantics) | Изоляцию изменяемого состояния (actor isolation) |
+| Пример аналогии | immutable данные (копии) | изолированный монитор с локом (actor model) |
+| Где возникает ошибка без него | При передаче значения в `Task.detached` или между задачами | При одновременном доступе к общим данным без синхронизации |
+| Кто применяет | Ты сам (через `Sendable`) | Компилятор Swift автоматически |
 
 ## Разница между map, compactMap и flatMap?
 
