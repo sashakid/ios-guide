@@ -11,6 +11,7 @@
     - [Introducing Side Tables](#introducing-side-tables)
     - [Swift Object Life Cycle](#swift-object-life-cycle)
     - [ValueType vs. ReferenceType](#valuetype-vs-referencetype)
+        - [Когда value type хранится в куче, и когда reference type хранится в стеке?](#когда-value-type-хранится-в-куче-и-когда-reference-type-хранится-в-стеке)
     - [What is copy on write mechanism](#what-is-copy-on-write-mechanism)
   - [Что такое протокол-ориентированное программирование? (POP)](#что-такое-протокол-ориентированное-программирование-pop)
     - [Generics](#generics)
@@ -951,6 +952,68 @@ Since all reference types require reference counting, increasing the amount of p
 However, value types do not naturally have a reference count. If your value type contains inner references, copying it will require increasing the reference count of it's children instead - not the first, not the second, but literally every single one of them.
 
 <img src="https://github.com/sashakid/ios-guide/blob/master/Images/mixed_memory.png">
+
+#### Когда value type хранится в куче, и когда reference type хранится в стеке?
+
+value type (struct / enum) в куче
+
+1.	Он захвачен замыканием. Замыкание (closure) живёт в куче, поэтому все захваченные значения (в том числе структуры) туда копируются.
+
+```swift
+struct Point { var x, y: Int }
+
+func makeClosure() -> () -> Void {
+    let p = Point(x: 10, y: 20)
+    return { print(p.x) } // p попадает в кучу!
+}
+```
+
+2. Он является частью reference type (класса). Если структура — свойство класса, то она будет храниться в куче вместе с экземпляром класса.
+
+```swift
+struct Point { 
+    var x, y: Int 
+}
+
+class Shape { 
+    var position = Point(x: 0, y: 0) // position в куче
+} 
+```
+
+3.	Он слишком большой или используется не локально. Компилятор может вынести value type в кучу, если:
+
+•	структура слишком велика, чтобы копировать её в стек,
+
+•	она используется вне области текущего стека (например, возвращается из функции, замыкается и т.д.).
+
+Это решает оптимизатор — ты 
+
+```swift
+struct Huge { 
+    var data = [Int](repeating: 0, count: 10_000) 
+}
+
+func make() -> Huge { 
+    Huge() // может быть выделен в куче
+} 
+```
+
+___
+
+reference type (class) в стеке
+
+Теоретически, объекты классов почти всегда в куче, но бывают исключения из-за оптимизаций:
+1.	Escape analysis (анализ “утечек” ссылок). Если компилятор видит, что объект класса не покидает функцию (то есть не возвращается, не сохраняется в глобальных переменных, не передаётся в другие функции), он может вложить его прямо в стек. Это не гарантировано, но Swift (через LLVM) может сделать такую оптимизацию.
+
+```swift
+class Temp { var x = 0 }
+
+func foo() {
+    let t = Temp()
+    t.x = 42
+    // t не уходит из функции, компилятор может разместить его в стеке
+}
+```
 
 ### What is copy on write mechanism
 
