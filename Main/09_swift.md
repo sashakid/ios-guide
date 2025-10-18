@@ -800,7 +800,7 @@ The essence of Swift memory management is: Swift preserves an object if it is st
 
 ### Understanding srong, weak and unowned
 
-Поскольку Swift целиком наследует ARC от Objective-C, более подробно можно почитать здесь [Automatic Reference Counting](8_objectivec.md#automatic-reference-counting).
+Поскольку Swift целиком наследует ARC от Objective-C, более подробно можно почитать здесь [Automatic Reference Counting](08_objectivec.md#automatic-reference-counting).
 
 The purpose of a `strong` reference is to keep an object alive. Strong referencing might result in several non-trivial problems:
 
