@@ -34,6 +34,7 @@
   - [RxSwift](#rxswift)
   - [SwiftUI](#swiftui)
   - [Combine](#combine)
+  - [Metal и шейдеры](#metal-и-шейдеры)
 
 # Swift
 
@@ -2261,4 +2262,91 @@ let subscription = NotificationCenter.default
     .debounce(for: .milliseconds(500), scheduler: RunLoop.main)
     .receive(on: RunLoop.main)
     .assign(to:\MyViewModel.filterString, on: myViewModel)
+```
+
+## Metal и шейдеры
+
+Metal в iOS — это низкоуровневый графический API (программный интерфейс приложения) и фреймворк для параллельных вычислений, разработанный Apple. Он позволяет разработчикам напрямую обращаться к графическому процессору (GPU) для создания высокопроизводительных 3D-графики и вычислений, что приводит к более быстрой и плавной работе приложений, особенно в играх и приложениях, обрабатывающих изображения и видео в реальном времени. 
+Metal состоит из двух уровней:
+
+1.	Metal API (Swift/Obj-C код): Ты создаёшь `MTLDevice`, `MTLCommandQueue`, пайплайны, ресурсы (текстуры, буферы) и отправляешь команды GPU.
+	
+2.	Metal Shading Language (MSL): Это язык шейдеров — очень похож на C++. Здесь ты пишешь код, который работает внутри GPU.
+
+Шейдер — это маленькая программа, которая запускается на видеокарте, а не на процессоре. Её задача — очень быстро выполнить одно и то же действие много раз: для каждой вершины, каждого пикселя или для набора данных.
+
+Проще всего представить так: Шейдер — как «мини-функция» внутри GPU, который умеет запускать тысячи одинаковых операций параллельно. Шейдер — это инструкция, что именно нужно делать с каждым элементом.
+
+Какие бывают: 
+
+- Vertex shader: Берёт точки 3D-модели и говорит GPU, где их рисовать на экране.
+
+- Fragment (pixel) shader: Считает цвет каждого пикселя: какой он будет, яркость, тень, отражение, блеск и т. д.
+
+- Compute shader: Просто вычисления на GPU: матрицы, эффекты, фильтры.
+
+Пример на пальцах: 
+
+Допустим, ты хочешь, чтобы картинка была чёрно-белой.
+Тогда шейдер получает пиксель → применяет формулу → отдаёт обновлённый пиксель.
+И GPU делает это для миллионов пикселей одновременно.
+
+Примеры:
+
+Vertex shader — обрабатывает вершины. Берёт координату вершины и просто возвращает её на экран.
+
+```c++
+#include <metal_stdlib>
+using namespace metal;
+
+struct Vertex {
+    float2 position;
+};
+
+vertex float4 simpleVertexShader(uint vertexID [[vertex_id]],
+                                 const device Vertex* vertices [[buffer(0)]]) {
+    float2 pos = vertices[vertexID].position;
+    return float4(pos, 0.0, 1.0);
+}
+```
+
+Fragment shader — считает цвет пикселя. Каждый пиксель будет красным.
+
+```c++
+#include <metal_stdlib>
+using namespace metal;
+
+fragment float4 simpleFragmentShader() {
+    return float4(1.0, 0.0, 0.0, 1.0); // красный пиксель
+}
+```
+
+Compute shader — вычисления на GPU. Берёт массив чисел и прибавляет к каждому элементу +1 параллельно.
+
+```c++
+#include <metal_stdlib>
+using namespace metal;
+
+kernel void addOne(device float* data [[buffer(0)]],
+                   uint id [[thread_position_in_grid]]) {
+    data[id] += 1.0;
+}
+```
+
+Как подключить на свифте:
+
+```swift
+let library = device.makeDefaultLibrary()!
+let vertex = library.makeFunction(name: "simpleVertexShader")!
+let fragment = library.makeFunction(name: "simpleFragmentShader")!
+
+let descriptor = MTLRenderPipelineDescriptor()
+descriptor.vertexFunction = vertex
+descriptor.fragmentFunction = fragment
+descriptor.colorAttachments[0].pixelFormat = .bgra8Unorm
+
+let pipeline = try device.makeRenderPipelineState(descriptor: descriptor)
+
+let computeFunc = library.makeFunction(name: "addOne")!
+let computePipeline = try device.makeComputePipelineState(function: computeFunc)
 ```

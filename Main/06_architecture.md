@@ -9,9 +9,11 @@
 		- [MVVM](#mvvm)
 			- [What is the difference between MVC, MVP, MVVM?](#what-is-the-difference-between-mvc-mvp-mvvm)
 		- [VIPER](#viper)
-		- [Redux](#redux)
 		- [VIP](#vip)
 			- [VIP vs VIPER](#vip-vs-viper)
+        - [Redux](#redux)
+        - [TCA](#tca)
+            - [TCA vs Redux](#tca-vs-redux)
 		- [SOAP](#soap)
 	- [Порождающие шаблоны](#порождающие-шаблоны)
 		- [Abstract factory](#abstract-factory)
@@ -640,28 +642,6 @@ extension WelcomeViewController: WelcomeViewProtocol {
 window.rootViewController = WelcomeRouter.createModule()
 ```
 
-<a name="redux"></a>
-
-### Redux
-
-As mentioned above Redux is a JS library for managing application state and making the application UI responsive based on the state. It follows a central principle that data binding should flow in one direction and should be stored as a single source of truth. The Redux architecture consists of building blocks that can be implemented in Swift using observation protocols in a very simple and straightforward fashion.
-
-<img src="https://github.com/sashakid/ios-guide/blob/master/Images/redux.png">
-
-1. State: Based on your state you render your UI or respond in any form. So basically state refers to the source of truth.
-2. Action: Actions are payloads or simply objects of information, that captures from the application via any kind of events such as touch events, network API responses etc,.
-3. Reducer: A Reducer is a function that takes the current state from the store, and the action. It combines the action and current state together and returns the new state.
-4. Store: Store holds the state. Store receives the action and passes on to the reducer and gets the updated state and passes on to the subscribers. It is important to note that you will only have a single store in an application. If you want to split your data handling logic, you will use reducer composition i.e using many reducers instead of many stores.
-5. View: View subscribes to the state changes from the store.
-
-__Advantages of Redux pattern__
-
-So the main reason I was self-forced to explore the redux pattern is due to the simplicity and predictability the pattern offers.
-Once very important use case is when building SOLID UI components, transferring the control actions like button click, table row selection to the root object using delegates or closures is very cumbersome making the code base complicated and heavy when communication is happening over many layers. Using Notifications is also not a good idea for larger apps as they are not very traceable causing to debug issues related to application flow and control can be very difficult. So redux pattern fits best in this use case.
-Redux pattern also allows for data binding as it follows observer design pattern, so we do data binding also using this pattern. However in the example that I am going to show I’ll be showing the control transfer of user events from the low level child UI object to the parent root object.
-
-<https://github.com/ReSwift/ReSwift>
-
 <a name="vip"></a>
 
 ### VIP
@@ -695,6 +675,58 @@ VIP and VIPER have the same basic components, but the data flow is different. Al
 <img src="https://github.com/sashakid/ios-guide/blob/master/Images/vip_vs_viper.png">
 
 In VIPER, the presenter directs data between the view and the interactor. The view and interactor don’t talk with each other.
+
+<a name="redux"></a>
+
+### Redux
+
+As mentioned above Redux is a JS library for managing application state and making the application UI responsive based on the state. It follows a central principle that data binding should flow in one direction and should be stored as a single source of truth. The Redux architecture consists of building blocks that can be implemented in Swift using observation protocols in a very simple and straightforward fashion.
+
+<img src="https://github.com/sashakid/ios-guide/blob/master/Images/redux.png">
+
+1. State: Based on your state you render your UI or respond in any form. So basically state refers to the source of truth.
+2. Action: Actions are payloads or simply objects of information, that captures from the application via any kind of events such as touch events, network API responses etc,.
+3. Reducer: A Reducer is a function that takes the current state from the store, and the action. It combines the action and current state together and returns the new state.
+4. Store: Store holds the state. Store receives the action and passes on to the reducer and gets the updated state and passes on to the subscribers. It is important to note that you will only have a single store in an application. If you want to split your data handling logic, you will use reducer composition i.e using many reducers instead of many stores.
+5. View: View subscribes to the state changes from the store.
+
+__Advantages of Redux pattern__
+
+So the main reason I was self-forced to explore the redux pattern is due to the simplicity and predictability the pattern offers.
+Once very important use case is when building SOLID UI components, transferring the control actions like button click, table row selection to the root object using delegates or closures is very cumbersome making the code base complicated and heavy when communication is happening over many layers. Using Notifications is also not a good idea for larger apps as they are not very traceable causing to debug issues related to application flow and control can be very difficult. So redux pattern fits best in this use case.
+Redux pattern also allows for data binding as it follows observer design pattern, so we do data binding also using this pattern. However in the example that I am going to show I’ll be showing the control transfer of user events from the low level child UI object to the parent root object.
+
+<https://github.com/ReSwift/ReSwift>
+
+### TCA
+
+<img src="https://github.com/sashakid/ios-guide/blob/master/Images/tca.png">
+
+UI — пользователь
+
+Action — набор допустимых действий
+
+State — состояние
+
+Environment — набор внешних сервисов
+
+Reducer — механизм, выполняющий работу по изменению состояния и порождающий эффекты
+
+Effect — задача, по завершению которой возвращается action в reducer
+
+<https://github.com/pointfreeco/swift-composable-architecture>
+
+#### TCA vs Redux
+
+1.	Redux — это паттерн. Им можно пользоваться где угодно, реализаций куча.
+
+2.	TCA — это конкретная реализация + набор инструментов, заточенный под Swift.
+
+3.	Устройство эффектов в TCA намного богаче. В Redux сайд-эффекты решают через Saga/Thunk/Observable и т.д.
+
+4.	Композиция и тесты в TCA встроены, в Redux — вручную.
+
+5.	Управление зависимостями в TCA встроено в сам фреймворк, аналогов в классическом Redux нет.
 
 <a name="soap"></a>
 
