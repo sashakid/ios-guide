@@ -114,7 +114,7 @@ general responsibility assignment software patterns / общие шаблоны 
 
 Шаблон определяет базовый принцип распределения ответственностей: Ответственность должна быть назначена тому, кто владеет максимумом необходимой информации для исполнения — информационному эксперту.
 
-2. Создатель (Creator
+2. Создатель (Creator)
 
 Класс должен создавать экземпляры тех классов, которые он может:
 
@@ -1193,11 +1193,12 @@ NSNotificationCenter *notificationCenter = [NSNotificationCenter defaultCenter];
 ### Chain of responsibility
 
 Responder (ответчик) – объект, который может реагировать на события и обрабатывать их.
+
 `responderObject : UIResponder; // or NSResponder in MacOS`
 
 <img src="https://github.com/sashakid/ios-guide/blob/master/Images/responder_chain.png">
 
-Цепочка ответственности позволяет вам передавать объекте по цепочке объектов-обработчиков, пока не будет найден необходимый объект обработчик.
+Цепочка ответственности позволяет вам передавать объекты по цепочке объектов-обработчиков, пока не будет найден необходимый объект обработчик.
 
 ```
 First responder -> next responder -> …

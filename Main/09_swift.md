@@ -1667,7 +1667,7 @@ class Lion: Animal {
 
 __@nonobjc__
 
-The @nonobjc keyword does alter the method dispatch. It can be used to disable `Message Dispatc`h and to make the method invisible for Objective-C runtime. It seems there is no difference between `@nonobjc` and `final`, so using final makes code more clear
+The `@nonobjc` keyword does alter the method dispatch. It can be used to disable `Message Dispatch` and to make the method invisible for Objective-C runtime. It seems there is no difference between `@nonobjc` and `final`, so using final makes code more clear
 
 __@objc final__
 
@@ -1967,7 +1967,7 @@ func printScore() async {
 }
 ```
 
-В данном примере действие, которое мы передаем в инициализатор `Task`, по умолчанию помечено как `@Sendable`. Данный атрибут позволяет выполнять задачи параллельно в разных потоках. А это возможно благодаря тому, что, что свойство score, в теле блока замыкания `Task`, является константой. Если бы свойство score было переменной, то доступ к ней могла бы получить одна из задач, в то время как другая может менять значение этой переменной.
+В данном примере действие, которое мы передаем в инициализатор `Task`, по умолчанию помечено как `@Sendable`. Данный атрибут позволяет выполнять задачи параллельно в разных потоках. А это возможно благодаря тому, что свойство score, в теле блока замыкания `Task`, является константой. Если бы свойство score было переменной, то доступ к ней могла бы получить одна из задач, в то время как другая может менять значение этой переменной.
 
 Атрибутом `@Sandable` можно помечать и свои собственный функции и замыкания:
 

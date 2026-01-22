@@ -3,9 +3,6 @@
 - [Реализуйте следующие методы: retain, release, autorelease](#реализуйте-следующие-методы-retain-release-autorelease)
 - [Выведется ли в дебагер Hello world? Почему?](#выведется-ли-в-дебагер-hello-world-почему)
 - [Что выведется в консоль?](#что-выведется-в-консоль)
-- [Задача про банерокрутилку](#задача-про-банерокрутилку)
-- [Задача на регулярное выражение](#задача-на-регулярное-выражение)
-- [Метод, возвращающий N наиболее часто встречающихся слов во входной строке](#метод-возвращающий-n-наиболее-часто-встречающихся-слов-во-входной-строке)
 - [Перечислите все проблемы, которые вы видите в приведенном ниже коде. Предложите, как их исправить](#перечислите-все-проблемы-которые-вы-видите-в-приведенном-ниже-коде-предложите-как-их-исправить)
 - [Заполнить строку буквами А, чтобы не делать миллионы итераций](#заполнить-строку-буквами-а-чтобы-не-делать-миллионы-итераций)
 - [Написать процедуру, инвертирующую массив символов](#написать-процедуру-инвертирующую-массив-символов)
@@ -106,109 +103,6 @@ A 2
 C 3
 B 2
 ```
-
-<a name="задача-про-банерокрутилку"></a>
-
-## Задача про банерокрутилку
-
-Из заданного списка вывести поочередно, рандомно, а главное, без повторений, все его элементы.
-
-```java
-import java.util.Random;
-class Banner
-{
-  public static void main(String[] args)
-  {
-    Random r = new Random();
-    int[] list = new int[100];// в угоду наглядности в дебри линкедлистов лезть не будем
-    for (int i = 0; i < 100; ++i)
-    {
-      list[i] = i;
-    }
-    /*А теперь главное - логика алгоритма*/
-    int index = 99;
-    int number;
-    while (index > 0)
-    {
-      number = r.nextInt(index);
-      System.out.println(list[number]);
-      list[number] = list[index];
-      --index;
-    }
-  }
-}
-```
-
-Теперь кратко и по сути, что здесь происходит. Пока в списке есть элементы, мы берем случайное число в пространстве длины массива, выводим его, потом последний элемент ставим на место только что выведенного, а индекс длины уменьшаем на единицу, пока не останется ничего.
-
-<a name="задача-на-регулярное-выражение"></a>
-
-## Задача на регулярное выражение
-
-В системе авторизации есть следующее ограничение на формат логина: он должен начинаться с латинской буквы, может состоять из латинских букв, цифр, точки и минуса и должен заканчиваться латинской буквой или цифрой. Минимальная длина логина — 1 символ. Максимальная — 20 символов.
-
-```objectivec
-BOOL loginTester(NSString* login) {
-  NSError *error = NULL;
-  NSRegularExpression *regex = [NSRegularExpression regularExpressionWithPattern:@"\\A[a-zA-Z](([a-zA-Z0-9\\.\\-]{0,18}[a-zA-Z0-9])|[a-zA-Z0-9]){0,1}\\z" options:NSRegularExpressionCaseInsensitive error:&error];
-  // Здесь надо бы проверить ошибки, но если регулярное выражение оттестированное и
-  // не из пользовательского ввода - можно пренебречь.
-  NSRange rangeOfFirstMatch = [regex rangeOfFirstMatchInString:login options:0 range:NSMakeRange(0, [login length])];
-  return (BOOL)(rangeOfFirstMatch.location!=NSNotFound);
-}
-```
-
-<a name="наиболее-часто-встречающиеся-слова"></a>
-
-## Метод, возвращающий N наиболее часто встречающихся слов во входной строке
-
-```objectivec
-- (NSArray *)mostFrequentWordsInString:(NSString *)string count:(NSUInteger)count {
-  // получаем массив слов.
-  // такой подход для человеческих языков будет работать хорошо.
-  // для языков, вроде китайского, или когда язык заранее не известен,
-  // лучше использовать enumerateSubstringsInRange с опцией NSStringEnumerationByWords
-  NSMutableCharacterSet *separators = [[NSCharacterSet whitespaceAndNewlineCharacterSet] mutableCopy];
-  [separators formUnionWithCharacterSet:[NSCharacterSet punctuationCharacterSet]];
-  NSArray *words = [string componentsSeparatedByCharactersInSet:separators];
-  NSCountedSet *set = [NSCountedSet setWithArray:words];
-  // тут бы пригодился enumerateByCount, но его нет.
-  // будем строить вручную
-  NSMutableArray *selectedWords = [NSMutableArray arrayWithCapacity:count];
-  NSMutableArray *countsOfSelectedWords = [NSMutableArray arrayWithCapacity:count];
-  for (NSString *word in set) {
-    NSUInteger wordCount = [set countForObject:word];
-    NSNumber *countOfFirstSelectedWord = [countsOfSelectedWords count] ? [countsOfSelectedWords objectAtIndex:0] : nil; // в iOS 7 появился firstObject
-    if ([selectedWords count] < count || wordCount >= [countOfFirstSelectedWord unsignedLongValue]) {
-      NSNumber *wordCountNSNumber = [NSNumber numberWithUnsignedLong:wordCount];
-      NSRange range = NSMakeRange(0, [countsOfSelectedWords count]);
-      NSUInteger indexToInsert = [countsOfSelectedWords indexOfObject:wordCountNSNumber inSortedRange:range options:NSBinarySearchingInsertionIndex usingComparator:^(NSNumber *n1, NSNumber *n2) {
-        NSUInteger _n1 = [n1 unsignedLongValue];
-        NSUInteger _n2 = [n2 unsignedLongValue];
-        if (_n1 == _n2)
-          return NSOrderedSame;
-        else if (_n1 < _n2)
-          return NSOrderedAscending;
-        else
-          return NSOrderedDescending;
-        }];
-        [selectedWords insertObject:word atIndex:indexToInsert];
-        [countsOfSelectedWords insertObject:wordCountNSNumber atIndex:indexToInsert];
-        // если слов уже есть больше чем нужно, удаляем то что с наименьшим повторением
-        if ([selectedWords count] > count) {
-          [selectedWords removeObjectAtIndex:0];
-          [countsOfSelectedWords removeObjectAtIndex:0];
-        }
-      }
-    }
-    return [selectedWords copy];
-    // можно было бы сразу вернуть selectedWords,
-    // но возвращать вместо immutable класса его mutable сабклас нехорошо - может привести к багам
-}
-// очень интересный метод для юнитестов: правильный результат может быть разным и зависит от порядка слов в строке.
-```
-
-Я бы именно такой подход и использовал, если бы мне нужно было решить эту задачу в реальном iOS приложении, при условии, что я понимаю, откуда будут браться входные данные для поиска и предполагаю, что размеры входной строки не будут больше нескольких мегабайт. Вполне разумное допущение для iOS приложения, на мой взгляд. Иначе на входе не было бы строки, а был бы файл. При реально больших входных данных прийдется попотеть над регулярным выражением для перебора слов, чтоб избавиться от одного промежуточного массива. Такое регулярное выражение очень зависит от языка — то что сработает для русского не проканает для китайского. А вот что делать со словами дальше — кроме прямолинейного алгоритма в голову ничего не приходит. Если бы нужно было выбрать одно наиболее часто встречающееся слово — это Fast Majority Voting. Но вся красота этого алгоритма в том, что он работает для выбора одного значения. Модификаций алгоритма для выбора N значений мне не известны. Самому модифицировать не получилось.
 
 <a name="проблемы-в-коде"></a>
 
@@ -415,9 +309,8 @@ struct StructB {
   char c;     // 1 байт
 };
 ```
-•	sizeof(StructA) == 8, так как после поля a (4 байта) компилятор вставляет 2 байта паддинга, чтобы выровнять поля структуры по 4 байта.
-
-•	sizeof(StructB) == 12, так как после поля b (1 байт) вставляется 3 байта паддинга для выравнивания поля a (4 байта). Далее стоит c (1 байт), и еще 2 байта паддинга.
+- sizeof(StructA) == 8, так как после поля a (4 байта) компилятор вставляет 2 байта паддинга, чтобы выровнять поля структуры по 4 байта.
+- sizeof(StructB) == 12, так как после поля b (1 байт) вставляется 3 байта паддинга для выравнивания поля a (4 байта). Далее стоит c (1 байт), и еще 2 байта паддинга.
 
 Таким образом, структуры занимают разное количество памяти из-за порядка расположения полей и выравнивания данных.
 
