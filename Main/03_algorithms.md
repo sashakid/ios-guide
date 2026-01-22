@@ -73,6 +73,12 @@ Performance is usually described with the Big O Notation. It defines the limitin
 
 For example, if you sort an array with 50 elements, and your sorting algorithm has a complexity of `O(n^2)`, there will be 2,500 operations necessary to complete the task. Furthermore, there’s also overhead in internal management and calling that method - so it’s 2,500 operations times constant. `O(1)` is the ideal complexity, meaning constant time. Good sorting algorithms usually need `O(n log n)` time.
 
+__Какие еще бывают нотации?__
+
+- O (Big O) — это наихудший сценарий (upper bound).
+- Ω (Big Omega) — наилучший случай (lower bound)
+- Θ (Big Theta) — точная оценка (и лучший, и худший растут одинаково)
+
 <a name="Последовательный поиск"></a>
 
 ## Последовательный поиск

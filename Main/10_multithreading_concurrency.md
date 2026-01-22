@@ -19,12 +19,15 @@
     - [Mutex](#mutex)
     - [Performance](#performance)
     - [Differences](#differences)
-  - [Что такое гонка условий?](#что-такое-гонка-условий)
+  - [Какие ты знаешь проблемы многопоточности?](#какие-ты-знаешь-проблемы-многопоточности)
+    - [Гонка условий](#гонка-условий)
+    - [Гонка данных](#гонка-данных)
+      - [Отличие гонки данных от гонки условий](#отличие-гонки-данных-от-гонки-условий)
     - [Deadlock](#deadlock)
     - [Livelock](#livelock)
     - [Starvation](#starvation)
     - [Priority inversion](#priority-inversion)
-    - [Как избежать гонки условий](#как-избежать-гонки-условий)
+  - [Как избежать ошибок многопоточности?](#как-избежать-ошибок-многопоточности)
 - [Чем отличается sync от async на разных очередях](#чем-отличается-sync-от-async-на-разных-очередях)
 - [Как многопоточность работает с UIKit?](#как-многопоточность-работает-с-uikit)
 - [Atomic vs nonatomic. Чем отличаются? Как вручную переопределить atomic/nonatomic сеттер в не ARC коде?](#atomic-vs-nonatomic-чем-отличаются-как-вручную-переопределить-atomicnonatomic-сеттер-в-не-arc-коде)
@@ -338,7 +341,19 @@ This method creates a new thread in your application, putting your application i
 ### GCD
 
 With GCD you don’t interact with threads directly anymore. Instead you add blocks of code to queues, and GCD manages a thread pool behind the scenes. GCD decides on which particular thread your code blocks are going to be executed on, and it manages these threads according to the available system resources. This alleviates the problem of too many threads being created, because the threads are now centrally managed and abstracted away from application developers. The other important change with GCD is that you as a developer think about work items in a queue rather than threads. This new mental model of concurrency is easier to work with. GCD exposes five different queues: the main queue running on the main thread, three background queues with different priorities, and one background queue with an even lower priority, which is I/O throttled. Furthermore, you can create custom queues, which can either be serial or concurrent queues. While custom queues are a powerful abstraction, all blocks you schedule on them will ultimately trickle down to one of the system’s global queues and its thread pool(s).
-
+```
+Your code
+   ↓
+DispatchQueue
+   ↓
+libdispatch (user space)
+   ↓
+pthread / workqueue
+   ↓
+kernel scheduler
+   ↓
+CPU
+```
 __Dispatch Queue__
 
 Dispatch queues are a C-based mechanism for __executing custom tasks__. A dispatch queue executes tasks either serially or concurrently but __always in a FIFO order__. A serial dispatch queue runs only one task at a time, waiting until that task is complete before dequeuing and starting a new one. By contrast, a concurrent dispatch queue starts as many tasks as it can without waiting for already started tasks to finish.
@@ -368,12 +383,13 @@ Dispatch sources are a C-based mechanism __for processing specific types of syst
 - Mach port events
 - Custom events that you trigger
 
-- async - concurrent: the code runs on a background thread. Control returns immediately to the main thread (and UI). The block can't assume that it's the only block running on that queue
-- async - serial: the code runs on a background thread. Control returns immediately to the main thread. The block can assume that it's the only block running on that queue
-- sync - concurrent: the code runs on a background thread but the main thread waits for it to finish, blocking any updates to the UI. The block can't assume that it's the only block running on that queue (I could have added another block using async a few seconds previously)
-- sync - serial: the code runs on a background thread but the main thread waits for it to finish, blocking any updates to the UI. The block can assume that it's the only block running on that queue
+__sync / async call on different queues__
 
-<img src="https://github.com/sashakid/ios-guide/blob/master/Images/gcd_queues_scheme.png">
+- async on concurrent: the code runs on a background thread. Control returns immediately to the main thread (and UI). The block can't assume that it's the only block running on that queue
+- async on serial: the code runs on a background thread. Control returns immediately to the main thread. The block can assume that it's the only block running on that queue
+- sync on concurrent: the code runs on a background thread but the main thread waits for it to finish, blocking any updates to the UI. The block can't assume that it's the only block running on that queue (I could have added another block using async a few seconds previously)
+- sync on serial: the code runs on a background thread but the main thread waits for it to finish, blocking any updates to the UI. The block can assume that it's the only block running on that queue
+
 <img src="https://github.com/sashakid/ios-guide/blob/master/Images/gcd_functions_1.png">
 <img src="https://github.com/sashakid/ios-guide/blob/master/Images/gcd_functions_2.png">
 
@@ -954,11 +970,76 @@ A Mutex is different than a semaphore as it is a locking mechanism while a semap
 
 <a name="race-condition"></a>
 
-## Что такое гонка условий?
+## Какие ты знаешь проблемы многопоточности?
 
-Can always happen if multiple threads access a shared resource without making sure that one thread is finished operating on a resource before another one begins accessing it.
+### Гонка условий 
+
+Так же Race condition или конкуренция — ошибка проектирования многопоточной системы или приложения, при которой работа системы или приложения зависит от того, в каком порядке выполняются части кода.
+
+```swift
+// 2️⃣ RACE CONDITION без data race (логическая гонка)
+
+var isReady = false
+
+DispatchQueue.global().async {
+    sleep(1)
+    DispatchQueue.main.async {
+        isReady = true
+    }
+}
+
+DispatchQueue.main.async {
+    if isReady {
+        print("Start")
+    } else {
+        print("Too early")
+    }
+}
+
+// результат недетерминирован, но data race нет
+```
 
 <img src="https://github.com/sashakid/ios-guide/blob/master/Images/race_condition.png">
+
+### Гонка данных 
+
+Так же Data race — Состояние, когда один поток обращается к изменяемому объекту, в то время как другой поток записывает в него.
+
+```swift
+var count = 0 
+let thread1 = Thread { 
+  for _ in 0...999 { 
+    count += 1 
+  } 
+} 
+  
+let thread2 = Thread { 
+  for _ in 0...999 { 
+    count += 1 
+  } 
+} 
+
+thread1.start() 
+thread2.start()
+```
+
+Мы ожидаем результат count = 2000. Но, к сожалению, результат будет всегда меньше этого числа. Это происходит потому, что операция увеличения счетчика не атомарна — она состоит из нескольких шагов: 
+- Чтение уже хранящегося значения; 
+- Сложение результата с единицей; 
+- Запись конечного результата обратно в переменную. 
+
+Так как в нашем примере отсутствует какая-либо синхронизация, то наши потоки могут оказаться в одной точке, например, в которой считывается текущее значение переменной. Что тогда происходит (представим, что мы на нулевой итерации): 
+- Поток 1 считывает текущее значение переменной и оно равно 0; 
+- Поток 2 делает аналогичное действие и получает результат 0; 
+- Далее поток 1 складывает результат с 1 и записывает обратно в переменную результат 1; 
+- Далее поток 2 начинает свою работу — так как он уже считал, что результат равен 0, он проделывает аналогичную работу потоку 1 и записывает конечный результат тоже 1.
+
+#### Отличие гонки данных от гонки условий
+
+-	Data race → проблема памяти
+-	Race condition → проблема порядка
+-	Data race почти всегда = race condition
+-	Race condition ≠ обязательно data race
 
 <a name="deadlock"></a>
 
@@ -966,20 +1047,58 @@ Can always happen if multiple threads access a shared resource without making su
 
 Two or more competing tasks are each waiting on the other to finish. You can observe this in real life when cars arrive simultaneously at a four-way stop.
 
-<img src="https://github.com/sashakid/ios-guide/blob/master/Images/deadlock.png">
-
 ```swift
-let queue = DispatchQueue(label: "my-queue")
+let queue = DispatchQueue(label: "my-queue") // serial queue
 queue.sync {
-  print("print this")
+  print("work 1")
 
   queue.sync {
-    print("deadlocked")
+    print("work 2")
   }
 }
 ```
 
-Putting this code anywhere in your app will immediately result in a crash before the second print statement runs. The queue is running code synchronously. The second closure can't run until the first one completes. The first closure can't complete until the second closure is run since its dispatched synchronously.
+Сообщение в XCode и stack trace:
+```
+BUG IN CLIENT OF LIBDISPATCH: dispatch_sync called on queue already owned by current thread
+.....
+#0	0x00000001057389c4 in __DISPATCH_WAIT_FOR_QUEUE__ ()
+.....
+```
+
+```
+Time ↓
+
+Thread T1
+│
+│  call queue.sync (1)
+│  ───────────────────────────────▶
+│
+│  выполняет блок (1) на queue
+│  ┌──────────────────────────────┐
+│  │ queue occupied (max = 1)     │
+│  └──────────────────────────────┘
+│
+│     call queue.sync (2)
+│     ───────────────────────────▶
+│
+│     ждёт освобождения queue
+│     (queue max concurrency = 1)
+│
+│     ⛔ WAIT
+│
+└───────────────────────────────────
+
+Queue "label" (serial)
+┌───────────────────────────────────┐
+│ [ block (1) RUNNING ]              │
+│ [ block (2) WAITING ]              │
+└───────────────────────────────────┘
+```
+
+Очередь выполняет код синхронно. Второй запуск очереди не может быть запущен до тех пор, пока не завершится первый. Первый не может быть завершен до тех пор, пока не будет запущен второй, так как он вызывается синхронно. __Это справедливо не только для главного потока, НО и для всех последовательных очередей.__
+
+> Do not call the dispatch_sync function from a task that is executing on the same queue that you pass to your function call. Doing so will deadlock the queue. If you need to dispatch to the current queue, do so asynchronously using the dispatch_async function.
 
 <a name="livelock"></a>
 
@@ -987,93 +1106,11 @@ Putting this code anywhere in your app will immediately result in a crash before
 
 Система не застревает, но занимается бесполезной работой. A livelock occurs when a request for an exclusive lock is repeatedly denied because a series of overlapping shared locks keep interfering. It is an endless loop in program execution. This could be a case when two threads exit allowing each other to write to or update record(s) in a database.
 
-Here's a very simple Java example of livelock where a husband and wife are trying to eat soup, but only have one spoon between them. Each spouse is too polite, and will pass the spoon if the other has not yet eaten.
-
-```java
-public class Livelock {
-    static class Spoon {
-        private Diner owner;
-        public Spoon(Diner d) { owner = d; }
-        public Diner getOwner() { return owner; }
-        public synchronized void setOwner(Diner d) { owner = d; }
-        public synchronized void use() {
-            System.out.printf("%s has eaten!", owner.name);
-        }
-    }
-
-    static class Diner {
-        private String name;
-        private boolean isHungry;
-
-        public Diner(String n) { name = n; isHungry = true; }       
-        public String getName() { return name; }
-        public boolean isHungry() { return isHungry; }
-
-        public void eatWith(Spoon spoon, Diner spouse) {
-            while (isHungry) {
-                // Don't have the spoon, so wait patiently for spouse.
-                if (spoon.owner != this) {
-                    try { Thread.sleep(1); }
-                    catch(InterruptedException e) { continue; }
-                    continue;
-                }                       
-
-                // If spouse is hungry, insist upon passing the spoon.
-                if (spouse.isHungry()) {                    
-                    System.out.printf(
-                        "%s: You eat first my darling %s!%n",
-                        name, spouse.getName());
-                    spoon.setOwner(spouse);
-                    continue;
-                }
-
-                // Spouse wasn't hungry, so finally eat
-                spoon.use();
-                isHungry = false;               
-                System.out.printf(
-                    "%s: I am stuffed, my darling %s!%n",
-                    name, spouse.getName());                
-                spoon.setOwner(spouse);
-            }
-        }
-    }
-
-    public static void main(String[] args) {
-        final Diner husband = new Diner("Bob");
-        final Diner wife = new Diner("Alice");
-
-        final Spoon s = new Spoon(husband);
-
-        new Thread(new Runnable() {
-            public void run() { husband.eatWith(s, wife); }   
-        }).start();
-
-        new Thread(new Runnable() {
-            public void run() { wife.eatWith(s, husband); }
-        }).start();
-    }
-}
-```
-
-Run the program and you'll get:
-
-```
-Bob: You eat first my darling Alice!
-Alice: You eat first my darling Bob!
-Bob: You eat first my darling Alice!
-Alice: You eat first my darling Bob!
-Bob: You eat first my darling Alice!
-Alice: You eat first my darling Bob!
-...
-```
-
-This will go on forever if uninterrupted. This is a livelock because both Alice and Bob are repeatedly asking each other to go first in an infinite loop (hence live). In a deadlock situation, both Alice and Bob would simply be frozen waiting on each other to go first — they won't be doing anything except wait (hence dead).
-
 <a name="starvation"></a>
 
 ### Starvation
 
-Locking shared resources can result in the readers-writers problem. Taking a reading lock is allowed as long as there is no writing lock on the resource. In this situation, a thread that is waiting to acquire a write lock can be starved by more read locks occurring in the meantime.
+Голодание — проблема, когда параллельный процесс не может получить ресурсы, необходимые для выполнения его работы. Livelock считается подслучаем Starvation, так как параллельные процессы одинаково «голодают», и никакая работа не выполняется до конца. Под голоданием обычно подразумевают когда не все, а один или несколько потоков мешают одному или нескольким другим потокам выполнять их работу так, как это задумывалось разработчиком (то есть наиболее эффективно).
 
 <a name="priority-inversion"></a>
 
@@ -1085,7 +1122,7 @@ The problem can occur when you have a high-priority and a low-priority task shar
 
 <a name="как-избежать-гонки-условий"></a>
 
-### Как избежать гонки условий
+## Как избежать ошибок многопоточности?
 
 The best way to avoid both deadlock and livelock situations is to take only one lock at a time. If you must acquire more than one lock at a time, you should make sure that other threads do not try to do something similar.
 
@@ -1169,14 +1206,43 @@ print("🔵 End")
 🔵 End
 🟢 Task 1 finished
 ```
+| Критерий | serialQueue.sync | concurrentQueue.sync |
+|--------|------------------|----------------------|
+| Тип очереди | Последовательная (serial) | Параллельная (concurrent) |
+| Количество одновременно выполняемых задач | 1 | Несколько |
+| Блокирует вызывающий поток | Да | Да |
+| Может выполняться параллельно с текущим блоком | Нет | Да |
+| Вызов `sync` из той же очереди | ❌ Deadlock | ✅ Выполняется inline |
+| Реентерабельность | ❌ Нет | ✅ Да |
+| Гарантия порядка выполнения | Строгая FIFO | FIFO только для начала |
+| Безопасно для защиты состояния | ✅ Да | ❌ Нет без барьеров |
+| Типичное применение | Мьютекс, сериализация доступа | Вычисления, чтение данных |
+| Пример системной очереди | `DispatchQueue.main` | `DispatchQueue.global()` |
 
-| Свойство                              | `serial.sync`                                       | `concurrent.sync`                                    |
-|---------------------------------------|-----------------------------------------------------|------------------------------------------------------|
-| Блокирует вызывающий поток            | ✅ Да                                               | ✅ Да                                                |
-| Задачи внутри очереди выполняются     | 🟡 По очереди, одна за другой                       | 🟢 Параллельно (если задачи независимы)              |
-| Может выполнять другие задачи         | ❌ Нет (ждёт свою очередь)                          | ✅ Да (другие потоки могут продолжать работать)      |
-| Подходит для                           | Последовательной логики, критических секций        | Быстрой параллельной работы с независимыми задачами |
+Inline — блок выполняется немедленно в текущем потоке,
+без постановки в очередь и без ожидания других задач.
 
+```swift
+concurrentQueue.sync {
+    print("B") // выполняется прямо здесь
+}
+```
+То есть это обычный вызов функции, а не “задача в очереди”.
+
+Реентерабельность — возможность безопасно войти в одну и ту же сущность повторно, пока предыдущий вход ещё не завершён.
+
+В контексте GCD:
+- serial queue → ❌ не реентерабельна (вход внутрь sync из неё же невозможен)
+- concurrent queue → ✅ реентерабельна (sync может выполниться inline)
+
+Проще: Можно ли вызвать sync на ту же очередь, не повесив программу?
+
+- serial → нельзя
+- concurrent → можно
+
+Ментальная модель:
+- serial.sync = “встань в очередь и жди”
+- concurrent.sync = “если могу — выполню прямо сейчас”
 ___
 
 __serial.async vs concurrent.async__

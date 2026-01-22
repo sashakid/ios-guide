@@ -55,15 +55,17 @@ _array_
 
 _associative array, map, symbol table, dictionary_
 
-An associative array, map, symbol table, or dictionary is an abstract data type composed of a collection of pairs, such that each possible key appears at most once in the collection.
-Operations associated with this data type allow:
+An associative array, map, symbol table, or dictionary is an abstract data type composed of a collection of pairs, such that each possible key appears at most once in the collection. Operations associated with this data type allow:
 
 - the addition of pairs to the collection
 - the removal of pairs from the collection
 - the modification of the values of existing pairs
 - the lookup of the value associated with a particular key
 
-Ассоциативный массив еще называют нагруженным множеством (data + info), где data – ключ, а нагрузка – значение ключа.
+Ассоциативный массив еще называют нагруженным множеством (data + info), где data – ключ, а нагрузка – значение ключа. Ассоциативный массив — это абстракция и может быть реализован не только хеш-таблицей. Другие варианты:
+- сбалансированное дерево (Red-Black, AVL) → O(log n)
+- B-tree (часто в базах данных)
+- Trie (если ключи — строки)
 
 <a name="xеш-таблица"></a>
 
