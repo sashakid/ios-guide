@@ -17,8 +17,6 @@
 
 ## UIApplication
 
-UIApplication — центральная точка контроля
-
 The centralized point of control and coordination for apps running in iOS.
 Every iOS app has exactly one instance of `UIApplication` (or, very rarely, a subclass of `UIApplication`). When an app launches, the system calls the `UIApplicationMain(_:_:_:_:)` function. Among its other tasks, this function creates a singleton `UIApplication` object that you access using shared. Your app’s application object handles the initial routing of incoming user events. It dispatches action messages forwarded to it by control objects (instances of the `UIControl` class) to appropriate target objects. The application object maintains a list of open windows (`UIWindow` objects), which it can use to retrieve any of the app’s `UIView` objects. The `UIApplication` class defines a delegate that conforms to the `UIApplicationDelegate` protocol and must implement some of the protocol’s methods. The application object informs the delegate of significant runtime events—for example, app launch, low-memory warnings, and app termination—giving it an opportunity to respond appropriately. Apps can cooperatively handle a resource, such as an email or an image file, through the `open(_:options:completionHandler:)` method. For example, an app that calls this method with an email `URL` causes the Mail app to launch and display the message.
 The APIs in this class allow you to manage device-specific behavior. 
@@ -38,7 +36,7 @@ Use your `UIApplication` object to do the following:
 
 AppDelegate — шарит состояния приложения и взаимодействия с системой
 
-A set of methods to manage shared behaviors for your app. Your app delegate object manages your app’s shared behaviors. The app delegate is effectively the root object of your app, and it works in conjunction with `UIApplication` to manage some interactions with the system. Like the `UIApplication` object, `UIKit` creates your app delegate object early in your app’s launch cycle so it’s always present.
+The app delegate is effectively the root object of your app, and it works in conjunction with `UIApplication` to manage some interactions with the system. Like the `UIApplication` object, `UIKit` creates your app delegate object early in your app’s launch cycle so it’s always present.
 
 Use your app delegate object to handle the following tasks:
 
