@@ -16,12 +16,14 @@
   - [Что такое протокол-ориентированное программирование? (POP)](#что-такое-протокол-ориентированное-программирование-pop)
     - [Generics](#generics)
     - [Associated Types](#associated-types)
+    - [Generics vs Associated Types](#generics-vs-associated-types)
     - [Что такое type erasure?](#что-такое-type-erasure)
     - [Что такое opaque type? (some)](#что-такое-opaque-type-some)
     - [Что такое existential type? (any)](#что-такое-existential-type-any)
     - [Чем отличается Generic от Protocol?](#чем-отличается-generic-от-protocol)
   - [Difference between Array VS NSArray VS \[AnyObject\]](#difference-between-array-vs-nsarray-vs-anyobject)
   - [Objective-C id is Swift Any or AnyObject](#objective-c-id-is-swift-any-or-anyobject)
+  - [Базовые протоколы в свифте](#базовые-протоколы-в-свифте)
   - [5 уровней доступа](#5-уровней-доступа-access-control-levels)
   - [Metod Dispatching](#metod-dispatching)
   - [Какие бывают анимации?](#какие-бывают-анимации)
@@ -1019,6 +1021,15 @@ func foo() {
 
 ### What is copy on write mechanism
 
+Кратко:
+
+Copy-on-Write (CoW) — это механизм оптимизации памяти.
+- Значимые типы (Array, Dictionary, Set, String) не копируются сразу при присваивании.
+- До тех пор, пока данные только читаются, несколько переменных делят одну область памяти.
+- Реальная копия создаётся только при попытке изменения, если владелец не единственный.
+
+Объяснение:
+
 A fully stack allocated value type will not need reference counting, but a value type with inner references will unfortunately inherit this ability.
 
 ```swift
@@ -1201,7 +1212,24 @@ The Container protocol defines three required capabilities that any container mu
 - It must be possible to access a count of the items in the container through a count property that returns an Int value.
 - It must be possible to retrieve each item in the container with a subscript that takes an Int index value.
 
+### Generics vs Associated Types
+
+Generics — это параметры функции или типа.
+Ты явно указываешь T и используешь его снаружи.
+
+Associated types — это параметры протокола.
+Они не указываются извне — их подставляет тип, который реализует протокол.
+
 ### Что такое type erasure?
+
+Кратко:
+
+Type erasure — это способ спрятать конкретный тип за абстракцией, чтобы:
+- можно было хранить разные типы в одной коллекции
+- можно было вернуть протокол с associated types из функции
+- можно было передавать такие типы как один унифицированный тип
+
+Объяснение:
 
 There are two types of protocols:
 
@@ -1259,6 +1287,14 @@ let witnesses: [AssociatedTypeProtocolWitness<String>] = []
 When using protocols, we’re not able to provide this necessary type information to the compiler. This is why the compiler complains that our protocol can only be used as a generic constraint when it has associated type or self requirements.
 
 ### Что такое opaque type? (some)
+
+Кратко:
+
+Opaque type (some) — это обратное type erasure.
+- Type erasure скрывает тип полностью → остаётся только протокол.
+- Opaque type скрывает тип, но сохраняет его конкретность для компилятора.
+
+Объяснение:
 
 Opaque return types is a new language feature that is introduced in Swift 5.1 by Apple. It can be used to return some value for function/method, and property without revealing the concrete type of the value to client that calls the API. The return type will be some type that implement a protocol. Using this solution, the module API doesn’t have to publicly leak the underlying internal return type of the method, it just need to return the opaque type of the protocol using the `some` keyword. The Swift compiler also will be able to preserve the underlying identity of the return type unlike using protocol as the return type. SwiftUI uses opaque return types inside its `View` protocol that returns `some View` in the body property.
 
@@ -1344,6 +1380,16 @@ let content: any Content = ImageContent(...)
 1. Consider starting with concrete types first, don’t overcomplicate from the start
 2. Move to opaque types using the `some` keyword once you need more type flexibility
 3. Change `some` to `any` when you know you need to store arbitrary (random) values
+
+| Свойство                     | `some Protocol` (Opaque)                  | `any Protocol` (Existential)              |
+|-------------------------------|------------------------------------------|------------------------------------------|
+| Тип                            | Конкретный, скрыт от внешнего кода       | Стертый, конкретный тип неизвестен       |
+| Производительность             | Высокая (компилятор знает тип)          | Ниже (вызовы через witness table)       |
+| Associated types               | Доступны                                 | Потеряны                                 |
+| Возможность inlining           | Да                                       | Нет                                      |
+| Возможность использовать разные типы | Нет, всегда один конкретный тип         | Да, разные типы в одной переменной      |
+| Применение                     | Возврат из функций, generics оптимизация | Хранение/передача разнородных объектов  |
+| Ограничения                    | Тип фиксирован для конкретного вызова   | Тип может быть любым, который удовлетворяет протоколу |
 
 ### Чем отличается Generic от Protocol?
 
@@ -1440,6 +1486,110 @@ Once a Generic becomes complete (e.g. `Array<String>`) it is a fully concrete ty
 `AnyObject` can represent an instance of any class type.
 
 > As part of its interoperability with Objective-C, Swift offers convenient and efficient ways of working with Cocoa frameworks. Swift automatically converts some Objective-C types to Swift types, and some Swift types to Objective-C types. Types that can be converted between Objective-C and Swift are referred to as bridged types. Anywhere you can use a bridged Objective-C reference type, you can use the Swift value type instead. This lets you take advantage of the functionality available on the reference type’s implementation in a way that is natural in Swift code. For this reason, you should almost never need to use a bridged reference type directly in your own code. In fact, when Swift code imports Objective-C APIs, the importer replaces Objective-C reference types with their corresponding value types. Likewise, when Objective-C code imports Swift APIs, the importer also replaces Swift value types with their corresponding Objective-C reference types.
+
+## Базовые протоколы в свифте
+
+__Equatable__
+
+```swift
+protocol Equatable
+```
+
+__Hashable__
+
+```swift
+protocol Hashable : Equatable
+```
+
+When using custom types to model data in your programs, you may frequently need to check whether two values are the same or different, or whether a particular value is included in a list of values. This capability, as well as the ability to store values in a set or use them as keys in a dictionary, are governed by two related standard library protocols, `Equatable` and `Hashable`.
+
+```swift 
+class Player {
+    var name: String
+    var position: Position
+
+
+    init(name: String, position: Position) {
+        self.name = name
+        self.position = position
+    }
+}
+
+extension Player: Equatable {
+    static func ==(lhs: Player, rhs: Player) -> Bool {
+        return lhs.name == rhs.name && lhs.position == rhs.position
+    }
+}
+
+extension Player: Hashable {
+    func hash(into hasher: inout Hasher) {
+        hasher.combine(name)
+        hasher.combine(position)
+    }
+}
+```
+
+__Comparable__
+
+```swift
+protocol Comparable : Equatable
+```
+
+```swift
+extension Date: Comparable {
+    static func < (lhs: Date, rhs: Date) -> Bool {
+        if lhs.year != rhs.year {
+            return lhs.year < rhs.year
+        } else if lhs.month != rhs.month {
+            return lhs.month < rhs.month
+        } else {
+            return lhs.day < rhs.day
+        }
+    }
+}
+```
+
+__Codable__
+
+```swift
+typealias Codable = Decodable & Encodable
+```
+Codable is a type alias for the Encodable and Decodable protocols. When you use Codable as a type or a generic constraint, it matches any type that conforms to both protocols.
+
+Many programming tasks involve sending data over a network connection, saving data to disk, or submitting data to APIs and services. These tasks often require data to be encoded and decoded to and from an intermediate format while the data is being transferred.
+The Swift standard library defines a standardized approach to data encoding and decoding. You adopt this approach by implementing the `Encodable` and `Decodable` protocols on your custom types. Adopting these protocols lets implementations of the Encoder and Decoder protocols take your data and encode or decode it to and from an external representation such as JSON or property list. To support both encoding and decoding, declare conformance to Codable, which combines the `Encodable` and `Decodable` protocols. This process is known as making your types codable.
+
+__Caseiterable__
+
+```swift
+protocol CaseIterable
+```
+
+A type that provides a collection of all of its values.
+
+```swift
+enum CompassDirection: CaseIterable {
+    case north, south, east, west
+}
+
+
+print("There are \(CompassDirection.allCases.count) directions.")
+// Prints "There are 4 directions."
+let caseList = CompassDirection.allCases
+                               .map({ "\($0)" })
+                               .joined(separator: ", ")
+// caseList == "north, south, east, west"
+```
+
+__Sequence__
+
+__Collection__
+
+```swift
+protocol Collection<Element> : Sequence
+```
+
+A sequence whose elements can be traversed multiple times, nondestructively, and accessed by an indexed subscript.
 
 ## 5 уровней доступа (access control levels)
 

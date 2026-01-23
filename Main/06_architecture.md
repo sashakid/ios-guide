@@ -14,7 +14,7 @@
         - [Redux](#redux)
         - [TCA](#tca)
             - [TCA vs Redux](#tca-vs-redux)
-		- [SOAP](#soap)
+		- [SOA](#soa)
 	- [Порождающие шаблоны](#порождающие-шаблоны)
 		- [Abstract factory](#abstract-factory)
 		- [Factory Method](#factory-method)
@@ -25,7 +25,7 @@
 		- [Decorator](#decorator)
 		- [Proxy](#proxy)
 		- [Facade](#facade)
-			- [Comparison](#comparison)
+		    - [Comparison](#comparison)
 		- [Кластеры](#кластеры)
 		- [Composite](#composite)
 	- [Communication Patterns](#communication-patterns)
@@ -670,11 +670,17 @@ Configurator — “суперкласс”, который инициализи
 
 #### VIP vs VIPER
 
-VIP and VIPER have the same basic components, but the data flow is different. Although VIP follows a unidirectional approach, VIPER has a bidirectional flow that starts with the presenter.
+VIPER не является чистой реализацией Clean Architecture — это скорее адаптация идей Clean Architecture под iOS с сильным упором на модульность и тестируемость, но с компромиссами в виде двунаправленных зависимостей и «толстого» Presentation-слоя.
 
 <img src="https://github.com/sashakid/ios-guide/blob/master/Images/vip_vs_viper.png">
 
 In VIPER, the presenter directs data between the view and the interactor. The view and interactor don’t talk with each other.
+Clean Swift (VIP) старается быть ближе к настоящей Clean Architecture:
+- ViewController → Interactor (запрос)
+- Interactor → Presenter (ответ)
+- Presenter → ViewController (ViewModel)
+
+Нет обратных зависимостей от Interactor → Presenter. Interactor ничего не знает о Presentation-части → Dependency Rule соблюдается строже.
 
 <a name="redux"></a>
 
@@ -728,9 +734,9 @@ Effect — задача, по завершению которой возвращ
 
 5.	Управление зависимостями в TCA встроено в сам фреймворк, аналогов в классическом Redux нет.
 
-<a name="soap"></a>
+<a name="soa"></a>
 
-### SOAP
+### SOA
 
 SOA is a style of software design where services are provided to the other components by application components, through a communication protocol over a network. The basic principles of service-oriented architecture are independent of vendors, products and technologies.
 
@@ -758,7 +764,13 @@ On the other hand, regular services have the following characteristics:
 - They should be imported in low level objects and other regular services
 - Can’t reuse in other projects - Have specific tasks
 
-Example: <https://github.com/pakisha/Medium6>
+__Как SOA связывается с Clean/VIPER/VIP?__
+
+SOA — это уровень ниже, чем архитектура экрана.
+- VIPER использует сервисы в Interactor.
+- VIP использует сервисы также в Interactor/DataStore.
+- MVC/Coordinator — в моделях или менеджерах.
+- TCA — через Environment.
 
 <a name="порождающие-шаблоны"></a>
 
@@ -849,10 +861,7 @@ static Singleton *sharedSingleton_ = nil;
 @end
 ```
 
-However this is wrong on several levels. Firstly, this isn't thread safe, so what happens if multiple threads all try to access this at the same time? There is no reason 1 thread couldn't be in the middle of allocating the object while the other one is trying to access the object. This is actually what Apple shows in its documentation.
-If you must use singletons, use `dispatch_once()`
-dispatch_once() solves the problem of safely being able to create a singleton in that (1) it guarantees that the code in the block will only be called once for the lifetime of the application (2) its thread safe as I noted in a previous article and (3) its faster than other methods like using `@synchronize()`,etc...
-"If called simultaneously from multiple threads, this function waits synchronously until the block has completed." So you should be writing it like this...
+However this is wrong on several levels. Firstly, this isn't thread safe, so what happens if multiple threads all try to access this at the same time? There is no reason 1 thread couldn't be in the middle of allocating the object while the other one is trying to access the object. This is actually what Apple shows in its documentation. If you must use singletons, use `dispatch_once()`, which solves the problem of safely being able to create a singleton in that (1) it guarantees that the code in the block will only be called once for the lifetime of the application (2) its thread safe as I noted in a previous article and (3) its faster than other methods like using `@synchronize()`
 
 _Thread safe_
 
@@ -867,11 +876,36 @@ _Thread safe_
 }
 ```
 
-__Criticism:__
+В свифте:
 
-1. It violates the single responsibility principle because of its quality of controlling its own creation and lifecycle.
-2. It introduces global state to your application. I would say global state is very bad because any code can change its value. So at the time of debugging it's really hard to find which portion of the code has made the current stage of global variable.
-3. Singleton is generally a bad idea if you are doing unit testing, and it's generally a bad idea not to perform unit testing.
+```swift
+final class Logger {
+    static let shared = Logger()
+}
+```
+
+Когда есть изменяемое состояние, используем или `MainActor` (для работы на главном потоке), или `actor` (для работы в любом другом потоке):
+
+```swift
+@MainActor
+final class SettingsManager {
+    static let shared = SettingsManager()
+}
+
+actor CacheManager {
+    static let shared = CacheManager()
+}
+```
+
+__Критика использования синглтона:__
+- Глобальное состояние → сложно предсказать поведение, легко сломать из любой части кода
+- Скрытые зависимости → в коде не видно, что класс использует этот синглтон (в отличие от явной передачи зависимости)
+- Очень сложно тестировать → unit-тесты становятся не изолированными, трудно мокировать/подменять
+- Нарушает Single Responsibility Principle → класс отвечает и за свою логику, и за контроль собственного создания
+- Тесная связанность (tight coupling) → код «прилипает» к конкретной реализации, трудно менять/заменять
+- Проблемы с многопоточностью → в неаккуратной реализации можно создать несколько экземпляров
+- Проблемы с жизненным циклом → сложно управлять созданием/уничтожением, порядок инициализации может сломаться
+- Трудно масштабировать → в больших системах превращается в «божественный объект» (god object)
 
 <a name="структурные-шаблоны"></a>
 

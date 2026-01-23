@@ -31,7 +31,7 @@
 - [Чем отличается sync от async на разных очередях](#чем-отличается-sync-от-async-на-разных-очередях)
 - [Как многопоточность работает с UIKit?](#как-многопоточность-работает-с-uikit)
 - [Atomic vs nonatomic. Чем отличаются? Как вручную переопределить atomic/nonatomic сеттер в не ARC коде?](#atomic-vs-nonatomic-чем-отличаются-как-вручную-переопределить-atomicnonatomic-сеттер-в-не-arc-коде)
-- [Можно ли отменить операцию в GCD? А в NSOperationQueue?](#можно-ли-отменить-операцию-в-gcd-а-в-nsoperationqueue)
+- [Можно ли отменить блок в GCD / операцию в NSOperationQueue / таск в async/await?](#можно-ли-отменить-блок-в-gcd--операцию-в-nsoperationqueue--таск-в-asyncawait)
 - [Когда лучше использовать GCD, а когда NSOperationQueue?](#когда-лучше-использовать-gcd-а-когда-nsoperationqueue)
 - [Difference between GCD and async/await](#difference-between-gcd-and-asyncawait)
 
@@ -1431,7 +1431,7 @@ Atomic – thread safe.
 
 <a name="отмена-операций"></a>
 
-# Можно ли отменить операцию в GCD? А в NSOperationQueue?
+# Можно ли отменить блок в GCD / операцию в NSOperationQueue / таск в async/await?
 
 __GCD (Grand Central Dispatch)__
 
@@ -1486,6 +1486,22 @@ queue.addOperation(operation)
 operation.cancel()
 ```
 
+__async / await__
+
+```swift
+let task = Task {
+    for i in 0..<10_000_000 {
+        try Task.checkCancellation()   // выбросит ошибку если отменено
+        // работа
+    }
+}
+
+task.cancel()
+```
+
+__Итого:__
+
+Задачу можно отменить во всех трёх случаях, но нигде нельзя отменить принудительно, как «убить поток». Всегда работает только кооперативная отмена — задача должна сама проверять, что её отменили, и выйти.
 
 <a name="gcd-vs-nsoperationqueue"></a>
 

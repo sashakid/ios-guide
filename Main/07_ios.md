@@ -1,14 +1,13 @@
 - [iOS](#ios)
   - [UIApplication](#uiapplication)
   - [AppDelegate](#appdelegate)
+  - [UIView](#uiview)
   - [UIWindow](#uiwindow)
   - [UIViewController](#uiviewcontroller)
-  - [UIView](#uiview)
   - [Жизненный цикл приложения](#жизненный-цикл-приложения)
   - [Жизненный цикл UIViewController](#жизненный-цикл-uiviewcontroller)
   - [Как работает UIScrollView?](#как-работает-uiscrollview)
   - [Как работает UITableView?](#как-работает-uitableview)
-  - [UIView](#uiview-1)
   - [IPhone, resolution, pixels vs points?](#iphone-resolution-pixels-vs-points)
   - [Файловая система iOS](#файловая-система-ios)
   - [Какой контент лучше хранить в Documents, а какой в Cache?](#какой-контент-лучше-хранить-в-documents-а-какой-в-cache)
@@ -51,12 +50,26 @@ Use your app delegate object to handle the following tasks:
 
 When your app’s state changes, UIKit notifies you by calling methods of the appropriate delegate object:
 
-- In iOS 13 and later, use UISceneDelegate objects to respond to life-cycle events in a scene-based app.
-- In iOS 12 and earlier, use the UIApplicationDelegate object to respond to life-cycle events.
+- In iOS 13 and later, use `UISceneDelegate` objects to respond to life-cycle events in a scene-based app.
+- In iOS 12 and earlier, use the `UIApplicationDelegate` object to respond to life-cycle events.
+
+## UIView
+
+A `UIView` is the fundamental building block for creating and managing the visual content within an iOS application. It represents a rectangular area on the screen and is responsible for drawing content, handling user interactions, and managing the layout of subviews. In essence, every visual element you see in an iOS app, from buttons to labels to custom graphics, is a subclass of UIView.
+
+- Initialization: The UIView is initialized via `init(frame:)` or `init(coder:)` if loaded from a storyboard.
+- Adding to a Superview: Once created, the view can be added to a superview using `addSubview(_:)`.
+- Layout: The view’s layout is determined, typically involving methods like `layoutSubviews()` where the view can adjust the frames of its subviews.
+- Drawing: The `draw(_:)` method is called when the view needs to render its content, like custom graphics.
+- Event Handling: The view handles user interactions such as touches using methods like `touchesBegan(_:with:)`.
+- Removing from Superview: The view can be removed from its superview using `removeFromSuperview()`.
+- Deinitialization: Finally, when the view is no longer needed, it’s deallocated from memory.
+
+<img src="https://github.com/sashakid/ios-guide/blob/master/Images/uiview_frame.png">
 
 ## UIWindow
 
-UIWindow — отвечает за UI
+UIWindow — единственный экземпляр  в приложении, который играет роль контейнера для всех представлений.
 
 The backdrop for your app’s user interface and the object that dispatches events to your views. Windows work with your view controllers to handle events and to perform many other tasks that are fundamental to your app’s operation. `UIKit` handles most window-related interactions, working with other objects as needed to implement many app behaviours.
 
@@ -82,18 +95,6 @@ You should rarely need to subclass UIWindow. The kinds of behaviors you might im
 
 A `UIViewController` is the cornerstone of an iOS app's architecture, managing a screen's content and the interactions within it. It acts as a bridge between the app's data and the `UIViews`, handling tasks such as view hierarchy management, user interaction responses, and navigation between different screens.
 
-## UIView
-
-A `UIView` is the fundamental building block for creating and managing the visual content within an iOS application. It represents a rectangular area on the screen and is responsible for drawing content, handling user interactions, and managing the layout of subviews. In essence, every visual element you see in an iOS app, from buttons to labels to custom graphics, is a subclass of UIView.
-
-- Initialization: The UIView is initialized via `init(frame:)` or `init(coder:)` if loaded from a storyboard.
-- Adding to a Superview: Once created, the view can be added to a superview using `addSubview(_:)`.
-- Layout: The view’s layout is determined, typically involving methods like `layoutSubviews()` where the view can adjust the frames of its subviews.
-- Drawing: The `draw(_:)` method is called when the view needs to render its content, like custom graphics.
-- Event Handling: The view handles user interactions such as touches using methods like `touchesBegan(_:with:)`.
-- Removing from Superview: The view can be removed from its superview using `removeFromSuperview()`.
-- Deinitialization: Finally, when the view is no longer needed, it’s deallocated from memory.
-
 <a name="жизненный-цикл-приложения"></a>
 ## Жизненный цикл приложения
 <img src="https://github.com/sashakid/ios-guide/blob/master/Images/lifecycle.png">
@@ -115,19 +116,36 @@ A `UIView` is the fundamental building block for creating and managing the visua
 | applicationWillEnterForeground(_:) | Background → Inactive	| Приложение возвращается из фонового режима, готовясь снова стать активным. | 
 | applicationWillTerminate(_:)	| Background → Not Running	| Приложение завершает работу. Система завершает его процесс, и данные должны быть сохранены. | 
 
+https://www.codecentric.de/en/knowledge-hub/blog/handling-ios-app-states-state-machine
+
 <a name="жизненный-цикл-uiviewController"></a>
 ## Жизненный цикл UIViewController
 
-1. `init()` The view controller is instantiated, either programmatically or from a storyboard.
-2. `loadView()` method is called, creating the view hierarchy for the view controller.
-3. `viewDidLoad()` method is called, where you typically initialize data and setup UI elements.
-4. `viewWillAppear(_:)` method is called just before the view becomes visible, useful for tasks like updating the UI based on new data.
-5. `viewWillLayoutSubviews` gets called anytime your view controller's view has its bounds changed. This happens when the view is loaded, when a rotation event occurs, or when a child view controller has its size changed by its parent. (There are probably some other situations, too). If there is anything you need to update before that view lays itself out (and before your constraints are re-applied) you should do it here. you should generally not update constraints here, because updating constraints can cause another layout pass.
-6. `viewDidLayoutSubviews` is called once all of your subviews have been laid out. If you need to fine-tune that layout by manually adjusting frames, for instance, this would be the place to do it.
-7. `viewDidAppear(_:)` method is called after the view has appeared on the screen, often used for starting animations or tracking analytics.
-8. `viewWillDisappear(_:)` method is invoked just before the view is hidden, useful for saving state or stopping tasks.
-9. `viewDidDisappear(_:)` method is called after the view is no longer visible, allowing you to clean up resources or stop processes.
-10. `deinit()` The view controller is deallocated when it’s no longer needed, cleaning up any remaining resources.
+1. `init` The view controller is instantiated, either programmatically or from a storyboard.
+2. `loadView` method is called, creating the view hierarchy for the view controller.
+3. `viewDidLoad` method is called, where you typically initialize data and setup UI elements.
+4. `viewWillAppear` method is called just before the view becomes visible, useful for tasks like updating the UI based on new data.
+5. `viewIsAppearing` (NEW) notifies the view controller that the system is adding the view controller’s view to a view hierarchy.
+6. `viewWillLayoutSubviews` gets called anytime your view controller's view has its bounds changed. This happens when the view is loaded, when a rotation event occurs, or when a child view controller has its size changed by its parent. (There are probably some other situations, too). If there is anything you need to update before that view lays itself out (and before your constraints are re-applied) you should do it here. you should generally not update constraints here, because updating constraints can cause another layout pass.
+7. `viewDidLayoutSubviews` is called once all of your subviews have been laid out. If you need to fine-tune that layout by manually adjusting frames, for instance, this would be the place to do it.
+8. `viewDidAppear` method is called after the view has appeared on the screen, often used for starting animations or tracking analytics.
+9. `viewWillDisappear` method is invoked just before the view is hidden, useful for saving state or stopping tasks.
+10. `viewDidDisappear` method is called after the view is no longer visible, allowing you to clean up resources or stop processes.
+11. `deinit` The view controller is deallocated when it’s no longer needed, cleaning up any remaining resources.
+
+`viewIsAppearing(_:)` (iOS 13+)
+-	Вызывается гарантированно перед реальным появлением
+- Срабатывает один раз за appearance
+- UIKit уже посчитал layout
+
+Лучше дружит с:
+- интерактивными переходами
+- swipe-to-back
+
+Apple прямо рекомендует для:
+- обновления UI
+- анимаций
+- работы с Auto Layout
 
 <img src="https://github.com/sashakid/ios-guide/blob/master/Images/uiviewcontroller.png">
 
@@ -235,47 +253,6 @@ UITableViewController : UIViewController <UITableViewDelegate, UITableViewDataSo
 Ячейки table view, которые больше не отображаются на экране, не выкидываются. Их можно адаптировать под повторное использование, указав идентификатор в процессе инициализации. Когда ячейка table view, отмеченная для повторного использования, пропадает с экрана, table view помещает ее в очередь для повторного использования в дальнейшем. Когда объект table view dataSource запрашивает у table view новую ячейку и указывает идентификатор, table view сначала проверяет очередь ячеек для повторного использования на предмет наличия необходимой ячейки. Если ячейка table view не была обнаружена, то table view создает новую, передавая ее затем объекту dataSource.
 ```objectivec
 UITableViewCell *cell = [tableView dequeueReusableCellWithIdentifier: CellIdentifier forIndexPath: indexPath];
-```
-
-<a name="uiview"></a>
-## UIView
-The UIView (UIResponder : NSObject) Объект, рисующий контент в прямоугольной области экрана и управляющий событиями, вызванными касаниями экрана пользователем. Представление также может содержать другие представления, называемые субпредставлениями. При добавлении субпредставления к представлению контейнер называется родительским представлением, а его субпредставление называется дочерним представлением. Сочетание родительского представления, его дочерних представлений (а так же их дочерних представлений, если таковые имеются) образует иерархию представлений.
-Интерфейс состоит из представлений (UIView).  
-UIWindow (UIView : UIResponder : NSObject) – единственный экземпляр  в приложении, который играет роль контейнера для всех представлений. class defines an object known as a window that manages and coordinates the views an app displays on a device screen. Unless an app can display content on an external device screen, an app has only one window. The two principal functions of a window are
-1. to provide an area for displaying its views
-2. to distribute events to the views
-To change the content your app displays, you can change the window’s root view; you don’t create a new window. A window belongs to a level—typically, UIWindowLevelNormal—that represents where it sits on the z-axis relative to other windows. For example, a system alert window appears above normal app windows.
-UIViewController – управление единственным экраном приложения.
-UINavigationController – управляет стеком из массива UIViewController.
-Root View Controller – Корневой контроллер, находится внизу стека, самый последний.   
-CGRect – структура, которая содержит переменные для хранения координат и размеров.
-frame – это прямоугольник описываемый положением location(x, y) и размерами size (width, height) вьюхи относительно ее superview в которой оа содержится.
-bounds – это прямоугольник описываемый положением location(x, y) и размерами size (width, height) вьюхи относительно ее собственной системы координат (0, 0).
-
-<img src="https://github.com/sashakid/ios-guide/blob/master/Images/uiview_frame.png">
-
-```objectivec
-// 1. CGRect получение координат и границ экрана.
-CGRect screen = [[UIScreen mainScreen] bounds];
-// 2. получение границ и координат фрейма для программы.
-CGRect appFrame = [[UIScreen mainScreen] applicationFrame];
-// 3. создаем новое окно.
-self.window = [UIWindow alloc] initWithFrame: appFrame];
-// 4. создаем вью с параметрами appFrame.
-UIView *view = [[UIView alloc]initWithFrame: appFrame];
-// 5. добавляем вью в окно с помощью метода addSubView.
-[window addSubView:view];
-// 6. делаем окно видимым
-[window makeKeyAndVisible];
-
-@implementation AppDelegate
-- (BOOL)application:(UIApplication *)application didFinishLaunchingWithOptions:(NSDictionary *)launchOptions {
-  self.window = [[UIWindow alloc] initWithFrame:[[UIScreen mainScreen] bounds]];
-  // Override point for customization after application launch.
-  self.window.backgroundColor = [UIColor whiteColor];
-  [self.window makeKeyAndVisible];
-  return YES;
-}
 ```
 
 <a name="iphone,-resolution,-pixels-vs-points"></a>
