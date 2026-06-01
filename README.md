@@ -20,9 +20,3 @@ _Привет, приняв участие за свою практику в б�
 * [Тестирование](Main/14_testing.md)
 * [Общие вопросы](Main/15_general_questions.md)
 * [Задачи](Main/16_tasks.md)
-
-Donations for a coffee ☕️ 😘
-
-BTC: bc1qtm6xv97tl96hp4udhfu3zsq8fp5d2lufe26rs0
-
-USDT(TRC20): TDysULcqQrZDE4Fb88Yub65fz5xLeLiK41
